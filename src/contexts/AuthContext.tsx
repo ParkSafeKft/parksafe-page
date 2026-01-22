@@ -48,10 +48,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signInWithGoogle = async () => {
     const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google'
-      //options: {
-      //  redirectTo: `${window.location.origin}/profile`,
-   //   },
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/profile`,
+      },
     });
     return { data, error };
   };
