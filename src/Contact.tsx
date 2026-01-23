@@ -1,50 +1,7 @@
-import React, { useState } from "react";
-import { Mail, Building2, Clock, Send, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { Mail, User, Phone, Clock, MapPin } from "lucide-react";
 import "./Contact.css";
-import { ContactFormData } from "./types";
 
 function Contact() {
-  const [formData, setFormData] = useState<ContactFormData>({
-    name: "",
-    email: "",
-    message: "",
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [status, setStatus] = useState("");
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setStatus("");
-
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setStatus("success");
-        setFormData({ name: "", email: "", message: "" });
-      } else {
-        setStatus("error");
-      }
-    } catch {
-      setStatus("error");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <div className="contact-page">
@@ -55,128 +12,69 @@ function Contact() {
             Kapcsolat
           </h1>
           <p>
-            Van kérdésed, javaslatos vagy csak szeretnél beszélni velünk?
-            Örülünk minden megkeresésnek!
+            Van kérdésed a ParkSafe-ről vagy szeretnél visszajelzést küldeni?
+            Örömmel állunk rendelkezésedre!
           </p>
         </div>
 
-        <div className="contact-content">
-          <div className="contact-info">
-            <h2>Lépj velünk kapcsolatba</h2>
-            <div className="info-item">
-              <div className="info-icon">
-                <Mail size={24} />
+        <div className="contact-content-centered">
+          <div className="contact-card">
+            <div className="contact-person">
+              <div className="person-avatar">
+                <User size={48} />
               </div>
-              <div className="info-details">
-                <h3>Email</h3>
-                <p>hello@parksafe.hu</p>
-              </div>
+              <h2>Perjési Szabolcs</h2>
+              <p className="person-role">Üzletvezető & Kapcsolattartó</p>
             </div>
-            <div className="info-item">
-              <div className="info-icon">
-                <Building2 size={24} />
-              </div>
-              <div className="info-details">
-                <h3>Cég</h3>
-                <p>
-                  ParkSafe Kft.
-                  <br />
-                  1051 Budapest, Október 6. utca 12.
-                </p>
-              </div>
-            </div>
-            <div className="info-item">
-              <div className="info-icon">
-                <Clock size={24} />
-              </div>
-              <div className="info-details">
-                <h3>Válaszidő</h3>
-                <p>
-                  24-48 órán belül válaszolunk
-                  <br />
-                  minden megkeresésre
-                </p>
-              </div>
-            </div>
-          </div>
 
-          <div className="contact-form-container">
-            <h2>Írj nekünk</h2>
-            <form onSubmit={handleSubmit} className="contact-form">
-              <div className="form-group">
-                <label htmlFor="name">Név *</label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  disabled={isSubmitting}
-                  placeholder="Teljes neved"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="email">Email cím *</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  disabled={isSubmitting}
-                  placeholder="email@domain.com"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="message">Üzenet *</label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  disabled={isSubmitting}
-                  placeholder="Írd le, miben segíthetünk..."
-                  rows={5}
-                />
-              </div>
-
-              {status === "success" && (
-                <div className="status-message success">
-                  <CheckCircle2 size={20} />
-                  Köszönjük az üzeneted! Hamarosan válaszolunk.
+            <div className="contact-details">
+              <a href="mailto:perjesidev@gmail.com" className="contact-item">
+                <div className="contact-icon">
+                  <Mail size={24} />
                 </div>
-              )}
-
-              {status === "error" && (
-                <div className="status-message error">
-                  <XCircle size={20} />
-                  Hiba történt az üzenet küldésekor. Kérlek próbáld újra!
+                <div className="contact-text">
+                  <h3>Email</h3>
+                  <p>perjesidev@gmail.com</p>
                 </div>
-              )}
+              </a>
 
-              <button
-                type="submit"
-                className="submit-btn"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 size={20} className="spinner" />
-                    Küldés...
-                  </>
-                ) : (
-                  <>
-                    <Send size={20} />
-                    Üzenet küldése
-                  </>
-                )}
-              </button>
-            </form>
+              <a href="tel:+36307212524" className="contact-item">
+                <div className="contact-icon">
+                  <Phone size={24} />
+                </div>
+                <div className="contact-text">
+                  <h3>Telefon</h3>
+                  <p>+36 30 721 2524</p>
+                </div>
+              </a>
+
+              <div className="contact-item">
+                <div className="contact-icon">
+                  <MapPin size={24} />
+                </div>
+                <div className="contact-text">
+                  <h3>Helyszín</h3>
+                  <p>Szeged, Magyarország</p>
+                </div>
+              </div>
+
+              <div className="contact-item">
+                <div className="contact-icon">
+                  <Clock size={24} />
+                </div>
+                <div className="contact-text">
+                  <h3>Válaszidő</h3>
+                  <p>24-48 órán belül</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="contact-note">
+              <p>
+                Kérdésed van az applikációval, adatokkal kapcsolatban, vagy szeretnél
+                együttműködni velünk? Írj bátran emailben vagy hívj telefonon!
+              </p>
+            </div>
           </div>
         </div>
       </div>
