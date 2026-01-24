@@ -1,15 +1,27 @@
 import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Shield, Star, Wrench, Check, Bike, Zap, Download } from "lucide-react";
+import { MapPin, Shield, Star, Wrench, Check, Bike, Zap, Download, ChevronDown, Navigation } from "lucide-react";
 import { motion } from "framer-motion";
 import { AuroraBackground } from "@/components/ui/aurora-background";
+import FAQSection, { faqSchema } from "@/components/FAQSection";
+import HowItWorks from "@/components/HowItWorks";
+import PartnerBenefits from "@/components/PartnerBenefits";
 
 function HomePage() {
   const [titleNumber, setTitleNumber] = useState(0);
+  const [expandedFeatures, setExpandedFeatures] = useState<number[]>([]);
   const titles = useMemo(
     () => ["bárhol", "bármikor", "egyszerűen", "gyorsan", "könnyedén"],
     []
   );
+
+  const toggleFeature = (index: number) => {
+    setExpandedFeatures((prev) =>
+      prev.includes(index)
+        ? prev.filter((i) => i !== index)
+        : [...prev, index]
+    );
+  };
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -59,6 +71,18 @@ function HomePage() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Add FAQ Schema markup for SEO
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.text = JSON.stringify(faqSchema);
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
   return (
     <div className="home-page">
       {/* Hero Section */}
@@ -76,7 +100,7 @@ function HomePage() {
         >
           <div className="hero-content">
             <h1 className="hero-title">
-              Tartsd biztonságban a bringád{" "}
+              Kerékpáros navigáció Szegeden{" "}
               <span className="relative inline-block overflow-hidden" style={{ width: '380px', height: '1.2em', verticalAlign: 'bottom' }}>
                 {titles.map((title, index) => (
                   <motion.span
@@ -102,32 +126,13 @@ function HomePage() {
                 ))}
               </span>
             </h1>
-            <p className="hero-description">
-              Fedezd fel a legmegbízhatóbb biciklitárolókat a közeledben! Valós
-              idejű elérhetőség, közösségi értékelések és kamerával védett
-              helyek – több mint 7500 vizsgált helyszín 200+ városban.
+            <p className="hero-subtitle">
+              Biztonságos tárolók, szervizek és kerékpáros útvonalak egy helyen
             </p>
-            <div className="hero-stats">
-              <div className="stat">
-                <span className="stat-number" data-target="7500">
-                  0+
-                </span>
-                <span className="stat-label">Vizsgált Helyszín</span>
-              </div>
-              <div className="stat">
-                <span className="stat-number" data-target="200">
-                  0+
-                </span>
-                <span className="stat-label">Város</span>
-              </div>
-              <div className="stat">
-                <span className="stat-number" data-target="847">
-                  0+
-                </span>
-                <span className="stat-label">Érdeklődő</span>
-              </div>
-            </div>
-            <div className="store-buttons">
+            <p className="hero-description">
+              A ParkSafe egy kifejezetten kerékpárosokra optimalizált digitális térképalkalmazás Szegeden. Találd meg a legjobb útvonalakat városi közlekedéshez, biztonságos tárolóhelyeket és közeli szervizeket közösségi visszajelzések alapján.
+            </p>
+            <div className="store-buttons hero-store-buttons">
               <a
                 href="https://apps.apple.com/app/id6752813986"
                 target="_blank"
@@ -160,6 +165,26 @@ function HomePage() {
             <p className="hero-subtext">
               Ingyenes • Android és iOS • Már elérhető!
             </p>
+            <div className="hero-stats">
+              <div className="stat">
+                <span className="stat-number" data-target="7500">
+                  0+
+                </span>
+                <span className="stat-label">Vizsgált Helyszín</span>
+              </div>
+              <div className="stat">
+                <span className="stat-number" data-target="200">
+                  0+
+                </span>
+                <span className="stat-label">Város</span>
+              </div>
+              <div className="stat">
+                <span className="stat-number" data-target="847">
+                  0+
+                </span>
+                <span className="stat-label">Érdeklődő</span>
+              </div>
+            </div>
           </div>
           <div className="hero-image">
             <div className="phone-mockup">
@@ -175,14 +200,116 @@ function HomePage() {
         </motion.div>
       </AuroraBackground>
 
+      {/* How It Works Section */}
+      <HowItWorks />
+
+      {/* Features Section */}
+      <section className="features">
+        <div className="container">
+          <div className="features-header">
+            <h2>Miért válaszd a ParkSafe-ot?</h2>
+            <p>Az egyetlen kifejezetten kerékpárosokra optimalizált alkalmazás Szegeden</p>
+          </div>
+          <div className="features-grid">
+            <div className={`feature-card ${expandedFeatures.includes(0) ? 'expanded' : 'collapsed'}`}>
+              <div className="feature-icon green">
+                <Navigation size={28} />
+              </div>
+              <h3>Kerékpáros útvonaltervezés</h3>
+              <p>
+                Nem autós, hanem kifejezetten kerékpáros logikára optimalizált útvonalak.
+                {expandedFeatures.includes(0) && (
+                  <> A ParkSafe figyelembe veszi a kerékpárutak minőségét, a forgalmat és a terepviszonyokat, hogy a legbiztonságosabb és legkényelmesebb útvonalat ajánlja városi közlekedéshez.</>
+                )}
+              </p>
+              <button className="expand-toggle" onClick={() => toggleFeature(0)}>
+                {expandedFeatures.includes(0) ? "Kevesebb" : "Bővebben"}{" "}
+                <ChevronDown
+                  size={16}
+                  style={{
+                    transition: "transform 0.3s ease",
+                    transform: expandedFeatures.includes(0) ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                />
+              </button>
+            </div>
+            <div className={`feature-card ${expandedFeatures.includes(1) ? 'expanded' : 'collapsed'}`}>
+              <div className="feature-icon blue">
+                <Shield size={28} />
+              </div>
+              <h3>Biztonságos tárolóhelyek</h3>
+              <p>
+                Szűrhető tárolók biztonsági szint, fedettség és kamerás védelem alapján.
+                {expandedFeatures.includes(1) && (
+                  <> Minden tárolóról részletes információkat találsz: van-e kamerás megfigyelés, fedett-e, milyen a környék biztonsága. A közösségi értékelések segítenek a legjobb döntés meghozatalában.</>
+                )}
+              </p>
+              <button className="expand-toggle" onClick={() => toggleFeature(1)}>
+                {expandedFeatures.includes(1) ? "Kevesebb" : "Bővebben"}{" "}
+                <ChevronDown
+                  size={16}
+                  style={{
+                    transition: "transform 0.3s ease",
+                    transform: expandedFeatures.includes(1) ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                />
+              </button>
+            </div>
+            <div className={`feature-card ${expandedFeatures.includes(2) ? 'expanded' : 'collapsed'}`}>
+              <div className="feature-icon green">
+                <Wrench size={28} />
+              </div>
+              <h3>Szervizek és önjavító állomások</h3>
+              <p>
+                Találd meg a legközelebbi kerékpárszervizeket és önjavító állomásokat egyetlen térképen.
+                {expandedFeatures.includes(2) && (
+                  <> Akár defekt ért útközben, akár rendszeres karbantartásra van szükséged, a ParkSafe megmutatja, hol kaphatsz gyors segítséget. Nyitvatartási idővel és elérhetőségi adatokkal.</>
+                )}
+              </p>
+              <button className="expand-toggle" onClick={() => toggleFeature(2)}>
+                {expandedFeatures.includes(2) ? "Kevesebb" : "Bővebben"}{" "}
+                <ChevronDown
+                  size={16}
+                  style={{
+                    transition: "transform 0.3s ease",
+                    transform: expandedFeatures.includes(2) ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                />
+              </button>
+            </div>
+            <div className={`feature-card ${expandedFeatures.includes(3) ? 'expanded' : 'collapsed'}`}>
+              <div className="feature-icon blue">
+                <Star size={28} />
+              </div>
+              <h3>Közösségi visszajelzések</h3>
+              <p>
+                A ParkSafe közösségi alapon működik: felhasználók osztják meg tapasztalataikat.
+                {expandedFeatures.includes(3) && (
+                  <> Értékelések, képek és valós tapasztalatok segítenek abban, hogy megbízható információk alapján dönts. A közösség biztosítja, hogy az adatok naprakészek és hitelesek legyenek.</>
+                )}
+              </p>
+              <button className="expand-toggle" onClick={() => toggleFeature(3)}>
+                {expandedFeatures.includes(3) ? "Kevesebb" : "Bővebben"}{" "}
+                <ChevronDown
+                  size={16}
+                  style={{
+                    transition: "transform 0.3s ease",
+                    transform: expandedFeatures.includes(3) ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Target Audience Section */}
       <section className="target-audience">
         <div className="container">
           <div className="target-header">
             <h2>Kinek szól a ParkSafe?</h2>
             <p>
-              Nem csak bicikliseknek! Minden városi közlekedő megtalálja benne a
-              számítását.
+              Minden kerékpáros számára, aki Szegeden közlekedik – munkába, egyetemre vagy ügyintézéshez
             </p>
           </div>
           <div className="target-grid">
@@ -190,102 +317,49 @@ function HomePage() {
               <div className="target-icon">
                 <Bike size={40} />
               </div>
-              <h3>Biciklisek</h3>
+              <h3>Rendszeres városi közlekedők</h3>
               <p>
-                Napi ingázók és hétvégi kerékpárosok, akik biztonságos
-                tárolóhelyet keresnek a városban. Fedezd fel a kamerás, fedett
-                és közösség által ellenőrzött helyeket.
+                Napi ingázók, egyetemisták és városi kerékpárosok, akik biztonságos útvonalakat és tárolóhelyeket keresnek. A ParkSafe segít megtalálni a legbiztonságosabb helyeket munkába vagy egyetemre menet.
               </p>
             </div>
             <div className="target-card">
               <div className="target-icon">
                 <Zap size={40} />
               </div>
-              <h3>Rolleresek</h3>
+              <h3>Alkalmi felhasználók és turisták</h3>
               <p>
-                Elektromos roller tulajdonosok, akiknek ugyanúgy fontos a
-                biztonságos tárolás. Találj olyan helyeket, ahol a rollered is
-                védve van a lopásoktól.
+                Új városrészekben mozgó kerékpárosok, turisták és rolleresek, akiknek fontos a gyors tájékozódás. Ismeretlen környezetben is megtalálod a biztonságos útvonalakat és tárolókat.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="features">
-        <div className="container">
-          <div className="features-header">
-            <h2>Miért választják a biciklisek a ParkSafe-et?</h2>
-            <p>Csatlakozz a több mint 800 felhasználóhoz, akik már használják az appot!</p>
-          </div>
-          <div className="features-grid">
-            <div className="feature-card">
-              <div className="feature-icon green">
-                <MapPin size={28} />
-              </div>
-              <h3>Valós idejű elérhetőség</h3>
-              <p>
-                Azonnali információ a szabad helyekről – nincs több felesleges
-                körözés.
-              </p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon blue">
-                <Shield size={28} />
-              </div>
-              <h3>Biztonság mindenek felett</h3>
-              <p>
-                Csak olyan tárolókat mutatunk, ahol tényleg biztonságban van a
-                biciklid – kamerás megfigyelés és világítás biztosítva.
-              </p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon green">
-                <Star size={28} />
-              </div>
-              <h3>Közösségi visszajelzések</h3>
-              <p>
-                Nézd meg mások tapasztalatait és oszd meg a sajátod is – együtt
-                építjük a megbízható tárolók térképét.
-              </p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon blue">
-                <Wrench size={28} />
-              </div>
-              <h3>Szerviz és kiegészítők</h3>
-              <p>
-                Egy helyen minden, amire bringásként szükséged lehet –
-                szervizek, pumpák, kiegészítők a térképen.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* FAQ Section */}
+      <FAQSection />
 
       {/* CTA Section */}
       <section className="cta-section">
         <div className="container">
           <div className="cta-content">
             <h2>
-              Töltsd le most a ParkSafe appot!
+              Kezdd el használni a ParkSafe-et!
             </h2>
             <p>
-              Kezdd el használni még ma, és találd meg a legbiztonságosabb tárolóhelyeket a közeledben.
+              Csatlakozz a szegedi kerékpáros közösséghez és találd meg a legbiztonságosabb útvonalakat.
             </p>
             <div className="cta-benefits">
               <div className="benefit">
                 <Check size={20} className="benefit-icon" />
-                Azonnali hozzáférés a legjobb tárolóhelyekhez
+                Kerékpáros szemléletű útvonaltervezés
               </div>
               <div className="benefit">
                 <Check size={20} className="benefit-icon" />
-                Valós idejű információk és értékelések
+                Közösségi értékelések és visszajelzések
               </div>
               <div className="benefit">
                 <Check size={20} className="benefit-icon" />
-                Ingyenes használat alapfunkciókkal
+                Teljesen ingyenes használat
               </div>
             </div>
             <div className="store-buttons-cta">

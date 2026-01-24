@@ -29,7 +29,7 @@ function Terms() {
           <section className="terms-section">
             <h2>2. A szolgáltatás leírása</h2>
             <p>
-              A ParkSafe egy mobilalkalmazás és webes platform, amely segít a
+              A ParkSafe egy mobilalkalmazás, amely segít a
               felhasználóknak biztonságos kerékpár- és roller-tárolóhelyek
               megtalálásában. A szolgáltatás keretében a következő funkciókat
               biztosítjuk:
