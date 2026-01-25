@@ -5,59 +5,47 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useLanguage } from "../contexts/LanguageContext";
 
 interface FAQItem {
   question: string;
   answer: string;
 }
 
-const faqData: FAQItem[] = [
-  {
-    question: "Mi az a ParkSafe?",
-    answer: "A ParkSafe egy kifejezetten kerékpárosokra optimalizált digitális térképalkalmazás, amely egyesíti az útvonaltervezést, tárolóhelyeket és szervizeket egyetlen platformon. Jelenleg Szegeden érhető el.",
-  },
-  {
-    question: "Hogyan működik az útvonaltervezés?",
-    answer: "A ParkSafe nem autós, hanem kerékpáros logikára építő útvonalakat ajánl. Figyelembe veszi a kerékpárutak minőségét, biztonságát és a városi közlekedés sajátosságait – nem túrázásra, hanem munkahelyre, egyetemre vagy ügyintézésre való eljutáshoz.",
-  },
-  {
-    question: "Milyen információkat tartalmaz egy tároló adatlapja?",
-    answer: "Minden tárolónál megtalálod: fedett vagy nyitott tárolás, biztonsági szint (van-e kamerás védelem), közösségi értékelések, felhasználói képek és tapasztalatok. Így megalapozott döntést hozhatsz.",
-  },
-  {
-    question: "Ingyenes a ParkSafe használata?",
-    answer: "Igen, a ParkSafe alapfunkciói teljesen ingyenesen használhatók. Jelenleg nincs díjköteles szolgáltatás, a jövőben esetlegesen partneri kedvezmények jelenhetnek meg.",
-  },
-  {
-    question: "Mennyire megbízhatóak az adatok?",
-    answer: "A ParkSafe közösségi alapon működik: felhasználók osztják meg tapasztalataikat, értékelik a helyeket és töltenek fel képeket. Ez biztosítja, hogy az információk naprakészek és valósak legyenek.",
-  },
-  {
-    question: "Csak Szegeden működik?",
-    answer: "Jelenleg a ParkSafe Szegeden érhető el teljes funkcionalitással. A platform tervezetten más városokra is bővül, ha a szegedi validáció sikeres és elegendő felhasználói bázis alakul ki.",
-  },
-  {
-    question: "Hogyan vehetem fel a kapcsolatot a csapattal?",
-    answer: 'A weboldalon található "Írj nekünk" menüponton keresztül tudsz üzenetet küldeni. Minden megkeresésre igyekszünk gyorsan reagálni.',
-  },
-];
-
-// Generate FAQ Schema for SEO
-export const faqSchema = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: faqData.map((item) => ({
-    "@type": "Question",
-    name: item.question,
-    acceptedAnswer: {
-      "@type": "Answer",
-      text: item.answer,
-    },
-  })),
-};
-
 function FAQSection() {
+  const { t } = useLanguage();
   const [openItems, setOpenItems] = useState<number[]>([]);
+
+  const faqData: FAQItem[] = [
+    {
+      question: t('faq.q1'),
+      answer: t('faq.a1'),
+    },
+    {
+      question: t('faq.q2'),
+      answer: t('faq.a2'),
+    },
+    {
+      question: t('faq.q3'),
+      answer: t('faq.a3'),
+    },
+    {
+      question: t('faq.q4'),
+      answer: t('faq.a4'),
+    },
+    {
+      question: t('faq.q5'),
+      answer: t('faq.a5'),
+    },
+    {
+      question: t('faq.q6'),
+      answer: t('faq.a6'),
+    },
+    {
+      question: t('faq.q7'),
+      answer: t('faq.a7'),
+    },
+  ];
 
   const toggleItem = (index: number) => {
     setOpenItems((prev) =>
@@ -71,9 +59,9 @@ function FAQSection() {
     <section className="py-24 bg-white">
       <div className="container px-4 md:px-6 mx-auto max-w-4xl">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">Gyakran Ismételt Kérdések</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">{t('faq.title')}</h2>
           <p className="text-lg text-zinc-500">
-            Minden, amit a ParkSafe használatáról tudni érdemes.
+            {t('faq.subtitle')}
           </p>
         </div>
 
@@ -107,3 +95,4 @@ function FAQSection() {
 }
 
 export default FAQSection;
+

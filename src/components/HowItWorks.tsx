@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Smartphone, MapPin, Star, Lock } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useLanguage } from "../contexts/LanguageContext";
 
 interface Step {
   number: number;
@@ -9,41 +10,43 @@ interface Step {
   description: string;
 }
 
-const steps: Step[] = [
-  {
-    number: 1,
-    icon: Smartphone,
-    title: "Nyisd meg az appot",
-    description: "Töltsd le a ParkSafe mobilalkalmazást iOS vagy Android rendszerre.",
-  },
-  {
-    number: 2,
-    icon: MapPin,
-    title: "Böngészd a térképet",
-    description: "Találd meg a legközelebbi biztonságos tárolókat, szervizeket és kerékpáros útvonalakat.",
-  },
-  {
-    number: 3,
-    icon: Star,
-    title: "Olvasd az értékeléseket",
-    description: "Nézd meg a közösség által megosztott tapasztalatokat és értékeléseket.",
-  },
-  {
-    number: 4,
-    icon: Lock,
-    title: "Válassz és parkolj",
-    description: "Válaszd ki a megfelelő tárolót biztonsági szint és távolság alapján.",
-  },
-];
-
 function HowItWorks() {
+  const { t } = useLanguage();
+
+  const steps: Step[] = [
+    {
+      number: 1,
+      icon: Smartphone,
+      title: t('howItWorks.step1.title'),
+      description: t('howItWorks.step1.desc'),
+    },
+    {
+      number: 2,
+      icon: MapPin,
+      title: t('howItWorks.step2.title'),
+      description: t('howItWorks.step2.desc'),
+    },
+    {
+      number: 3,
+      icon: Star,
+      title: t('howItWorks.step3.title'),
+      description: t('howItWorks.step3.desc'),
+    },
+    {
+      number: 4,
+      icon: Lock,
+      title: t('howItWorks.step4.title'),
+      description: t('howItWorks.step4.desc'),
+    },
+  ];
+
   return (
     <section className="py-24 bg-white">
       <div className="container px-4 md:px-6 mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">Hogyan működik?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">{t('howItWorks.title')}</h2>
           <p className="text-lg text-zinc-500 max-w-2xl mx-auto">
-            Négy egyszerű lépés a biztonságosabb városi kerékpározáshoz.
+            {t('howItWorks.subtitle')}
           </p>
         </div>
 
@@ -83,3 +86,4 @@ function HowItWorks() {
 }
 
 export default HowItWorks;
+

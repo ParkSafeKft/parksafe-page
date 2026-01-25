@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Navigation, Shield, Wrench, Star, Check, Bike, Zap } from "lucide-react";
+import { Navigation, Shield, Wrench, Star, Check, Bike, Zap, Users } from "lucide-react";
 import { motion } from "framer-motion";
-import FAQSection, { faqSchema } from "@/components/FAQSection";
+import FAQSection from "@/components/FAQSection";
+import PartnerBenefits from "@/components/PartnerBenefits";
 import HowItWorks from "@/components/HowItWorks";
 import { useLanguage } from "./contexts/LanguageContext";
 
@@ -11,7 +12,49 @@ function HomePage() {
   const [activeTab, setActiveTab] = useState("map");
 
   useEffect(() => {
-    // FAQ Schema
+    // Dynamic FAQ Schema based on current language
+    const faqSchema = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: t('faq.q1'),
+          acceptedAnswer: { "@type": "Answer", text: t('faq.a1') }
+        },
+        {
+          "@type": "Question",
+          name: t('faq.q2'),
+          acceptedAnswer: { "@type": "Answer", text: t('faq.a2') }
+        },
+        {
+          "@type": "Question",
+          name: t('faq.q3'),
+          acceptedAnswer: { "@type": "Answer", text: t('faq.a3') }
+        },
+        {
+          "@type": "Question",
+          name: t('faq.q4'),
+          acceptedAnswer: { "@type": "Answer", text: t('faq.a4') }
+        },
+        {
+          "@type": "Question",
+          name: t('faq.q5'),
+          acceptedAnswer: { "@type": "Answer", text: t('faq.a5') }
+        },
+        {
+          "@type": "Question",
+          name: t('faq.q6'),
+          acceptedAnswer: { "@type": "Answer", text: t('faq.a6') }
+        },
+        {
+          "@type": "Question",
+          name: t('faq.q7'),
+          acceptedAnswer: { "@type": "Answer", text: t('faq.a7') }
+        }
+      ]
+    };
+
     const script = document.createElement("script");
     script.type = "application/ld+json";
     script.text = JSON.stringify(faqSchema);
@@ -19,7 +62,7 @@ function HomePage() {
     return () => {
       document.head.removeChild(script);
     };
-  }, []);
+  }, [t]); // Re-run when language changes
 
   return (
     <div className="home-page font-sans text-slate-900 bg-white selection:bg-[#34aa56] selection:text-white">
@@ -78,18 +121,20 @@ function HomePage() {
             </div>
 
             {/* Right Content - High Fidelity Mockup */}
-            {/* Right Content - High Fidelity Mockup */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-              className="relative flex items-center justify-center lg:justify-end py-10"
+              className="relative flex items-center justify-center lg:justify-end py-10 lg:py-0"
             >
-              <div className="relative w-[280px] md:w-[320px] lg:w-[360px]">
+              {/* Decorative Blob/Glow to anchor the phone */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-[#34aa56]/20 via-emerald-100/30 to-transparent rounded-full blur-3xl -z-10" />
+              
+              <div className="relative w-[300px] md:w-[400px] lg:w-[480px]">
                 <img
                   src="/ios_mapview.png"
                   alt="ParkSafe Mobile Interface"
-                  className="w-full h-auto"
+                  className="w-full h-auto drop-shadow-2xl"
                 />
               </div>
             </motion.div>
@@ -99,14 +144,14 @@ function HomePage() {
       </section>
 
       {/* Bento Feature Grid - Network Scale & Features */}
-      <section className="py-32 bg-slate-50 border-t border-slate-200">
+      <section className="py-32 bg-zinc-50 border-t border-zinc-200">
         <div className="container px-4 md:px-6 mx-auto">
 
           <div className="max-w-3xl mx-auto text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 mb-6">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-zinc-900 mb-6">
               {t('home.grid.osTitle')}
             </h2>
-            <p className="text-lg text-slate-500">
+            <p className="text-lg text-zinc-500">
               {t('home.grid.osDesc')}
             </p>
           </div>
@@ -114,67 +159,88 @@ function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
 
             {/* Master Card - Network Scale */}
-            <div className="md:col-span-2 row-span-2 bg-white rounded-[2rem] p-8 md:p-12 shadow-xl shadow-slate-200/50 border border-slate-200 relative overflow-hidden group">
+            <div className="md:col-span-2 row-span-2 bg-white rounded-[2rem] p-8 md:p-12 shadow-xl shadow-zinc-200/50 border border-zinc-100 relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-bl from-[#34aa56]/10 to-transparent rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
 
               <div className="relative z-10">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold tracking-widest uppercase mb-6">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#34aa56] animate-pulse" />
-                  <span>{t('home.grid.mainTitle')}</span>
-                </div>
-
-                <h3 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
+                <h3 className="text-4xl md:text-5xl font-extrabold text-zinc-900 mb-4 tracking-tight">
                   {t('home.grid.mainStat')}
-                  <span className="block text-2xl md:text-3xl font-bold text-slate-400 mt-2">{t('home.grid.mainStatLabel')}</span>
+                  <span className="block text-2xl md:text-3xl font-bold text-zinc-400 mt-2">{t('home.grid.mainStatLabel')}</span>
                 </h3>
-                <p className="text-slate-500 max-w-md text-lg leading-relaxed mt-6">
+                <p className="text-zinc-500 max-w-md text-lg leading-relaxed mt-6">
                   {t('home.grid.mainDesc')}
                 </p>
               </div>
 
               {/* Abstract UI representation */}
-              <div className="absolute bottom-0 right-0 w-[60%] h-[60%] bg-slate-50 rounded-tl-[2rem] border-l border-t border-slate-100 shadow-2xl translate-y-8 translate-x-8 transition-transform group-hover:translate-x-6 group-hover:translate-y-6">
+              <div className="absolute bottom-0 right-0 w-[60%] h-[60%] bg-zinc-50 rounded-tl-[2rem] border-l border-t border-zinc-100 shadow-2xl translate-y-8 translate-x-8 transition-transform group-hover:translate-x-6 group-hover:translate-y-6">
                 <div className="w-full h-full bg-[url('/ios_mapview.png')] bg-cover bg-top opacity-80 grayscale-[20%]" />
               </div>
             </div>
 
             {/* Feature Card 2 - Infrastructure */}
-            <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-200 flex flex-col justify-between group hover:border-[#34aa56]/30 transition-colors">
+            <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-zinc-200/50 border border-zinc-100 flex flex-col justify-between group hover:border-[#34aa56]/30 transition-colors">
               <div>
                 <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center mb-6">
                   <Navigation className="text-[#34aa56] w-5 h-5" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">{t('home.grid.infraTitle')}</h3>
-                <p className="text-slate-500 text-sm">
+                <h3 className="text-xl font-bold text-zinc-900 mb-2">{t('home.grid.infraTitle')}</h3>
+                <p className="text-zinc-500 text-sm">
                   {t('home.grid.infraDesc')}
                 </p>
               </div>
             </div>
 
             {/* Feature Card 3 - Service Network */}
-            <div className="bg-slate-900 rounded-[2rem] p-8 shadow-xl shadow-slate-900/20 text-white relative overflow-hidden">
+            <div className="bg-[#0f1d16] rounded-[2rem] p-8 shadow-xl shadow-emerald-900/10 text-white relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
-              <Wrench className="w-8 h-8 text-slate-400 mb-6" />
+              <Wrench className="w-8 h-8 text-emerald-400 mb-6" />
               <h3 className="text-xl font-bold mb-2">{t('home.grid.serviceTitle')}</h3>
-              <p className="text-slate-400 text-sm">
+              <p className="text-emerald-100/60 text-sm">
                 {t('home.grid.serviceDesc')}
               </p>
             </div>
 
             {/* Feature Card 4 - Routing */}
-            <div className="md:col-span-3 lg:col-span-1 bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-200 flex items-center gap-6">
+            <div className="md:col-span-3 lg:col-span-1 bg-white rounded-[2rem] p-8 shadow-xl shadow-zinc-200/50 border border-zinc-100 flex items-center gap-6">
               <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center shrink-0">
                 <Zap className="text-blue-600 w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-900">{t('home.grid.trafficTitle')}</h3>
-                <p className="text-slate-500 text-sm">{t('home.grid.trafficDesc')}</p>
+                <h3 className="text-lg font-bold text-zinc-900">{t('home.grid.trafficTitle')}</h3>
+                <p className="text-zinc-500 text-sm">{t('home.grid.trafficDesc')}</p>
+              </div>
+            </div>
+
+            {/* Feature Card 5 - Community (New Symmetrical Fill) */}
+            <div className="md:col-span-3 lg:col-span-2 bg-gradient-to-br from-[#0f1d16] to-[#152920] rounded-[2rem] p-8 shadow-xl shadow-emerald-900/10 text-white flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[#34aa56]/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+
+              <div className="relative z-10 flex-1">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/10">
+                    <Users className="text-emerald-400 w-5 h-5" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">{t('home.grid.communityTitle')}</h3>
+                </div>
+                <p className="text-emerald-100/60 text-sm leading-relaxed max-w-md">
+                  {t('home.grid.communityDesc')}
+                </p>
+              </div>
+
+              <div className="relative z-10 flex flex-col items-center md:items-end shrink-0">
+                <span className="text-5xl font-extrabold tracking-tight text-white mb-1">{t('home.grid.communityStat')}</span>
+                <span className="text-emerald-500 font-bold text-sm tracking-wider uppercase">Accuracy Score</span>
               </div>
             </div>
 
           </div>
         </div>
       </section>
+
+      <HowItWorks />
+      
+      <PartnerBenefits />
 
       <FAQSection />
 
@@ -215,3 +281,4 @@ function HomePage() {
 }
 
 export default HomePage;
+

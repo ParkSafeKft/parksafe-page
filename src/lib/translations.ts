@@ -20,9 +20,9 @@ export const translations = {
         },
         home: {
             hero: {
-                title: "Professzionális Parkolás",
-                subtitle: "Magyar Kerékpárosoknak.",
-                description: "A legmegbízhatóbb infrastruktúra térkép a városi közlekedéshez. Találj biztonságos parkolókat, szervizállomásokat és ellenőrzött útvonalakat.",
+                title: "Városi Kerékpározás,",
+                subtitle: "Újragondolva.",
+                description: "Nem csak egy térkép. A ParkSafe a városi mikromobilitás operációs rendszere. Biztonságos parkolás, intelligens útvonaltervezés és közösségi erő egyetlen applikációban.",
                 downloadIOS: "Letöltés iOS-re",
                 downloadAndroid: "Irány az Android",
             },
@@ -30,29 +30,87 @@ export const translations = {
                 mainTitle: "Magyarország Legnagyobb Kerékpáros Hálózata",
                 mainStat: "7,500+",
                 mainStatLabel: "Ellenőrzött Parkolóhely",
-                mainDesc: "Mélygarázsoktól az utcai tárolókig. Lefedjük a város minden szegletét valós idejű foglaltsági adatokkal.",
-                infraTitle: "Infrastruktúra Tudatos",
-                infraDesc: "Útvonaltervezőnk kifejezetten előnyben részesíti a védett kerékpárutakat és az alacsony forgalmú zónákat a maximális biztonság érdekében.",
+                mainDesc: "Adatvezérelt parkolási megoldások. Valós idejű foglaltság, biztonsági besorolás és közösségi validáció minden egyes ponton.",
+                infraTitle: "Biztonság-Első Tervezés",
+                infraDesc: "Algoritmusunk a védett sávokat és a biztonságos zónákat részesíti előnyben, nem a legrövidebb, hanem a legbiztonságosabb utat keresve.",
                 serviceTitle: "800+ Szervizpont",
-                serviceDesc: "Ellenőrzött szervizpontok, nyilvános pumpák és gyorsszerviz állomások kiterjedt hálózata.",
-                trafficTitle: "Élő Forgalmi Adatok",
-                trafficDesc: "Kerüld el a dugókat valós időben.",
-                osTitle: "Teljes operációs rendszer városi bringázáshoz.",
-                osDesc: "Minden, amire szükséged van a biztonságos városi közlekedéshez, egyetlen erőteljes felületen.",
+                serviceDesc: "Azonnali segítség, bárhol is vagy. Szervizek, nyilvános pumpák és segélypontok térképe.",
+                trafficTitle: "Élő Városi Adatok",
+                trafficDesc: "Dinamikus útvonaltervezés a város pulzusához igazodva.",
+                communityTitle: "Közösségi Validáció",
+                communityStat: "98%",
+                communityDesc: "Pontosság a felhasználói visszajelzések és a helyi közösség folyamatos jelentései alapján. Együtt építjük a legmegbízhatóbb térképet.",
+                osTitle: "A jövő városi közlekedése.",
+                osDesc: "Egyetlen platform, amely összeköti a kerékpárosokat a várossal. Adatvezérelt döntések a biztonságosabb holnapért.",
             },
             cta: {
                 title: "Készen állsz a",
-                titleHighlight: "váltásra?",
-                desc: "Csatlakozz az ellenőrzött kerékpárosok hálózatához, és férj hozzá a legátfogóbb városi kerékpáros adatokhoz.",
+                titleHighlight: "jövőre?",
+                desc: "Csatlakozz a ParkSafe közösséghez, és légy része a városi közlekedés forradalmának. Töltsd le még ma.",
                 security: "v2.4 Kiadás • Nagyvállalati Szintű Biztonság • GDPR Megfelelő",
+            }
+        },
+        howItWorks: {
+            title: "Hogyan működik?",
+            subtitle: "Intelligens megoldás, egyszerű lépésekben.",
+            step1: {
+                title: "Töltsd le és Indítsd",
+                desc: "Elérhető iOS és Android platformokon. Regisztrálj másodpercek alatt."
+            },
+            step2: {
+                title: "Fedezd fel a Várost",
+                desc: "Interaktív hőtérkép mutatja a biztonságos zónákat és parkolókat."
+            },
+            step3: {
+                title: "Közösségi Validáció",
+                desc: "Valós visszajelzések és értékelések segítik a legjobb döntést."
+            },
+            step4: {
+                title: "Parkolj Biztonságban",
+                desc: "Navigálj a kiválasztott helyre és parkolj nyugodtan."
+            }
+        },
+        faq: {
+            title: "Gyakran Ismételt Kérdések",
+            subtitle: "Minden, amit a ParkSafe használatáról tudni érdemes.",
+            q1: "Mi az a ParkSafe?",
+            a1: "A ParkSafe egy kifejezetten kerékpárosokra optimalizált digitális térképalkalmazás, amely egyesíti az útvonaltervezést, tárolóhelyeket és szervizeket egyetlen platformon. Jelenleg Szegeden érhető el.",
+            q2: "Hogyan működik az útvonaltervezés?",
+            a2: "A ParkSafe nem autós, hanem kerékpáros logikára építő útvonalakat ajánl. Figyelembe veszi a kerékpárutak minőségét, biztonságát és a városi közlekedés sajátosságait – nem túrázásra, hanem munkahelyre, egyetemre vagy ügyintézésre való eljutáshoz.",
+            q3: "Milyen információkat tartalmaz egy tároló adatlapja?",
+            a3: "Minden tárolónál megtalálod: fedett vagy nyitott tárolás, biztonsági szint (van-e kamerás védelem), közösségi értékelések, felhasználói képek és tapasztalatok. Így megalapozott döntést hozhatsz.",
+            q4: "Ingyenes a ParkSafe használata?",
+            a4: "Igen, a ParkSafe alapfunkciói teljesen ingyenesen használhatók. Jelenleg nincs díjköteles szolgáltatás, a jövőben esetlegesen partneri kedvezmények jelenhetnek meg.",
+            q5: "Mennyire megbízhatóak az adatok?",
+            a5: "A ParkSafe közösségi alapon működik: felhasználók osztják meg tapasztalataikat, értékelik a helyeket és töltenek fel képeket. Ez biztosítja, hogy az információk naprakészek és valósak legyenek.",
+            q6: "Csak Szegeden működik?",
+            a6: "Jelenleg a ParkSafe Szegeden érhető el teljes funkcionalitással. A platform tervezetten más városokra is bővül, ha a szegedi validáció sikeres és elegendő felhasználói bázis alakul ki.",
+            q7: "Hogyan vehetem fel a kapcsolatot a csapattal?",
+            a7: 'A weboldalon található "Írj nekünk" menüponton keresztül tudsz üzenetet küldeni. Minden megkeresésre igyekszünk gyorsan reagálni.',
+        },
+        partners: {
+            title: "Partnerek és Előnyök",
+            subtitle: "Mert a közösség ereje kifizetődő.",
+            comingSoon: "Hamarosan érkezik!",
+            benefit1: {
+                title: "Exkluzív Kedvezmények",
+                desc: "Prémium ajánlatok a legnagyobb kerékpáros márkáktól és boltoktól."
+            },
+            benefit2: {
+                title: "Kiemelt Szervizháttér",
+                desc: "Soron kívüli foglalás és kedvezményes javítás partnereinknél."
+            },
+            benefit3: {
+                title: "Életmód és Közösség",
+                desc: "Belépők, események és közösségi programok csak ParkSafe tagoknak."
             }
         },
         contact: {
             title: "Kapcsolat",
-            subtitle: "Van kérdésed a ParkSafe-ről vagy szeretnél visszajelzést küldeni? Örömmel állunk rendelkezésedre!",
+            subtitle: "Innovációs partnerünk vagy felhasználónk? Hallani akarunk felőled.",
             role: "Üzletvezető & Kapcsolattartó",
             responseTimeTitle: "Válaszidő",
-            responseTimeDesc: "Általában 24-48 órán belül válaszolunk minden megkeresésre.",
+            responseTimeDesc: "Üzleti megkeresésekre 24 órán belül reagálunk.",
             footerNote: "Kérdésed van az applikációval, adatokkal kapcsolatban, vagy szeretnél együttműködni velünk? Írj bátran emailben vagy hívj telefonon!",
         },
         login: {
@@ -109,9 +167,9 @@ export const translations = {
         },
         home: {
             hero: {
-                title: "Professional Parking for",
-                subtitle: "Hungary's Cyclists.",
-                description: "The most reliable infrastructure map for urban mobility. Find secure parking, service stations, and verified routes.",
+                title: "Urban Cycling,",
+                subtitle: "Reimagined.",
+                description: "Not just a map. ParkSafe is the operating system for urban micro-mobility. Secure parking, intelligent routing, and community power in one app.",
                 downloadIOS: "Download for iOS",
                 downloadAndroid: "Get it on Android",
             },
@@ -119,29 +177,87 @@ export const translations = {
                 mainTitle: "Hungary's Largest Cycle Network",
                 mainStat: "7,500+",
                 mainStatLabel: "Verified Parking Spots",
-                mainDesc: "From underground garages to street-side racks. We cover every corner of the city with real-time availability updates.",
-                infraTitle: "Infrastructure Aware",
-                infraDesc: "Our routing algorithm specifically favors protected bike lanes and low-traffic zones for maximum safety.",
-                serviceTitle: "800+ Service Centers",
-                serviceDesc: "Extensive network of verified service points, public pumps, and rapid repair stations.",
-                trafficTitle: "Live Traffic Data",
-                trafficDesc: "Avoid congestion in real-time.",
-                osTitle: "A complete operating system for urban cycling.",
-                osDesc: "Everything you need to navigate the city safely, packed into one powerful interface.",
+                mainDesc: "Data-driven parking solutions. Real-time availability, security ratings, and community validation at every single point.",
+                infraTitle: "Safety-First Design",
+                infraDesc: "Our algorithm prioritizes protected lanes and safe zones, seeking not just the fastest, but the safest route.",
+                serviceTitle: "800+ Service Points",
+                serviceDesc: "Immediate help, wherever you are. Map of repair shops, public pumps, and emergency stations.",
+                trafficTitle: "Live Urban Data",
+                trafficDesc: "Dynamic routing adapted to the city's pulse.",
+                communityTitle: "Community Verified",
+                communityStat: "98%",
+                communityDesc: "Accuracy rate driven by user feedback and continuous local community reports. Building the most reliable map together.",
+                osTitle: "The Future of Urban Transit.",
+                osDesc: "One platform connecting cyclists with their city. Data-driven decisions for a safer tomorrow.",
             },
             cta: {
-                title: "Ready to upgrade your",
-                titleHighlight: "commute?",
-                desc: "Join the network of verified cyclists and access the most comprehensive urban cycling data available.",
+                title: "Ready for the",
+                titleHighlight: "future?",
+                desc: "Join the ParkSafe community and be part of the urban transport revolution. Download today.",
                 security: "v2.4 Release • Enterprise Grade Security • GDPR Compliant",
+            }
+        },
+        howItWorks: {
+            title: "How It Works",
+            subtitle: "Smart solution, simple steps.",
+            step1: {
+                title: "Download & Launch",
+                desc: "Available on iOS and Android. Register in seconds."
+            },
+            step2: {
+                title: "Explore the City",
+                desc: "Interactive heatmap shows safe zones and parking spots."
+            },
+            step3: {
+                title: "Community Validation",
+                desc: "Real feedback and ratings help you make the best choice."
+            },
+            step4: {
+                title: "Park Safely",
+                desc: "Navigate to your spot and park with peace of mind."
+            }
+        },
+        faq: {
+            title: "Frequently Asked Questions",
+            subtitle: "Everything you need to know about using ParkSafe.",
+            q1: "What is ParkSafe?",
+            a1: "ParkSafe is a digital map application optimized specifically for cyclists, combining route planning, parking spots, and service stations in one platform. Currently available in Szeged.",
+            q2: "How does route planning work?",
+            a2: "ParkSafe recommends routes based on cycling logic, not car logic. It considers bike path quality, safety, and urban traffic characteristics – designed for commuting to work, university, or errands, not just touring.",
+            q3: "What information is on a parking spot's data sheet?",
+            a3: "For every spot, you'll find: covered or open storage, security level (CCTV presence), community ratings, user photos, and experiences. This helps you make an informed decision.",
+            q4: "Is ParkSafe free to use?",
+            a4: "Yes, ParkSafe's core features are completely free to use. There are currently no paid services; partner discounts may appear in the future.",
+            q5: "How reliable is the data?",
+            a5: "ParkSafe operates on a community basis: users share their experiences, rate places, and upload photos. This ensures that information is up-to-date and real.",
+            q6: "Does it only work in Szeged?",
+            a6: "Currently, ParkSafe is available with full functionality in Szeged. The platform is planned to expand to other cities if the Szeged validation is successful and a sufficient user base is established.",
+            q7: "How can I contact the team?",
+            a7: "You can send a message via the 'Contact Us' menu item on the website. We try to respond to all inquiries quickly.",
+        },
+        partners: {
+            title: "Partners & Benefits",
+            subtitle: "Because community power pays off.",
+            comingSoon: "Coming Soon!",
+            benefit1: {
+                title: "Exclusive Discounts",
+                desc: "Premium offers from top cycling brands and shops."
+            },
+            benefit2: {
+                title: "Priority Service",
+                desc: "Skip the line booking and discounted repairs at our partners."
+            },
+            benefit3: {
+                title: "Lifestyle & Community",
+                desc: "Tickets, events, and community programs only for ParkSafe members."
             }
         },
         contact: {
             title: "Contact",
-            subtitle: "Have a question about ParkSafe or want to send feedback? We are happy to help!",
+            subtitle: "Innovation partner or user? We want to hear from you.",
             role: "Business Manager & Contact",
             responseTimeTitle: "Response Time",
-            responseTimeDesc: "We usually respond to all inquiries within 24-48 hours.",
+            responseTimeDesc: "We respond to business inquiries within 24 hours.",
             footerNote: "Have questions about the app, data, or want to collaborate with us? Feel free to email or call!",
         },
         login: {
