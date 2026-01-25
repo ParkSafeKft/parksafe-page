@@ -68,73 +68,38 @@ function FAQSection() {
   };
 
   return (
-    <section className="faq-section">
-      <div className="container">
-        <div className="faq-header">
-          <h2>GYIK – Gyakran Ismételt Kérdések</h2>
-          <p>
-            Válaszok a leggyakrabban felmerülő kérdésekre a ParkSafe használatáról
+    <section className="py-24 bg-white">
+      <div className="container px-4 md:px-6 mx-auto max-w-4xl">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">Gyakran Ismételt Kérdések</h2>
+          <p className="text-lg text-zinc-500">
+            Minden, amit a ParkSafe használatáról tudni érdemes.
           </p>
         </div>
 
-        <div className="faq-list">
+        <div className="space-y-4">
           {faqData.map((item, index) => (
             <Collapsible
               key={index}
               open={openItems.includes(index)}
               onOpenChange={() => toggleItem(index)}
+              className="bg-zinc-50 rounded-2xl border border-zinc-100 overflow-hidden"
             >
-              <CollapsibleTrigger>
-                <h3>{item.question}</h3>
+              <CollapsibleTrigger className="flex items-center justify-between w-full p-6 text-left hover:bg-zinc-100/50 transition-colors">
+                <h3 className="text-lg font-semibold text-zinc-900 pr-8">{item.question}</h3>
                 <ChevronDown
-                  size={24}
-                  style={{
-                    transition: "transform 0.3s ease",
-                    transform: openItems.includes(index)
-                      ? "rotate(180deg)"
-                      : "rotate(0deg)",
-                  }}
+                  size={20}
+                  className={`text-zinc-400 transition-transform duration-300 ${openItems.includes(index) ? "rotate-180" : ""
+                    }`}
                 />
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <p>{item.answer}</p>
+                <div className="px-6 pb-6 text-zinc-600 leading-relaxed">
+                  <p>{item.answer}</p>
+                </div>
               </CollapsibleContent>
             </Collapsible>
           ))}
-        </div>
-
-        <div className="faq-cta">
-          <h3>Készen állsz a biztonságos tárolásra?</h3>
-          <div className="store-buttons">
-            <a
-              href="https://apps.apple.com/app/id6752813986"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="store-button apple"
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" className="store-icon">
-                <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-              </svg>
-              <div className="store-text">
-                <span className="store-small">Töltsd le</span>
-                <span className="store-large">App Store</span>
-              </div>
-            </a>
-            <a
-              href="https://play.google.com/store/apps/details?id=com.parksafe.app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="store-button google"
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" className="store-icon">
-                <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z" />
-              </svg>
-              <div className="store-text">
-                <span className="store-small">Szerezd be</span>
-                <span className="store-large">Google Play</span>
-              </div>
-            </a>
-          </div>
         </div>
       </div>
     </section>

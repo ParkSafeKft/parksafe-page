@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import "./App.css";
 import { AuthProvider } from "./contexts/AuthContext.tsx";
+import { LanguageProvider } from "./contexts/LanguageContext.tsx";
 import Header from "./Header.tsx";
 import Footer from "./Footer.tsx";
 import HomePage from "./HomePage.tsx";
@@ -16,6 +16,7 @@ import Login from "./Login.tsx";
 import Profile from "./Profile.tsx";
 import Admin from "./admin/modern.tsx";
 import Test from "./Test.tsx";
+import ScrollToTop from "./components/ScrollToTop";
 
 // Component to handle OAuth redirects
 function AuthRedirectHandler() {
@@ -68,25 +69,28 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <AuthRedirectHandler />
-        <AppLayout>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/success" element={<Success />} />
-            <Route path="/error" element={<Error />} />
-            <Route path="/email-change-success" element={<EmailChangeSuccess />} />
-            <Route path="/password-reset" element={<PasswordReset />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/test" element={<Test />} />
-          </Routes>
-        </AppLayout>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <AuthRedirectHandler />
+          <ScrollToTop />
+          <AppLayout>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/success" element={<Success />} />
+              <Route path="/error" element={<Error />} />
+              <Route path="/email-change-success" element={<EmailChangeSuccess />} />
+              <Route path="/password-reset" element={<PasswordReset />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/test" element={<Test />} />
+            </Routes>
+          </AppLayout>
+        </AuthProvider>
+      </LanguageProvider>
     </Router>
   );
 }

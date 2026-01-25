@@ -1,48 +1,54 @@
 import { Link } from "react-router-dom";
-import { Smartphone, Bot, Mail, FileText, Lock } from "lucide-react";
-import "./Footer.css";
+import { useLanguage } from "./contexts/LanguageContext";
 
 function Footer() {
+  const { t } = useLanguage();
+
   return (
-    <footer className="footer">
-      <div className="container">
-        <div className="footer-content">
-          <div className="footer-links">
-            <a
-              href="https://apps.apple.com/app/id6752813986"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer-link"
-            >
-              <Smartphone size={16} />
-              App Store
+    <footer className="bg-slate-900 border-t border-slate-800 text-slate-400 py-12 md:py-16">
+      <div className="container mx-auto px-4">
+
+        {/* Top Section: Logo & main links */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
+
+          {/* Logo / Brand */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10">
+              <img src="/logo.png" alt="P" className="w-6 h-6 brightness-110" />
+            </div>
+            <span className="text-xl font-bold text-white tracking-tight">ParkSafe</span>
+          </div>
+
+          {/* Links */}
+          <div className="flex flex-wrap justify-center gap-8 text-sm font-medium">
+            <a href="https://apps.apple.com/app/id6752813986" className="hover:text-white transition-colors">
+              {t('footer.appStore')}
             </a>
-            <a
-              href="https://play.google.com/store/apps/details?id=com.parksafe.app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer-link"
-            >
-              <Bot size={16} />
-              Google Play
+            <a href="https://play.google.com/store/apps/details?id=com.parksafe.app" className="hover:text-white transition-colors">
+              {t('footer.googlePlay')}
             </a>
-            <Link to="/contact" className="footer-link">
-              <Mail size={16} />
-              Kapcsolat
+            <Link to="/contact" className="hover:text-white transition-colors">
+              {t('nav.contact')}
             </Link>
-            <Link to="/terms" className="footer-link">
-              <FileText size={16} />
-              ÁSZF
+            <Link to="/terms" className="hover:text-white transition-colors">
+              {t('footer.terms')}
             </Link>
-            <Link to="/privacy" className="footer-link">
-              <Lock size={16} />
-              Adatvédelem
+            <Link to="/privacy" className="hover:text-white transition-colors">
+              {t('footer.privacy')}
             </Link>
           </div>
         </div>
-        <div className="footer-bottom">
-          <p>© 2025 ParkSafe. Minden jog fenntartva.</p>
+
+        {/* Bottom Section: Copyright */}
+        <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-medium opacity-60">
+          <p>{t('footer.rights')}</p>
+          <div className="flex gap-6">
+            <a href="#" className="hover:text-white transition-colors">Twitter</a>
+            <a href="#" className="hover:text-white transition-colors">LinkedIn</a>
+            <a href="#" className="hover:text-white transition-colors">Instagram</a>
+          </div>
         </div>
+
       </div>
     </footer>
   );

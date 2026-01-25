@@ -1,400 +1,215 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Shield, Star, Wrench, Check, Bike, Zap, Download, ChevronDown, Navigation } from "lucide-react";
+import { Navigation, Shield, Wrench, Star, Check, Bike, Zap } from "lucide-react";
 import { motion } from "framer-motion";
-import { AuroraBackground } from "@/components/ui/aurora-background";
 import FAQSection, { faqSchema } from "@/components/FAQSection";
 import HowItWorks from "@/components/HowItWorks";
-import PartnerBenefits from "@/components/PartnerBenefits";
+import { useLanguage } from "./contexts/LanguageContext";
 
 function HomePage() {
-  const [titleNumber, setTitleNumber] = useState(0);
-  const [expandedFeatures, setExpandedFeatures] = useState<number[]>([]);
-  const titles = useMemo(
-    () => ["bárhol", "bármikor", "egyszerűen", "gyorsan", "könnyedén"],
-    []
-  );
-
-  const toggleFeature = (index: number) => {
-    setExpandedFeatures((prev) =>
-      prev.includes(index)
-        ? prev.filter((i) => i !== index)
-        : [...prev, index]
-    );
-  };
+  const { t } = useLanguage();
+  const [activeTab, setActiveTab] = useState("map");
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (titleNumber === titles.length - 1) {
-        setTitleNumber(0);
-      } else {
-        setTitleNumber(titleNumber + 1);
-      }
-    }, 2000);
-    return () => clearTimeout(timeoutId);
-  }, [titleNumber, titles]);
-
-  useEffect(() => {
-    // Animated counter effect
-    const animateCounter = (element, target, duration = 2000) => {
-      let startTime = null;
-
-      const animate = (currentTime) => {
-        if (startTime === null) startTime = currentTime;
-        const progress = Math.min((currentTime - startTime) / duration, 1);
-
-        // Easing function for smooth animation
-        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-        const currentValue = Math.floor(easeOutQuart * target);
-
-        element.textContent = currentValue.toLocaleString() + "+";
-
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          element.textContent = target.toLocaleString() + "+";
-        }
-      };
-
-      requestAnimationFrame(animate);
-    };
-
-    // Start animation after a short delay
-    const timer = setTimeout(() => {
-      const counters = document.querySelectorAll(".stat-number[data-target]");
-      counters.forEach((counter) => {
-        const target = parseInt(counter.getAttribute("data-target"));
-        animateCounter(counter, target);
-      });
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Add FAQ Schema markup for SEO
-  useEffect(() => {
+    // FAQ Schema
     const script = document.createElement("script");
     script.type = "application/ld+json";
     script.text = JSON.stringify(faqSchema);
     document.head.appendChild(script);
-
     return () => {
       document.head.removeChild(script);
     };
   }, []);
 
   return (
-    <div className="home-page">
-      {/* Hero Section */}
-      <AuroraBackground className="!min-h-[90vh] !h-auto !justify-start !pt-[120px] !pb-[80px]">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            delay: 0.2,
-            duration: 0.8,
-            ease: "easeInOut",
-          }}
-          className="container hero-container"
-          style={{ position: 'relative', zIndex: 2 }}
-        >
-          <div className="hero-content">
-            <h1 className="hero-title">
-              Kerékpáros navigáció Szegeden{" "}
-              <span className="relative inline-block overflow-hidden" style={{ width: '380px', height: '1.2em', verticalAlign: 'bottom' }}>
-                {titles.map((title, index) => (
-                  <motion.span
-                    key={index}
-                    className="highlight whitespace-nowrap"
-                    style={{ position: 'absolute', left: 0, top: 0 }}
-                    initial={{ opacity: 0, y: "-100" }}
-                    transition={{ type: "spring", stiffness: 50 }}
-                    animate={
-                      titleNumber === index
-                        ? {
-                            y: 0,
-                            opacity: 1,
-                          }
-                        : {
-                            y: titleNumber > index ? -150 : 150,
-                            opacity: 0,
-                          }
-                    }
-                  >
-                    {title}
-                  </motion.span>
-                ))}
-              </span>
-            </h1>
-            <p className="hero-subtitle">
-              Biztonságos tárolók, szervizek és kerékpáros útvonalak egy helyen
-            </p>
-            <p className="hero-description">
-              A ParkSafe egy kifejezetten kerékpárosokra optimalizált digitális térképalkalmazás Szegeden. Találd meg a legjobb útvonalakat városi közlekedéshez, biztonságos tárolóhelyeket és közeli szervizeket közösségi visszajelzések alapján.
-            </p>
-            <div className="store-buttons hero-store-buttons">
-              <a
-                href="https://apps.apple.com/app/id6752813986"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="store-button apple"
+    <div className="home-page font-sans text-slate-900 bg-white selection:bg-[#34aa56] selection:text-white">
+
+      {/* Hero Section - Corporate & Trusted ===================================== */}
+      <section className="relative w-full pt-32 pb-24 lg:pt-48 lg:pb-32 overflow-hidden">
+
+        {/* Minimal Noise Texture for "Paper" feel */}
+        <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] pointer-events-none mix-blend-multiply" />
+
+        {/* Subtle Gradient Spot - One only, very faint */}
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-b from-slate-50 to-white -z-10" />
+
+        <div className="container px-4 md:px-6 relative z-10 w-full max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+
+            {/* Left Content - Static Authority */}
+            <div className="flex flex-col gap-8 text-center lg:text-left">
+
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.8 }}
+                className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.05]"
               >
-                <svg viewBox="0 0 24 24" fill="currentColor" className="store-icon">
-                  <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-                </svg>
-                <div className="store-text">
-                  <span className="store-small">Töltsd le</span>
-                  <span className="store-large">App Store</span>
-                </div>
-              </a>
-              <a
-                href="https://play.google.com/store/apps/details?id=com.parksafe.app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="store-button google"
+                {t('home.hero.title')} <br className="hidden lg:block" />
+                <span className="text-[#34aa56]">{t('home.hero.subtitle')}</span>
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.8 }}
+                className="text-xl text-slate-500 max-w-lg mx-auto lg:mx-0 leading-relaxed font-medium"
               >
-                <svg viewBox="0 0 24 24" fill="currentColor" className="store-icon">
-                  <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
-                </svg>
-                <div className="store-text">
-                  <span className="store-small">Szerezd be</span>
-                  <span className="store-large">Google Play</span>
-                </div>
-              </a>
+                {t('home.hero.description')}
+              </motion.p>
+
+              {/* Action Bar */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.8 }}
+                className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4"
+              >
+                <a href="https://apps.apple.com/app/id6752813986" className="inline-flex items-center justify-center gap-2 bg-slate-900 text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-slate-900/10">
+                  <svg viewBox="0 0 384 512" fill="currentColor" className="w-5 h-5 mb-1"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 52.3-11.4 69.5-34.3z" /></svg>
+                  {t('home.hero.downloadIOS')}
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=com.parksafe.app" className="inline-flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-900 px-8 py-4 rounded-full font-bold text-lg hover:bg-slate-50 hover:border-slate-300 transition-all hover:scale-105 active:scale-95 shadow-sm">
+                  <svg viewBox="0 0 512 512" fill="currentColor" className="w-5 h-5 mb-1"><path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z" /></svg>
+                  {t('home.hero.downloadAndroid')}
+                </a>
+              </motion.div>
+
             </div>
-            <p className="hero-subtext">
-              Ingyenes • Android és iOS • Már elérhető!
-            </p>
-            <div className="hero-stats">
-              <div className="stat">
-                <span className="stat-number" data-target="7500">
-                  0+
-                </span>
-                <span className="stat-label">Vizsgált Helyszín</span>
-              </div>
-              <div className="stat">
-                <span className="stat-number" data-target="200">
-                  0+
-                </span>
-                <span className="stat-label">Város</span>
-              </div>
-              <div className="stat">
-                <span className="stat-number" data-target="847">
-                  0+
-                </span>
-                <span className="stat-label">Érdeklődő</span>
-              </div>
-            </div>
-          </div>
-          <div className="hero-image">
-            <div className="phone-mockup">
-              <div className="phone-screen">
+
+            {/* Right Content - High Fidelity Mockup */}
+            {/* Right Content - High Fidelity Mockup */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+              className="relative flex items-center justify-center lg:justify-end py-10"
+            >
+              <div className="relative w-[280px] md:w-[320px] lg:w-[360px]">
                 <img
-                  src="/phone.jpeg"
-                  alt="ParkSafe app mockup"
-                  className="phone-screen-image"
+                  src="/ios_mapview.png"
+                  alt="ParkSafe Mobile Interface"
+                  className="w-full h-auto"
                 />
               </div>
-            </div>
-          </div>
-        </motion.div>
-      </AuroraBackground>
+            </motion.div>
 
-      {/* How It Works Section */}
-      <HowItWorks />
-
-      {/* Features Section */}
-      <section className="features">
-        <div className="container">
-          <div className="features-header">
-            <h2>Miért válaszd a ParkSafe-ot?</h2>
-            <p>Az egyetlen kifejezetten kerékpárosokra optimalizált alkalmazás Szegeden</p>
-          </div>
-          <div className="features-grid">
-            <div className={`feature-card ${expandedFeatures.includes(0) ? 'expanded' : 'collapsed'}`}>
-              <div className="feature-icon green">
-                <Navigation size={28} />
-              </div>
-              <h3>Kerékpáros útvonaltervezés</h3>
-              <p>
-                Nem autós, hanem kifejezetten kerékpáros logikára optimalizált útvonalak.
-                {expandedFeatures.includes(0) && (
-                  <> A ParkSafe figyelembe veszi a kerékpárutak minőségét, a forgalmat és a terepviszonyokat, hogy a legbiztonságosabb és legkényelmesebb útvonalat ajánlja városi közlekedéshez.</>
-                )}
-              </p>
-              <button className="expand-toggle" onClick={() => toggleFeature(0)}>
-                {expandedFeatures.includes(0) ? "Kevesebb" : "Bővebben"}{" "}
-                <ChevronDown
-                  size={16}
-                  style={{
-                    transition: "transform 0.3s ease",
-                    transform: expandedFeatures.includes(0) ? "rotate(180deg)" : "rotate(0deg)",
-                  }}
-                />
-              </button>
-            </div>
-            <div className={`feature-card ${expandedFeatures.includes(1) ? 'expanded' : 'collapsed'}`}>
-              <div className="feature-icon blue">
-                <Shield size={28} />
-              </div>
-              <h3>Biztonságos tárolóhelyek</h3>
-              <p>
-                Szűrhető tárolók biztonsági szint, fedettség és kamerás védelem alapján.
-                {expandedFeatures.includes(1) && (
-                  <> Minden tárolóról részletes információkat találsz: van-e kamerás megfigyelés, fedett-e, milyen a környék biztonsága. A közösségi értékelések segítenek a legjobb döntés meghozatalában.</>
-                )}
-              </p>
-              <button className="expand-toggle" onClick={() => toggleFeature(1)}>
-                {expandedFeatures.includes(1) ? "Kevesebb" : "Bővebben"}{" "}
-                <ChevronDown
-                  size={16}
-                  style={{
-                    transition: "transform 0.3s ease",
-                    transform: expandedFeatures.includes(1) ? "rotate(180deg)" : "rotate(0deg)",
-                  }}
-                />
-              </button>
-            </div>
-            <div className={`feature-card ${expandedFeatures.includes(2) ? 'expanded' : 'collapsed'}`}>
-              <div className="feature-icon green">
-                <Wrench size={28} />
-              </div>
-              <h3>Szervizek és önjavító állomások</h3>
-              <p>
-                Találd meg a legközelebbi kerékpárszervizeket és önjavító állomásokat egyetlen térképen.
-                {expandedFeatures.includes(2) && (
-                  <> Akár defekt ért útközben, akár rendszeres karbantartásra van szükséged, a ParkSafe megmutatja, hol kaphatsz gyors segítséget. Nyitvatartási idővel és elérhetőségi adatokkal.</>
-                )}
-              </p>
-              <button className="expand-toggle" onClick={() => toggleFeature(2)}>
-                {expandedFeatures.includes(2) ? "Kevesebb" : "Bővebben"}{" "}
-                <ChevronDown
-                  size={16}
-                  style={{
-                    transition: "transform 0.3s ease",
-                    transform: expandedFeatures.includes(2) ? "rotate(180deg)" : "rotate(0deg)",
-                  }}
-                />
-              </button>
-            </div>
-            <div className={`feature-card ${expandedFeatures.includes(3) ? 'expanded' : 'collapsed'}`}>
-              <div className="feature-icon blue">
-                <Star size={28} />
-              </div>
-              <h3>Közösségi visszajelzések</h3>
-              <p>
-                A ParkSafe közösségi alapon működik: felhasználók osztják meg tapasztalataikat.
-                {expandedFeatures.includes(3) && (
-                  <> Értékelések, képek és valós tapasztalatok segítenek abban, hogy megbízható információk alapján dönts. A közösség biztosítja, hogy az adatok naprakészek és hitelesek legyenek.</>
-                )}
-              </p>
-              <button className="expand-toggle" onClick={() => toggleFeature(3)}>
-                {expandedFeatures.includes(3) ? "Kevesebb" : "Bővebben"}{" "}
-                <ChevronDown
-                  size={16}
-                  style={{
-                    transition: "transform 0.3s ease",
-                    transform: expandedFeatures.includes(3) ? "rotate(180deg)" : "rotate(0deg)",
-                  }}
-                />
-              </button>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* Target Audience Section */}
-      <section className="target-audience">
-        <div className="container">
-          <div className="target-header">
-            <h2>Kinek szól a ParkSafe?</h2>
-            <p>
-              Minden kerékpáros számára, aki Szegeden közlekedik – munkába, egyetemre vagy ügyintézéshez
+      {/* Bento Feature Grid - Network Scale & Features */}
+      <section className="py-32 bg-slate-50 border-t border-slate-200">
+        <div className="container px-4 md:px-6 mx-auto">
+
+          <div className="max-w-3xl mx-auto text-center mb-20">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 mb-6">
+              {t('home.grid.osTitle')}
+            </h2>
+            <p className="text-lg text-slate-500">
+              {t('home.grid.osDesc')}
             </p>
           </div>
-          <div className="target-grid">
-            <div className="target-card">
-              <div className="target-icon">
-                <Bike size={40} />
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+
+            {/* Master Card - Network Scale */}
+            <div className="md:col-span-2 row-span-2 bg-white rounded-[2rem] p-8 md:p-12 shadow-xl shadow-slate-200/50 border border-slate-200 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-bl from-[#34aa56]/10 to-transparent rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+
+              <div className="relative z-10">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold tracking-widest uppercase mb-6">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#34aa56] animate-pulse" />
+                  <span>{t('home.grid.mainTitle')}</span>
+                </div>
+
+                <h3 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
+                  {t('home.grid.mainStat')}
+                  <span className="block text-2xl md:text-3xl font-bold text-slate-400 mt-2">{t('home.grid.mainStatLabel')}</span>
+                </h3>
+                <p className="text-slate-500 max-w-md text-lg leading-relaxed mt-6">
+                  {t('home.grid.mainDesc')}
+                </p>
               </div>
-              <h3>Rendszeres városi közlekedők</h3>
-              <p>
-                Napi ingázók, egyetemisták és városi kerékpárosok, akik biztonságos útvonalakat és tárolóhelyeket keresnek. A ParkSafe segít megtalálni a legbiztonságosabb helyeket munkába vagy egyetemre menet.
+
+              {/* Abstract UI representation */}
+              <div className="absolute bottom-0 right-0 w-[60%] h-[60%] bg-slate-50 rounded-tl-[2rem] border-l border-t border-slate-100 shadow-2xl translate-y-8 translate-x-8 transition-transform group-hover:translate-x-6 group-hover:translate-y-6">
+                <div className="w-full h-full bg-[url('/ios_mapview.png')] bg-cover bg-top opacity-80 grayscale-[20%]" />
+              </div>
+            </div>
+
+            {/* Feature Card 2 - Infrastructure */}
+            <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-200 flex flex-col justify-between group hover:border-[#34aa56]/30 transition-colors">
+              <div>
+                <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center mb-6">
+                  <Navigation className="text-[#34aa56] w-5 h-5" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">{t('home.grid.infraTitle')}</h3>
+                <p className="text-slate-500 text-sm">
+                  {t('home.grid.infraDesc')}
+                </p>
+              </div>
+            </div>
+
+            {/* Feature Card 3 - Service Network */}
+            <div className="bg-slate-900 rounded-[2rem] p-8 shadow-xl shadow-slate-900/20 text-white relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+              <Wrench className="w-8 h-8 text-slate-400 mb-6" />
+              <h3 className="text-xl font-bold mb-2">{t('home.grid.serviceTitle')}</h3>
+              <p className="text-slate-400 text-sm">
+                {t('home.grid.serviceDesc')}
               </p>
             </div>
-            <div className="target-card">
-              <div className="target-icon">
-                <Zap size={40} />
+
+            {/* Feature Card 4 - Routing */}
+            <div className="md:col-span-3 lg:col-span-1 bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-200 flex items-center gap-6">
+              <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center shrink-0">
+                <Zap className="text-blue-600 w-6 h-6" />
               </div>
-              <h3>Alkalmi felhasználók és turisták</h3>
-              <p>
-                Új városrészekben mozgó kerékpárosok, turisták és rolleresek, akiknek fontos a gyors tájékozódás. Ismeretlen környezetben is megtalálod a biztonságos útvonalakat és tárolókat.
-              </p>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">{t('home.grid.trafficTitle')}</h3>
+                <p className="text-slate-500 text-sm">{t('home.grid.trafficDesc')}</p>
+              </div>
             </div>
+
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
       <FAQSection />
 
-      {/* CTA Section */}
-      <section className="cta-section">
-        <div className="container">
-          <div className="cta-content">
-            <h2>
-              Kezdd el használni a ParkSafe-et!
-            </h2>
-            <p>
-              Csatlakozz a szegedi kerékpáros közösséghez és találd meg a legbiztonságosabb útvonalakat.
-            </p>
-            <div className="cta-benefits">
-              <div className="benefit">
-                <Check size={20} className="benefit-icon" />
-                Kerékpáros szemléletű útvonaltervezés
-              </div>
-              <div className="benefit">
-                <Check size={20} className="benefit-icon" />
-                Közösségi értékelések és visszajelzések
-              </div>
-              <div className="benefit">
-                <Check size={20} className="benefit-icon" />
-                Teljesen ingyenes használat
-              </div>
-            </div>
-            <div className="store-buttons-cta">
-              <a
-                href="https://apps.apple.com/app/id6752813986"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="store-button apple"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor" className="store-icon">
-                  <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-                </svg>
-                <div className="store-text">
-                  <span className="store-small">Töltsd le</span>
-                  <span className="store-large">App Store</span>
-                </div>
-              </a>
-              <a
-                href="https://play.google.com/store/apps/details?id=com.parksafe.app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="store-button google"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor" className="store-icon">
-                  <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
-                </svg>
-                <div className="store-text">
-                  <span className="store-small">Szerezd be</span>
-                  <span className="store-large">Google Play</span>
-                </div>
-              </a>
-            </div>
+      {/* Corporate Dark Mode CTA */}
+      <section className="py-24 relative overflow-hidden bg-slate-900">
+
+        {/* Subtle Grid Pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:32px_32px] opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
+
+        <div className="container px-4 mx-auto text-center relative z-10">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white tracking-tight">
+            {t('home.cta.title')} <span className="text-[#34aa56]">{t('home.cta.titleHighlight')}</span>
+          </h2>
+          <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+            {t('home.cta.desc')}
+          </p>
+
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="https://apps.apple.com/app/id6752813986" className="inline-flex items-center justify-center gap-2 bg-white text-slate-900 px-8 py-4 rounded-full font-bold text-lg hover:bg-zinc-100 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-white/5">
+              <svg viewBox="0 0 384 512" fill="currentColor" className="w-5 h-5 mb-1"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 52.3-11.4 69.5-34.3z" /></svg>
+              {t('home.hero.downloadIOS')}
+            </a>
+            <a href="https://play.google.com/store/apps/details?id=com.parksafe.app" className="inline-flex items-center justify-center gap-2 bg-transparent text-white border border-slate-700 px-8 py-4 rounded-full font-bold text-lg hover:bg-slate-800 hover:border-slate-600 transition-all hover:scale-105 active:scale-95">
+              <svg viewBox="0 0 512 512" fill="currentColor" className="w-5 h-5 mb-1"><path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z" /></svg>
+              {t('home.hero.downloadAndroid')}
+            </a>
           </div>
+
+          <p className="mt-8 text-slate-500 text-sm font-medium">
+            {t('home.cta.security')}
+          </p>
         </div>
       </section>
+
     </div>
   );
 }

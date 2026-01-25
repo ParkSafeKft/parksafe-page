@@ -58,6 +58,21 @@
   --blue-300: #0ea5e9;
   --indigo-300: #06b6d4;
   --violet-200: #22d3ee;
+
+  /* ParkSafe Rebrand Colors */
+  --parksafe-green: #34aa56;
+  --parksafe-green-50: #f0fdf4;
+  --parksafe-green-100: #dcfce7;
+  --parksafe-green-500: #34aa56;
+  --parksafe-green-600: #2b8f48;
+  --parksafe-green-900: #14532d;
+
+  --emerald-500: #34aa56;
+  /* Override with brand color */
+  --emerald-600: #2b8f48;
+  --teal-400: #2dd4bf;
+  --teal-300: #5eead4;
+  --cyan-500: #06b6d4;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -127,6 +142,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
@@ -137,6 +153,7 @@
     from {
       background-position: 50% 50%, 50% 50%;
     }
+
     to {
       background-position: 350% 50%, 350% 50%;
     }
@@ -150,6 +167,7 @@
 }
 
 @layer base {
+
   /* Force dark mode for admin panel */
   .admin-dark {
     --background: oklch(0.145 0 0);
@@ -158,7 +176,8 @@
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.205 0 0);
     --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.646 0.222 142.495); /* Green accent */
+    --primary: oklch(0.646 0.222 142.495);
+    /* Green accent */
     --primary-foreground: oklch(0.985 0 0);
     --secondary: oklch(0.269 0 0);
     --secondary-foreground: oklch(0.985 0 0);
@@ -169,15 +188,21 @@
     --destructive: oklch(0.704 0.191 22.216);
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.646 0.222 142.495); /* Green ring */
-    --sidebar: oklch(0.145 0 0); /* Dark sidebar background */
-    --sidebar-foreground: oklch(0.985 0 0); /* Light text */
-    --sidebar-primary: oklch(0.646 0.222 142.495); /* Green primary */
+    --ring: oklch(0.646 0.222 142.495);
+    /* Green ring */
+    --sidebar: oklch(0.145 0 0);
+    /* Dark sidebar background */
+    --sidebar-foreground: oklch(0.985 0 0);
+    /* Light text */
+    --sidebar-primary: oklch(0.646 0.222 142.495);
+    /* Green primary */
     --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.205 0 0); /* Darker accent */
+    --sidebar-accent: oklch(0.205 0 0);
+    /* Darker accent */
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.646 0.222 142.495); /* Green ring */
+    --sidebar-ring: oklch(0.646 0.222 142.495);
+    /* Green ring */
   }
 
   /* Force dark sidebar background - Target all possible elements */
@@ -258,7 +283,7 @@
 
   /* Nuclear option - override all background colors in sidebar area */
   .admin-dark aside,
-  .admin-dark aside > *,
+  .admin-dark aside>*,
   .admin-dark aside * {
     background-color: oklch(0.145 0 0) !important;
   }
@@ -298,7 +323,7 @@
 
   /* Target everything inside the mobile sheet */
   .admin-dark [data-slot="sheet-content"] *,
-  .admin-dark [data-slot="sheet-content"] > *,
+  .admin-dark [data-slot="sheet-content"]>*,
   .admin-dark [data-slot="sheet-content"] div {
     background-color: inherit !important;
   }
@@ -321,7 +346,7 @@
 
   /* Nuclear option for mobile sheet - override any white/light backgrounds */
   .admin-dark [data-slot="sheet-content"],
-  .admin-dark [data-slot="sheet-content"] > div,
+  .admin-dark [data-slot="sheet-content"]>div,
   .admin-dark [data-slot="sheet-content"] [class*="bg-"] {
     background: oklch(0.145 0 0) !important;
     background-color: oklch(0.145 0 0) !important;
@@ -423,7 +448,7 @@
   }
 
   /* Remove any margin/padding that creates gaps */
-  .admin-dark .bg-card.border-border > div > div {
+  .admin-dark .bg-card.border-border>div>div {
     margin: 0 !important;
   }
 
