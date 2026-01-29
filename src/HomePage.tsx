@@ -128,11 +128,26 @@ function HomePage() {
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-[#34aa56]/20 via-emerald-100/30 to-transparent rounded-full blur-3xl -z-10" />
               
               <div className="relative w-[300px] md:w-[400px] lg:w-[480px]">
-                <img
-                  src="/ios_mapview.png"
-                  alt="ParkSafe Mobile Interface"
-                  className="w-full h-auto drop-shadow-2xl"
-                />
+                <picture className="w-full h-auto drop-shadow-2xl">
+                  {/* Responsive WebP Sources */}
+                  <source 
+                    type="image/webp" 
+                    srcSet="/ios_mapview_300.webp 300w, /ios_mapview_480.webp 480w, /ios_mapview_800.webp 800w"
+                    sizes="(min-width: 1024px) 480px, (min-width: 768px) 400px, 300px"
+                  />
+                  {/* Responsive PNG Fallback */}
+                  <img
+                    src="/ios_mapview.png"
+                    srcSet="/ios_mapview_300.png 300w, /ios_mapview_480.png 480w, /ios_mapview_800.png 800w"
+                    sizes="(min-width: 1024px) 480px, (min-width: 768px) 400px, 300px"
+                    alt="ParkSafe Mobile Interface - Kerékpáros Térkép"
+                    width="480"
+                    height="900"
+                    className="w-full h-auto drop-shadow-2xl"
+                    fetchPriority="high"
+                    decoding="async"
+                  />
+                </picture>
               </div>
             </motion.div>
 
@@ -170,8 +185,13 @@ function HomePage() {
               </div>
 
               {/* Abstract UI representation */}
-              <div className="absolute bottom-0 right-0 w-[60%] h-[60%] bg-zinc-50 rounded-tl-[2rem] border-l border-t border-zinc-100 shadow-2xl translate-y-8 translate-x-8 transition-transform group-hover:translate-x-6 group-hover:translate-y-6">
-                <div className="w-full h-full bg-[url('/ios_mapview.png')] bg-cover bg-top opacity-80 grayscale-[20%]" />
+              <div className="absolute bottom-0 right-0 w-[60%] h-[60%] bg-zinc-50 rounded-tl-[2rem] border-l border-t border-zinc-100 shadow-2xl translate-y-8 translate-x-8 transition-transform group-hover:translate-x-6 group-hover:translate-y-6 overflow-hidden">
+                <img 
+                  src="/ios_mapview_300.png" 
+                  alt="" 
+                  className="w-full h-full object-cover object-top opacity-80 grayscale-[20%]"
+                  loading="lazy" 
+                />
               </div>
             </div>
 

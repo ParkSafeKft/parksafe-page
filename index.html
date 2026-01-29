@@ -14,55 +14,19 @@
 
     <!-- SEO Meta Tags -->
     <title>ParkSafe: Kerékpáros Navigáció & Térkép</title>
-    <meta name="description" content="ParkSafe: Biztonságos kerékpáros útvonalak, tárolók és szervizek egy helyen. Navigálj okosan a városban! Ingyenes letöltés." />
+    <meta name="description" content="ParkSafe: Szeged egyetlen kerékpáros navigációs applikációja. Fedezd fel a legbiztonságosabb útvonalakat, ellenőrzött tárolókat és szervizeket egy helyen. Töltsd le ingyen iOS-re és Androidra, és tekerj gondtalanul!" />
     <meta name="keywords" content="kerékpár, kerékpáros útvonal, bicikli tárolás, kerékpár szerviz, városi közlekedés, kerékpáros navigáció, bike parking, ParkSafe" />
     <link rel="canonical" href="https://parksafe.hu/" />
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "ParkSafe",
-      "url": "https://parksafe.hu/",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "https://parksafe.hu/search?q={search_term_string}",
-        "query-input": "required name=search_term_string"
-      }
-    }
-    </script>
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "ParkSafe",
-      "url": "https://parksafe.hu",
-      "logo": "https://parksafe.hu/logo.png",
-      "sameAs": [
-        "https://www.facebook.com/parksafe",
-        "https://twitter.com/parksafe"
-      ]
-    }
-    </script>
-
-
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="ParkSafe – Kerékpáros navigáció Szegeden" />
-    <meta property="og:description" content="Biztonságos útvonalak, tárolók és szervizek kerékpárosoknak. Közösségi alapú információk Szegeden." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://parksafe.hu" />
-    <meta property="og:image" content="https://parksafe.hu/logo.png" />
-
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="ParkSafe – Kerékpáros navigáció Szegeden" />
-    <meta name="twitter:description" content="Biztonságos útvonalak, tárolók és szervizek kerékpárosoknak Szegeden." />
-    <meta name="twitter:image" content="https://parksafe.hu/logo.png" />
-
+    
+    <!-- Preload Critical Assets -->
+    <link rel="preload" as="image" href="/ios_mapview.png">
+    
+    <!-- Non-Blocking Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" as="image" href="/ios_mapview.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"></noscript>
+
 
   </head>
   <body>
@@ -71,13 +35,17 @@
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
     <div id="root">
-      <!-- SEO Fallback: Visible to crawlers before React loads -->
-      <h1 style="visibility: hidden; height: 0; margin: 0; overflow: hidden;">ParkSafe: Városi Kerékpározás, Újragondolva</h1>
-      <p style="visibility: hidden; height: 0; margin: 0; overflow: hidden;">
-        ParkSafe: Biztonságos kerékpáros útvonalak, tárolók és szervizek egy helyen. Navigálj okosan a városban!
-      </p>
-      <!-- SEO Fallback: Crawlable Links -->
-      <nav style="visibility: hidden; height: 0; margin: 0; overflow: hidden;">
+      <!-- App Shell: Visible loading state to fix FCP -->
+      <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: white;">
+        <div style="width: 64px; height: 64px; background-color: #34aa56; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+           <img src="/logo.png" alt="ParkSafe Logo" style="width: 40px; height: 40px; object-fit: contain;">
+        </div>
+        <h1 style="font-family: system-ui, -apple-system, sans-serif; font-size: 24px; font-weight: 800; color: #0f172a; margin: 0;">ParkSafe</h1>
+        <p style="font-family: system-ui, -apple-system, sans-serif; color: #64748b; margin-top: 8px;">Betöltés...</p>
+      </div>
+
+      <!-- SEO Fallback: Crawlable Links (Hidden visually but available for bots) -->
+      <nav style="display: none;">
         <a href="/contact">Kapcsolat</a>
         <a href="/terms">ÁSZF</a>
         <a href="/privacy">Adatvédelem</a>
