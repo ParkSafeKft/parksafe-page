@@ -82,15 +82,12 @@ function HomePage() {
             {/* Left Content - Static Authority */}
             <div className="flex flex-col gap-8 text-center lg:text-left">
 
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1, duration: 0.8 }}
+              <h1
                 className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.05]"
               >
                 {t('home.hero.title')} <br className="hidden lg:block" />
                 <span className="text-[#34aa56]">{t('home.hero.subtitle')}</span>
-              </motion.h1>
+              </h1>
 
               <motion.p
                 initial={{ opacity: 0, y: 20 }}

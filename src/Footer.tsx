@@ -27,15 +27,16 @@ function Footer() {
             <a href="https://play.google.com/store/apps/details?id=com.parksafe.app" className="hover:text-white transition-colors">
               {t('footer.googlePlay')}
             </a>
-            <Link to="/contact" className="hover:text-white transition-colors">
+            <Link to="/contact" className="hover:text-white transition-colors" aria-label="Contact ParkSafe Support">
               {t('nav.contact')}
             </Link>
-            <Link to="/terms" className="hover:text-white transition-colors">
+            <Link to="/terms" className="hover:text-white transition-colors" aria-label="Read Terms of Service">
               {t('footer.terms')}
             </Link>
-            <Link to="/privacy" className="hover:text-white transition-colors">
+            <Link to="/privacy" className="hover:text-white transition-colors" aria-label="Read Privacy Policy">
               {t('footer.privacy')}
             </Link>
+
           </div>
         </div>
 
