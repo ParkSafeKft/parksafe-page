@@ -132,13 +132,13 @@ function HomePage() {
                   {/* Responsive WebP Sources */}
                   <source 
                     type="image/webp" 
-                    srcSet="/ios_mapview_300.webp 300w, /ios_mapview_480.webp 480w, /ios_mapview_800.webp 800w"
+                    srcSet="/ios_mapview_300.webp 300w, /ios_mapview_480.webp 480w, /ios_mapview_600.webp 600w, /ios_mapview_800.webp 800w"
                     sizes="(min-width: 1024px) 480px, (min-width: 768px) 400px, 300px"
                   />
                   {/* Responsive PNG Fallback */}
                   <img
                     src="/ios_mapview.png"
-                    srcSet="/ios_mapview_300.png 300w, /ios_mapview_480.png 480w, /ios_mapview_800.png 800w"
+                    srcSet="/ios_mapview_300.png 300w, /ios_mapview_480.png 480w, /ios_mapview_600.png 600w, /ios_mapview_800.png 800w"
                     sizes="(min-width: 1024px) 480px, (min-width: 768px) 400px, 300px"
                     alt="ParkSafe Mobile Interface - Kerékpáros Térkép"
                     width="480"

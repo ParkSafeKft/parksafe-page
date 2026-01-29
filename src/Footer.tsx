@@ -14,7 +14,10 @@ function Footer() {
           {/* Logo / Brand */}
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10">
-              <img src="/logo.png" alt="P" className="w-6 h-6 brightness-110" />
+              <picture>
+                <source srcSet="/logo_64.webp" type="image/webp" />
+                <img src="/logo_64.png" alt="P" className="w-6 h-6 brightness-110" />
+              </picture>
             </div>
             <span className="text-xl font-bold text-white tracking-tight">ParkSafe</span>
           </div>

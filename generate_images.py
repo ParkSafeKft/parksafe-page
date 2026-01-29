@@ -5,7 +5,8 @@ import sys
 def resize_images():
     # 1. IOS MAPVIEW (Responsive)
     source_file = 'public/ios_mapview.png'
-    widths = [300, 480, 800]
+    # Added 600w for 2x pixel density on mobile (300px * 2 = 600px)
+    widths = [300, 480, 600, 800]
     
     if os.path.exists(source_file):
         try:
