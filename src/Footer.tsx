@@ -5,7 +5,7 @@ function Footer() {
   const { t } = useLanguage();
 
   return (
-    <footer className="bg-slate-900 border-t border-slate-800 text-slate-400 py-12 md:py-16">
+    <footer className="bg-slate-900 border-t border-slate-800 text-slate-300 py-12 md:py-16">
       <div className="container mx-auto px-4">
 
         {/* Top Section: Logo & main links */}
