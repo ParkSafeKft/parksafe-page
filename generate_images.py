@@ -25,8 +25,7 @@ def resize_images():
 
                     # Save WebP
                     webp_output = f"{base_name}_{width}.webp"
-                    # Lower quality to 75 (standard for web) to reduce size significantly
-                    resized_img.save(webp_output, format='WEBP', quality=75)
+                    resized_img.save(webp_output, format='WEBP', quality=85)
                     print(f"Saved {webp_output}")
         except Exception as e:
             print(f"Error processing {source_file}: {e}")
@@ -66,8 +65,7 @@ def resize_images():
                 print(f"Saved {small_output_png}")
 
                 small_output_webp = 'public/logo_64.webp'
-                # Lower quality to 80 for logo (logos need slightly higher quality than photos)
-                small_img.save(small_output_webp, format='WEBP', quality=80)
+                small_img.save(small_output_webp, format='WEBP', quality=85)
                 print(f"Saved {small_output_webp}")
 
         except Exception as e:
