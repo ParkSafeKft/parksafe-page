@@ -20,7 +20,7 @@ export const translations = {
         },
         home: {
             hero: {
-                title: "Városi Kerékpározás,",
+                title: "ParkSafe: Városi Kerékpározás,",
                 subtitle: "Újragondolva.",
                 description: "Nem csak egy térkép. A ParkSafe a városi mikromobilitás operációs rendszere. Biztonságos parkolás, intelligens útvonaltervezés és közösségi erő egyetlen applikációban.",
                 downloadIOS: "Letöltés iOS-re",
