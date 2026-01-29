@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="hu">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/logo.ico" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- SEO Meta Tags -->
+    <title>ParkSafe: Kerékpáros Navigáció & Térkép</title>
+    <meta name="description" content="ParkSafe: Városi kerékpáros navigáció és térkép. Biztonságos útvonalak, tárolók és szervizek egy appban. Töltsd le ingyen és tekerj gondtalanul!" />
+    <meta name="keywords" content="kerékpár, kerékpáros útvonal, bicikli tárolás, kerékpár szerviz, városi közlekedés, kerékpáros navigáció, bike parking, ParkSafe" />
+    <link rel="canonical" href="https://parksafe.hu/" />
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "ParkSafe",
+      "url": "https://parksafe.hu/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://parksafe.hu/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "ParkSafe",
+      "url": "https://parksafe.hu",
+      "logo": "https://parksafe.hu/logo.png",
+      "sameAs": [
+        "https://www.facebook.com/parksafe",
+        "https://twitter.com/parksafe"
+      ]
+    }
+    </script>
+
+    <!-- Open Graph Meta Tags -->
+
+    <meta property="og:title" content="ParkSafe: Kerékpáros Navigáció & Térkép" />
+    <meta property="og:description" content="ParkSafe: Városi kerékpáros navigáció és térkép. Biztonságos útvonalak, tárolók és szervizek egy appban. Töltsd le ingyen és tekerj gondtalanul!" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://parksafe.hu/" />
+    <meta property="og:image" content="https://parksafe.hu/logo.png" />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ParkSafe: Kerékpáros Navigáció & Térkép" />
+    <meta name="twitter:description" content="ParkSafe: Városi kerékpáros navigáció és térkép. Biztonságos útvonalak, tárolók és szervizek egy appban." />
+    <meta name="twitter:image" content="https://parksafe.hu/logo.png" />
+    
+    <!-- Non-Blocking Fonts -->
+
+    <link rel="preconnect" href="https://grainy-gradients.vercel.app">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"></noscript>
+
+
+  </head>
+  <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PN6H8XM3"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <div id="root">
+      <!-- App Shell: Visible loading state to fix FCP -->
+      <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: white;">
+        <div style="width: 64px; height: 64px; background-color: #34aa56; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+           <img src="/logo_64.png" srcset="/logo_64.webp" alt="ParkSafe Logo" style="width: 40px; height: 40px; object-fit: contain;">
+        </div>
+        <h1 style="font-family: system-ui, -apple-system, sans-serif; font-size: 24px; font-weight: 800; color: #0f172a; margin: 0;">ParkSafe</h1>
+        <p style="font-family: system-ui, -apple-system, sans-serif; color: #64748b; margin-top: 8px;">Betöltés...</p>
+      </div>
+
+      <!-- SEO Fallback: Crawlable Links (Hidden visually but available for bots) -->
+      <nav style="display: none;">
+        <a href="/contact">Kapcsolat</a>
+        <a href="/terms">ÁSZF</a>
+        <a href="/privacy">Adatvédelem</a>
+        <a href="/login">Bejelentkezés</a>
+      </nav>
+    </div>
+
+    <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Google Tag Manager (Non-Blocking) -->
+    <script defer>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-PN6H8XM3');</script>
+    <!-- End Google Tag Manager -->
+  </body>
+
+</html>

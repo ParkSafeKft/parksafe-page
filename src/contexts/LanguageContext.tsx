@@ -1,5 +1,3 @@
-'use client';
-
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { translations, Language, TranslationKey } from '../lib/translations';
 
@@ -15,26 +13,20 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const [language, setLanguage] = useState<Language>('hu');
 
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const savedLang = localStorage.getItem('parksafe-language') as Language;
-            if (savedLang && (savedLang === 'hu' || savedLang === 'en')) {
-                // eslint-disable-next-line react-hooks/set-state-in-effect
-                setLanguage(savedLang);
-            }
+        const savedLang = localStorage.getItem('parksafe-language') as Language;
+        if (savedLang && (savedLang === 'hu' || savedLang === 'en')) {
+            setLanguage(savedLang);
         }
     }, []);
 
     const handleSetLanguage = (lang: Language) => {
         setLanguage(lang);
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('parksafe-language', lang);
-        }
+        localStorage.setItem('parksafe-language', lang);
     };
 
     const t = (key: TranslationKey): string => {
         // Nested object access for keys like "home.hero.title"
         const keys = key.split('.');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let value: any = translations[language];
 
         for (const k of keys) {

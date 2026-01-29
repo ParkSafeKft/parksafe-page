@@ -1,8 +1,6 @@
-"use client"
-
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
+import { cva, VariantProps } from "class-variance-authority"
 import { PanelLeftIcon } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -186,11 +184,18 @@ function Sidebar({
         <SheetContent
           data-sidebar="sidebar"
           data-slot="sidebar"
-          data-mobile="true"
-          className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
+          className="w-(--sidebar-width) p-0 [&>button]:hidden"
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+              backgroundColor: "#0a0a0a",
+              color: "#f1f5f9",
+              borderColor: "#0a0a0a",
+              "--sidebar": "#0a0a0a",
+              "--sidebar-foreground": "#f1f5f9",
+              "--sidebar-border": "#0a0a0a",
+              "--sidebar-accent": "#000000ff",
+              "--sidebar-accent-foreground": "#f1f5f9"
             } as React.CSSProperties
           }
           side={side}
@@ -199,7 +204,20 @@ function Sidebar({
             <SheetTitle>Sidebar</SheetTitle>
             <SheetDescription>Displays the mobile sidebar.</SheetDescription>
           </SheetHeader>
-          <div className="flex h-full w-full flex-col">{children}</div>
+          <div 
+            className="flex h-full w-full flex-col" 
+            style={{
+              backgroundColor: "#1e293b",
+              color: "#f1f5f9",
+              "--sidebar": "#1e293b",
+              "--sidebar-foreground": "#f1f5f9",
+              "--sidebar-border": "#334155",
+              "--sidebar-accent": "#22c55e",
+              "--sidebar-accent-foreground": "#f1f5f9"
+            } as React.CSSProperties}
+          >
+            {children}
+          </div>
         </SheetContent>
       </Sheet>
     )
@@ -569,7 +587,7 @@ function SidebarMenuAction({
         "peer-data-[size=lg]/menu-button:top-2.5",
         "group-data-[collapsible=icon]:hidden",
         showOnHover &&
-        "peer-data-[active=true]/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0",
+          "peer-data-[active=true]/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0",
         className
       )}
       {...props}
@@ -607,10 +625,8 @@ function SidebarMenuSkeleton({
   showIcon?: boolean
 }) {
   // Random width between 50 to 90%.
-  const [width, setWidth] = React.useState("50%")
-
-  React.useEffect(() => {
-    setWidth(`${Math.floor(Math.random() * 40) + 50}%`)
+  const width = React.useMemo(() => {
+    return `${Math.floor(Math.random() * 40) + 50}%`
   }, [])
 
   return (
