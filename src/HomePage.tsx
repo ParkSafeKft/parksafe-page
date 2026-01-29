@@ -177,7 +177,7 @@ function HomePage() {
               <div className="relative z-10">
                 <h3 className="text-4xl md:text-5xl font-extrabold text-zinc-900 mb-4 tracking-tight">
                   {t('home.grid.mainStat')}
-                  <span className="block text-2xl md:text-3xl font-bold text-zinc-400 mt-2">{t('home.grid.mainStatLabel')}</span>
+                  <span className="block text-2xl md:text-3xl font-bold text-zinc-500 mt-2">{t('home.grid.mainStatLabel')}</span>
                 </h3>
                 <p className="text-zinc-500 max-w-md text-lg leading-relaxed mt-6">
                   {t('home.grid.mainDesc')}
@@ -186,12 +186,15 @@ function HomePage() {
 
               {/* Abstract UI representation */}
               <div className="absolute bottom-0 right-0 w-[60%] h-[60%] bg-zinc-50 rounded-tl-[2rem] border-l border-t border-zinc-100 shadow-2xl translate-y-8 translate-x-8 transition-transform group-hover:translate-x-6 group-hover:translate-y-6 overflow-hidden">
-                <img 
-                  src="/ios_mapview_300.png" 
-                  alt="" 
-                  className="w-full h-full object-cover object-top opacity-80 grayscale-[20%]"
-                  loading="lazy" 
-                />
+                <picture>
+                  <source type="image/webp" srcSet="/ios_mapview_300.webp" />
+                  <img 
+                    src="/ios_mapview_300.png" 
+                    alt="" 
+                    className="w-full h-full object-cover object-top opacity-80 grayscale-[20%]"
+                    loading="lazy" 
+                  />
+                </picture>
               </div>
             </div>
 

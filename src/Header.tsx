@@ -30,7 +30,10 @@ function Header() {
         <Link to="/" className="flex items-center gap-2 group">
           <div className="relative w-8 h-8 rounded-xl bg-[#34aa56] flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
             <div className="absolute inset-0 bg-gradient-to-tr from-black/10 to-transparent" />
-            <img src="/logo.png" alt="P" className="w-5 h-5 object-contain" />
+            <picture>
+              <source srcSet="/logo_64.webp" type="image/webp" />
+              <img src="/logo_64.png" alt="P" className="w-5 h-5 object-contain" />
+            </picture>
           </div>
           <span className="font-bold text-lg tracking-tight text-zinc-900">ParkSafe</span>
         </Link>
@@ -49,9 +52,10 @@ function Header() {
         <div className="flex items-center gap-3">
           <LanguageToggle />
 
-          {!loading && (
-            <>
-              {user ? (
+          {/* Auth Button with fixed width container to prevent CLS */}
+          <div className="min-w-[100px] flex justify-end">
+            {!loading ? (
+              user ? (
                 <Link
                   to="/profile"
                   className="px-4 py-2 rounded-full bg-zinc-100 text-sm font-semibold text-zinc-900 hover:bg-zinc-200 transition-colors"
@@ -65,9 +69,12 @@ function Header() {
                 >
                   {t('nav.login')}
                 </Link>
-              )}
-            </>
-          )}
+              )
+            ) : (
+               /* Skeleton / Placeholder to reserve space */
+              <div className="w-24 h-10 rounded-full bg-slate-100 animate-pulse" />
+            )}
+          </div>
         </div>
       </div>
     </header>

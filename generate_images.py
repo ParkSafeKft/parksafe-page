@@ -38,21 +38,34 @@ def resize_images():
             with Image.open(logo_file) as img:
                 print(f"Opened {logo_file} ({img.size[0]}x{img.size[1]})")
                 
-                # Only resize if it's huge (e.g., > 512px width)
+                # --- A. Create Main Optimized Logo (Max 512px) ---
                 if img.width > 512:
                     print("Logo is large, resizing to 512px width...")
                     aspect_ratio = img.height / img.width
                     new_width = 512
                     new_height = int(new_width * aspect_ratio)
                     resized_img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-                    
-                    # Overwrite with optimized version
                     resized_img.save(logo_file, format='PNG', optimize=True)
                     print(f"Optimized {logo_file}")
                 else:
                     print("Logo is already small enough. Optimizing only...")
                     img.save(logo_file, format='PNG', optimize=True)
                     print(f"Optimized {logo_file}")
+
+                # --- B. Create Small Logo for Header (64px) ---
+                # We use 64px for 40px display to look sharp on Retina screens (approx 1.5x - 2x)
+                small_width = 64
+                aspect_ratio = img.height / img.width
+                small_height = int(small_width * aspect_ratio)
+                small_img = img.resize((small_width, small_height), Image.Resampling.LANCZOS)
+                
+                small_output_png = 'public/logo_64.png'
+                small_img.save(small_output_png, format='PNG', optimize=True)
+                print(f"Saved {small_output_png}")
+
+                small_output_webp = 'public/logo_64.webp'
+                small_img.save(small_output_webp, format='WEBP', quality=85)
+                print(f"Saved {small_output_webp}")
 
         except Exception as e:
             print(f"Error processing {logo_file}: {e}")
