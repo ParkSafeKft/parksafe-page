@@ -63,20 +63,7 @@
     <link rel="preload" href="https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"></noscript>
-    
-    <!-- Critical CSS to prevent FOUC and Render Blocking -->
-    <style>
-      /* Base resets and critical app shell styles */
-      *,:after,:before,::backdrop{box-sizing:border-box;border:0 solid;margin:0;padding:0}html,:host{-webkit-text-size-adjust:100%;tab-size:4;line-height:1.5;font-family:Inter,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;-webkit-tap-highlight-color:transparent}body{background-color:#fff;color:#0f172a;font-family:Inter,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;margin:0;line-height:inherit}
-      
-      /* App Shell Specific Styles */
-      #root { display: flex; flex-direction: column; min-height: 100vh; }
-      .app-shell-container { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: white; }
-      .app-shell-logo-bg { width: 64px; height: 64px; background-color: #34aa56; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
-      .app-shell-logo-img { width: 40px; height: 40px; object-fit: contain; }
-      .app-shell-title { font-family: system-ui, -apple-system, sans-serif; font-size: 24px; font-weight: 800; color: #0f172a; margin: 0; }
-      .app-shell-subtitle { font-family: system-ui, -apple-system, sans-serif; color: #64748b; margin-top: 8px; }
-    </style>
+
 
   </head>
   <body>
@@ -86,13 +73,10 @@
     <!-- End Google Tag Manager (noscript) -->
     <div id="root">
       <!-- App Shell: Visible loading state to fix FCP -->
-      <div class="app-shell-container">
-        <div class="app-shell-logo-bg">
-           <img class="app-shell-logo-img" src="/logo_64.png" srcset="/logo_64.webp" alt="ParkSafe Logo">
+      <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: white;">
+        <div style="width: 64px; height: 64px; background-color: #34aa56; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+           <img src="/logo_64.png" srcset="/logo_64.webp" alt="ParkSafe Logo" style="width: 40px; height: 40px; object-fit: contain;">
         </div>
-        <h1 class="app-shell-title">ParkSafe</h1>
-        <p class="app-shell-subtitle">Betöltés...</p>
-      </div>
         <h1 style="font-family: system-ui, -apple-system, sans-serif; font-size: 24px; font-weight: 800; color: #0f172a; margin: 0;">ParkSafe</h1>
         <p style="font-family: system-ui, -apple-system, sans-serif; color: #64748b; margin-top: 8px;">Betöltés...</p>
       </div>
