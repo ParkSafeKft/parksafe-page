@@ -1,5 +1,3 @@
-"use client";
-
 import { Globe } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 
@@ -13,7 +11,7 @@ export function LanguageToggle() {
     return (
         <button
             onClick={toggleLanguage}
-            className="p-2 rounded-full hover:bg-slate-100 transition-colors flex items-center gap-2 group cursor-pointer"
+            className="p-2 rounded-full hover:bg-slate-100 transition-colors flex items-center gap-2 group"
             aria-label="Toggle language"
         >
             <span className="text-lg leading-none" role="img" aria-label={language === 'hu' ? 'Magyar' : 'English'}>
@@ -25,3 +23,4 @@ export function LanguageToggle() {
         </button>
     );
 }
+
