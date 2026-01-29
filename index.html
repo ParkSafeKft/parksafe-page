@@ -12,6 +12,34 @@
     <meta name="keywords" content="kerékpár, kerékpáros útvonal, bicikli tárolás, kerékpár szerviz, városi közlekedés, kerékpáros navigáció, bike parking, ParkSafe" />
     <link rel="canonical" href="https://parksafe.hu/" />
 
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "ParkSafe",
+      "url": "https://parksafe.hu/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://parksafe.hu/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "ParkSafe",
+      "url": "https://parksafe.hu",
+      "logo": "https://parksafe.hu/logo.png",
+      "sameAs": [
+        "https://www.facebook.com/parksafe",
+        "https://twitter.com/parksafe"
+      ]
+    }
+    </script>
+
     <!-- Open Graph Meta Tags -->
 
     <meta property="og:title" content="ParkSafe: Kerékpáros Navigáció & Térkép" />
@@ -25,12 +53,9 @@
     <meta name="twitter:title" content="ParkSafe: Kerékpáros Navigáció & Térkép" />
     <meta name="twitter:description" content="ParkSafe: Városi kerékpáros navigáció és térkép. Biztonságos útvonalak, tárolók és szervizek egy appban." />
     <meta name="twitter:image" content="https://parksafe.hu/logo.png" />
-
-    
-    <!-- Preload Critical Assets -->
-    <link rel="preload" as="image" href="/ios_mapview.png">
     
     <!-- Non-Blocking Fonts -->
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
