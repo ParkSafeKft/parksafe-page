@@ -53,26 +53,26 @@ function Header() {
           <LanguageToggle />
 
           {/* Auth Button with fixed width container to prevent CLS */}
-          <div className="w-[100px] flex justify-end">
+          <div className="min-w-[100px] flex justify-end">
             {!loading ? (
               user ? (
                 <Link
                   to="/profile"
-                  className="px-4 py-2 rounded-full bg-zinc-100 text-sm font-semibold text-zinc-900 hover:bg-zinc-200 transition-colors whitespace-nowrap"
+                  className="px-4 py-2 rounded-full bg-zinc-100 text-sm font-semibold text-zinc-900 hover:bg-zinc-200 transition-colors"
                 >
                   {t('nav.profile')}
                 </Link>
               ) : (
                 <Link
                   to="/login"
-                  className="px-5 py-2.5 rounded-full bg-zinc-900 text-sm font-semibold text-white shadow-lg shadow-zinc-900/10 hover:bg-zinc-800 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap"
+                  className="px-5 py-2.5 rounded-full bg-zinc-900 text-sm font-semibold text-white shadow-lg shadow-zinc-900/10 hover:bg-zinc-800 hover:scale-[1.02] active:scale-[0.98] transition-all"
                 >
                   {t('nav.login')}
                 </Link>
               )
             ) : (
                /* Skeleton / Placeholder to reserve space */
-              <div className="w-24 h-10 rounded-full bg-slate-100/50 animate-pulse" />
+              <div className="w-24 h-10 rounded-full bg-slate-100 animate-pulse" />
             )}
           </div>
         </div>
