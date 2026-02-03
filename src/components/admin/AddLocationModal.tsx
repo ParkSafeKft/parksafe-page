@@ -192,9 +192,6 @@ export default function AddLocationModal({ isOpen, onClose, locationType, onSucc
                 <DialogHeader className="px-6 py-4 border-b border-border bg-card">
                     <DialogTitle className="text-xl font-bold flex items-center justify-between text-foreground">
                         {getTitle()}
-                        <Button variant="ghost" size="icon" onClick={onClose} disabled={isLoading} className="h-8 w-8 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground">
-                            <X className="h-4 w-4" />
-                        </Button>
                     </DialogTitle>
                 </DialogHeader>
 

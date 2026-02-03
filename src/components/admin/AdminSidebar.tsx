@@ -42,19 +42,19 @@ export default function AdminSidebar({
     onHomeConfig,
 }: AdminSidebarProps) {
     return (
-        <Sidebar className="bg-sidebar border-r border-sidebar-border" collapsible="icon">
+        <Sidebar className="bg-sidebar border-r border-sidebar-border overflow-x-hidden" collapsible="icon">
             <SidebarHeader className="p-4 border-b border-sidebar-border">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <div className="flex items-center gap-2 px-2 py-1">
-                            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                        <div className="flex items-center gap-3 px-1 py-1 data-[state=open]:px-2">
+                            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
                                 <Shield className="h-5 w-5 text-primary" />
                             </div>
-                            <div className="flex flex-col gap-0.5 group-data-[collapsible=icon]:hidden">
-                                <span className="font-bold text-foreground tracking-tight">
+                            <div className="flex flex-col gap-0.5 overflow-hidden transition-all group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0">
+                                <span className="font-bold text-foreground tracking-tight truncate">
                                     Admin Panel
                                 </span>
-                                <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
+                                <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium truncate">
                                     Management
                                 </span>
                             </div>
@@ -63,9 +63,9 @@ export default function AdminSidebar({
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent className="p-2">
+            <SidebarContent className="p-2 overflow-x-hidden">
                 <SidebarGroup>
-                    <SidebarGroupLabel>Adatkezelés</SidebarGroupLabel>
+                    <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">Adatkezelés</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             <SidebarMenuItem>
@@ -73,7 +73,7 @@ export default function AdminSidebar({
                                     isActive={activeTab === 'users'}
                                     onClick={() => setActiveTab('users')}
                                     tooltip="Felhasználók"
-                                    className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary"
+                                    className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary transition-colors"
                                 >
                                     <Users className="h-4 w-4" />
                                     <span>Felhasználók</span>
@@ -84,7 +84,7 @@ export default function AdminSidebar({
                                     isActive={activeTab === 'parking'}
                                     onClick={() => setActiveTab('parking')}
                                     tooltip="Bicikli Parkolók"
-                                    className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary"
+                                    className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary transition-colors"
                                 >
                                     <MapPin className="h-4 w-4" />
                                     <span>Bicikli Parkolók</span>
@@ -95,7 +95,7 @@ export default function AdminSidebar({
                                     isActive={activeTab === 'services'}
                                     onClick={() => setActiveTab('services')}
                                     tooltip="Szervizek & Boltok"
-                                    className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary"
+                                    className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary transition-colors"
                                 >
                                     <Building className="h-4 w-4" />
                                     <span>Szervizek & Boltok</span>
@@ -106,7 +106,7 @@ export default function AdminSidebar({
                                     isActive={activeTab === 'repair'}
                                     onClick={() => setActiveTab('repair')}
                                     tooltip="Javító Állomások"
-                                    className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary"
+                                    className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary transition-colors"
                                 >
                                     <Wrench className="h-4 w-4" />
                                     <span>Javító Állomások</span>
@@ -116,23 +116,24 @@ export default function AdminSidebar({
                     </SidebarGroupContent>
                 </SidebarGroup>
 
-                <SidebarSeparator className="my-2" />
+                <SidebarSeparator className="my-2 mx-2 group-data-[collapsible=icon]:hidden" />
 
                 <SidebarGroup>
-                    <SidebarGroupLabel>Egyéb</SidebarGroupLabel>
+                    <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">Egyéb</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     tooltip="Vissza a főoldalra"
                                     onClick={onHomeConfig}
+                                    className="hover:bg-muted transition-colors"
                                 >
                                     <Home className="h-4 w-4" />
                                     <span>Vissza a főoldalra</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
-                                <SidebarMenuButton tooltip="Beállítások">
+                                <SidebarMenuButton tooltip="Beállítások" className="hover:bg-muted transition-colors">
                                     <Settings className="h-4 w-4" />
                                     <span>Beállítások</span>
                                 </SidebarMenuButton>
@@ -142,10 +143,10 @@ export default function AdminSidebar({
                 </SidebarGroup>
             </SidebarContent>
 
-            <SidebarFooter className="p-4 border-t border-sidebar-border bg-sidebar-accent/5">
+            <SidebarFooter className="p-4 border-t border-sidebar-border bg-sidebar-accent/5 overflow-x-hidden">
                 <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center">
-                        <Avatar className="h-9 w-9 ring-2 ring-primary/20">
+                    <div className="flex items-center gap-3 overflow-hidden group-data-[collapsible=icon]:justify-center">
+                        <Avatar className="h-9 w-9 ring-2 ring-primary/20 flex-shrink-0">
                             <AvatarImage
                                 src={profile?.avatar_url}
                                 alt={profile?.username || 'Admin'}
@@ -156,7 +157,7 @@ export default function AdminSidebar({
                                     .toUpperCase()}
                             </AvatarFallback>
                         </Avatar>
-                        <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
+                        <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden overflow-hidden">
                             <p className="text-sm font-medium text-foreground truncate">
                                 {profile?.username || 'Admin'}
                             </p>
@@ -171,14 +172,14 @@ export default function AdminSidebar({
                         className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 border-border/50 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
                         onClick={onLogout}
                     >
-                        <LogOut className="h-4 w-4 mr-2 group-data-[collapsible=icon]:mr-0" />
-                        <span className="group-data-[collapsible=icon]:hidden">
+                        <LogOut className="h-4 w-4 mr-2 group-data-[collapsible=icon]:mr-0 flex-shrink-0" />
+                        <span className="group-data-[collapsible=icon]:hidden truncate">
                             Kijelentkezés
                         </span>
                     </Button>
                 </div>
             </SidebarFooter>
-            <SidebarRail />
+            {/* Removed SidebarRail to prevent horizontal scroll issues */}
         </Sidebar>
     );
 }
