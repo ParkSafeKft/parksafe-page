@@ -103,16 +103,16 @@ export default function AdminPage() {
                     countQuery = supabase.from('profiles').select('*', { count: 'exact', head: true });
                     break;
                 case 'parking':
-                    query = supabase.from('parking_spots').select('*');
-                    countQuery = supabase.from('parking_spots').select('*', { count: 'exact', head: true });
+                    query = supabase.from('parkingSpots').select('*');
+                    countQuery = supabase.from('parkingSpots').select('*', { count: 'exact', head: true });
                     break;
                 case 'services':
-                    query = supabase.from('bicycle_services').select('*');
-                    countQuery = supabase.from('bicycle_services').select('*', { count: 'exact', head: true });
+                    query = supabase.from('bicycleService').select('*');
+                    countQuery = supabase.from('bicycleService').select('*', { count: 'exact', head: true });
                     break;
                 case 'repair':
-                    query = supabase.from('repair_stations').select('*');
-                    countQuery = supabase.from('repair_stations').select('*', { count: 'exact', head: true });
+                    query = supabase.from('repairStation').select('*');
+                    countQuery = supabase.from('repairStation').select('*', { count: 'exact', head: true });
                     break;
                 default:
                     return;
@@ -201,8 +201,8 @@ export default function AdminPage() {
 
     const handleToggleAvailability = async (id: string, currentStatus: boolean) => {
         setToggleLoading(id);
-        const table = activeTab === 'parking' ? 'parking_spots' :
-            activeTab === 'services' ? 'bicycle_services' : 'repair_stations';
+        const table = activeTab === 'parking' ? 'parkingSpots' :
+            activeTab === 'services' ? 'bicycleService' : 'repairStation';
 
         try {
             const { error } = await supabase
@@ -224,8 +224,8 @@ export default function AdminPage() {
 
     const handleDeleteClick = (id: string) => {
         const table = activeTab === 'users' ? 'profiles' :
-            activeTab === 'parking' ? 'parking_spots' :
-                activeTab === 'services' ? 'bicycle_services' : 'repair_stations';
+            activeTab === 'parking' ? 'parkingSpots' :
+                activeTab === 'services' ? 'bicycleService' : 'repairStation';
         setDeleteModal({ show: true, table, id });
     };
 
