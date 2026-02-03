@@ -2,7 +2,19 @@ import {
     MoreHorizontal,
     MapPin,
     Wrench,
+    Eye,
+    Edit,
+    Trash2
 } from 'lucide-react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 interface RepairTableProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,7 +44,7 @@ export default function RepairTable({
     // sortConfig,
     onRowClick,
     onEdit,
-    // onDelete,
+    onDelete,
     // onToggleAvailability,
     // toggleLoading,
     searchTerm,
@@ -112,7 +124,7 @@ export default function RepairTable({
 
     return (
         <div className="flex flex-col gap-4">
-            <div className="overflow-x-auto rounded-xl border border-white/5 bg-[#111111]">
+            <div className="overflow-x-auto rounded-xl border border-white/5 bg-[#111111] pb-32">
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="border-b border-white/5 bg-white/[0.02]">
@@ -132,8 +144,9 @@ export default function RepairTable({
                                 <tr
                                     key={station.id}
                                     className="hover:bg-white/[0.02] transition-colors group cursor-pointer"
+                                    onClick={() => onRowClick(station)}
                                 >
-                                    <td className="p-4" onClick={() => onRowClick(station)}>
+                                    <td className="p-4">
                                         <div className="flex flex-col">
                                             <span className="text-sm font-semibold text-white">{station.name}</span>
                                             {coords && (
@@ -179,15 +192,29 @@ export default function RepairTable({
                                         </span>
                                     </td>
                                     <td className="p-4 text-right">
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onEdit(station);
-                                            }}
-                                            className="p-2 rounded-lg text-zinc-500 hover:text-white hover:bg-white/10 transition-all"
-                                        >
-                                            <MoreHorizontal className="w-5 h-5" />
-                                        </button>
+                                        <div onClick={(e) => e.stopPropagation()}>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" className="h-8 w-8 p-0 text-zinc-500 hover:text-white hover:bg-white/10">
+                                                        <span className="sr-only">Open menu</span>
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="bg-[#111111] border-white/10 text-zinc-400">
+                                                    <DropdownMenuLabel className="text-white">Műveletek</DropdownMenuLabel>
+                                                    <DropdownMenuItem onClick={() => onRowClick(station)} className="hover:bg-white/5 hover:text-white cursor-pointer focus:bg-white/5 focus:text-white">
+                                                        <Eye className="mr-2 h-4 w-4" /> Megtekintés
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => onEdit(station)} className="hover:bg-white/5 hover:text-white cursor-pointer focus:bg-white/5 focus:text-white">
+                                                        <Edit className="mr-2 h-4 w-4" /> Szerkesztés
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator className="bg-white/10" />
+                                                    <DropdownMenuItem onClick={() => onDelete(station.id)} className="text-red-500 hover:bg-red-500/10 hover:text-red-400 cursor-pointer focus:bg-red-500/10 focus:text-red-400">
+                                                        <Trash2 className="mr-2 h-4 w-4" /> Törlés
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
                                     </td>
                                 </tr>
                             );

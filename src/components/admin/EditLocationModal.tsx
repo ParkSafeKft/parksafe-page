@@ -255,9 +255,6 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                             </h3>
                             <p className="text-xs text-zinc-500 mt-1">Módosítsd az adatokat és mentsd el a változtatásokat. A *-gal jelölt mezők kötelezőek.</p>
                         </div>
-                        <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-lg text-zinc-500 transition-colors">
-                            <XCircle className="w-6 h-6" />
-                        </button>
                     </div>
 
                     {/* Scrollable Form */}
