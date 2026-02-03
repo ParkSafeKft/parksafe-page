@@ -22,12 +22,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
+    const fetchUserProfile = async (session: any) => {
+        if (!session?.user) {
+            setUser(null);
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+
+            if (profile) {
+                // Merge auth user with profile data.
+                // Profile data takes precedence for fields like 'role'.
+                setUser({
+                    ...session.user,
+                    ...profile,
+                } as User);
+            } else {
+                setUser(session.user as User);
+            }
+        } catch (error) {
+            console.error('Error fetching user profile:', error);
+            setUser(session.user as User);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         // Get initial session
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         supabase.auth.getSession().then(({ data: { session } }: any) => {
-            setUser(session?.user as User ?? null);
-            setLoading(false);
+            fetchUserProfile(session);
         });
 
         // Listen for auth changes
@@ -35,8 +66,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             data: { subscription },
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
-            setUser(session?.user as User ?? null);
-            setLoading(false);
+            fetchUserProfile(session);
         });
 
         return () => subscription.unsubscribe();
