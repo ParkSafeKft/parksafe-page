@@ -19,6 +19,8 @@ interface UsersTableProps {
     currentPage: number;
     totalPages: number;
     onPageChange: (page: number) => void;
+    pageSize: number;
+    onPageSizeChange: (size: number) => void;
 }
 
 export default function UsersTable({
@@ -34,6 +36,8 @@ export default function UsersTable({
     currentPage,
     totalPages,
     onPageChange,
+    pageSize,
+    onPageSizeChange,
 }: UsersTableProps) {
     if (users.length === 0) {
         return (
@@ -126,8 +130,8 @@ export default function UsersTable({
                             onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                             disabled={currentPage === 1}
                             className={`px-4 py-2 text-xs font-medium border rounded-lg transition-colors ${currentPage === 1
-                                    ? 'text-zinc-600 bg-zinc-900 border-zinc-800 opacity-50 cursor-not-allowed'
-                                    : 'text-zinc-400 bg-zinc-900 border-zinc-800 hover:bg-zinc-800 hover:text-white'
+                                ? 'text-zinc-600 bg-zinc-900 border-zinc-800 opacity-50 cursor-not-allowed'
+                                : 'text-zinc-400 bg-zinc-900 border-zinc-800 hover:bg-zinc-800 hover:text-white'
                                 }`}
                         >
                             Előző
@@ -136,8 +140,8 @@ export default function UsersTable({
                             onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
                             disabled={currentPage === totalPages}
                             className={`px-4 py-2 text-xs font-medium border rounded-lg transition-colors ${currentPage === totalPages
-                                    ? 'text-zinc-600 bg-zinc-900 border-zinc-800 opacity-50 cursor-not-allowed'
-                                    : 'text-white bg-zinc-800 border-zinc-700 hover:bg-zinc-700'
+                                ? 'text-zinc-600 bg-zinc-900 border-zinc-800 opacity-50 cursor-not-allowed'
+                                : 'text-white bg-zinc-800 border-zinc-700 hover:bg-zinc-700'
                                 }`}
                         >
                             Következő
