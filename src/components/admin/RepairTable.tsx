@@ -32,6 +32,9 @@ interface RepairTableProps {
     onToggleAvailability: (id: string, currentStatus: boolean) => void;
     toggleLoading: string | null;
     searchTerm?: string;
+    currentPage: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
     selectAll: boolean;
 }
 
@@ -49,6 +52,9 @@ export default function RepairTable({
     // toggleLoading,
     searchTerm,
     // selectAll,
+    currentPage,
+    totalPages,
+    onPageChange,
 }: RepairTableProps) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const parseWKBPoint = (wkb: any) => {
@@ -217,18 +223,39 @@ export default function RepairTable({
                                         </div>
                                     </td>
                                 </tr>
-                            );
+                            )
                         })}
                     </tbody>
                 </table>
             </div>
-            <div className="flex items-center justify-between px-2">
-                <p className="text-xs text-zinc-500">1 / 1 oldal</p>
-                <div className="flex gap-2">
-                    <button className="px-4 py-2 text-xs font-medium text-zinc-400 bg-zinc-900 border border-zinc-800 rounded-lg opacity-50 cursor-not-allowed">Előző</button>
-                    <button className="px-4 py-2 text-xs font-medium text-white bg-zinc-800 border border-zinc-700 rounded-lg hover:bg-zinc-700 transition-colors">Következő</button>
+
+            {totalPages > 1 && (
+                <div className="flex items-center justify-between px-2">
+                    <p className="text-xs text-zinc-500">{currentPage} / {totalPages} oldal</p>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+                            disabled={currentPage === 1}
+                            className={`px-4 py-2 text-xs font-medium border rounded-lg transition-colors ${currentPage === 1
+                                    ? 'text-zinc-600 bg-zinc-900 border-zinc-800 opacity-50 cursor-not-allowed'
+                                    : 'text-zinc-400 bg-zinc-900 border-zinc-800 hover:bg-zinc-800 hover:text-white'
+                                }`}
+                        >
+                            Előző
+                        </button>
+                        <button
+                            onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+                            disabled={currentPage === totalPages}
+                            className={`px-4 py-2 text-xs font-medium border rounded-lg transition-colors ${currentPage === totalPages
+                                    ? 'text-zinc-600 bg-zinc-900 border-zinc-800 opacity-50 cursor-not-allowed'
+                                    : 'text-white bg-zinc-800 border-zinc-700 hover:bg-zinc-700'
+                                }`}
+                        >
+                            Következő
+                        </button>
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }

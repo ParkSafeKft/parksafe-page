@@ -16,7 +16,9 @@ interface UsersTableProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onRowClick: (item: any) => void;
     searchTerm?: string;
-    selectAll: boolean;
+    currentPage: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
 }
 
 export default function UsersTable({
@@ -29,6 +31,9 @@ export default function UsersTable({
     onRowClick,
     searchTerm,
     // selectAll,
+    currentPage,
+    totalPages,
+    onPageChange,
 }: UsersTableProps) {
     if (users.length === 0) {
         return (
@@ -82,8 +87,8 @@ export default function UsersTable({
                                 </td>
                                 <td className="p-4">
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${user.role === 'admin'
-                                            ? 'bg-green-500/10 text-green-500 border-green-500/20'
-                                            : 'bg-zinc-800 text-zinc-300 border-zinc-700'
+                                        ? 'bg-green-500/10 text-green-500 border-green-500/20'
+                                        : 'bg-zinc-800 text-zinc-300 border-zinc-700'
                                         }`}>
                                         {user.role}
                                     </span>
@@ -112,13 +117,34 @@ export default function UsersTable({
                     </tbody>
                 </table>
             </div>
-            <div className="flex items-center justify-between px-2">
-                <p className="text-xs text-zinc-500">1 / 1 oldal</p>
-                <div className="flex gap-2">
-                    <button className="px-4 py-2 text-xs font-medium text-zinc-400 bg-zinc-900 border border-zinc-800 rounded-lg opacity-50 cursor-not-allowed">Előző</button>
-                    <button className="px-4 py-2 text-xs font-medium text-white bg-zinc-800 border border-zinc-700 rounded-lg hover:bg-zinc-700 transition-colors">Következő</button>
+
+            {totalPages > 1 && (
+                <div className="flex items-center justify-between px-2">
+                    <p className="text-xs text-zinc-500">{currentPage} / {totalPages} oldal</p>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+                            disabled={currentPage === 1}
+                            className={`px-4 py-2 text-xs font-medium border rounded-lg transition-colors ${currentPage === 1
+                                    ? 'text-zinc-600 bg-zinc-900 border-zinc-800 opacity-50 cursor-not-allowed'
+                                    : 'text-zinc-400 bg-zinc-900 border-zinc-800 hover:bg-zinc-800 hover:text-white'
+                                }`}
+                        >
+                            Előző
+                        </button>
+                        <button
+                            onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+                            disabled={currentPage === totalPages}
+                            className={`px-4 py-2 text-xs font-medium border rounded-lg transition-colors ${currentPage === totalPages
+                                    ? 'text-zinc-600 bg-zinc-900 border-zinc-800 opacity-50 cursor-not-allowed'
+                                    : 'text-white bg-zinc-800 border-zinc-700 hover:bg-zinc-700'
+                                }`}
+                        >
+                            Következő
+                        </button>
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }

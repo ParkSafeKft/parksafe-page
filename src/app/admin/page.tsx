@@ -407,7 +407,9 @@ export default function AdminPage() {
                                             sortConfig={sortConfig}
                                             onRowClick={(item) => setDetailModal({ show: true, item, type: 'user' })}
                                             searchTerm={searchTerm}
-                                            selectAll={selectAll}
+                                            currentPage={currentPage}
+                                            totalPages={totalPages}
+                                            onPageChange={setCurrentPage}
                                         />
                                     )}
                                     {activeTab === 'parking' && (
@@ -424,7 +426,9 @@ export default function AdminPage() {
                                             onToggleAvailability={handleToggleAvailability}
                                             toggleLoading={toggleLoading}
                                             searchTerm={searchTerm}
-                                            selectAll={selectAll}
+                                            currentPage={currentPage}
+                                            totalPages={totalPages}
+                                            onPageChange={setCurrentPage}
                                         />
                                     )}
                                     {activeTab === 'services' && (
@@ -442,6 +446,9 @@ export default function AdminPage() {
                                             toggleLoading={toggleLoading}
                                             searchTerm={searchTerm}
                                             selectAll={selectAll}
+                                            currentPage={currentPage}
+                                            totalPages={totalPages}
+                                            onPageChange={setCurrentPage}
                                         />
                                     )}
                                     {activeTab === 'repair' && (
@@ -459,36 +466,10 @@ export default function AdminPage() {
                                             toggleLoading={toggleLoading}
                                             searchTerm={searchTerm}
                                             selectAll={selectAll}
+                                            currentPage={currentPage}
+                                            totalPages={totalPages}
+                                            onPageChange={setCurrentPage}
                                         />
-                                    )}
-
-                                    {/* Pagination */}
-                                    {totalCount > pageSize && (
-                                        <div className="border-t border-border p-4 bg-muted/20">
-                                            <div className="flex items-center justify-between">
-                                                <div className="text-sm text-muted-foreground">
-                                                    {currentPage} / {totalPages} oldal
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        disabled={currentPage === 1}
-                                                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                                    >
-                                                        Előző
-                                                    </Button>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        disabled={currentPage === totalPages}
-                                                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                                    >
-                                                        Következő
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        </div>
                                     )}
                                 </CardContent>
                             </Card>
