@@ -226,19 +226,19 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && !isLoading && onClose()}>
-            <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-hidden p-0 gap-0">
-                <DialogHeader className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
-                    <DialogTitle className="text-xl font-bold flex items-center justify-between">
+            <DialogContent className="admin-dark sm:max-w-3xl max-h-[90vh] overflow-hidden p-0 gap-0 border-border bg-background text-foreground">
+                <DialogHeader className="px-6 py-4 border-b border-border bg-card">
+                    <DialogTitle className="text-xl font-bold flex items-center justify-between text-foreground">
                         {getTitle()}
-                        <Button variant="ghost" size="icon" onClick={onClose} disabled={isLoading} className="h-8 w-8 rounded-full">
+                        <Button variant="ghost" size="icon" onClick={onClose} disabled={isLoading} className="h-8 w-8 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground">
                             <X className="h-4 w-4" />
                         </Button>
                     </DialogTitle>
                 </DialogHeader>
 
-                <ScrollArea className="max-h-[calc(90vh-130px)] bg-zinc-50 dark:bg-zinc-900/50">
+                <ScrollArea className="max-h-[calc(90vh-130px)] bg-background">
                     <div className="px-6 py-6">
-                        <p className="text-sm text-zinc-500 mb-6">
+                        <p className="text-sm text-muted-foreground mb-6">
                             Módosítsd az adatokat és mentsd el a változtatásokat. A *-gal jelölt mezők kötelezők.
                         </p>
 
@@ -255,7 +255,7 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                                         placeholder="Helyszín neve"
                                         required
                                         disabled={isLoading}
-                                        className="bg-white dark:bg-zinc-950"
+                                        className="bg-input/50 border-input focus:ring-primary"
                                     />
                                 </div>
 
@@ -269,7 +269,7 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                                         placeholder="Város neve"
                                         required
                                         disabled={isLoading}
-                                        className="bg-white dark:bg-zinc-950"
+                                        className="bg-input/50 border-input focus:ring-primary"
                                     />
                                 </div>
                             </div>
@@ -284,13 +284,13 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                                     placeholder="Rövid leírás a helyszínről"
                                     rows={3}
                                     disabled={isLoading}
-                                    className="bg-white dark:bg-zinc-950 resize-none"
+                                    className="bg-input/50 border-input focus:ring-primary resize-none"
                                 />
                             </div>
 
                             {/* Coordinates */}
-                            <div className="space-y-4 p-4 rounded-xl bg-zinc-100/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
-                                <h3 className="text-sm font-semibold flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
+                            <div className="space-y-4 p-4 rounded-xl bg-muted/30 border border-border">
+                                <h3 className="text-sm font-semibold flex items-center gap-2 text-foreground">
                                     <MapPin className="h-4 w-4" />
                                     Koordináták
                                 </h3>
@@ -307,7 +307,7 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                                             step="0.000001"
                                             required
                                             disabled={isLoading}
-                                            className="bg-white dark:bg-zinc-950"
+                                            className="bg-input/50 border-input focus:ring-primary"
                                         />
                                     </div>
 
@@ -323,19 +323,19 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                                             step="0.000001"
                                             required
                                             disabled={isLoading}
-                                            className="bg-white dark:bg-zinc-950"
+                                            className="bg-input/50 border-input focus:ring-primary"
                                         />
                                     </div>
                                 </div>
-                                <div className="flex items-start gap-2 text-xs text-zinc-500">
+                                <div className="flex items-start gap-2 text-xs text-muted-foreground">
                                     <Info className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
                                     <span>
                                         Tipp: A koordinátákat{' '}
-                                        <a href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium">
+                                        <a href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
                                             Google Maps
                                         </a>
                                         -ről vagy{' '}
-                                        <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium">
+                                        <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
                                             OpenStreetMap
                                         </a>
                                         -ről tudod kimásolni
@@ -345,8 +345,8 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
 
                             {/* Parking specific fields */}
                             {locationType === 'parking' && (
-                                <div className="space-y-3 p-4 rounded-xl bg-zinc-100/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
-                                    <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
+                                <div className="space-y-3 p-4 rounded-xl bg-muted/30 border border-border">
+                                    <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 text-foreground">
                                         Parkoló információk
                                     </h3>
                                     <div className="flex items-center justify-between py-2">
@@ -387,7 +387,7 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                                             value={formData.capacity_level}
                                             onChange={handleChange}
                                             disabled={isLoading}
-                                            className="flex h-10 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-950 dark:ring-offset-zinc-950 dark:placeholder:text-zinc-400 dark:focus-visible:ring-zinc-300"
+                                            className="flex h-10 w-full rounded-md border border-input bg-input/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                         >
                                             <option value="">Válassz...</option>
                                             <option value="small">Kis (1-10 hely)</option>
@@ -400,8 +400,8 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
 
                             {/* Service specific fields */}
                             {locationType === 'services' && (
-                                <div className="space-y-4 p-4 rounded-xl bg-zinc-100/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
-                                    <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
+                                <div className="space-y-4 p-4 rounded-xl bg-muted/30 border border-border">
+                                    <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 text-foreground">
                                         <Building2 className="h-4 w-4" />
                                         Üzlet információk
                                     </h3>
@@ -417,7 +417,7 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                                                     onChange={handleChange}
                                                     placeholder="+36 20 123 4567"
                                                     disabled={isLoading}
-                                                    className="bg-white dark:bg-zinc-950"
+                                                    className="bg-input/50 border-input focus:ring-primary"
                                                 />
                                             </div>
 
@@ -431,7 +431,7 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                                                     onChange={handleChange}
                                                     placeholder="https://pelda.hu"
                                                     disabled={isLoading}
-                                                    className="bg-white dark:bg-zinc-950"
+                                                    className="bg-input/50 border-input focus:ring-primary"
                                                 />
                                             </div>
                                         </div>
@@ -447,7 +447,7 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                                                     onChange={handleChange}
                                                     placeholder="H-P: 9:00-18:00"
                                                     disabled={isLoading}
-                                                    className="bg-white dark:bg-zinc-950"
+                                                    className="bg-input/50 border-input focus:ring-primary"
                                                 />
                                             </div>
 
@@ -464,7 +464,7 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                                                     max="5"
                                                     step="0.1"
                                                     disabled={isLoading}
-                                                    className="bg-white dark:bg-zinc-950"
+                                                    className="bg-input/50 border-input focus:ring-primary"
                                                 />
                                             </div>
                                         </div>
@@ -477,7 +477,7 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                                                 value={formData.price_range}
                                                 onChange={handleChange}
                                                 disabled={isLoading}
-                                                className="flex h-10 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-950 dark:ring-offset-zinc-950 dark:placeholder:text-zinc-400 dark:focus-visible:ring-zinc-300"
+                                                className="flex h-10 w-full rounded-md border border-input bg-input/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 <option value="">Válassz...</option>
                                                 <option value="$">$ - Olcsó</option>
@@ -491,8 +491,8 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
 
                             {/* Repair station specific fields */}
                             {locationType === 'repair' && (
-                                <div className="space-y-3 p-4 rounded-xl bg-zinc-100/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
-                                    <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
+                                <div className="space-y-3 p-4 rounded-xl bg-muted/30 border border-border">
+                                    <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 text-foreground">
                                         Szerviz információk
                                     </h3>
                                     <div className="flex items-center justify-between py-2">
@@ -518,7 +518,7 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                             )}
 
                             {/* Image Upload */}
-                            <div className="p-4 rounded-xl bg-zinc-100/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                            <div className="p-4 rounded-xl bg-muted/30 border border-border">
                                 <ImageUpload
                                     existingImages={pictureUrls}
                                     onChange={setPictureUrls}
@@ -528,14 +528,14 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                             </div>
 
                             {error && (
-                                <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 text-red-700 text-sm border border-red-200">
+                                <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm border border-destructive/20">
                                     <AlertCircle className="h-4 w-4 flex-shrink-0" />
                                     <span>{error}</span>
                                 </div>
                             )}
 
                             {success && (
-                                <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 text-green-700 text-sm border border-green-200">
+                                <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 text-primary text-sm border border-primary/20">
                                     <CheckCircle className="h-4 w-4 flex-shrink-0" />
                                     <span>Helyszín sikeresen frissítve!</span>
                                 </div>
@@ -545,13 +545,13 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                 </ScrollArea>
 
                 {/* Footer */}
-                <DialogFooter className="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 flex justify-end gap-3 flex-shrink-0">
+                <DialogFooter className="px-6 py-4 border-t border-border bg-muted/50 flex justify-end gap-3 flex-shrink-0">
                     <Button
                         type="button"
                         variant="outline"
                         onClick={onClose}
                         disabled={isLoading}
-                        className="bg-white dark:bg-zinc-900"
+                        className="bg-transparent border-input hover:bg-muted"
                     >
                         Mégse
                     </Button>
@@ -559,7 +559,7 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                         type="submit"
                         onClick={handleSubmit}
                         disabled={isLoading || success}
-                        className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800"
+                        className="bg-primary text-primary-foreground hover:bg-primary/90"
                     >
                         {isLoading ? (
                             <>
