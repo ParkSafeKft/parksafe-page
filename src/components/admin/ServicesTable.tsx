@@ -1,33 +1,6 @@
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-    DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
-import {
     MoreHorizontal,
-    Eye,
-    EyeOff,
-    Edit,
-    Trash2,
     MapPin,
-    CheckCircle,
-    XCircle,
-    Loader2,
-    ChevronUp,
-    ChevronDown,
     Building,
 } from 'lucide-react';
 
@@ -52,30 +25,19 @@ interface ServicesTableProps {
 
 export default function ServicesTable({
     data,
-    selectedRows,
-    onSelectAll,
-    onSelectRow,
-    onSort,
-    sortConfig,
+    // selectedRows,
+    // onSelectAll,
+    // onSelectRow,
+    // onSort,
+    // sortConfig,
     onRowClick,
     onEdit,
-    onDelete,
-    onToggleAvailability,
-    toggleLoading,
+    // onDelete,
+    // onToggleAvailability,
+    // toggleLoading,
     searchTerm,
-    selectAll,
+    // selectAll,
 }: ServicesTableProps) {
-    const SortIcon = ({ columnKey }: { columnKey: string }) => {
-        if (sortConfig.key !== columnKey) {
-            return <MoreHorizontal className="h-4 w-4 text-muted-foreground" />;
-        }
-        return sortConfig.direction === 'asc' ? (
-            <ChevronUp className="h-4 w-4 text-green-500" />
-        ) : (
-            <ChevronDown className="h-4 w-4 text-green-500" />
-        );
-    };
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const parseWKBPoint = (wkb: any) => {
         if (!wkb) return null;
@@ -131,14 +93,14 @@ export default function ServicesTable({
 
     if (data.length === 0) {
         return (
-            <div className="p-12 text-center">
-                <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-                    <Building className="h-8 w-8 text-muted-foreground" />
+            <div className="flex flex-col items-center justify-center py-32 border-2 border-dashed border-zinc-800 rounded-3xl bg-zinc-900/20">
+                <div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center mb-4">
+                    <Building className="w-8 h-8 text-zinc-700" />
                 </div>
-                <h3 className="text-lg font-medium text-foreground mb-2">
+                <h3 className="text-lg font-semibold text-white">
                     {searchTerm ? 'Nincs találat' : 'Nincsenek szervizek'}
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-zinc-500 max-w-xs text-center mt-2">
                     {searchTerm
                         ? 'Próbálj meg más keresési kifejezést használni.'
                         : 'Kattints az "Új hozzáadása" gombra az első szerviz létrehozásához.'
@@ -149,207 +111,91 @@ export default function ServicesTable({
     }
 
     return (
-        <div className="max-h-[calc(100vh-300px)] overflow-hidden flex flex-col">
-            {selectedRows.size > 0 && (
-                <div className="flex items-center justify-between p-4 bg-primary/10 border-b border-border">
-                    <div className="flex items-center gap-3">
-                        <Badge variant="secondary" className="bg-primary/20 text-primary">
-                            {selectedRows.size} kijelölt
-                        </Badge>
-                        <span className="text-sm text-muted-foreground">
-                            {selectedRows.size} szerviz kijelölve
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onSelectAll(false)}
-                            className="border-border"
-                        >
-                            Kijelölés törlése
-                        </Button>
-                    </div>
-                </div>
-            )}
-
-            <div className="flex-1 overflow-auto">
-                <Table>
-                    <TableHeader className="bg-muted/50 sticky top-0 z-10">
-                        <TableRow className="border-border hover:bg-muted/80">
-                            <TableHead className="w-12">
-                                <Checkbox
-                                    checked={selectAll}
-                                    onCheckedChange={onSelectAll}
-                                    className="border-muted-foreground"
-                                />
-                            </TableHead>
-                            <TableHead
-                                className="text-muted-foreground font-medium cursor-pointer hover:text-foreground transition-colors"
-                                onClick={() => onSort('name')}
-                            >
-                                <div className="flex items-center justify-between">
-                                    Név
-                                    <SortIcon columnKey="name" />
-                                </div>
-                            </TableHead>
-                            <TableHead
-                                className="text-muted-foreground font-medium cursor-pointer hover:text-foreground transition-colors"
-                                onClick={() => onSort('city')}
-                            >
-                                <div className="flex items-center justify-between">
-                                    Város
-                                    <SortIcon columnKey="city" />
-                                </div>
-                            </TableHead>
-                            <TableHead className="text-muted-foreground font-medium">Telefon</TableHead>
-                            <TableHead
-                                className="text-muted-foreground font-medium cursor-pointer hover:text-foreground transition-colors"
-                                onClick={() => onSort('rating')}
-                            >
-                                <div className="flex items-center justify-between">
-                                    Értékelés
-                                    <SortIcon columnKey="rating" />
-                                </div>
-                            </TableHead>
-                            <TableHead
-                                className="text-muted-foreground font-medium cursor-pointer hover:text-foreground transition-colors"
-                                onClick={() => onSort('available')}
-                            >
-                                <div className="flex items-center justify-between">
-                                    Státusz
-                                    <SortIcon columnKey="available" />
-                                </div>
-                            </TableHead>
-                            <TableHead
-                                className="text-muted-foreground font-medium cursor-pointer hover:text-foreground transition-colors"
-                                onClick={() => onSort('created_at')}
-                            >
-                                <div className="flex items-center justify-between">
-                                    Létrehozva
-                                    <SortIcon columnKey="created_at" />
-                                </div>
-                            </TableHead>
-                            <TableHead className="text-muted-foreground font-medium w-16">Műveletek</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
+        <div className="flex flex-col gap-4">
+            <div className="overflow-x-auto rounded-xl border border-white/5 bg-[#111111]">
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr className="border-b border-white/5 bg-white/[0.02]">
+                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Név</th>
+                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Város</th>
+                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Telefon</th>
+                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Értékelés</th>
+                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Státusz</th>
+                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Létrehozva</th>
+                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider text-right">Műveletek</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
                         {data.map((service) => {
                             const coords = getCoordinates(service);
                             return (
-                                <TableRow
+                                <tr
                                     key={service.id}
-                                    className={`border-border hover:bg-muted/50 transition-colors ${selectedRows.has(service.id) ? 'bg-primary/5' : ''
-                                        }`}
+                                    className="hover:bg-white/[0.02] transition-colors group cursor-pointer"
                                 >
-                                    <TableCell>
-                                        <Checkbox
-                                            checked={selectedRows.has(service.id)}
-                                            onCheckedChange={(checked) => onSelectRow(service.id, checked as boolean)}
-                                            className="border-muted-foreground"
-                                        />
-                                    </TableCell>
-                                    <TableCell
-                                        className="font-medium text-foreground cursor-pointer hover:text-primary transition-colors"
-                                        onClick={() => onRowClick(service)}
-                                    >
-                                        <div>
-                                            <div className="font-medium">{service.name}</div>
+                                    <td className="p-4" onClick={() => onRowClick(service)}>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-semibold text-white">{service.name}</span>
                                             {coords && (
-                                                <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                                                    <MapPin className="h-3 w-3" />
-                                                    {coords.lat.toFixed(4)}, {coords.lon.toFixed(4)}
-                                                </div>
+                                                <span className="text-[10px] text-zinc-500 flex items-center gap-1">
+                                                    <MapPin className="w-3 h-3" /> {coords.lat.toFixed(4)}, {coords.lon.toFixed(4)}
+                                                </span>
                                             )}
                                         </div>
-                                    </TableCell>
-                                    <TableCell className="text-muted-foreground">{service.city}</TableCell>
-                                    <TableCell className="text-muted-foreground break-all">{service.phone || 'Nincs'}</TableCell>
-                                    <TableCell className="text-muted-foreground">
-                                        <div className="flex items-center gap-1">
+                                    </td>
+                                    <td className="p-4">
+                                        <span className="text-sm text-zinc-400">{service.city}</span>
+                                    </td>
+                                    <td className="p-4">
+                                        <span className="text-sm text-zinc-400 break-all">{service.phone || 'Nincs'}</span>
+                                    </td>
+                                    <td className="p-4">
+                                        <div className="flex items-center gap-1 text-sm text-white">
                                             <span>{service.rating || 'N/A'}</span>
                                             {service.rating && <span className="text-yellow-500">⭐</span>}
                                         </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge
-                                            variant={service.available ? 'default' : 'destructive'}
-                                            className={
-                                                service.available
-                                                    ? 'bg-primary hover:bg-primary/80 text-primary-foreground'
-                                                    : 'bg-destructive hover:bg-destructive/80 text-destructive-foreground'
-                                            }
+                                    </td>
+                                    <td className="p-4">
+                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${service.available
+                                                ? 'bg-green-500/10 text-green-500 border-green-500/20'
+                                                : 'bg-zinc-800 text-zinc-500 border-zinc-700'
+                                            }`}>
+                                            <div className={`w-1.5 h-1.5 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.2)] ${service.available ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-zinc-500'}`} />
+                                            {service.available ? 'Aktív' : 'Inaktív'}
+                                        </span>
+                                    </td>
+                                    <td className="p-4">
+                                        <span className="text-sm text-zinc-500">
+                                            {new Date(service.created_at).toLocaleDateString('hu-HU', {
+                                                year: 'numeric',
+                                                month: 'short',
+                                                day: 'numeric',
+                                            })}
+                                        </span>
+                                    </td>
+                                    <td className="p-4 text-right">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onEdit(service);
+                                            }}
+                                            className="p-2 rounded-lg text-zinc-500 hover:text-white hover:bg-white/10 transition-all"
                                         >
-                                            <div className="flex items-center gap-1">
-                                                {service.available ? (
-                                                    <CheckCircle className="h-3 w-3" />
-                                                ) : (
-                                                    <XCircle className="h-3 w-3" />
-                                                )}
-                                                {service.available ? 'Aktív' : 'Inaktív'}
-                                            </div>
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-muted-foreground">
-                                        {new Date(service.created_at).toLocaleDateString('hu-HU', {
-                                            year: 'numeric',
-                                            month: 'short',
-                                            day: 'numeric',
-                                        })}
-                                    </TableCell>
-                                    <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted">
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-48">
-                                                <DropdownMenuItem
-                                                    onClick={() => onRowClick(service)}
-                                                    className="cursor-pointer"
-                                                >
-                                                    <Eye className="h-4 w-4 mr-2" />
-                                                    Részletek megtekintése
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem
-                                                    onClick={() => onEdit(service)}
-                                                    className="cursor-pointer"
-                                                >
-                                                    <Edit className="h-4 w-4 mr-2" />
-                                                    Szerkesztés
-                                                </DropdownMenuItem>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem
-                                                    onClick={() => onToggleAvailability(service.id, service.available)}
-                                                    className="cursor-pointer"
-                                                    disabled={toggleLoading === service.id}
-                                                >
-                                                    {toggleLoading === service.id ? (
-                                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                                    ) : service.available ? (
-                                                        <EyeOff className="h-4 w-4 mr-2" />
-                                                    ) : (
-                                                        <Eye className="h-4 w-4 mr-2" />
-                                                    )}
-                                                    {service.available ? 'Deaktiválás' : 'Aktiválás'}
-                                                </DropdownMenuItem>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem
-                                                    onClick={() => onDelete(service.id)}
-                                                    className="cursor-pointer text-destructive focus:text-destructive"
-                                                >
-                                                    <Trash2 className="h-4 w-4 mr-2" />
-                                                    Törlés
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
-                                </TableRow>
+                                            <MoreHorizontal className="w-5 h-5" />
+                                        </button>
+                                    </td>
+                                </tr>
                             );
                         })}
-                    </TableBody>
-                </Table>
+                    </tbody>
+                </table>
+            </div>
+            <div className="flex items-center justify-between px-2">
+                <p className="text-xs text-zinc-500">1 / 1 oldal</p>
+                <div className="flex gap-2">
+                    <button className="px-4 py-2 text-xs font-medium text-zinc-400 bg-zinc-900 border border-zinc-800 rounded-lg opacity-50 cursor-not-allowed">Előző</button>
+                    <button className="px-4 py-2 text-xs font-medium text-white bg-zinc-800 border border-zinc-700 rounded-lg hover:bg-zinc-700 transition-colors">Következő</button>
+                </div>
             </div>
         </div>
     );

@@ -1,29 +1,15 @@
-import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuItem,
-    SidebarMenuButton,
-    SidebarRail,
-    SidebarGroup,
-    SidebarGroupLabel,
-    SidebarGroupContent,
-    SidebarSeparator,
-} from '@/components/ui/sidebar';
+import React from 'react';
 import {
     Users,
     MapPin,
-    Building,
+    Store,
     Wrench,
-    LogOut,
     Home,
     Settings,
-    Shield,
+    LogOut,
+    Shield
 } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 
 interface AdminSidebarProps {
     activeTab: string;
@@ -41,145 +27,97 @@ export default function AdminSidebar({
     onLogout,
     onHomeConfig,
 }: AdminSidebarProps) {
+    const menuItems = [
+        { id: 'users', label: 'Felhasználók', icon: Users, section: 'ADATKEZELÉS' },
+        { id: 'parking', label: 'Bicikli Parkolók', icon: MapPin, section: 'ADATKEZELÉS' },
+        { id: 'services', label: 'Szervizek & Boltok', icon: Store, section: 'ADATKEZELÉS' },
+        { id: 'repair', label: 'Javító Állomások', icon: Wrench, section: 'ADATKEZELÉS' },
+        { id: 'home', label: 'Vissza a főoldalra', icon: Home, section: 'EGYÉB' },
+        { id: 'settings', label: 'Beállítások', icon: Settings, section: 'EGYÉB' },
+    ];
+
+    const sections = ['ADATKEZELÉS', 'EGYÉB'];
+
+    const handleItemClick = (id: string) => {
+        if (id === 'home') {
+            onHomeConfig();
+        } else if (id !== 'settings') {
+            setActiveTab(id);
+        }
+    };
+
     return (
-        <Sidebar className="bg-sidebar border-r border-sidebar-border overflow-x-hidden" collapsible="icon">
-            <SidebarHeader className="p-4 border-b border-sidebar-border">
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <div className="flex items-center gap-3 px-1 py-1 data-[state=open]:px-2">
-                            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                                <Shield className="h-5 w-5 text-primary" />
-                            </div>
-                            <div className="flex flex-col gap-0.5 overflow-hidden transition-all group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0">
-                                <span className="font-bold text-foreground tracking-tight truncate">
-                                    Admin Panel
-                                </span>
-                                <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium truncate">
-                                    Management
-                                </span>
-                            </div>
-                        </div>
-                    </SidebarMenuItem>
-                </SidebarMenu>
-            </SidebarHeader>
+        <aside className="w-72 h-screen bg-[#0a0a0a] border-r border-white/5 flex flex-col shrink-0 overflow-y-auto">
+            {/* Header */}
+            <div className="p-6 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center border border-green-500/20">
+                    <Shield className="w-6 h-6 text-green-500" />
+                </div>
+                <div>
+                    <h1 className="text-white font-bold tracking-tight">Admin Panel</h1>
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">Management</p>
+                </div>
+            </div>
 
-            <SidebarContent className="p-2 overflow-x-hidden">
-                <SidebarGroup>
-                    <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">Adatkezelés</SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton
-                                    isActive={activeTab === 'users'}
-                                    onClick={() => setActiveTab('users')}
-                                    tooltip="Felhasználók"
-                                    className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary transition-colors"
-                                >
-                                    <Users className="h-4 w-4" />
-                                    <span>Felhasználók</span>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton
-                                    isActive={activeTab === 'parking'}
-                                    onClick={() => setActiveTab('parking')}
-                                    tooltip="Bicikli Parkolók"
-                                    className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary transition-colors"
-                                >
-                                    <MapPin className="h-4 w-4" />
-                                    <span>Bicikli Parkolók</span>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton
-                                    isActive={activeTab === 'services'}
-                                    onClick={() => setActiveTab('services')}
-                                    tooltip="Szervizek & Boltok"
-                                    className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary transition-colors"
-                                >
-                                    <Building className="h-4 w-4" />
-                                    <span>Szervizek & Boltok</span>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton
-                                    isActive={activeTab === 'repair'}
-                                    onClick={() => setActiveTab('repair')}
-                                    tooltip="Javító Állomások"
-                                    className="data-[active=true]:bg-primary/10 data-[active=true]:text-primary transition-colors"
-                                >
-                                    <Wrench className="h-4 w-4" />
-                                    <span>Javító Állomások</span>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-zinc-800 to-transparent mb-6" />
 
-                <SidebarSeparator className="my-2 mx-2 group-data-[collapsible=icon]:hidden" />
-
-                <SidebarGroup>
-                    <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">Egyéb</SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton
-                                    tooltip="Vissza a főoldalra"
-                                    onClick={onHomeConfig}
-                                    className="hover:bg-muted transition-colors"
-                                >
-                                    <Home className="h-4 w-4" />
-                                    <span>Vissza a főoldalra</span>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton tooltip="Beállítások" className="hover:bg-muted transition-colors">
-                                    <Settings className="h-4 w-4" />
-                                    <span>Beállítások</span>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
-            </SidebarContent>
-
-            <SidebarFooter className="p-4 border-t border-sidebar-border bg-sidebar-accent/5 overflow-x-hidden">
-                <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-3 overflow-hidden group-data-[collapsible=icon]:justify-center">
-                        <Avatar className="h-9 w-9 ring-2 ring-primary/20 flex-shrink-0">
-                            <AvatarImage
-                                src={profile?.avatar_url}
-                                alt={profile?.username || 'Admin'}
-                            />
-                            <AvatarFallback className="bg-primary text-primary-foreground">
-                                {(profile?.username || profile?.email || 'A')
-                                    .charAt(0)
-                                    .toUpperCase()}
-                            </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden overflow-hidden">
-                            <p className="text-sm font-medium text-foreground truncate">
-                                {profile?.username || 'Admin'}
-                            </p>
-                            <p className="text-xs text-muted-foreground truncate">
-                                {profile?.email}
-                            </p>
+            {/* Navigation */}
+            <nav className="flex-1 px-4 space-y-8">
+                {sections.map(section => (
+                    <div key={section} className="space-y-2">
+                        <h3 className="px-3 text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
+                            {section}
+                        </h3>
+                        <div className="space-y-1">
+                            {menuItems
+                                .filter(item => item.section === section)
+                                .map(item => {
+                                    const Icon = item.icon;
+                                    const isActive = activeTab === item.id;
+                                    return (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => handleItemClick(item.id)}
+                                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${isActive && item.id !== 'home' && item.id !== 'settings'
+                                                    ? 'bg-green-500/10 text-green-500 border border-green-500/20'
+                                                    : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
+                                                }`}
+                                        >
+                                            <Icon className={`w-5 h-5 transition-colors ${isActive && item.id !== 'home' && item.id !== 'settings' ? 'text-green-500' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
+                                            <span className="text-sm font-medium flex-1 text-left">{item.label}</span>
+                                            {isActive && item.id !== 'home' && item.id !== 'settings' && <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />}
+                                        </button>
+                                    );
+                                })}
                         </div>
                     </div>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 border-border/50 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
-                        onClick={onLogout}
-                    >
-                        <LogOut className="h-4 w-4 mr-2 group-data-[collapsible=icon]:mr-0 flex-shrink-0" />
-                        <span className="group-data-[collapsible=icon]:hidden truncate">
-                            Kijelentkezés
-                        </span>
-                    </Button>
+                ))}
+            </nav>
+
+            {/* Footer */}
+            <div className="p-4 mt-auto space-y-4">
+                <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3">
+                    <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/10 shrink-0">
+                        <ImageWithFallback
+                            src={profile?.avatar_url || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100&h=100"}
+                            alt="User"
+                            className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#0a0a0a] rounded-full" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-white truncate">{profile?.username || 'Admin'}</p>
+                        <p className="text-[11px] text-zinc-500 truncate">{profile?.email}</p>
+                    </div>
                 </div>
-            </SidebarFooter>
-            {/* Removed SidebarRail to prevent horizontal scroll issues */}
-        </Sidebar>
+
+                <button
+                    onClick={onLogout}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors text-sm font-medium">
+                    <LogOut className="w-4 h-4" />
+                    Kijelentkezés
+                </button>
+            </div>
+        </aside>
     );
 }
