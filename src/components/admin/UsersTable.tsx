@@ -1,6 +1,7 @@
 import {
     MoreHorizontal,
     Users,
+    ChevronDown,
 } from 'lucide-react';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 
@@ -58,10 +59,10 @@ export default function UsersTable({
     }
 
     return (
-        <div className="flex flex-col gap-4">
-            <div className="overflow-x-auto rounded-xl border border-white/5 bg-[#111111]">
+        <div className="flex flex-col gap-4 h-full">
+            <div className="flex-1 overflow-auto min-h-0 rounded-xl border border-white/5 bg-[#111111]">
                 <table className="w-full text-left border-collapse">
-                    <thead>
+                    <thead className="sticky top-0 z-10 bg-[#111111]">
                         <tr className="border-b border-white/5 bg-white/[0.02]">
                             <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Avatar</th>
                             <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Felhasználónév</th>
@@ -122,33 +123,57 @@ export default function UsersTable({
                 </table>
             </div>
 
-            {totalPages > 1 && (
-                <div className="flex items-center justify-between px-2">
-                    <p className="text-xs text-zinc-500">{currentPage} / {totalPages} oldal</p>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-                            disabled={currentPage === 1}
-                            className={`px-4 py-2 text-xs font-medium border rounded-lg transition-colors ${currentPage === 1
-                                ? 'text-zinc-600 bg-zinc-900 border-zinc-800 opacity-50 cursor-not-allowed'
-                                : 'text-zinc-400 bg-zinc-900 border-zinc-800 hover:bg-zinc-800 hover:text-white'
-                                }`}
-                        >
-                            Előző
-                        </button>
-                        <button
-                            onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-                            disabled={currentPage === totalPages}
-                            className={`px-4 py-2 text-xs font-medium border rounded-lg transition-colors ${currentPage === totalPages
-                                ? 'text-zinc-600 bg-zinc-900 border-zinc-800 opacity-50 cursor-not-allowed'
-                                : 'text-white bg-zinc-800 border-zinc-700 hover:bg-zinc-700'
-                                }`}
-                        >
-                            Következő
-                        </button>
+            <div className="flex-shrink-0">
+                {/* Footer Content */}
+
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-between px-2">
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs text-zinc-500">Sorok:</span>
+                            <div className="relative">
+                                <select
+                                    value={pageSize}
+                                    onChange={(e) => onPageSizeChange(Number(e.target.value))}
+                                    className="appearance-none bg-[#111111] border border-white/10 text-zinc-300 text-xs rounded-lg pl-2 pr-6 py-1 focus:outline-none focus:border-green-500/50 cursor-pointer hover:border-white/20 transition-colors"
+                                >
+                                    <option value={5}>5</option>
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                    <option value={50}>50</option>
+                                    <option value={100}>100</option>
+                                </select>
+                                <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-500 pointer-events-none" />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                            <span className="text-xs text-zinc-500">{currentPage} / {totalPages} oldal</span>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+                                    disabled={currentPage === 1}
+                                    className={`px-4 py-2 text-xs font-medium border rounded-lg transition-colors ${currentPage === 1
+                                        ? 'text-zinc-600 bg-zinc-900 border-zinc-800 opacity-50 cursor-not-allowed'
+                                        : 'text-zinc-400 bg-zinc-900 border-zinc-800 hover:bg-zinc-800 hover:text-white'
+                                        }`}
+                                >
+                                    Előző
+                                </button>
+                                <button
+                                    onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className={`px-4 py-2 text-xs font-medium border rounded-lg transition-colors ${currentPage === totalPages
+                                        ? 'text-zinc-600 bg-zinc-900 border-zinc-800 opacity-50 cursor-not-allowed'
+                                        : 'text-white bg-zinc-800 border-zinc-700 hover:bg-zinc-700'
+                                        }`}
+                                >
+                                    Következő
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 }

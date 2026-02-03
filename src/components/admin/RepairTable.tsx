@@ -134,10 +134,10 @@ export default function RepairTable({
     }
 
     return (
-        <div className="flex flex-col gap-4">
-            <div className="overflow-x-auto rounded-xl border border-white/5 bg-[#111111] pb-32">
+        <div className="flex flex-col gap-4 h-full">
+            <div className="flex-1 overflow-auto min-h-0 rounded-xl border border-white/5 bg-[#111111] pb-0">
                 <table className="w-full text-left border-collapse">
-                    <thead>
+                    <thead className="sticky top-0 z-10 bg-[#111111]">
                         <tr className="border-b border-white/5 bg-white/[0.02]">
                             <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Név</th>
                             <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Város</th>
@@ -234,7 +234,7 @@ export default function RepairTable({
                 </table>
             </div>
 
-            <div className="flex items-center justify-between px-2">
+            <div className="flex items-center justify-between px-2 pb-2">
                 <div className="flex items-center gap-2">
                     <span className="text-xs text-zinc-500">Sorok:</span>
                     <div className="relative">
