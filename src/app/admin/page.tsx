@@ -60,7 +60,7 @@ export default function AdminPage() {
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
-    const pageSize = 10;
+    const [pageSize, setPageSize] = useState(10);
     const [totalCount, setTotalCount] = useState(0);
 
     // Selection
@@ -167,7 +167,7 @@ export default function AdminPage() {
     useEffect(() => {
         fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeTab, currentPage, sortConfig, searchTerm, profile]);
+    }, [activeTab, currentPage, sortConfig, searchTerm, profile, pageSize]);
 
     const handleSort = (key: string) => {
         setSortConfig(prev => ({
@@ -410,6 +410,8 @@ export default function AdminPage() {
                                             currentPage={currentPage}
                                             totalPages={totalPages}
                                             onPageChange={setCurrentPage}
+                                            pageSize={pageSize}
+                                            onPageSizeChange={setPageSize}
                                         />
                                     )}
                                     {activeTab === 'parking' && (
@@ -429,6 +431,8 @@ export default function AdminPage() {
                                             currentPage={currentPage}
                                             totalPages={totalPages}
                                             onPageChange={setCurrentPage}
+                                            pageSize={pageSize}
+                                            onPageSizeChange={setPageSize}
                                         />
                                     )}
                                     {activeTab === 'services' && (
@@ -449,6 +453,8 @@ export default function AdminPage() {
                                             currentPage={currentPage}
                                             totalPages={totalPages}
                                             onPageChange={setCurrentPage}
+                                            pageSize={pageSize}
+                                            onPageSizeChange={setPageSize}
                                         />
                                     )}
                                     {activeTab === 'repair' && (
@@ -469,6 +475,8 @@ export default function AdminPage() {
                                             currentPage={currentPage}
                                             totalPages={totalPages}
                                             onPageChange={setCurrentPage}
+                                            pageSize={pageSize}
+                                            onPageSizeChange={setPageSize}
                                         />
                                     )}
                                 </CardContent>
