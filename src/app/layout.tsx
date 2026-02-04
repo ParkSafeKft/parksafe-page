@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     images: ["https://parksafe.hu/logo.png"],
   },
   icons: {
-    icon: "/logo.ico",
+    icon: "/favicon.ico",
   },
 };
 
