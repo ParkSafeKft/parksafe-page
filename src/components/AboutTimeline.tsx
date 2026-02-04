@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Trophy, Award, Rocket, Lightbulb, TrendingUp } from "lucide-react";
+import Image from "next/image";
 import { useLanguage } from "../contexts/LanguageContext";
 
 export function AboutTimeline() {
@@ -15,6 +16,8 @@ export function AboutTimeline() {
             desc: t('about.page.timeline.milestone1.desc'),
             icon: Lightbulb,
             imageAlt: t('about.page.timeline.milestone1.imageAlt'),
+            image: '/mgk.jpg',
+            imageOrientation: 'portrait' as const,
         },
         {
             year: t('about.page.timeline.milestone2.year'),
@@ -23,6 +26,7 @@ export function AboutTimeline() {
             desc: t('about.page.timeline.milestone2.desc'),
             icon: Rocket,
             imageAlt: t('about.page.timeline.milestone2.imageAlt'),
+            image: null,
         },
         {
             year: t('about.page.timeline.milestone3.year'),
@@ -32,6 +36,8 @@ export function AboutTimeline() {
             achievement: t('about.page.timeline.milestone3.achievement'),
             icon: Trophy,
             imageAlt: t('about.page.timeline.milestone3.imageAlt'),
+            image: '/start.jpg',
+            imageOrientation: 'landscape' as const,
         },
         {
             year: t('about.page.timeline.milestone4.year'),
@@ -41,6 +47,8 @@ export function AboutTimeline() {
             achievement: t('about.page.timeline.milestone4.achievement'),
             icon: Award,
             imageAlt: t('about.page.timeline.milestone4.imageAlt'),
+            image: '/virtus.JPG',
+            imageOrientation: 'landscape' as const,
         },
         {
             year: t('about.page.timeline.milestone5.year'),
@@ -49,6 +57,7 @@ export function AboutTimeline() {
             desc: t('about.page.timeline.milestone5.desc'),
             icon: TrendingUp,
             imageAlt: t('about.page.timeline.milestone5.imageAlt'),
+            image: null,
         },
     ];
 
@@ -143,27 +152,18 @@ export function AboutTimeline() {
                                                 </div>
                                             )}
 
-                                            {/* Image Placeholder */}
-                                            <div className="relative w-full aspect-video bg-gradient-to-br from-zinc-100 to-zinc-200 rounded-2xl overflow-hidden">
-                                                {/* Future: Replace with <Image> component when photos are ready */}
-                                                {/*
-                                                <Image
-                                                    src={`/images/about/about_milestone_${index + 1}.webp`}
-                                                    alt={milestone.imageAlt}
-                                                    width={800}
-                                                    height={450}
-                                                    className="object-cover w-full h-full"
-                                                />
-                                                */}
-                                                <div className="absolute inset-0 flex items-center justify-center">
-                                                    <div className="text-center">
-                                                        <Icon className="w-12 h-12 text-zinc-400 mx-auto mb-2" />
-                                                        <p className="text-zinc-400 text-sm font-medium">
-                                                            {milestone.imageAlt}
-                                                        </p>
-                                                    </div>
+                                            {/* Image */}
+                                            {milestone.image && (
+                                                <div className={`relative w-full ${milestone.imageOrientation === 'portrait' ? 'aspect-[3/4]' : 'aspect-video'} rounded-2xl overflow-hidden shadow-lg`}>
+                                                    <Image
+                                                        src={milestone.image}
+                                                        alt={milestone.imageAlt}
+                                                        fill
+                                                        className="object-cover"
+                                                        sizes="(max-width: 768px) 100vw, 50vw"
+                                                    />
                                                 </div>
-                                            </div>
+                                            )}
                                         </div>
                                     </div>
 
