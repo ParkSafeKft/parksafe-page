@@ -187,7 +187,7 @@ export default function HomePage() {
                             </div>
 
                             {/* Abstract UI representation */}
-                            <div className="absolute bottom-0 right-0 w-[60%] h-[60%] bg-zinc-50 rounded-tl-[2rem] border-l border-t border-zinc-100 shadow-2xl translate-y-8 translate-x-8 transition-transform group-hover:translate-x-6 group-hover:translate-y-6 overflow-hidden">
+                            <div className="absolute bottom-0 right-0 w-[60%] h-[60%] bg-zinc-50 rounded-tl-[2rem] border-l border-t border-zinc-100 shadow-2xl translate-y-8 translate-x-8 overflow-hidden">
                                 <picture>
                                     <source type="image/webp" srcSet="/ios_mapview_300.webp" />
                                     <img
