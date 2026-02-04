@@ -218,7 +218,7 @@ export default function TermsPage() {
                             <ul className="space-y-3">
                                 <li className="flex items-center gap-3 text-zinc-600 bg-zinc-50 p-3 rounded-lg border border-zinc-100">
                                     <Mail className="w-5 h-5 text-[#34aa56]" />
-                                    <span><strong>E-mail:</strong> perjesidev@gmail.com</span>
+                                    <span><strong>E-mail:</strong> info@parksafe.hu</span>
                                 </li>
                                 <li className="flex items-center gap-3 text-zinc-600 bg-zinc-50 p-3 rounded-lg border border-zinc-100">
                                     <MapPin className="w-5 h-5 text-[#34aa56]" />
@@ -238,7 +238,7 @@ export default function TermsPage() {
                     <p className="text-zinc-400 text-sm leading-relaxed">
                         <strong className="text-zinc-600">Hatályos:</strong> 2025. január 5-től
                         <br />
-                        <span className="opacity-75">Premiumtex Kft. • Zsombó, Dózsa d. 55. • perjesidev@gmail.com</span>
+                        <span className="opacity-75">Premiumtex Kft. • Zsombó, Dózsa d. 55. • info@parksafe.hu</span>
                     </p>
                 </div>
             </div>

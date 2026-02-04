@@ -42,13 +42,13 @@ export default function ContactPage() {
                             </div>
 
                             <div className="space-y-6">
-                                <a href="mailto:perjesidev@gmail.com" className="group/item flex items-center gap-6 p-4 rounded-2xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all duration-200">
+                                <a href="mailto:info@parksafe.hu" className="group/item flex items-center gap-6 p-4 rounded-2xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all duration-200">
                                     <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0 group-hover/item:scale-110 transition-transform">
                                         <Mail size={20} className="text-[#34aa56]" />
                                     </div>
                                     <div>
                                         <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Email</h3>
-                                        <p className="text-lg font-semibold text-slate-900 group-hover/item:text-[#34aa56] transition-colors">perjesidev@gmail.com</p>
+                                        <p className="text-lg font-semibold text-slate-900 group-hover/item:text-[#34aa56] transition-colors">info@parksafe.hu</p>
                                     </div>
                                     <ChevronRight className="ml-auto text-slate-300 opacity-0 group-hover/item:opacity-100 transition-opacity" />
                                 </a>

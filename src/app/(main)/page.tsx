@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import FAQSection from "@/components/FAQSection";
 import PartnerBenefits from "@/components/PartnerBenefits";
 import HowItWorks from "@/components/HowItWorks";
+import { AboutHighlight } from "@/components/AboutHighlight";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function HomePage() {
@@ -259,6 +260,8 @@ export default function HomePage() {
                     </div>
                 </div>
             </section>
+
+            <AboutHighlight />
 
             <HowItWorks />
 
