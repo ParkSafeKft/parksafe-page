@@ -32,8 +32,12 @@ export default function ContactPage() {
 
                         <div className="relative z-10">
                             <div className="flex items-center gap-6 mb-10">
-                                <div className="w-20 h-20 bg-slate-100 rounded-2xl flex items-center justify-center shadow-inner border border-slate-200 shrink-0">
-                                    <User size={40} className="text-slate-400" />
+                                <div className="w-20 h-20 rounded-2xl shadow-inner border border-slate-200 shrink-0 overflow-hidden">
+                                    <img
+                                        src="/psz.png"
+                                        alt="Perjési Szabolcs"
+                                        className="w-full h-full object-cover"
+                                    />
                                 </div>
                                 <div>
                                     <h2 className="text-2xl font-bold text-slate-900">Perjési Szabolcs</h2>
