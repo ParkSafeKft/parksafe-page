@@ -11,17 +11,52 @@ export default function ResetPasswordPage() {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const [isValidToken, setIsValidToken] = useState(false);
+    const [checkingToken, setCheckingToken] = useState(true);
     const router = useRouter();
 
     useEffect(() => {
-        // Check if we have a valid recovery session
-        supabase.auth.getSession().then(({ data: { session } }) => {
+        const handleAuthCheck = async () => {
+            // 1. Check URL hash for recovery params (Supabase sends these in hash)
+            // Format: #access_token=...&refresh_token=...&type=recovery
+            if (typeof window !== 'undefined') {
+                const hash = window.location.hash;
+                if (hash && hash.includes('type=recovery')) {
+                    setIsValidToken(true);
+                    setCheckingToken(false);
+                    return;
+                }
+            }
+
+            // 2. Fallback: Check if we have an active session
+            // For recovery flow, Supabase client automatically sets the session from hash
+            const { data: { session } } = await supabase.auth.getSession();
             if (session) {
                 setIsValidToken(true);
             } else {
+                // If no session and no hash, likely invalid/expired link or direct access
                 setError('Invalid or expired reset link. Please request a new one.');
             }
+            setCheckingToken(false);
+        };
+
+        handleAuthCheck();
+
+        // Listen for auth state changes to detect when recovery session is established
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'PASSWORD_RECOVERY') {
+                setIsValidToken(true);
+                setCheckingToken(false);
+            } else if (event === 'SIGNED_IN' && session) {
+                // If we are on this page and signed in, assume it's the recovery session
+                // Validating the URL hash type=recovery above is safer, but this is a fallback
+                setIsValidToken(true);
+                setCheckingToken(false);
+            }
         });
+
+        return () => {
+            subscription.unsubscribe();
+        };
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -53,8 +88,13 @@ export default function ResetPasswordPage() {
 
             setMessage('Password updated successfully! Redirecting to login...');
 
-            // Sign out the user to ensure they log in with the new password
+            // Force sign out so they have to log in with new credentials
             await supabase.auth.signOut();
+
+            // Clear the URL hash
+            if (typeof window !== 'undefined') {
+                window.history.replaceState(null, '', window.location.pathname);
+            }
 
             // Redirect to login after 2 seconds
             setTimeout(() => {
@@ -66,6 +106,18 @@ export default function ResetPasswordPage() {
             setLoading(false);
         }
     };
+
+    if (checkingToken) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+                <div className="max-w-md w-full space-y-8">
+                    <div className="text-center">
+                        <p className="text-gray-600">Validating reset link...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (!isValidToken) {
         return (

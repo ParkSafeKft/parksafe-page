@@ -152,9 +152,10 @@ The token is:
 - Check redirect URLs are configured
 
 **User auto-logged in?**
-- This shouldn't happen with our implementation
-- We check for session and require password
-- We call signOut() after password update
+- This issue is now fixed!
+- We updated `AuthRedirectHandler.tsx` to ignore password recovery links
+- We updated the reset page to handle the session correctly
+- The user will stay on the reset page until they update their password
 
 ---
 
