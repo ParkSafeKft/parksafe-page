@@ -32,12 +32,8 @@ export default function ContactPage() {
 
                         <div className="relative z-10">
                             <div className="flex items-center gap-6 mb-10">
-                                <div className="w-20 h-20 rounded-2xl shadow-inner border border-slate-200 shrink-0 overflow-hidden">
-                                    <img
-                                        src="/psz.png"
-                                        alt="Perjési Szabolcs"
-                                        className="w-full h-full object-cover"
-                                    />
+                                <div className="w-20 h-20 bg-slate-100 rounded-2xl flex items-center justify-center shadow-inner border border-slate-200 shrink-0">
+                                    <User size={40} className="text-slate-400" />
                                 </div>
                                 <div>
                                     <h2 className="text-2xl font-bold text-slate-900">Perjési Szabolcs</h2>
@@ -46,13 +42,13 @@ export default function ContactPage() {
                             </div>
 
                             <div className="space-y-6">
-                                <a href="mailto:info@parksafe.hu" className="group/item flex items-center gap-6 p-4 rounded-2xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all duration-200">
+                                <a href="mailto:perjesidev@gmail.com" className="group/item flex items-center gap-6 p-4 rounded-2xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all duration-200">
                                     <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0 group-hover/item:scale-110 transition-transform">
                                         <Mail size={20} className="text-[#34aa56]" />
                                     </div>
                                     <div>
                                         <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Email</h3>
-                                        <p className="text-lg font-semibold text-slate-900 group-hover/item:text-[#34aa56] transition-colors">info@parksafe.hu</p>
+                                        <p className="text-lg font-semibold text-slate-900 group-hover/item:text-[#34aa56] transition-colors">perjesidev@gmail.com</p>
                                     </div>
                                     <ChevronRight className="ml-auto text-slate-300 opacity-0 group-hover/item:opacity-100 transition-opacity" />
                                 </a>

@@ -46,7 +46,7 @@ export default function PrivacyPage() {
                                     <span className="font-semibold text-zinc-900 min-w-[80px]">Székhely:</span> 6792 Zsombó, Dózsa d. 55
                                 </p>
                                 <p className="flex items-center gap-2">
-                                    <span className="font-semibold text-zinc-900 min-w-[80px]">E-mail:</span> info@parksafe.hu
+                                    <span className="font-semibold text-zinc-900 min-w-[80px]">E-mail:</span> perjesidev@gmail.com
                                 </p>
                             </div>
                         </section>
@@ -175,7 +175,7 @@ export default function PrivacyPage() {
                             </div>
                             <p className="text-zinc-600 bg-blue-50 p-4 rounded-xl border border-blue-100 text-center">
                                 Jogai gyakorlására vonatkozó kérelmét az{" "}
-                                <strong className="text-blue-700">info@parksafe.hu</strong> e-mail címre küldheti el.
+                                <strong className="text-blue-700">perjesidev@gmail.com</strong> e-mail címre küldheti el.
                             </p>
                         </section>
 
@@ -213,7 +213,7 @@ export default function PrivacyPage() {
                             <div className="bg-zinc-50 rounded-xl p-6 border border-zinc-100 space-y-3 text-zinc-600">
                                 <p className="flex items-center gap-3">
                                     <Mail className="w-5 h-5 text-[#34aa56]" />
-                                    <span><strong>E-mail:</strong> info@parksafe.hu</span>
+                                    <span><strong>E-mail:</strong> perjesidev@gmail.com</span>
                                 </p>
                                 <p className="flex items-center gap-3">
                                     <MapPin className="w-5 h-5 text-[#34aa56]" />
@@ -240,7 +240,7 @@ export default function PrivacyPage() {
                     <p className="text-zinc-400 text-sm leading-relaxed">
                         <strong className="text-zinc-600">Hatályos:</strong> 2025. augusztus 8-tól
                         <br />
-                        <span className="opacity-75">Premiumtex Kft. • 6792 Zsombó, Dózsa d. 55 • info@parksafe.hu</span>
+                        <span className="opacity-75">Premiumtex Kft. • 6792 Zsombó, Dózsa d. 55 • perjesidev@gmail.com</span>
                     </p>
                 </div>
             </div>

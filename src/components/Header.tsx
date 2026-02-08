@@ -45,9 +45,6 @@ function Header() {
                     <Link href="/" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors">
                         {t('nav.home')}
                     </Link>
-                    <Link href="/about" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors">
-                        {t('about.nav')}
-                    </Link>
                     <Link href="/contact" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors">
                         {t('nav.contact')}
                     </Link>
