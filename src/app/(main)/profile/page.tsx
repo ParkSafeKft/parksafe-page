@@ -31,8 +31,9 @@ export default function ProfilePage() {
     const [deleteError, setDeleteError] = useState('');
 
     const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [passwordStep, setPasswordStep] = useState<'request' | 'verify'>('request');
     const [passwordForm, setPasswordForm] = useState({
-        currentPassword: '',
+        code: '',
         newPassword: '',
         confirmPassword: ''
     });
@@ -106,6 +107,35 @@ export default function ProfilePage() {
         }
     };
 
+    const handleRequestCode = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        setPasswordLoading(true);
+        setPasswordError('');
+        setPasswordSuccess('');
+
+        try {
+            if (!user?.email) throw new Error('No user email');
+
+            const { error } = await supabase.auth.signInWithOtp({
+                email: user.email,
+                options: {
+                    shouldCreateUser: false
+                }
+            });
+
+            if (error) throw error;
+
+            setPasswordSuccess(t('profile.verificationSent'));
+            setPasswordStep('verify');
+
+        } catch (error: any) {
+            console.error('Error requesting code:', error);
+            setPasswordError(error.message || t('profile.changePasswordError'));
+        } finally {
+            setPasswordLoading(false);
+        }
+    };
+
     const handleChangePassword = async (e: React.FormEvent) => {
         e.preventDefault();
         setPasswordError('');
@@ -127,14 +157,15 @@ export default function ProfilePage() {
         try {
             if (!user?.email) throw new Error('No user email');
 
-            // 1. Verify old password
-            const { error: signInError } = await supabase.auth.signInWithPassword({
+            // 1. Verify OTP
+            const { error: verifyError } = await supabase.auth.verifyOtp({
                 email: user.email,
-                password: passwordForm.currentPassword
+                token: passwordForm.code,
+                type: 'email'
             });
 
-            if (signInError) {
-                setPasswordError(t('profile.incorrectPassword'));
+            if (verifyError) {
+                setPasswordError(t('profile.incorrectPassword')); // Reuse incorrect password msg or similar
                 setPasswordLoading(false);
                 return;
             }
@@ -151,8 +182,9 @@ export default function ProfilePage() {
             setPasswordSuccess(t('profile.changePasswordSuccess'));
             setTimeout(() => {
                 setShowPasswordModal(false);
-                setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                setPasswordForm({ code: '', newPassword: '', confirmPassword: '' });
                 setPasswordSuccess('');
+                setPasswordStep('request');
             }, 2000);
 
         } catch (error) {
@@ -466,64 +498,91 @@ export default function ProfilePage() {
                                 </div>
                             )}
 
-                            <form onSubmit={handleChangePassword} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                                        {t('profile.currentPassword')}
-                                    </label>
-                                    <input
-                                        type="password"
-                                        required
-                                        value={passwordForm.currentPassword}
-                                        onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                                        className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#34aa56] focus:border-transparent transition-all"
-                                    />
-                                </div>
+                            {passwordStep === 'request' ? (
+                                <div className="space-y-6 text-center">
+                                    <p className="text-slate-600">
+                                        {t('profile.reauthDescription')}
+                                    </p>
 
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                                        {t('profile.newPassword')}
-                                    </label>
-                                    <input
-                                        type="password"
-                                        required
-                                        value={passwordForm.newPassword}
-                                        onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                                        className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#34aa56] focus:border-transparent transition-all"
-                                    />
+                                    <div className="grid grid-cols-2 gap-4 pt-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPasswordModal(false)}
+                                            disabled={passwordLoading}
+                                            className="py-3 px-4 rounded-xl font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+                                        >
+                                            {t('profile.cancel')}
+                                        </button>
+                                        <button
+                                            onClick={handleRequestCode}
+                                            disabled={passwordLoading}
+                                            className="py-3 px-4 rounded-xl font-bold text-white bg-[#34aa56] hover:bg-[#2d964b] shadow-lg shadow-[#34aa56]/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                        >
+                                            {passwordLoading ? '...' : t('profile.sendCode')}
+                                        </button>
+                                    </div>
                                 </div>
+                            ) : (
+                                <form onSubmit={handleChangePassword} className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                                            {t('profile.codeLabel')}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={passwordForm.code}
+                                            onChange={(e) => setPasswordForm({ ...passwordForm, code: e.target.value })}
+                                            placeholder="123456"
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#34aa56] focus:border-transparent transition-all font-mono tracking-widest text-center text-lg"
+                                        />
+                                    </div>
 
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                                        {t('profile.confirmNewPassword')}
-                                    </label>
-                                    <input
-                                        type="password"
-                                        required
-                                        value={passwordForm.confirmPassword}
-                                        onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                                        className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#34aa56] focus:border-transparent transition-all"
-                                    />
-                                </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                                            {t('profile.newPassword')}
+                                        </label>
+                                        <input
+                                            type="password"
+                                            required
+                                            value={passwordForm.newPassword}
+                                            onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#34aa56] focus:border-transparent transition-all"
+                                        />
+                                    </div>
 
-                                <div className="grid grid-cols-2 gap-4 pt-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPasswordModal(false)}
-                                        disabled={passwordLoading}
-                                        className="py-3 px-4 rounded-xl font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
-                                    >
-                                        {t('profile.cancel')}
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        disabled={passwordLoading}
-                                        className="py-3 px-4 rounded-xl font-bold text-white bg-[#34aa56] hover:bg-[#2d964b] shadow-lg shadow-[#34aa56]/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                                    >
-                                        {passwordLoading ? t('profile.saving') : t('resetPassword.submitButton')}
-                                    </button>
-                                </div>
-                            </form>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                                            {t('profile.confirmNewPassword')}
+                                        </label>
+                                        <input
+                                            type="password"
+                                            required
+                                            value={passwordForm.confirmPassword}
+                                            onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#34aa56] focus:border-transparent transition-all"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4 pt-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPasswordModal(false)}
+                                            disabled={passwordLoading}
+                                            className="py-3 px-4 rounded-xl font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+                                        >
+                                            {t('profile.cancel')}
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={passwordLoading}
+                                            className="py-3 px-4 rounded-xl font-bold text-white bg-[#34aa56] hover:bg-[#2d964b] shadow-lg shadow-[#34aa56]/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                        >
+                                            {passwordLoading ? t('profile.saving') : t('profile.verifyAndChange')}
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
 
                         </div>
                     </div>

@@ -177,6 +177,11 @@ export const translations = {
             passwordMismatch: "Az új jelszavak nem egyeznek.",
             incorrectPassword: "A jelenlegi jelszó helytelen.",
             saving: "Mentés...",
+            sendCode: "Ellenőrző kód küldése",
+            codeLabel: "Ellenőrző kód",
+            verificationSent: "Kód elküldve az email címre!",
+            verifyAndChange: "Ellenőrzés és Csere",
+            reauthDescription: "Biztonsági okokból küldtünk egy ellenőrző kódot az email címedre. Kérjük, írd be a kódot és az új jelszót.",
         }
     },
     en: {
@@ -353,6 +358,11 @@ export const translations = {
             passwordMismatch: "New passwords do not match.",
             incorrectPassword: "The current password is incorrect.",
             saving: "Saving...",
+            sendCode: "Send Verification Code",
+            codeLabel: "Verification Code",
+            verificationSent: "Code sent to your email!",
+            verifyAndChange: "Verify & Change",
+            reauthDescription: "For security reasons, we sent a verification code to your email. Please enter the code and your new password.",
         }
     }
 };
