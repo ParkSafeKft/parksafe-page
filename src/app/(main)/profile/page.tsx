@@ -15,7 +15,8 @@ import {
     Calendar,
     Clock,
     Hash,
-    LayoutDashboard
+    LayoutDashboard,
+    Lock
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -28,6 +29,16 @@ export default function ProfilePage() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [deleteError, setDeleteError] = useState('');
+
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [passwordForm, setPasswordForm] = useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
+    const [passwordLoading, setPasswordLoading] = useState(false);
+    const [passwordError, setPasswordError] = useState('');
+    const [passwordSuccess, setPasswordSuccess] = useState('');
 
     useEffect(() => {
         // Redirect to home if not logged in
@@ -92,6 +103,63 @@ export default function ProfilePage() {
             console.error('Error deleting account:', error);
             setDeleteError(t('login.errorGeneric'));
             setDeleteLoading(false);
+        }
+    };
+
+    const handleChangePassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setPasswordError('');
+        setPasswordSuccess('');
+        setPasswordLoading(true);
+
+        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+            setPasswordError(t('profile.passwordMismatch'));
+            setPasswordLoading(false);
+            return;
+        }
+
+        if (passwordForm.newPassword.length < 6) {
+            setPasswordError(t('resetPassword.errorLength'));
+            setPasswordLoading(false);
+            return;
+        }
+
+        try {
+            if (!user?.email) throw new Error('No user email');
+
+            // 1. Verify old password
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+                email: user.email,
+                password: passwordForm.currentPassword
+            });
+
+            if (signInError) {
+                setPasswordError(t('profile.incorrectPassword'));
+                setPasswordLoading(false);
+                return;
+            }
+
+            // 2. Update password
+            const { error: updateError } = await supabase.auth.updateUser({
+                password: passwordForm.newPassword
+            });
+
+            if (updateError) {
+                throw updateError;
+            }
+
+            setPasswordSuccess(t('profile.changePasswordSuccess'));
+            setTimeout(() => {
+                setShowPasswordModal(false);
+                setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                setPasswordSuccess('');
+            }, 2000);
+
+        } catch (error) {
+            console.error('Error changing password:', error);
+            setPasswordError(t('profile.changePasswordError'));
+        } finally {
+            setPasswordLoading(false);
         }
     };
 
@@ -267,6 +335,16 @@ export default function ProfilePage() {
                                 )}
 
                                 <button
+                                    onClick={() => setShowPasswordModal(true)}
+                                    className="w-full flex items-center gap-3 p-4 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-900 font-bold transition-colors text-left group"
+                                >
+                                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm border border-slate-200 group-hover:border-slate-300 transition-colors">
+                                        <Lock size={20} className="text-slate-600" />
+                                    </div>
+                                    <span>{t('profile.changePassword')}</span>
+                                </button>
+
+                                <button
                                     onClick={handleLogout}
                                     className="w-full flex items-center gap-3 p-4 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-900 font-bold transition-colors text-left group"
                                 >
@@ -304,60 +382,154 @@ export default function ProfilePage() {
             </div>
 
             {/* Delete Account Modal */}
-            {showDeleteModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowDeleteModal(false)}>
-                    <div
-                        className="w-full max-w-lg bg-white rounded-[2rem] shadow-2xl p-8 animate-in fade-in zoom-in-95 duration-200"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="flex items-center justify-center w-16 h-16 bg-red-50 rounded-full mx-auto mb-6">
-                            <AlertTriangle className="w-8 h-8 text-red-500" />
-                        </div>
-
-                        <h2 className="text-2xl font-bold text-slate-900 text-center mb-4">
-                            {t('profile.deleteModalTitle')}
-                        </h2>
-
-                        <div className="bg-red-50 rounded-xl p-4 mb-6 border border-red-100">
-                            <p className="text-red-800 font-medium mb-2">{t('profile.deleteModalWarning')}</p>
-                            <ul className="text-sm text-red-700 space-y-1 list-disc list-inside">
-                                <li>Profilinformációk végleges törlése</li>
-                                <li>Bejelentkezési adatok eltávolítása</li>
-                                <li>Elmentett beállitások elvesztése</li>
-                            </ul>
-                        </div>
-
-                        <p className="text-center text-slate-500 mb-8">
-                            {t('profile.deleteModalConfirm')}
-                        </p>
-
-                        {deleteError && (
-                            <div className="mb-6 p-3 rounded-lg bg-red-100 text-red-700 text-sm font-medium text-center">
-                                {deleteError}
+            {
+                showDeleteModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowDeleteModal(false)}>
+                        <div
+                            className="w-full max-w-lg bg-white rounded-[2rem] shadow-2xl p-8 animate-in fade-in zoom-in-95 duration-200"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center justify-center w-16 h-16 bg-red-50 rounded-full mx-auto mb-6">
+                                <AlertTriangle className="w-8 h-8 text-red-500" />
                             </div>
-                        )}
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <button
-                                onClick={() => setShowDeleteModal(false)}
-                                disabled={deleteLoading}
-                                className="py-3 px-4 rounded-xl font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
-                            >
-                                {t('profile.cancel')}
-                            </button>
-                            <button
-                                onClick={handleDeleteAccount}
-                                disabled={deleteLoading}
-                                className="py-3 px-4 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                            >
-                                {deleteLoading ? t('profile.deleting') : t('profile.verify')}
-                            </button>
+                            <h2 className="text-2xl font-bold text-slate-900 text-center mb-4">
+                                {t('profile.deleteModalTitle')}
+                            </h2>
+
+                            <div className="bg-red-50 rounded-xl p-4 mb-6 border border-red-100">
+                                <p className="text-red-800 font-medium mb-2">{t('profile.deleteModalWarning')}</p>
+                                <ul className="text-sm text-red-700 space-y-1 list-disc list-inside">
+                                    <li>Profilinformációk végleges törlése</li>
+                                    <li>Bejelentkezési adatok eltávolítása</li>
+                                    <li>Elmentett beállitások elvesztése</li>
+                                </ul>
+                            </div>
+
+                            <p className="text-center text-slate-500 mb-8">
+                                {t('profile.deleteModalConfirm')}
+                            </p>
+
+                            {deleteError && (
+                                <div className="mb-6 p-3 rounded-lg bg-red-100 text-red-700 text-sm font-medium text-center">
+                                    {deleteError}
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <button
+                                    onClick={() => setShowDeleteModal(false)}
+                                    disabled={deleteLoading}
+                                    className="py-3 px-4 rounded-xl font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+                                >
+                                    {t('profile.cancel')}
+                                </button>
+                                <button
+                                    onClick={handleDeleteAccount}
+                                    disabled={deleteLoading}
+                                    className="py-3 px-4 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    {deleteLoading ? t('profile.deleting') : t('profile.verify')}
+                                </button>
+                            </div>
+
                         </div>
-
                     </div>
-                </div>
-            )}
+                )
+            }
 
-        </div>
+            {/* Change Password Modal */}
+            {
+                showPasswordModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowPasswordModal(false)}>
+                        <div
+                            className="w-full max-w-lg bg-white rounded-[2rem] shadow-2xl p-8 animate-in fade-in zoom-in-95 duration-200"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center justify-center w-16 h-16 bg-slate-50 rounded-full mx-auto mb-6">
+                                <Lock className="w-8 h-8 text-slate-600" />
+                            </div>
+
+                            <h2 className="text-2xl font-bold text-slate-900 text-center mb-6">
+                                {t('profile.changePassword')}
+                            </h2>
+
+                            {passwordError && (
+                                <div className="mb-6 p-3 rounded-lg bg-red-100 text-red-700 text-sm font-medium text-center">
+                                    {passwordError}
+                                </div>
+                            )}
+
+                            {passwordSuccess && (
+                                <div className="mb-6 p-3 rounded-lg bg-green-100 text-green-700 text-sm font-medium text-center">
+                                    {passwordSuccess}
+                                </div>
+                            )}
+
+                            <form onSubmit={handleChangePassword} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                                        {t('profile.currentPassword')}
+                                    </label>
+                                    <input
+                                        type="password"
+                                        required
+                                        value={passwordForm.currentPassword}
+                                        onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#34aa56] focus:border-transparent transition-all"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                                        {t('profile.newPassword')}
+                                    </label>
+                                    <input
+                                        type="password"
+                                        required
+                                        value={passwordForm.newPassword}
+                                        onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#34aa56] focus:border-transparent transition-all"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                                        {t('profile.confirmNewPassword')}
+                                    </label>
+                                    <input
+                                        type="password"
+                                        required
+                                        value={passwordForm.confirmPassword}
+                                        onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#34aa56] focus:border-transparent transition-all"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 pt-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPasswordModal(false)}
+                                        disabled={passwordLoading}
+                                        className="py-3 px-4 rounded-xl font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+                                    >
+                                        {t('profile.cancel')}
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={passwordLoading}
+                                        className="py-3 px-4 rounded-xl font-bold text-white bg-[#34aa56] hover:bg-[#2d964b] shadow-lg shadow-[#34aa56]/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                    >
+                                        {passwordLoading ? t('profile.saving') : t('resetPassword.submitButton')}
+                                    </button>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                )
+            }
+
+        </div >
     );
 }

@@ -168,6 +168,15 @@ export const translations = {
             cancel: "Mégsem",
             verify: "Igen, törlöm",
             deleting: "Törlés...",
+            changePassword: "Jelszó megváltoztatása",
+            currentPassword: "Jelenlegi jelszó",
+            newPassword: "Új jelszó",
+            confirmNewPassword: "Új jelszó megerősítése",
+            changePasswordSuccess: "A jelszó sikeresen megváltoztatva.",
+            changePasswordError: "Hiba történt a jelszó változtatása közben.",
+            passwordMismatch: "Az új jelszavak nem egyeznek.",
+            incorrectPassword: "A jelenlegi jelszó helytelen.",
+            saving: "Mentés...",
         }
     },
     en: {
@@ -335,6 +344,15 @@ export const translations = {
             cancel: "Cancel",
             verify: "Yes, delete it",
             deleting: "Deleting...",
+            changePassword: "Change Password",
+            currentPassword: "Current Password",
+            newPassword: "New Password",
+            confirmNewPassword: "Confirm New Password",
+            changePasswordSuccess: "Password changed successfully.",
+            changePasswordError: "An error occurred while changing the password.",
+            passwordMismatch: "New passwords do not match.",
+            incorrectPassword: "The current password is incorrect.",
+            saving: "Saving...",
         }
     }
 };
