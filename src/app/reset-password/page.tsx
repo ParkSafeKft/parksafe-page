@@ -1,12 +1,24 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { supabase } from '@/lib/supabaseClient';
-import { useAuth } from '@/contexts/AuthContext';
+import { createClient } from '@supabase/supabase-js';
 import { Lock, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Link from 'next/link';
+
+// Create a local Supabase client that doesn't persist sessions.
+// This prevents the password reset flow from logging the user in on other tabs.
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+const secureClient = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+        persistSession: false, // Don't save session to localStorage
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+    },
+});
 
 function ResetPasswordContent() {
     const { t } = useLanguage();
@@ -16,9 +28,13 @@ function ResetPasswordContent() {
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const [verifying, setVerifying] = useState(true);
-    const { updatePassword, signOut } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
+
+    // We don't need useAuth here because we're using a local client
+    // const { updatePassword, signOut } = useAuth(); 
+
+    const successRef = useRef(false);
 
     const token_hash = searchParams.get('token_hash');
     const type = searchParams.get('type') as any || 'recovery';
@@ -32,7 +48,8 @@ function ResetPasswordContent() {
             }
 
             try {
-                const { error } = await supabase.auth.verifyOtp({ token_hash, type });
+                // Verify against the secure, local client
+                const { error } = await secureClient.auth.verifyOtp({ token_hash, type });
                 if (error) {
                     setError(error.message);
                 }
@@ -45,6 +62,8 @@ function ResetPasswordContent() {
         };
 
         verifyToken();
+
+        // No cleanup needed for signOut because session is not persisted!
     }, [token_hash, type, t]);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -65,13 +84,20 @@ function ResetPasswordContent() {
         setLoading(true);
 
         try {
-            const { error } = await updatePassword(password);
+            // Update user using the secure client (which has the session in memory)
+            const { error } = await secureClient.auth.updateUser({
+                password: password,
+            });
+
             if (error) {
                 setError(error.message);
             } else {
                 setMessage(t('resetPassword.successMessage'));
-                // Sign out to force fresh login
-                await signOut();
+                successRef.current = true;
+
+                // We don't need to sign out locally, but it's good practice to clear the in-memory session
+                await secureClient.auth.signOut();
+
                 setTimeout(() => {
                     router.push('/login');
                 }, 2000);
