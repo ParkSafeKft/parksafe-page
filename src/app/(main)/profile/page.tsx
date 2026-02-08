@@ -116,12 +116,8 @@ export default function ProfilePage() {
         try {
             if (!user?.email) throw new Error('No user email');
 
-            const { error } = await supabase.auth.signInWithOtp({
-                email: user.email,
-                options: {
-                    shouldCreateUser: false
-                }
-            });
+            // Use reauthenticate() to trigger the "Confirm reauthentication" email template
+            const { error } = await supabase.auth.reauthenticate();
 
             if (error) throw error;
 
