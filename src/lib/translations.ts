@@ -176,12 +176,9 @@ export const translations = {
             changePasswordError: "Hiba történt a jelszó változtatása közben.",
             passwordMismatch: "Az új jelszavak nem egyeznek.",
             incorrectPassword: "A jelenlegi jelszó helytelen.",
-            saving: "Mentés...",
-            sendCode: "Ellenőrző kód küldése",
-            codeLabel: "Ellenőrző kód",
-            verificationSent: "Kód elküldve az email címre!",
-            verifyAndChange: "Ellenőrzés és Csere",
-            reauthDescription: "Biztonsági okokból küldtünk egy ellenőrző kódot az email címedre. Kérjük, írd be a kódot és az új jelszót.",
+            resetLinkSent: "Jelszó-visszaállító link elküldve!",
+            sendResetLink: "Jelszó-visszaállító email küldése",
+            resetLinkDescription: "Küldünk egy e-mailt a jelszó visszaállításához szükséges linkkel.",
         }
     },
     en: {
@@ -357,12 +354,9 @@ export const translations = {
             changePasswordError: "An error occurred while changing the password.",
             passwordMismatch: "New passwords do not match.",
             incorrectPassword: "The current password is incorrect.",
-            saving: "Saving...",
-            sendCode: "Send Verification Code",
-            codeLabel: "Verification Code",
-            verificationSent: "Code sent to your email!",
-            verifyAndChange: "Verify & Change",
-            reauthDescription: "For security reasons, we sent a verification code to your email. Please enter the code and your new password.",
+            resetLinkSent: "Password reset link sent!",
+            sendResetLink: "Send Password Reset Email",
+            resetLinkDescription: "We will send an email with a link to reset your password.",
         }
     }
 };

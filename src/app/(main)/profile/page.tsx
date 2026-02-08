@@ -30,16 +30,10 @@ export default function ProfilePage() {
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [deleteError, setDeleteError] = useState('');
 
-    const [showPasswordModal, setShowPasswordModal] = useState(false);
-    const [passwordStep, setPasswordStep] = useState<'request' | 'verify'>('request');
-    const [passwordForm, setPasswordForm] = useState({
-        code: '',
-        newPassword: '',
-        confirmPassword: ''
-    });
-    const [passwordLoading, setPasswordLoading] = useState(false);
-    const [passwordError, setPasswordError] = useState('');
-    const [passwordSuccess, setPasswordSuccess] = useState('');
+    const [showResetModal, setShowResetModal] = useState(false);
+    const [resetLoading, setResetLoading] = useState(false);
+    const [resetError, setResetError] = useState('');
+    const [resetSuccess, setResetSuccess] = useState('');
 
     useEffect(() => {
         // Redirect to home if not logged in
@@ -107,87 +101,31 @@ export default function ProfilePage() {
         }
     };
 
-    const handleRequestCode = async (e?: React.FormEvent) => {
-        if (e) e.preventDefault();
-        setPasswordLoading(true);
-        setPasswordError('');
-        setPasswordSuccess('');
+    const handleSendResetLink = async () => {
+        if (!user?.email) return;
+
+        setResetLoading(true);
+        setResetError('');
+        setResetSuccess('');
 
         try {
-            if (!user?.email) throw new Error('No user email');
-
-            // Use reauthenticate() to trigger the "Confirm reauthentication" email template
-            const { error } = await supabase.auth.reauthenticate();
+            const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+                redirectTo: `${window.location.origin}/reset-password`,
+            });
 
             if (error) throw error;
 
-            setPasswordSuccess(t('profile.verificationSent'));
-            setPasswordStep('verify');
-
-        } catch (error: any) {
-            console.error('Error requesting code:', error);
-            setPasswordError(error.message || t('profile.changePasswordError'));
-        } finally {
-            setPasswordLoading(false);
-        }
-    };
-
-    const handleChangePassword = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setPasswordError('');
-        setPasswordSuccess('');
-        setPasswordLoading(true);
-
-        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-            setPasswordError(t('profile.passwordMismatch'));
-            setPasswordLoading(false);
-            return;
-        }
-
-        if (passwordForm.newPassword.length < 6) {
-            setPasswordError(t('resetPassword.errorLength'));
-            setPasswordLoading(false);
-            return;
-        }
-
-        try {
-            if (!user?.email) throw new Error('No user email');
-
-            // 1. Verify OTP
-            const { error: verifyError } = await supabase.auth.verifyOtp({
-                email: user.email,
-                token: passwordForm.code,
-                type: 'email'
-            });
-
-            if (verifyError) {
-                setPasswordError(t('profile.incorrectPassword')); // Reuse incorrect password msg or similar
-                setPasswordLoading(false);
-                return;
-            }
-
-            // 2. Update password
-            const { error: updateError } = await supabase.auth.updateUser({
-                password: passwordForm.newPassword
-            });
-
-            if (updateError) {
-                throw updateError;
-            }
-
-            setPasswordSuccess(t('profile.changePasswordSuccess'));
+            setResetSuccess(t('profile.resetLinkSent'));
             setTimeout(() => {
-                setShowPasswordModal(false);
-                setPasswordForm({ code: '', newPassword: '', confirmPassword: '' });
-                setPasswordSuccess('');
-                setPasswordStep('request');
-            }, 2000);
+                setShowResetModal(false);
+                setResetSuccess('');
+            }, 3000);
 
         } catch (error) {
-            console.error('Error changing password:', error);
-            setPasswordError(t('profile.changePasswordError'));
+            console.error('Error sending reset link:', error);
+            setResetError(t('login.errorGeneric'));
         } finally {
-            setPasswordLoading(false);
+            setResetLoading(false);
         }
     };
 
@@ -363,13 +301,13 @@ export default function ProfilePage() {
                                 )}
 
                                 <button
-                                    onClick={() => setShowPasswordModal(true)}
+                                    onClick={() => setShowResetModal(true)}
                                     className="w-full flex items-center gap-3 p-4 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-900 font-bold transition-colors text-left group"
                                 >
                                     <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm border border-slate-200 group-hover:border-slate-300 transition-colors">
                                         <Lock size={20} className="text-slate-600" />
                                     </div>
-                                    <span>{t('profile.changePassword')}</span>
+                                    <span>{t('profile.sendResetLink')}</span>
                                 </button>
 
                                 <button
@@ -466,10 +404,10 @@ export default function ProfilePage() {
                 )
             }
 
-            {/* Change Password Modal */}
+            {/* Reset Password Link Modal */}
             {
-                showPasswordModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowPasswordModal(false)}>
+                showResetModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowResetModal(false)}>
                         <div
                             className="w-full max-w-lg bg-white rounded-[2rem] shadow-2xl p-8 animate-in fade-in zoom-in-95 duration-200"
                             onClick={(e) => e.stopPropagation()}
@@ -478,108 +416,53 @@ export default function ProfilePage() {
                                 <Lock className="w-8 h-8 text-slate-600" />
                             </div>
 
-                            <h2 className="text-2xl font-bold text-slate-900 text-center mb-6">
-                                {t('profile.changePassword')}
+                            <h2 className="text-2xl font-bold text-slate-900 text-center mb-4">
+                                {t('profile.sendResetLink')}
                             </h2>
 
-                            {passwordError && (
+                            <p className="text-center text-slate-600 mb-8">
+                                {t('profile.resetLinkDescription')}
+                            </p>
+
+                            {resetError && (
                                 <div className="mb-6 p-3 rounded-lg bg-red-100 text-red-700 text-sm font-medium text-center">
-                                    {passwordError}
+                                    {resetError}
                                 </div>
                             )}
 
-                            {passwordSuccess && (
+                            {resetSuccess && (
                                 <div className="mb-6 p-3 rounded-lg bg-green-100 text-green-700 text-sm font-medium text-center">
-                                    {passwordSuccess}
+                                    {resetSuccess}
                                 </div>
                             )}
 
-                            {passwordStep === 'request' ? (
-                                <div className="space-y-6 text-center">
-                                    <p className="text-slate-600">
-                                        {t('profile.reauthDescription')}
-                                    </p>
-
-                                    <div className="grid grid-cols-2 gap-4 pt-4">
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPasswordModal(false)}
-                                            disabled={passwordLoading}
-                                            className="py-3 px-4 rounded-xl font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
-                                        >
-                                            {t('profile.cancel')}
-                                        </button>
-                                        <button
-                                            onClick={handleRequestCode}
-                                            disabled={passwordLoading}
-                                            className="py-3 px-4 rounded-xl font-bold text-white bg-[#34aa56] hover:bg-[#2d964b] shadow-lg shadow-[#34aa56]/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                                        >
-                                            {passwordLoading ? '...' : t('profile.sendCode')}
-                                        </button>
-                                    </div>
+                            {!resetSuccess && (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <button
+                                        onClick={() => setShowResetModal(false)}
+                                        disabled={resetLoading}
+                                        className="py-3 px-4 rounded-xl font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+                                    >
+                                        {t('profile.cancel')}
+                                    </button>
+                                    <button
+                                        onClick={handleSendResetLink}
+                                        disabled={resetLoading}
+                                        className="py-3 px-4 rounded-xl font-bold text-white bg-[#34aa56] hover:bg-[#2d964b] shadow-lg shadow-[#34aa56]/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                    >
+                                        {resetLoading ? '...' : t('profile.sendResetLink')}
+                                    </button>
                                 </div>
-                            ) : (
-                                <form onSubmit={handleChangePassword} className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-2">
-                                            {t('profile.codeLabel')}
-                                        </label>
-                                        <input
-                                            type="text"
-                                            required
-                                            value={passwordForm.code}
-                                            onChange={(e) => setPasswordForm({ ...passwordForm, code: e.target.value })}
-                                            placeholder="123456"
-                                            className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#34aa56] focus:border-transparent transition-all font-mono tracking-widest text-center text-lg"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-2">
-                                            {t('profile.newPassword')}
-                                        </label>
-                                        <input
-                                            type="password"
-                                            required
-                                            value={passwordForm.newPassword}
-                                            onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                                            className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#34aa56] focus:border-transparent transition-all"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 mb-2">
-                                            {t('profile.confirmNewPassword')}
-                                        </label>
-                                        <input
-                                            type="password"
-                                            required
-                                            value={passwordForm.confirmPassword}
-                                            onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                                            className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#34aa56] focus:border-transparent transition-all"
-                                        />
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4 pt-4">
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPasswordModal(false)}
-                                            disabled={passwordLoading}
-                                            className="py-3 px-4 rounded-xl font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
-                                        >
-                                            {t('profile.cancel')}
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            disabled={passwordLoading}
-                                            className="py-3 px-4 rounded-xl font-bold text-white bg-[#34aa56] hover:bg-[#2d964b] shadow-lg shadow-[#34aa56]/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                                        >
-                                            {passwordLoading ? t('profile.saving') : t('profile.verifyAndChange')}
-                                        </button>
-                                    </div>
-                                </form>
                             )}
 
+                            {resetSuccess && (
+                                <button
+                                    onClick={() => setShowResetModal(false)}
+                                    className="w-full py-3 px-4 rounded-xl font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+                                >
+                                    {t('profile.cancel')}
+                                </button>
+                            )}
                         </div>
                     </div>
                 )
