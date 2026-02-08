@@ -8,7 +8,7 @@ export function AuthRedirectHandler() {
 
     useEffect(() => {
         // Check if we have auth tokens in the URL hash (regular login or magic link)
-        if (typeof window !== 'undefined' && window.location.hash && window.location.hash.includes('access_token=')) {
+        if (typeof window !== 'undefined' && window.location.hash && window.location.hash.includes('access_token=') && !window.location.hash.includes('type=recovery')) {
             // The Supabase client (initialized in AuthContext) will automatically pick up the session 
             // from the hash when it initializes or when the hash changes.
             // We just need to give it a moment to process, then clean the URL and redirect.

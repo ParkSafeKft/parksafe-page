@@ -81,6 +81,8 @@ export interface AuthContextType {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     signInWithGoogle: () => Promise<{ data: any; error: any }>;
     signOut: () => Promise<void>;
+    requestPasswordReset: (email: string) => Promise<{ data: any; error: any }>;
+    updatePassword: (password: string) => Promise<{ data: any; error: any }>;
 }
 
 export interface FormData {
