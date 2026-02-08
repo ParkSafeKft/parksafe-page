@@ -196,6 +196,11 @@ export default function LoginPage() {
                                             className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#34aa56]/20 focus:border-[#34aa56] transition-all font-medium"
                                         />
                                     </div>
+                                    <div className="flex justify-end">
+                                        <Link href="/forgot-password" className="text-sm font-bold text-[#34aa56] hover:text-emerald-700 transition-colors">
+                                            {t('forgotPassword.title')}
+                                        </Link>
+                                    </div>
                                 </div>
 
                                 <button
