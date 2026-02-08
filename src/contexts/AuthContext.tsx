@@ -99,12 +99,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await supabase.auth.signOut();
     };
 
+    const requestPasswordReset = async (email: string) => {
+        const redirectTo = typeof window !== 'undefined'
+            ? `${window.location.origin}/reset-password`
+            : undefined;
+
+        const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo,
+        });
+        return { data, error };
+    };
+
+    const updatePassword = async (newPassword: string) => {
+        const { data, error } = await supabase.auth.updateUser({
+            password: newPassword,
+        });
+        return { data, error };
+    };
+
     const value: AuthContextType = {
         user,
         loading,
         signInWithEmail,
         signInWithGoogle,
         signOut,
+        requestPasswordReset,
+        updatePassword,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
