@@ -65,12 +65,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const {
             data: { subscription },
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+        } = supabase.auth.onAuthStateChange((event: any, session: any) => {
+            // If user is recovering password, redirect to reset-password page
+            if (event === 'PASSWORD_RECOVERY') {
+                // Redirect to reset password page
+                if (typeof window !== 'undefined') {
+                    window.location.href = '/reset-password';
+                }
+                return;
+            }
+
             fetchUserProfile(session);
         });
 
         return () => subscription.unsubscribe();
     }, []);
+
 
     const signInWithEmail = async (email: string, password: string) => {
         const { data, error } = await supabase.auth.signInWithPassword({
