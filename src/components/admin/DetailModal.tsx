@@ -1,9 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Dialog,
     DialogContent,
     DialogTitle,
 } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -25,6 +31,9 @@ import {
     Star,
     Edit,
     MessageSquare,
+    ChevronDown,
+    AlertCircle,
+    Check
 } from 'lucide-react';
 
 interface DetailModalProps {
@@ -48,6 +57,20 @@ export default function DetailModal({
     onStatusChange,
 }: DetailModalProps) {
     const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+    const [currentStatus, setCurrentStatus] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (item?.status) {
+            setCurrentStatus(item.status);
+        }
+    }, [item]);
+
+    const handleStatusChange = (newStatus: string) => {
+        setCurrentStatus(newStatus);
+        if (onStatusChange && item) {
+            onStatusChange(item.id, newStatus);
+        }
+    };
 
     if (!item) return null;
 
@@ -101,18 +124,28 @@ export default function DetailModal({
                 <DialogContent className="admin-dark max-w-2xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
                     <div className="flex flex-col h-[85vh]">
                         {/* Header */}
-                        <div className="p-6 border-b border-border flex-shrink-0">
-                            <DialogTitle className="text-foreground flex items-center gap-4 text-xl font-bold">
-                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                                    <MessageSquare className="h-5 w-5 text-white" />
+                        <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm sticky top-0 z-10">
+                            <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
+                                <div className="flex items-center gap-4 min-w-0">
+                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-600/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                        <MessageSquare className="h-6 w-6 text-purple-400" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h1 className="text-lg font-bold text-foreground truncate leading-tight">
+                                            Visszajelzés részletei
+                                        </h1>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <p className="text-xs font-mono text-muted-foreground truncate opacity-70">
+                                                ID: {item.id.substring(0, 8)}...
+                                            </p>
+                                            <Badge variant="outline" className="text-[10px] h-5 px-1.5 border-white/10 bg-white/5">
+                                                {new Date(item.created_at).toLocaleDateString()}
+                                            </Badge>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <h1 className="text-xl font-bold text-foreground truncate">
-                                        Visszajelzés részletei
-                                    </h1>
-                                    <p className="text-muted-foreground text-sm mt-1 truncate">
-                                        {item.id}
-                                    </p>
+                                <div className="flex-shrink-0 pl-4">
+                                    {/* Optional: Add status badge here too for quick visibility */}
                                 </div>
                             </DialogTitle>
                         </div>
@@ -136,60 +169,111 @@ export default function DetailModal({
                                 </div>
 
                                 {/* Metadata Grid */}
-                                <div className="grid grid-cols-2 gap-6">
-                                    <div>
-                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                                            Típus
+                                <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                                    <div className="space-y-2">
+                                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                            <Shield className="w-3 h-3" /> Típus
                                         </h3>
-                                        <div className="flex items-center gap-2 text-white capitalize">
-                                            {item.type}
+                                        <div className="flex items-center">
+                                            <Badge variant="secondary" className="px-3 py-1 text-sm font-medium capitalize bg-zinc-800 text-zinc-100 hover:bg-zinc-700 border-zinc-700">
+                                                {item.type}
+                                            </Badge>
                                         </div>
                                     </div>
-                                    <div>
-                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                                            Kategória
+                                    <div className="space-y-2">
+                                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                            <AlertCircle className="w-3 h-3" /> Prioritás
                                         </h3>
-                                        <div className="flex items-center gap-2 text-white capitalize">
+                                        <div className="flex items-center">
+                                            <Badge
+                                                className={`px-3 py-1 text-sm font-medium capitalize border-0 ${item.priority === 'high' ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' :
+                                                    item.priority === 'medium' ? 'bg-orange-500/20 text-orange-400 hover:bg-orange-500/30' :
+                                                        'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30'
+                                                    }`}
+                                            >
+                                                {item.priority}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                            <Users className="w-3 h-3" /> Kategória
+                                        </h3>
+                                        <p className="text-sm font-medium text-zinc-200 capitalize pl-1">
                                             {item.category?.replace(/_/g, ' ')}
-                                        </div>
+                                        </p>
                                     </div>
-                                    <div>
-                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                                            Státusz
+                                    <div className="space-y-2">
+                                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                            <CheckCircle className="w-3 h-3" /> Státusz
                                         </h3>
                                         {onStatusChange ? (
-                                            <div className="relative">
-                                                <select
-                                                    value={item.status}
-                                                    onChange={(e) => onStatusChange(item.id, e.target.value)}
-                                                    onClick={(e) => e.stopPropagation()}
-                                                    className="w-full appearance-none bg-zinc-900/50 hover:bg-zinc-900 border border-white/10 text-zinc-300 text-sm rounded-lg pl-3 pr-8 py-2 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-colors cursor-pointer"
-                                                >
-                                                    <option value="open">Nyitott</option>
-                                                    <option value="in_progress">Folyamatban</option>
-                                                    <option value="resolved">Megoldva</option>
-                                                    <option value="closed">Lezárt</option>
-                                                    <option value="duplicate">Duplikált</option>
-                                                </select>
-                                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-zinc-400">
-                                                    <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                                                    </svg>
-                                                </div>
-                                            </div>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button
+                                                        variant="outline"
+                                                        className={`w-full justify-between border-white/10 bg-zinc-900/50 hover:bg-zinc-900 hover:text-white capitalize font-normal ${currentStatus === 'resolved' ? 'text-green-400 border-green-900/50' :
+                                                            currentStatus === 'closed' ? 'text-zinc-400' :
+                                                                currentStatus === 'in_progress' ? 'text-blue-400 border-blue-900/50' :
+                                                                    'text-zinc-200'
+                                                            }`}
+                                                    >
+                                                        <span className="flex items-center gap-2">
+                                                            <span className={`w-2 h-2 rounded-full ${currentStatus === 'open' ? 'bg-yellow-500' :
+                                                                currentStatus === 'in_progress' ? 'bg-blue-500' :
+                                                                    currentStatus === 'resolved' ? 'bg-green-500' :
+                                                                        currentStatus === 'closed' ? 'bg-zinc-500' :
+                                                                            'bg-purple-500'
+                                                                }`} />
+                                                            {currentStatus === 'open' ? 'Nyitott' :
+                                                                currentStatus === 'in_progress' ? 'Folyamatban' :
+                                                                    currentStatus === 'resolved' ? 'Megoldva' :
+                                                                        currentStatus === 'closed' ? 'Lezárt' :
+                                                                            currentStatus === 'duplicate' ? 'Duplikált' :
+                                                                                currentStatus?.replace(/_/g, ' ')}
+                                                        </span>
+                                                        <ChevronDown className="h-4 w-4 opacity-50" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="start" className="w-[180px] bg-zinc-900 border-zinc-800">
+                                                    <DropdownMenuItem onClick={() => handleStatusChange('open')} className="text-zinc-200 focus:bg-zinc-800 focus:text-white cursor-pointer group">
+                                                        <span className="w-2 h-2 rounded-full bg-yellow-500 mr-2 group-hover:shadow-[0_0_8px_rgba(234,179,8,0.6)] transition-shadow" />
+                                                        Nyitott
+                                                        {currentStatus === 'open' && <Check className="ml-auto h-3 w-3" />}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleStatusChange('in_progress')} className="text-zinc-200 focus:bg-zinc-800 focus:text-white cursor-pointer group">
+                                                        <span className="w-2 h-2 rounded-full bg-blue-500 mr-2 group-hover:shadow-[0_0_8px_rgba(59,130,246,0.6)] transition-shadow" />
+                                                        Folyamatban
+                                                        {currentStatus === 'in_progress' && <Check className="ml-auto h-3 w-3" />}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleStatusChange('resolved')} className="text-zinc-200 focus:bg-zinc-800 focus:text-white cursor-pointer group">
+                                                        <span className="w-2 h-2 rounded-full bg-green-500 mr-2 group-hover:shadow-[0_0_8px_rgba(34,197,94,0.6)] transition-shadow" />
+                                                        Megoldva
+                                                        {currentStatus === 'resolved' && <Check className="ml-auto h-3 w-3" />}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleStatusChange('duplicate')} className="text-zinc-200 focus:bg-zinc-800 focus:text-white cursor-pointer group">
+                                                        <span className="w-2 h-2 rounded-full bg-purple-500 mr-2 group-hover:shadow-[0_0_8px_rgba(168,85,247,0.6)] transition-shadow" />
+                                                        Duplikált
+                                                        {currentStatus === 'duplicate' && <Check className="ml-auto h-3 w-3" />}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleStatusChange('closed')} className="text-zinc-200 focus:bg-zinc-800 focus:text-white cursor-pointer group">
+                                                        <span className="w-2 h-2 rounded-full bg-zinc-500 mr-2 group-hover:shadow-[0_0_8px_rgba(113,113,122,0.6)] transition-shadow" />
+                                                        Lezárt
+                                                        {currentStatus === 'closed' && <Check className="ml-auto h-3 w-3" />}
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         ) : (
-                                            <div className="flex items-center gap-2 text-white capitalize">
+                                            <div className="flex items-center gap-2 text-white capitalize pl-1">
+                                                <span className={`w-2 h-2 rounded-full ${item.status === 'open' ? 'bg-yellow-500' :
+                                                    item.status === 'in_progress' ? 'bg-blue-500' :
+                                                        item.status === 'resolved' ? 'bg-green-500' :
+                                                            item.status === 'closed' ? 'bg-zinc-500' :
+                                                                'bg-purple-500'
+                                                    }`} />
                                                 {item.status?.replace(/_/g, ' ')}
                                             </div>
                                         )}
-                                    </div>
-                                    <div>
-                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                                            Prioritás
-                                        </h3>
-                                        <div className="flex items-center gap-2 text-white capitalize">
-                                            {item.priority}
-                                        </div>
                                     </div>
                                 </div>
                             </div>
