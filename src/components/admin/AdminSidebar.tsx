@@ -7,7 +7,6 @@ import {
     Store,
     Wrench,
     Home,
-    Settings,
     LogOut,
     Shield
 } from 'lucide-react';
@@ -37,7 +36,6 @@ export default function AdminSidebar({
         { id: 'repair', label: 'Javító Állomások', icon: Wrench, section: 'ADATKEZELÉS' },
         { id: 'feedback', label: 'Visszajelzések', icon: MessageSquare, section: 'ADATKEZELÉS' },
         { id: 'home', label: 'Vissza a főoldalra', icon: Home, section: 'EGYÉB' },
-        { id: 'settings', label: 'Beállítások', icon: Settings, section: 'EGYÉB' },
     ];
 
     const sections = ['ÁTTEKINTÉS', 'ADATKEZELÉS', 'EGYÉB'];
@@ -45,7 +43,7 @@ export default function AdminSidebar({
     const handleItemClick = (id: string) => {
         if (id === 'home') {
             onHomeConfig();
-        } else if (id !== 'settings') {
+        } else {
             setActiveTab(id);
         }
     };
@@ -82,14 +80,14 @@ export default function AdminSidebar({
                                         <button
                                             key={item.id}
                                             onClick={() => handleItemClick(item.id)}
-                                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${isActive && item.id !== 'home' && item.id !== 'settings'
+                                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${isActive && item.id !== 'home'
                                                 ? 'bg-green-500/10 text-green-500 border border-green-500/20'
                                                 : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
                                                 }`}
                                         >
-                                            <Icon className={`w-5 h-5 transition-colors ${isActive && item.id !== 'home' && item.id !== 'settings' ? 'text-green-500' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
+                                            <Icon className={`w-5 h-5 transition-colors ${isActive && item.id !== 'home' ? 'text-green-500' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
                                             <span className="text-sm font-medium flex-1 text-left">{item.label}</span>
-                                            {isActive && item.id !== 'home' && item.id !== 'settings' && <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />}
+                                            {isActive && item.id !== 'home' && <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />}
                                         </button>
                                     );
                                 })}
