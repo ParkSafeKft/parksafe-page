@@ -171,7 +171,11 @@ export default function FeedbackTable({
                     </thead>
                     <tbody className="divide-y divide-white/5">
                         {data.map((item) => (
-                            <tr key={item.id} className="hover:bg-white/[0.02] transition-colors group">
+                            <tr
+                                key={item.id}
+                                className="hover:bg-white/[0.02] transition-colors group cursor-pointer"
+                                onClick={() => onRowClick(item)}
+                            >
                                 <td className="p-4">
                                     <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center border border-white/10">
                                         {getTypeIcon(item.type)}
@@ -216,7 +220,10 @@ export default function FeedbackTable({
                                 </td>
                                 <td className="p-4 text-right">
                                     <button
-                                        onClick={() => onRowClick(item)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onRowClick(item);
+                                        }}
                                         className="p-2 rounded-lg text-zinc-500 hover:text-white hover:bg-white/10 transition-all"
                                     >
                                         <MoreHorizontal className="w-5 h-5" />

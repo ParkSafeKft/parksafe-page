@@ -35,7 +35,9 @@ interface DetailModalProps {
     type: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onEdit: (item: any) => void;
+    onStatusChange?: (id: string, newStatus: string) => void;
 }
+
 
 export default function DetailModal({
     isOpen,
@@ -43,6 +45,7 @@ export default function DetailModal({
     item,
     type,
     onEdit,
+    onStatusChange,
 }: DetailModalProps) {
     const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
 
@@ -154,56 +157,71 @@ export default function DetailModal({
                                         <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
                                             Státusz
                                         </h3>
-                                        <div className="flex items-center gap-2 text-white capitalize">
-                                            {item.status?.replace(/_/g, ' ')}
-                                        </div>
+                                        {item.status?.replace(/_/g, ' ')}
                                     </div>
-                                    <div>
-                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                                            Prioritás
-                                        </h3>
-                                        <div className="flex items-center gap-2 text-white capitalize">
-                                            {item.priority}
+                                    {onStatusChange && (
+                                        <div className="mt-2">
+                                            <select
+                                                value={item.status}
+                                                onChange={(e) => onStatusChange(item.id, e.target.value)}
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="w-full bg-zinc-900 border border-white/10 text-zinc-300 text-sm rounded-lg p-2 focus:outline-none focus:border-purple-500/50"
+                                            >
+                                                <option value="open">Nyitott</option>
+                                                <option value="in_progress">Folyamatban</option>
+                                                <option value="resolved">Megoldva</option>
+                                                <option value="closed">Lezárt</option>
+                                                <option value="duplicate">Duplikált</option>
+                                            </select>
                                         </div>
-                                    </div>
-                                </div>
-
-                                <Separator className="bg-border" />
-
-                                {/* Contact info */}
-                                <div>
-                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                                        Kapcsolat
-                                    </h3>
-                                    {item.contact_email ? (
-                                        <div className="flex items-center gap-2 text-white">
-                                            <Mail className="w-4 h-4 text-zinc-400" />
-                                            {item.contact_email}
-                                        </div>
-                                    ) : (
-                                        <p className="text-zinc-500">Nincs megadva</p>
                                     )}
                                 </div>
-                                {/* Admin Notes */}
-                                {item.admin_notes && (
-                                    <div className="mt-4">
-                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                                            Admin Jegyzetek
-                                        </h3>
-                                        <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 text-yellow-200 rounded-lg text-sm">
-                                            {item.admin_notes}
-                                        </div>
+                                <div>
+                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                                        Prioritás
+                                    </h3>
+                                    <div className="flex items-center gap-2 text-white capitalize">
+                                        {item.priority}
                                     </div>
+                                </div>
+                            </div>
+
+                            <Separator className="bg-border" />
+
+                            {/* Contact info */}
+                            <div>
+                                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                                    Kapcsolat
+                                </h3>
+                                {item.contact_email ? (
+                                    <div className="flex items-center gap-2 text-white">
+                                        <Mail className="w-4 h-4 text-zinc-400" />
+                                        {item.contact_email}
+                                    </div>
+                                ) : (
+                                    <p className="text-zinc-500">Nincs megadva</p>
                                 )}
                             </div>
-                        </ScrollArea>
-
-                        <div className="p-6 border-t border-border flex justify-end">
-                            <Button onClick={onClose} variant="outline">Bezárás</Button>
-                        </div>
+                            {/* Admin Notes */}
+                            {item.admin_notes && (
+                                <div className="mt-4">
+                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                                        Admin Jegyzetek
+                                    </h3>
+                                    <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 text-yellow-200 rounded-lg text-sm">
+                                        {item.admin_notes}
+                                    </div>
+                                </div>
+                            )}
                     </div>
-                </DialogContent>
-            </Dialog>
+                </ScrollArea>
+
+                <div className="p-6 border-t border-border flex justify-end">
+                    <Button onClick={onClose} variant="outline">Bezárás</Button>
+                </div>
+            </div>
+                </DialogContent >
+            </Dialog >
         );
     }
 

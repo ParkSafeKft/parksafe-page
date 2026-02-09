@@ -74,7 +74,11 @@ export default function UsersTable({
                     </thead>
                     <tbody className="divide-y divide-white/5">
                         {users.map((user) => (
-                            <tr key={user.id} className="hover:bg-white/[0.02] transition-colors group">
+                            <tr
+                                key={user.id}
+                                className="hover:bg-white/[0.02] transition-colors group cursor-pointer"
+                                onClick={() => onRowClick(user)}
+                            >
                                 <td className="p-4">
                                     <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 group-hover:border-green-500/50 transition-colors">
                                         <ImageWithFallback
@@ -111,7 +115,10 @@ export default function UsersTable({
                                 </td>
                                 <td className="p-4 text-right">
                                     <button
-                                        onClick={() => onRowClick(user)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onRowClick(user);
+                                        }}
                                         className="p-2 rounded-lg text-zinc-500 hover:text-white hover:bg-white/10 transition-all"
                                     >
                                         <MoreHorizontal className="w-5 h-5" />
