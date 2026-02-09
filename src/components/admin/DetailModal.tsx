@@ -24,6 +24,7 @@ import {
     Camera,
     Star,
     Edit,
+    MessageSquare,
 } from 'lucide-react';
 
 interface DetailModalProps {
@@ -90,6 +91,121 @@ export default function DetailModal({
     };
 
     const coords = getCoordinates();
+
+    if (type === 'feedback') {
+        return (
+            <Dialog open={isOpen} onOpenChange={onClose}>
+                <DialogContent className="admin-dark max-w-2xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
+                    <div className="flex flex-col h-[85vh]">
+                        {/* Header */}
+                        <div className="p-6 border-b border-border flex-shrink-0">
+                            <DialogTitle className="text-foreground flex items-center gap-4 text-xl font-bold">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                                    <MessageSquare className="h-5 w-5 text-white" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h1 className="text-xl font-bold text-foreground truncate">
+                                        Visszajelzés részletei
+                                    </h1>
+                                    <p className="text-muted-foreground text-sm mt-1 truncate">
+                                        {item.id}
+                                    </p>
+                                </div>
+                            </DialogTitle>
+                        </div>
+
+                        <ScrollArea className="flex-1">
+                            <div className="p-6 space-y-6">
+                                {/* Title & Description */}
+                                <div>
+                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                                        Cím
+                                    </h3>
+                                    <p className="text-lg font-semibold text-white">{item.title}</p>
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                                        Leírás
+                                    </h3>
+                                    <div className="p-4 rounded-lg bg-white/5 border border-white/10 text-zinc-300 whitespace-pre-wrap">
+                                        {item.description}
+                                    </div>
+                                </div>
+
+                                {/* Metadata Grid */}
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div>
+                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                                            Típus
+                                        </h3>
+                                        <div className="flex items-center gap-2 text-white capitalize">
+                                            {item.type}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                                            Kategória
+                                        </h3>
+                                        <div className="flex items-center gap-2 text-white capitalize">
+                                            {item.category?.replace(/_/g, ' ')}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                                            Státusz
+                                        </h3>
+                                        <div className="flex items-center gap-2 text-white capitalize">
+                                            {item.status?.replace(/_/g, ' ')}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                                            Prioritás
+                                        </h3>
+                                        <div className="flex items-center gap-2 text-white capitalize">
+                                            {item.priority}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <Separator className="bg-border" />
+
+                                {/* Contact info */}
+                                <div>
+                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                                        Kapcsolat
+                                    </h3>
+                                    {item.contact_email ? (
+                                        <div className="flex items-center gap-2 text-white">
+                                            <Mail className="w-4 h-4 text-zinc-400" />
+                                            {item.contact_email}
+                                        </div>
+                                    ) : (
+                                        <p className="text-zinc-500">Nincs megadva</p>
+                                    )}
+                                </div>
+                                {/* Admin Notes */}
+                                {item.admin_notes && (
+                                    <div className="mt-4">
+                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                                            Admin Jegyzetek
+                                        </h3>
+                                        <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 text-yellow-200 rounded-lg text-sm">
+                                            {item.admin_notes}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </ScrollArea>
+
+                        <div className="p-6 border-t border-border flex justify-end">
+                            <Button onClick={onClose} variant="outline">Bezárás</Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        );
+    }
 
     if (type === 'user') {
         return (

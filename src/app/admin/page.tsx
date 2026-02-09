@@ -36,13 +36,15 @@ import AddLocationModal from '@/components/admin/AddLocationModal';
 import EditLocationModal from '@/components/admin/EditLocationModal';
 import DetailModal from '@/components/admin/DetailModal';
 import DeleteConfirmModal from '@/components/admin/DeleteConfirmModal';
+import DeviceStatsOverview from '@/components/admin/DeviceStatsOverview';
+import FeedbackTable from '@/components/admin/FeedbackTable';
 
 export default function AdminPage() {
     const router = useRouter();
     const { user: profile, loading: authLoading, signOut } = useAuth();
 
 
-    const [activeTab, setActiveTab] = useState('users');
+    const [activeTab, setActiveTab] = useState('dashboard');
     const [searchTerm, setSearchTerm] = useState('');
 
     // Data states
@@ -54,6 +56,8 @@ export default function AdminPage() {
     const [bicycleServices, setBicycleServices] = useState<any[]>([]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [repairStations, setRepairStations] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [feedback, setFeedback] = useState<any[]>([]);
 
     const [dataLoading, setDataLoading] = useState(false);
     const [toggleLoading, setToggleLoading] = useState<string | null>(null);
@@ -114,6 +118,13 @@ export default function AdminPage() {
                     query = supabase.from('repairStation').select('*');
                     countQuery = supabase.from('repairStation').select('*', { count: 'exact', head: true });
                     break;
+                case 'feedback':
+                    query = supabase.from('feedback').select('*');
+                    countQuery = supabase.from('feedback').select('*', { count: 'exact', head: true });
+                    break;
+                case 'dashboard':
+                    setDataLoading(false);
+                    return;
                 default:
                     return;
             }
@@ -123,6 +134,9 @@ export default function AdminPage() {
                 if (activeTab === 'users') {
                     query = query.or(`username.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
                     countQuery = countQuery.or(`username.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+                } else if (activeTab === 'feedback') {
+                    query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
+                    countQuery = countQuery.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
                 } else {
                     query = query.or(`name.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`);
                     countQuery = countQuery.or(`name.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`);
@@ -148,6 +162,7 @@ export default function AdminPage() {
             else if (activeTab === 'parking') setParkingSpots(dataRes.data || []);
             else if (activeTab === 'services') setBicycleServices(dataRes.data || []);
             else if (activeTab === 'repair') setRepairStations(dataRes.data || []);
+            else if (activeTab === 'feedback') setFeedback(dataRes.data || []);
 
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -181,7 +196,8 @@ export default function AdminPage() {
         if (checked) {
             const currentData = activeTab === 'users' ? users :
                 activeTab === 'parking' ? parkingSpots :
-                    activeTab === 'services' ? bicycleServices : repairStations;
+                    activeTab === 'services' ? bicycleServices :
+                        activeTab === 'repair' ? repairStations : feedback;
             setSelectedRows(new Set(currentData.map(item => item.id)));
         } else {
             setSelectedRows(new Set());
@@ -222,10 +238,31 @@ export default function AdminPage() {
         }
     };
 
+    const handleFeedbackStatusChange = async (id: string, newStatus: string) => {
+        setToggleLoading(id);
+        try {
+            const { error } = await supabase
+                .from('feedback')
+                .update({ status: newStatus })
+                .eq('id', id);
+
+            if (error) throw error;
+
+            toast.success('Visszajelzés státusza frissítve');
+            fetchData();
+        } catch (error) {
+            console.error('Error updating feedback status:', error);
+            toast.error('Hiba történt a státusz frissítésekor');
+        } finally {
+            setToggleLoading(null);
+        }
+    };
+
     const handleDeleteClick = (id: string) => {
         const table = activeTab === 'users' ? 'profiles' :
             activeTab === 'parking' ? 'parkingSpots' :
-                activeTab === 'services' ? 'bicycleService' : 'repairStation';
+                activeTab === 'services' ? 'bicycleService' :
+                    activeTab === 'repair' ? 'repairStation' : 'feedback';
         setDeleteModal({ show: true, table, id });
     };
 
@@ -317,26 +354,32 @@ export default function AdminPage() {
                                         <Separator orientation="vertical" className="h-8 bg-sidebar-border" />
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                                                {activeTab === 'dashboard' && <Loader2 className="h-5 w-5 text-white" />}
                                                 {activeTab === 'users' && <Users className="h-5 w-5 text-white" />}
                                                 {activeTab === 'parking' && <MapPin className="h-5 w-5 text-white" />}
                                                 {activeTab === 'services' && <Building className="h-5 w-5 text-white" />}
                                                 {activeTab === 'repair' && <Wrench className="h-5 w-5 text-white" />}
+                                                {activeTab === 'feedback' && <Users className="h-5 w-5 text-white" />} {/* Use explicit icon if needed */}
                                             </div>
                                             <div>
                                                 <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                                                    {activeTab === 'dashboard' && 'Vezérlőpult'}
                                                     {activeTab === 'users' && 'Felhasználók'}
                                                     {activeTab === 'parking' && 'Bicikli Parkolók'}
                                                     {activeTab === 'services' && 'Szervizek & Boltok'}
                                                     {activeTab === 'repair' && 'Javító Állomások'}
+                                                    {activeTab === 'feedback' && 'Visszajelzések'}
                                                     <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                                                        {totalCount} elem
+                                                        {activeTab === 'dashboard' ? 'Áttekintés' : `${totalCount} elem`}
                                                     </Badge>
                                                 </h1>
                                                 <p className="text-muted-foreground text-sm mt-1">
+                                                    {activeTab === 'dashboard' && 'Rendszerstatisztikák és áttekintés'}
                                                     {activeTab === 'users' && 'Összes regisztrált felhasználó kezelése'}
                                                     {activeTab === 'parking' && 'Bicikli parkolók létrehozása és kezelése'}
                                                     {activeTab === 'services' && 'Kerékpár szervizek és boltok kezelése'}
                                                     {activeTab === 'repair' && 'Önkiszolgáló javító állomások kezelése'}
+                                                    {activeTab === 'feedback' && 'Felhasználói visszajelzések kezelése'}
                                                 </p>
                                             </div>
                                         </div>
@@ -364,7 +407,7 @@ export default function AdminPage() {
                                             )}
                                         </div>
 
-                                        {activeTab !== 'users' && (
+                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && (
                                             <>
                                                 <Separator orientation="vertical" className="h-8 bg-sidebar-border" />
                                                 <Button
@@ -396,6 +439,11 @@ export default function AdminPage() {
                         ) : (
                             <Card className="bg-card border-border overflow-hidden h-full flex flex-col">
                                 <CardContent className="p-0 m-0 flex-1 overflow-hidden flex flex-col">
+                                    {activeTab === 'dashboard' && (
+                                        <div className="overflow-y-auto h-full p-1">
+                                            <DeviceStatsOverview />
+                                        </div>
+                                    )}
                                     {activeTab === 'users' && (
                                         <UsersTable
                                             users={users}
@@ -472,6 +520,25 @@ export default function AdminPage() {
                                             toggleLoading={toggleLoading}
                                             searchTerm={searchTerm}
                                             selectAll={selectAll}
+                                            currentPage={currentPage}
+                                            totalPages={totalPages}
+                                            onPageChange={setCurrentPage}
+                                            pageSize={pageSize}
+                                            onPageSizeChange={setPageSize}
+                                        />
+                                    )}
+                                    {activeTab === 'feedback' && (
+                                        <FeedbackTable
+                                            data={feedback}
+                                            isLoading={dataLoading}
+                                            selectedRows={selectedRows}
+                                            onSelectAll={handleSelectAll}
+                                            onSelectRow={handleSelectRow}
+                                            onSort={handleSort}
+                                            sortConfig={sortConfig}
+                                            onRowClick={(item) => setDetailModal({ show: true, item, type: 'feedback' })} // Need to support feedback in DetailModal
+                                            onStatusChange={handleFeedbackStatusChange}
+                                            searchTerm={searchTerm}
                                             currentPage={currentPage}
                                             totalPages={totalPages}
                                             onPageChange={setCurrentPage}
