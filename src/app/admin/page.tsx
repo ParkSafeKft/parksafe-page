@@ -583,6 +583,7 @@ export default function AdminPage() {
                         setDetailModal({ ...detailModal, show: false });
                         setEditLocationModal({ show: true, item });
                     }}
+                    onStatusChange={handleFeedbackStatusChange}
                 />
 
                 <DeleteConfirmModal

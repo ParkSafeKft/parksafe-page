@@ -157,31 +157,39 @@ export default function DetailModal({
                                         <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
                                             Státusz
                                         </h3>
-                                        {item.status?.replace(/_/g, ' ')}
+                                        {onStatusChange ? (
+                                            <div className="relative">
+                                                <select
+                                                    value={item.status}
+                                                    onChange={(e) => onStatusChange(item.id, e.target.value)}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="w-full appearance-none bg-zinc-900/50 hover:bg-zinc-900 border border-white/10 text-zinc-300 text-sm rounded-lg pl-3 pr-8 py-2 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-colors cursor-pointer"
+                                                >
+                                                    <option value="open">Nyitott</option>
+                                                    <option value="in_progress">Folyamatban</option>
+                                                    <option value="resolved">Megoldva</option>
+                                                    <option value="closed">Lezárt</option>
+                                                    <option value="duplicate">Duplikált</option>
+                                                </select>
+                                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-zinc-400">
+                                                    <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-2 text-white capitalize">
+                                                {item.status?.replace(/_/g, ' ')}
+                                            </div>
+                                        )}
                                     </div>
-                                    {onStatusChange && (
-                                        <div className="mt-2">
-                                            <select
-                                                value={item.status}
-                                                onChange={(e) => onStatusChange(item.id, e.target.value)}
-                                                onClick={(e) => e.stopPropagation()}
-                                                className="w-full bg-zinc-900 border border-white/10 text-zinc-300 text-sm rounded-lg p-2 focus:outline-none focus:border-purple-500/50"
-                                            >
-                                                <option value="open">Nyitott</option>
-                                                <option value="in_progress">Folyamatban</option>
-                                                <option value="resolved">Megoldva</option>
-                                                <option value="closed">Lezárt</option>
-                                                <option value="duplicate">Duplikált</option>
-                                            </select>
+                                    <div>
+                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                                            Prioritás
+                                        </h3>
+                                        <div className="flex items-center gap-2 text-white capitalize">
+                                            {item.priority}
                                         </div>
-                                    )}
-                                </div>
-                                <div>
-                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                                        Prioritás
-                                    </h3>
-                                    <div className="flex items-center gap-2 text-white capitalize">
-                                        {item.priority}
                                     </div>
                                 </div>
                             </div>
@@ -193,14 +201,24 @@ export default function DetailModal({
                                 <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
                                     Kapcsolat
                                 </h3>
-                                {item.contact_email ? (
-                                    <div className="flex items-center gap-2 text-white">
-                                        <Mail className="w-4 h-4 text-zinc-400" />
-                                        {item.contact_email}
-                                    </div>
-                                ) : (
-                                    <p className="text-zinc-500">Nincs megadva</p>
-                                )}
+                                <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                                    {item.contact_email ? (
+                                        <div className="flex items-center gap-3 text-white">
+                                            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                                <Mail className="w-4 h-4 text-primary" />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-xs text-muted-foreground">Email cím</span>
+                                                <span className="font-medium break-all">{item.contact_email}</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <p className="text-zinc-500 flex items-center gap-2">
+                                            <XCircle className="w-4 h-4" />
+                                            Nincs megadva elérhetőség
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                             {/* Admin Notes */}
                             {item.admin_notes && (
