@@ -213,13 +213,12 @@ export default function DetailModal({
                                     </div>
                                 </div>
                             )}
-                    </div>
-                </ScrollArea>
+                        </ScrollArea>
 
-                <div className="p-6 border-t border-border flex justify-end">
-                    <Button onClick={onClose} variant="outline">Bezárás</Button>
-                </div>
-            </div>
+                        <div className="p-6 border-t border-border flex justify-end">
+                            <Button onClick={onClose} variant="outline">Bezárás</Button>
+                        </div>
+                    </div>
                 </DialogContent >
             </Dialog >
         );
@@ -340,6 +339,7 @@ export default function DetailModal({
                                     </div>
                                 </div>
                             </div>
+
                         </ScrollArea>
 
                         {/* Action Buttons */}
@@ -355,8 +355,8 @@ export default function DetailModal({
                             </div>
                         </div>
                     </div>
-                </DialogContent>
-            </Dialog>
+                </DialogContent >
+            </Dialog >
         );
     }
 
