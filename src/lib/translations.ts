@@ -12,7 +12,7 @@ export const translations = {
             logout: 'Kijelentkezés',
         },
         footer: {
-            rights: '© 2025 ParkSafe. Minden jog fenntartva.',
+            rights: '© 2026 ParkSafe. Minden jog fenntartva.',
             appStore: 'App Store',
             googlePlay: 'Google Play',
             terms: 'ÁSZF',
@@ -252,7 +252,7 @@ export const translations = {
             logout: 'Logout',
         },
         footer: {
-            rights: '© 2025 ParkSafe. All rights reserved.',
+            rights: '© 2026 ParkSafe. All rights reserved.',
             appStore: 'App Store',
             googlePlay: 'Google Play',
             terms: 'Terms',
