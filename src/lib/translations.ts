@@ -168,6 +168,9 @@ export const translations = {
             cancel: "Mégsem",
             verify: "Igen, törlöm",
             deleting: "Törlés...",
+            sendResetLink: "Jelszó Visszaállítása",
+            resetLinkDescription: "Küldünk egy jelszó-visszaállító linket az email címedre. Kattints a linkre a jelszavad megváltoztatásához.",
+            resetLinkSent: "A jelszó-visszaállító link elküldve az email címedre!",
         },
         about: {
             nav: "Rólunk",
@@ -408,6 +411,9 @@ export const translations = {
             cancel: "Cancel",
             verify: "Yes, delete it",
             deleting: "Deleting...",
+            sendResetLink: "Reset Password",
+            resetLinkDescription: "We'll send a password reset link to your email address. Click the link to change your password.",
+            resetLinkSent: "Password reset link has been sent to your email!",
         },
         about: {
             nav: "About Us",

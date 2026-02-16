@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
+import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 import {
     SidebarProvider,
     SidebarTrigger,
@@ -38,6 +39,25 @@ import DetailModal from '@/components/admin/DetailModal';
 import DeleteConfirmModal from '@/components/admin/DeleteConfirmModal';
 import DeviceStatsOverview from '@/components/admin/DeviceStatsOverview';
 import FeedbackTable from '@/components/admin/FeedbackTable';
+
+/**
+ * Sanitize a search term to prevent PostgREST filter injection.
+ * Escapes characters that have special meaning in PostgREST filter syntax.
+ */
+function sanitizeSearchTerm(term: string): string {
+    return term
+        .replace(/\\/g, '\\\\')
+        .replace(/%/g, '\\%')
+        .replace(/_/g, '\\_')
+        .replace(/,/g, '')
+        .replace(/\(/g, '')
+        .replace(/\)/g, '')
+        .replace(/\./g, ' ')
+        .trim()
+        .slice(0, 100);
+}
+
+const isDev = process.env.NODE_ENV === 'development';
 
 export default function AdminPage() {
     const router = useRouter();
@@ -93,10 +113,54 @@ export default function AdminPage() {
         id: null
     });
 
-    // Fetch data
-    const fetchData = async () => {
+    // Map active tab to Supabase table name
+    const getTableForTab = (tab: string): string | null => {
+        switch (tab) {
+            case 'users': return 'profiles';
+            case 'parking': return 'parkingSpots';
+            case 'services': return 'bicycleService';
+            case 'repair': return 'repairStation';
+            case 'feedback': return 'feedback';
+            default: return null;
+        }
+    };
+
+    const activeTable = getTableForTab(activeTab);
+
+    // Ref to always hold the latest fetchData, avoiding stale closures in realtime callback
+    const fetchDataRef = useRef<(silent?: boolean) => Promise<void>>(undefined);
+
+    // Realtime subscription - debounced refetch to avoid hammering on rapid changes
+    const refetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handleRealtimeChange = useCallback(() => {
+        if (refetchTimeoutRef.current) {
+            clearTimeout(refetchTimeoutRef.current);
+        }
+        refetchTimeoutRef.current = setTimeout(() => {
+            fetchDataRef.current?.(true);
+        }, 500);
+    }, []);
+
+    const { isSubscribed: isRealtimeConnected } = useRealtimeSubscription({
+        table: activeTable || '',
+        enabled: !!activeTable,
+        onchange: handleRealtimeChange,
+    });
+
+    // Cleanup debounce timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (refetchTimeoutRef.current) {
+                clearTimeout(refetchTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    // Fetch data (silent = true skips the loading spinner, used for realtime updates)
+    const fetchData = async (silent = false) => {
         if (!profile) return;
-        setDataLoading(true);
+        if (!silent) setDataLoading(true);
         try {
             let query;
             let countQuery;
@@ -129,17 +193,20 @@ export default function AdminPage() {
                     return;
             }
 
-            // Search
+            // Search (sanitized to prevent PostgREST filter injection)
             if (searchTerm) {
-                if (activeTab === 'users') {
-                    query = query.or(`username.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
-                    countQuery = countQuery.or(`username.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
-                } else if (activeTab === 'feedback') {
-                    query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
-                    countQuery = countQuery.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
-                } else {
-                    query = query.or(`name.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`);
-                    countQuery = countQuery.or(`name.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`);
+                const safe = sanitizeSearchTerm(searchTerm);
+                if (safe) {
+                    if (activeTab === 'users') {
+                        query = query.or(`username.ilike.%${safe}%,email.ilike.%${safe}%`);
+                        countQuery = countQuery.or(`username.ilike.%${safe}%,email.ilike.%${safe}%`);
+                    } else if (activeTab === 'feedback') {
+                        query = query.or(`title.ilike.%${safe}%,description.ilike.%${safe}%`);
+                        countQuery = countQuery.or(`title.ilike.%${safe}%,description.ilike.%${safe}%`);
+                    } else {
+                        query = query.or(`name.ilike.%${safe}%,city.ilike.%${safe}%`);
+                        countQuery = countQuery.or(`name.ilike.%${safe}%,city.ilike.%${safe}%`);
+                    }
                 }
             }
 
@@ -165,12 +232,15 @@ export default function AdminPage() {
             else if (activeTab === 'feedback') setFeedback(dataRes.data || []);
 
         } catch (error) {
-            console.error('Error fetching data:', error);
-            toast.error('Hiba történt az adatok betöltésekor');
+            if (isDev) console.error('Error fetching data:', error);
+            if (!silent) toast.error('Hiba történt az adatok betöltésekor');
         } finally {
-            setDataLoading(false);
+            if (!silent) setDataLoading(false);
         }
     };
+
+    // Keep the ref in sync with the latest fetchData
+    fetchDataRef.current = fetchData;
 
     useEffect(() => {
         // Reset page and selection on tab/search change
@@ -229,9 +299,9 @@ export default function AdminPage() {
             if (error) throw error;
 
             toast.success('Státusz sikeresen módosítva');
-            fetchData(); // Refresh data
+            fetchData();
         } catch (error) {
-            console.error('Error toggling status:', error);
+            if (isDev) console.error('Error toggling status:', error);
             toast.error('Hiba történt a státusz módosítása során');
         } finally {
             setToggleLoading(null);
@@ -251,7 +321,7 @@ export default function AdminPage() {
             toast.success('Visszajelzés státusza frissítve');
             fetchData();
         } catch (error) {
-            console.error('Error updating feedback status:', error);
+            if (isDev) console.error('Error updating feedback status:', error);
             toast.error('Hiba történt a státusz frissítésekor');
         } finally {
             setToggleLoading(null);
@@ -267,11 +337,15 @@ export default function AdminPage() {
     };
 
     const confirmDelete = async () => {
-        if (!deleteModal.table || !deleteModal.id) return;
+        if (!deleteModal.id) return;
+
+        // Recalculate table name from activeTab instead of trusting state
+        const table = getTableForTab(activeTab);
+        if (!table) return;
 
         try {
             const { error } = await supabase
-                .from(deleteModal.table)
+                .from(table)
                 .delete()
                 .eq('id', deleteModal.id);
 
@@ -281,7 +355,7 @@ export default function AdminPage() {
             setDeleteModal({ show: false, table: null, id: null });
             fetchData();
         } catch (error) {
-            console.error('Error deleting item:', error);
+            if (isDev) console.error('Error deleting item:', error);
             toast.error('Hiba történt a törlés során');
         }
     };
@@ -291,7 +365,7 @@ export default function AdminPage() {
             await signOut();
             router.push('/');
         } catch (error) {
-            console.error(error);
+            if (isDev) console.error('Logout error:', error);
         }
     };
 
@@ -372,6 +446,26 @@ export default function AdminPage() {
                                                     <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
                                                         {activeTab === 'dashboard' ? 'Áttekintés' : `${totalCount} elem`}
                                                     </Badge>
+                                                    {activeTab !== 'dashboard' && (
+                                                        <Badge
+                                                            variant="outline"
+                                                            className={`gap-1.5 text-xs ${
+                                                                isRealtimeConnected
+                                                                    ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                                                    : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                                                            }`}
+                                                        >
+                                                            <span className="relative flex h-2 w-2">
+                                                                {isRealtimeConnected && (
+                                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                                                                )}
+                                                                <span className={`relative inline-flex rounded-full h-2 w-2 ${
+                                                                    isRealtimeConnected ? 'bg-emerald-500' : 'bg-yellow-500'
+                                                                }`} />
+                                                            </span>
+                                                            {isRealtimeConnected ? 'Élő' : 'Kapcsolódás...'}
+                                                        </Badge>
+                                                    )}
                                                 </h1>
                                                 <p className="text-muted-foreground text-sm mt-1">
                                                     {activeTab === 'dashboard' && 'Rendszerstatisztikák és áttekintés'}

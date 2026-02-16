@@ -1,63 +1,68 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 export async function GET(request: NextRequest) {
     try {
-        // Authenticate the user (optional but recommended)
-        /*
-        const supabaseAuth = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        );
-        const authHeader = request.headers.get('Authorization');
-        if (!authHeader) {
-             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+        if (!supabaseUrl || !supabaseAnonKey) {
+            if (isDev) console.error('Missing Supabase environment variables');
+            return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
         }
-        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(authHeader.replace('Bearer ', ''));
-        
+
+        // Authenticate the requesting user
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const token = authHeader.replace('Bearer ', '');
+
+        // Create a client with the user's token so RLS policies work correctly
+        const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+            global: { headers: { Authorization: `Bearer ${token}` } }
+        });
+
+        // Verify the user's JWT and get their identity
+        const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
+
         if (authError || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-        
-        // Check if user is admin
-        // ... (fetch user role from profiles)
-        */
 
-        // For simplicity, relying on the fact that this is an internal API endpoint 
-        // protected by Next.js route handlers if needed, but ideally we should verify the user.
-        // Given I cannot easily check user role here without more setup, I'll proceed with the request.
-        // In a real app, middleware or helper function should be used.
+        // Check if user is admin (RLS now sees the authenticated user)
+        const { data: profile, error: profileError } = await supabaseAuth
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
 
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-        const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-        if (!supabaseUrl) {
-            console.error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable');
-            return NextResponse.json({ error: 'Configuration Error: Missing API URL' }, { status: 500 });
+        if (profileError || !profile || profile.role !== 'admin') {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
+        // Use service role key for the RPC call (bypasses RLS for stats)
         let supabase;
-
         if (serviceRoleKey) {
             supabase = createClient(supabaseUrl, serviceRoleKey);
-        } else if (anonKey) {
-            console.warn('SUPABASE_SERVICE_ROLE_KEY missing, falling back to ANON key. This may expose stats to public if not restricted.');
-            supabase = createClient(supabaseUrl, anonKey);
         } else {
-            console.error('Neither SUPABASE_SERVICE_ROLE_KEY nor NEXT_PUBLIC_SUPABASE_ANON_KEY found');
-            return NextResponse.json({ error: 'Configuration Error: Missing API Keys' }, { status: 500 });
+            // Fallback: use the user's token for the query
+            supabase = createClient(supabaseUrl, supabaseAnonKey, {
+                global: { headers: { Authorization: `Bearer ${token}` } }
+            });
         }
 
         const { data, error } = await supabase.rpc('get_device_stats');
 
         if (error) {
-            console.error('Supabase RPC Error:', error);
-            // Return actual error message for debugging
-            return NextResponse.json({ error: `Supabase Error: ${error.message}` }, { status: 500 });
+            if (isDev) console.error('Supabase RPC Error:', error);
+            return NextResponse.json({ error: 'Failed to fetch device statistics' }, { status: 500 });
         }
 
-        // Check if data is empty array, return default object instead of null/undefined
         if (!data || data.length === 0) {
             return NextResponse.json({
                 total_devices: 0,
@@ -73,8 +78,8 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json(data[0]);
 
-    } catch (error: any) {
-        console.error('API Error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    } catch (error) {
+        if (isDev) console.error('API Error:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

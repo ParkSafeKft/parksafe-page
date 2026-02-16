@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 import {
     Loader2,
     Smartphone,
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
+const isDev = process.env.NODE_ENV === 'development';
 
 interface DeviceStats {
     total_devices: number;
@@ -33,7 +35,18 @@ export default function DeviceStatsOverview() {
 
     const fetchStats = async () => {
         try {
-            const res = await fetch('/api/device-stats');
+            // Get the current session token for authenticated API calls
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.access_token) {
+                throw new Error('No active session');
+            }
+
+            const res = await fetch('/api/device-stats', {
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`,
+                },
+            });
+
             if (!res.ok) {
                 const errorData = await res.json();
                 throw new Error(errorData.error || 'Failed to fetch stats');
@@ -44,7 +57,6 @@ export default function DeviceStatsOverview() {
             if (data) {
                 setStats(data);
             } else {
-                // Fallback struct if empty
                 setStats({
                     total_devices: 0,
                     registered_users: 0,
@@ -56,9 +68,9 @@ export default function DeviceStatsOverview() {
                     active_last_30_days: 0
                 });
             }
-        } catch (err: any) {
-            console.error('Error fetching device stats:', err);
-            setError(err.message);
+        } catch (err: unknown) {
+            if (isDev) console.error('Error fetching device stats:', err);
+            setError(err instanceof Error ? err.message : 'Ismeretlen hiba');
         } finally {
             setLoading(false);
         }
