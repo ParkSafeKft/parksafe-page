@@ -6,6 +6,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Mail, ArrowRight, AlertCircle, ChevronLeft, CheckCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 export default function ForgotPasswordPage() {
     const { t } = useLanguage();
     const [email, setEmail] = useState('');
@@ -29,7 +31,7 @@ export default function ForgotPasswordPage() {
                 setEmail('');
             }
         } catch (err) {
-            console.error(err);
+            if (isDev) console.error(err);
             setError(t('forgotPassword.errorGeneric'));
         } finally {
             setLoading(false);

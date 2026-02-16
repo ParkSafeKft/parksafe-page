@@ -8,6 +8,8 @@ import { supabase } from '@/lib/supabaseClient';
 import { Mail, Lock, ArrowRight, AlertCircle, ChevronLeft } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 export default function LoginPage() {
     const { t } = useLanguage();
     const [email, setEmail] = useState('');
@@ -37,15 +39,16 @@ export default function LoginPage() {
                 .rpc('get_provider_by_email', { p_email: email });
 
             if (error) {
-                console.error('Error checking provider:', error);
+                if (isDev) console.error('Error checking provider:', error);
                 setError(t('login.errorGeneric'));
                 setCheckingProvider(false);
                 return;
             }
 
             if (data === 'false') {
-                // No user found with this email
-                setError(t('login.errorNoAccount'));
+                // User doesn't exist - show email/password form anyway
+                // to avoid revealing whether an account exists (user enumeration)
+                setProvider('email');
                 setCheckingProvider(false);
                 return;
             }
@@ -53,7 +56,7 @@ export default function LoginPage() {
             // Set the provider
             setProvider(data);
         } catch (err) {
-            console.error('Error:', err);
+            if (isDev) console.error('Error:', err);
             setError(t('login.errorGeneric'));
         } finally {
             setCheckingProvider(false);
@@ -73,7 +76,7 @@ export default function LoginPage() {
                 router.push('/profile');
             }
         } catch (err) {
-            console.error(err);
+            if (isDev) console.error(err);
             setError(t('login.errorGeneric'));
         } finally {
             setLoading(false);
@@ -92,7 +95,7 @@ export default function LoginPage() {
             }
             // Don't set loading to false here - the redirect will happen
         } catch (err) {
-            console.error(err);
+            if (isDev) console.error(err);
             setError(t('login.errorGeneric'));
             setLoading(false);
         }

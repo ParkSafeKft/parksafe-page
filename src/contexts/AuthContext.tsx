@@ -47,7 +47,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 setUser(session.user as User);
             }
         } catch (error) {
-            console.error('Error fetching user profile:', error);
+            if (process.env.NODE_ENV === 'development') console.error('Error fetching user profile:', error);
             setUser(session.user as User);
         } finally {
             setLoading(false);

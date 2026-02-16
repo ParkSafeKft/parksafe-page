@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 export default function ProfilePage() {
     const { t } = useLanguage();
     const { user, loading, signOut } = useAuth();
@@ -54,12 +56,12 @@ export default function ProfilePage() {
                         .single();
 
                     if (error) {
-                        console.error('Error fetching profile:', error);
+                        if (isDev) console.error('Error fetching profile:', error);
                     } else {
                         setProfile(data);
                     }
                 } catch (error) {
-                    console.error('Error:', error);
+                    if (isDev) console.error('Error:', error);
                 } finally {
                     setProfileLoading(false);
                 }
@@ -85,7 +87,7 @@ export default function ProfilePage() {
                 .rpc('delete_user_account', { user_id: user.id });
 
             if (error) {
-                console.error('Error deleting account:', error);
+                if (isDev) console.error('Error deleting account:', error);
                 setDeleteError(t('login.errorGeneric'));
                 setDeleteLoading(false);
                 return;
@@ -95,7 +97,7 @@ export default function ProfilePage() {
             await signOut();
             router.push('/');
         } catch (error) {
-            console.error('Error deleting account:', error);
+            if (isDev) console.error('Error deleting account:', error);
             setDeleteError(t('login.errorGeneric'));
             setDeleteLoading(false);
         }
@@ -122,7 +124,7 @@ export default function ProfilePage() {
             }, 3000);
 
         } catch (error) {
-            console.error('Error sending reset link:', error);
+            if (isDev) console.error('Error sending reset link:', error);
             setResetError(t('login.errorGeneric'));
         } finally {
             setResetLoading(false);
@@ -266,15 +268,17 @@ export default function ProfilePage() {
                                     </div>
                                 </div>
 
-                                <div className="md:col-span-2 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <Hash size={16} className="text-slate-400" />
-                                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">ID</span>
+                                {isAdmin && (
+                                    <div className="md:col-span-2 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <Hash size={16} className="text-slate-400" />
+                                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">ID</span>
+                                        </div>
+                                        <div className="font-mono text-sm text-slate-500 bg-white p-2 rounded border border-slate-200 select-all">
+                                            {user.id}
+                                        </div>
                                     </div>
-                                    <div className="font-mono text-sm text-slate-500 bg-white p-2 rounded border border-slate-200 select-all">
-                                        {user.id}
-                                    </div>
-                                </div>
+                                )}
 
                             </div>
                         </div>

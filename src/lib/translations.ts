@@ -145,7 +145,7 @@ export const translations = {
             successMessage: "A jelszó sikeresen frissítve. Átirányítás a bejelentkezéshez...",
             errorGeneric: "Hiba történt a jelszó frissítése közben.",
             errorMismatch: "A jelszavak nem egyeznek.",
-            errorLength: "A jelszónak legalább 6 karakter hosszúnak kell lennie.",
+            errorLength: "A jelszónak legalább 8 karakter hosszúnak kell lennie.",
         },
         profile: {
             greeting: "Szia",
@@ -388,7 +388,7 @@ export const translations = {
             successMessage: "Password updated successfully. Redirecting to login...",
             errorGeneric: "An error occurred while updating the password.",
             errorMismatch: "Passwords do not match.",
-            errorLength: "Password must be at least 6 characters long.",
+            errorLength: "Password must be at least 8 characters long.",
         },
         profile: {
             greeting: "Hi",

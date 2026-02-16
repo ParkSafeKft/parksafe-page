@@ -7,6 +7,8 @@ import { Lock, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Link from 'next/link';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 // Create a local Supabase client that doesn't persist sessions.
 // This prevents the password reset flow from logging the user in on other tabs.
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -54,7 +56,7 @@ function ResetPasswordContent() {
                     setError(error.message);
                 }
             } catch (err) {
-                console.error(err);
+                if (isDev) console.error(err);
                 setError(t('resetPassword.errorGeneric'));
             } finally {
                 setVerifying(false);
@@ -76,7 +78,7 @@ function ResetPasswordContent() {
             return;
         }
 
-        if (password.length < 6) {
+        if (password.length < 8) {
             setError(t('resetPassword.errorLength'));
             return;
         }
@@ -103,7 +105,7 @@ function ResetPasswordContent() {
                 }, 2000);
             }
         } catch (err) {
-            console.error(err);
+            if (isDev) console.error(err);
             setError(t('resetPassword.errorGeneric'));
         } finally {
             setLoading(false);
