@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 import {
     Dialog,
     DialogContent,
@@ -33,7 +34,11 @@ import {
     MessageSquare,
     ChevronDown,
     AlertCircle,
-    Check
+    Check,
+    Flag,
+    Store,
+    Wrench,
+    User
 } from 'lucide-react';
 
 interface DetailModalProps {
@@ -58,12 +63,76 @@ export default function DetailModal({
 }: DetailModalProps) {
     const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
     const [currentStatus, setCurrentStatus] = useState<string | null>(null);
+    const [poiCoords, setPoiCoords] = useState<{ lat: number; lon: number; name: string } | null>(null);
+    const [poiCoordsLoading, setPoiCoordsLoading] = useState(false);
 
     useEffect(() => {
         if (item?.status) {
             setCurrentStatus(item.status);
         }
     }, [item]);
+
+    const fetchPoiCoords = useCallback(async () => {
+        if (type !== 'poi_flags' || !item?.poi_id || !item?.poi_type) {
+            setPoiCoords(null);
+            return;
+        }
+        const tableMap: Record<string, string> = {
+            parking: 'parkingSpots',
+            bicycleService: 'bicycleService',
+            repairStation: 'repairStation',
+        };
+        const tableName = tableMap[item.poi_type];
+        if (!tableName) return;
+
+        setPoiCoordsLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from(tableName)
+                .select('name, coordinate')
+                .eq('id', item.poi_id)
+                .single();
+            if (error || !data) {
+                setPoiCoords(null);
+                return;
+            }
+            const coord = data.coordinate;
+            let lat: number | null = null;
+            let lon: number | null = null;
+            if (coord && typeof coord === 'object' && coord.type === 'Point' && Array.isArray(coord.coordinates)) {
+                [lon, lat] = coord.coordinates;
+            } else if (typeof coord === 'string' && coord.length >= 50) {
+                try {
+                    const coordsHex = coord.substring(18);
+                    if (coordsHex.length >= 32) {
+                        const lonHex = coordsHex.substring(0, 16);
+                        const latHex = coordsHex.substring(16, 32);
+                        const lonBuf = new ArrayBuffer(8);
+                        const lonView = new DataView(lonBuf);
+                        for (let i = 0; i < 8; i++) lonView.setUint8(i, parseInt(lonHex.substr(i * 2, 2), 16));
+                        lon = lonView.getFloat64(0, true);
+                        const latBuf = new ArrayBuffer(8);
+                        const latView = new DataView(latBuf);
+                        for (let i = 0; i < 8; i++) latView.setUint8(i, parseInt(latHex.substr(i * 2, 2), 16));
+                        lat = latView.getFloat64(0, true);
+                    }
+                } catch { /* ignore parse errors */ }
+            }
+            if (lat != null && lon != null) {
+                setPoiCoords({ lat, lon, name: data.name || '' });
+            } else {
+                setPoiCoords(null);
+            }
+        } catch {
+            setPoiCoords(null);
+        } finally {
+            setPoiCoordsLoading(false);
+        }
+    }, [type, item?.poi_id, item?.poi_type]);
+
+    useEffect(() => {
+        fetchPoiCoords();
+    }, [fetchPoiCoords]);
 
     const handleStatusChange = (newStatus: string) => {
         setCurrentStatus(newStatus);
@@ -117,6 +186,285 @@ export default function DetailModal({
     };
 
     const coords = getCoordinates();
+
+    if (type === 'poi_flags') {
+        const getPoiTypeLabel = (poiType: string) => {
+            switch (poiType) {
+                case 'parking': return 'Parkoló';
+                case 'bicycleService': return 'Szerviz';
+                case 'repairStation': return 'Javító állomás';
+                default: return poiType;
+            }
+        };
+
+        const getPoiTypeIcon = (poiType: string) => {
+            switch (poiType) {
+                case 'parking': return <MapPin className="h-5 w-5 text-green-400" />;
+                case 'bicycleService': return <Store className="h-5 w-5 text-blue-400" />;
+                case 'repairStation': return <Wrench className="h-5 w-5 text-orange-400" />;
+                default: return <MapPin className="h-5 w-5 text-zinc-400" />;
+            }
+        };
+
+        const getReasonLabel = (reason: string) => {
+            const labels: Record<string, string> = {
+                wrong_location: 'Rossz helyen van',
+                doesnt_exist: 'Nem létezik',
+                incorrect_info: 'Hibás információ',
+                duplicate: 'Duplikált',
+                other: 'Egyéb',
+            };
+            return labels[reason] || reason;
+        };
+
+        const poiFlagStatuses = [
+            { value: 'pending', label: 'Függőben', color: 'bg-yellow-500', hoverShadow: 'group-hover:shadow-[0_0_8px_rgba(234,179,8,0.6)]' },
+            { value: 'reviewed', label: 'Áttekintve', color: 'bg-blue-500', hoverShadow: 'group-hover:shadow-[0_0_8px_rgba(59,130,246,0.6)]' },
+            { value: 'resolved', label: 'Megoldva', color: 'bg-green-500', hoverShadow: 'group-hover:shadow-[0_0_8px_rgba(34,197,94,0.6)]' },
+            { value: 'dismissed', label: 'Elutasítva', color: 'bg-zinc-500', hoverShadow: 'group-hover:shadow-[0_0_8px_rgba(113,113,122,0.6)]' },
+        ];
+
+        const currentStatusObj = poiFlagStatuses.find(s => s.value === currentStatus) || poiFlagStatuses[0];
+
+        return (
+            <Dialog open={isOpen} onOpenChange={onClose}>
+                <DialogContent className="admin-dark max-w-2xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
+                    <div className="flex flex-col h-[85vh]">
+                        {/* Header */}
+                        <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
+                            <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
+                                <div className="flex items-center gap-4 min-w-0 pr-8">
+                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500/20 to-red-600/20 border border-orange-500/30 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                        <Flag className="h-6 w-6 text-orange-400" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h1 className="text-lg font-bold text-foreground truncate leading-tight">
+                                            POI Bejelentés részletei
+                                        </h1>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <p className="text-xs font-mono text-muted-foreground truncate opacity-70">
+                                                ID: {item.id.substring(0, 8)}...
+                                            </p>
+                                            <Badge variant="outline" className="text-[10px] h-5 px-1.5 border-white/10 bg-white/5">
+                                                {new Date(item.created_at).toLocaleDateString()}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                </div>
+                            </DialogTitle>
+                        </div>
+
+                        <ScrollArea className="flex-1 min-h-0">
+                            <div className="p-6 space-y-6">
+                                {/* POI Info */}
+                                <div>
+                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                                        Érintett POI
+                                    </h3>
+                                    <div className="p-4 rounded-lg bg-white/5 border border-white/10 flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-lg bg-zinc-900 flex items-center justify-center border border-white/10">
+                                            {getPoiTypeIcon(item.poi_type)}
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-sm font-semibold text-white">
+                                                {poiCoords?.name || getPoiTypeLabel(item.poi_type)}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground mt-0.5">
+                                                {getPoiTypeLabel(item.poi_type)} &middot; <span className="font-mono">ID: {item.poi_id?.substring(0, 8)}...</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* POI Map */}
+                                {poiCoordsLoading ? (
+                                    <div className="flex items-center justify-center py-8">
+                                        <div className="w-5 h-5 border-2 border-zinc-600 border-t-zinc-300 rounded-full animate-spin" />
+                                        <span className="ml-3 text-sm text-zinc-500">Térkép betöltése...</span>
+                                    </div>
+                                ) : poiCoords ? (
+                                    <div>
+                                        <h3 className="flex items-center gap-2 text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                                            <MapPin className="h-4 w-4" />
+                                            POI helye a térképen
+                                        </h3>
+                                        <div className="flex gap-6 mb-3">
+                                            <div className="flex-1">
+                                                <p className="text-xs text-muted-foreground mb-0.5">Szélesség (Latitude)</p>
+                                                <p className="text-sm font-mono font-semibold text-white">{poiCoords.lat.toFixed(6)}</p>
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-xs text-muted-foreground mb-0.5">Hosszúság (Longitude)</p>
+                                                <p className="text-sm font-mono font-semibold text-white">{poiCoords.lon.toFixed(6)}</p>
+                                            </div>
+                                        </div>
+                                        <div className="relative rounded-lg overflow-hidden border border-border mb-3">
+                                            <iframe
+                                                width="100%"
+                                                height="250"
+                                                frameBorder="0"
+                                                style={{ border: 0, pointerEvents: 'none' }}
+                                                src={`https://www.openstreetmap.org/export/embed.html?bbox=${(poiCoords.lon - 0.002).toFixed(6)},${(poiCoords.lat - 0.002).toFixed(6)},${(poiCoords.lon + 0.002).toFixed(6)},${(poiCoords.lat + 0.002).toFixed(6)}&layer=mapnik&marker=${poiCoords.lat.toFixed(6)},${poiCoords.lon.toFixed(6)}`}
+                                                title="POI Location Map"
+                                            />
+                                        </div>
+                                        <Button
+                                            variant="outline"
+                                            className="w-full"
+                                            size="sm"
+                                            onClick={() => window.open(`https://www.google.com/maps?q=${poiCoords.lat},${poiCoords.lon}`, '_blank')}
+                                        >
+                                            <MapPin className="h-3.5 w-3.5 mr-2" />
+                                            Megnyitás Google Maps-en
+                                        </Button>
+                                    </div>
+                                ) : null}
+
+                                {/* Comment */}
+                                {item.comment && (
+                                    <div>
+                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                                            Megjegyzés
+                                        </h3>
+                                        <div className="p-4 rounded-lg bg-white/5 border border-white/10 text-zinc-300 whitespace-pre-wrap">
+                                            {item.comment}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Metadata Grid */}
+                                <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                                    <div className="space-y-2">
+                                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                            <AlertCircle className="w-3 h-3" /> Ok
+                                        </h3>
+                                        <div className="flex items-center">
+                                            <Badge variant="secondary" className="px-3 py-1 text-sm font-medium capitalize bg-zinc-800 text-zinc-100 hover:bg-zinc-700 border-zinc-700">
+                                                {getReasonLabel(item.reason)}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                            <CheckCircle className="w-3 h-3" /> Státusz
+                                        </h3>
+                                        {onStatusChange ? (
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button
+                                                        variant="outline"
+                                                        className={`w-full justify-between border-white/10 bg-zinc-900/50 hover:bg-zinc-900 hover:text-white capitalize font-normal ${
+                                                            currentStatus === 'resolved' ? 'text-green-400 border-green-900/50' :
+                                                            currentStatus === 'dismissed' ? 'text-zinc-400' :
+                                                            currentStatus === 'reviewed' ? 'text-blue-400 border-blue-900/50' :
+                                                            'text-zinc-200'
+                                                        }`}
+                                                    >
+                                                        <span className="flex items-center gap-2">
+                                                            <span className={`w-2 h-2 rounded-full ${currentStatusObj.color}`} />
+                                                            {currentStatusObj.label}
+                                                        </span>
+                                                        <ChevronDown className="h-4 w-4 opacity-50" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="start" className="w-[180px] bg-zinc-900 border-zinc-800">
+                                                    {poiFlagStatuses.map(s => (
+                                                        <DropdownMenuItem
+                                                            key={s.value}
+                                                            onClick={() => handleStatusChange(s.value)}
+                                                            className="text-zinc-200 focus:bg-zinc-800 focus:text-white cursor-pointer group"
+                                                        >
+                                                            <span className={`w-2 h-2 rounded-full ${s.color} mr-2 ${s.hoverShadow} transition-shadow`} />
+                                                            {s.label}
+                                                            {currentStatus === s.value && <Check className="ml-auto h-3 w-3" />}
+                                                        </DropdownMenuItem>
+                                                    ))}
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        ) : (
+                                            <div className="flex items-center gap-2 text-white capitalize pl-1">
+                                                <span className={`w-2 h-2 rounded-full ${currentStatusObj.color}`} />
+                                                {currentStatusObj.label}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                            <User className="w-3 h-3" /> Bejelentő
+                                        </h3>
+                                        <p className="text-sm font-medium text-zinc-200 pl-1">
+                                            {item.reporter_username || 'Ismeretlen'}
+                                        </p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                            <Clock className="w-3 h-3" /> Bejelentés dátuma
+                                        </h3>
+                                        <p className="text-sm font-medium text-zinc-200 pl-1">
+                                            {new Date(item.created_at).toLocaleDateString('hu-HU', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Reported Coordinates */}
+                                {item.reported_latitude && item.reported_longitude && (
+                                    <>
+                                        <Separator className="bg-border" />
+                                        <div>
+                                            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                                                Bejelentett koordináták
+                                            </h3>
+                                            <div className="flex gap-6 mb-3">
+                                                <div className="flex-1">
+                                                    <p className="text-xs text-muted-foreground mb-0.5">Szélesség</p>
+                                                    <p className="text-sm font-mono font-semibold text-white">{item.reported_latitude.toFixed(6)}</p>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-xs text-muted-foreground mb-0.5">Hosszúság</p>
+                                                    <p className="text-sm font-mono font-semibold text-white">{item.reported_longitude.toFixed(6)}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* Review info */}
+                                {item.reviewed_at && (
+                                    <>
+                                        <Separator className="bg-border" />
+                                        <div>
+                                            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                                                Áttekintés információ
+                                            </h3>
+                                            <div className="p-3 bg-blue-500/10 border border-blue-500/20 text-blue-200 rounded-lg text-sm">
+                                                Áttekintve: {new Date(item.reviewed_at).toLocaleDateString('hu-HU', {
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </ScrollArea>
+
+                        <div className="p-6 border-t border-border flex justify-end">
+                            <Button onClick={onClose} variant="outline">Bezárás</Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        );
+    }
 
     if (type === 'feedback') {
         return (

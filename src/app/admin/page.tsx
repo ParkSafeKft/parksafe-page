@@ -39,6 +39,7 @@ import DetailModal from '@/components/admin/DetailModal';
 import DeleteConfirmModal from '@/components/admin/DeleteConfirmModal';
 import DeviceStatsOverview from '@/components/admin/DeviceStatsOverview';
 import FeedbackTable from '@/components/admin/FeedbackTable';
+import PoiFlagsTable from '@/components/admin/PoiFlagsTable';
 
 /**
  * Sanitize a search term to prevent PostgREST filter injection.
@@ -78,6 +79,8 @@ export default function AdminPage() {
     const [repairStations, setRepairStations] = useState<any[]>([]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [feedback, setFeedback] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [poiFlags, setPoiFlags] = useState<any[]>([]);
 
     const [dataLoading, setDataLoading] = useState(false);
     const [toggleLoading, setToggleLoading] = useState<string | null>(null);
@@ -121,6 +124,7 @@ export default function AdminPage() {
             case 'services': return 'bicycleService';
             case 'repair': return 'repairStation';
             case 'feedback': return 'feedback';
+            case 'poi_flags': return 'poi_flags';
             default: return null;
         }
     };
@@ -186,6 +190,10 @@ export default function AdminPage() {
                     query = supabase.from('feedback').select('*');
                     countQuery = supabase.from('feedback').select('*', { count: 'exact', head: true });
                     break;
+                case 'poi_flags':
+                    query = supabase.from('poi_flags').select('*, profiles!poi_flags_user_id_fkey(username)');
+                    countQuery = supabase.from('poi_flags').select('*', { count: 'exact', head: true });
+                    break;
                 case 'dashboard':
                     setDataLoading(false);
                     return;
@@ -203,6 +211,9 @@ export default function AdminPage() {
                     } else if (activeTab === 'feedback') {
                         query = query.or(`title.ilike.%${safe}%,description.ilike.%${safe}%`);
                         countQuery = countQuery.or(`title.ilike.%${safe}%,description.ilike.%${safe}%`);
+                    } else if (activeTab === 'poi_flags') {
+                        query = query.or(`reason.ilike.%${safe}%,comment.ilike.%${safe}%,poi_type.ilike.%${safe}%`);
+                        countQuery = countQuery.or(`reason.ilike.%${safe}%,comment.ilike.%${safe}%,poi_type.ilike.%${safe}%`);
                     } else {
                         query = query.or(`name.ilike.%${safe}%,city.ilike.%${safe}%`);
                         countQuery = countQuery.or(`name.ilike.%${safe}%,city.ilike.%${safe}%`);
@@ -230,6 +241,15 @@ export default function AdminPage() {
             else if (activeTab === 'services') setBicycleServices(dataRes.data || []);
             else if (activeTab === 'repair') setRepairStations(dataRes.data || []);
             else if (activeTab === 'feedback') setFeedback(dataRes.data || []);
+            else if (activeTab === 'poi_flags') {
+                // Flatten the joined profiles data
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const mapped = (dataRes.data || []).map((row: any) => ({
+                    ...row,
+                    reporter_username: row.profiles?.username || null,
+                }));
+                setPoiFlags(mapped);
+            }
 
         } catch (error) {
             if (isDev) console.error('Error fetching data:', error);
@@ -267,7 +287,8 @@ export default function AdminPage() {
             const currentData = activeTab === 'users' ? users :
                 activeTab === 'parking' ? parkingSpots :
                     activeTab === 'services' ? bicycleServices :
-                        activeTab === 'repair' ? repairStations : feedback;
+                        activeTab === 'repair' ? repairStations :
+                            activeTab === 'poi_flags' ? poiFlags : feedback;
             setSelectedRows(new Set(currentData.map(item => item.id)));
         } else {
             setSelectedRows(new Set());
@@ -328,11 +349,32 @@ export default function AdminPage() {
         }
     };
 
+    const handlePoiFlagStatusChange = async (id: string, newStatus: string) => {
+        setToggleLoading(id);
+        try {
+            const { error } = await supabase
+                .from('poi_flags')
+                .update({ status: newStatus, reviewed_at: new Date().toISOString() })
+                .eq('id', id);
+
+            if (error) throw error;
+
+            toast.success('POI bejelentés státusza frissítve');
+            fetchData();
+        } catch (error) {
+            if (isDev) console.error('Error updating poi flag status:', error);
+            toast.error('Hiba történt a státusz frissítésekor');
+        } finally {
+            setToggleLoading(null);
+        }
+    };
+
     const handleDeleteClick = (id: string) => {
         const table = activeTab === 'users' ? 'profiles' :
             activeTab === 'parking' ? 'parkingSpots' :
                 activeTab === 'services' ? 'bicycleService' :
-                    activeTab === 'repair' ? 'repairStation' : 'feedback';
+                    activeTab === 'repair' ? 'repairStation' :
+                        activeTab === 'poi_flags' ? 'poi_flags' : 'feedback';
         setDeleteModal({ show: true, table, id });
     };
 
@@ -433,7 +475,8 @@ export default function AdminPage() {
                                                 {activeTab === 'parking' && <MapPin className="h-5 w-5 text-white" />}
                                                 {activeTab === 'services' && <Building className="h-5 w-5 text-white" />}
                                                 {activeTab === 'repair' && <Wrench className="h-5 w-5 text-white" />}
-                                                {activeTab === 'feedback' && <Users className="h-5 w-5 text-white" />} {/* Use explicit icon if needed */}
+                                                {activeTab === 'feedback' && <Users className="h-5 w-5 text-white" />}
+                                                {activeTab === 'poi_flags' && <MapPin className="h-5 w-5 text-white" />}
                                             </div>
                                             <div>
                                                 <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
@@ -443,6 +486,7 @@ export default function AdminPage() {
                                                     {activeTab === 'services' && 'Szervizek & Boltok'}
                                                     {activeTab === 'repair' && 'Javító Állomások'}
                                                     {activeTab === 'feedback' && 'Visszajelzések'}
+                                                    {activeTab === 'poi_flags' && 'POI Bejelentések'}
                                                     <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
                                                         {activeTab === 'dashboard' ? 'Áttekintés' : `${totalCount} elem`}
                                                     </Badge>
@@ -474,6 +518,7 @@ export default function AdminPage() {
                                                     {activeTab === 'services' && 'Kerékpár szervizek és boltok kezelése'}
                                                     {activeTab === 'repair' && 'Önkiszolgáló javító állomások kezelése'}
                                                     {activeTab === 'feedback' && 'Felhasználói visszajelzések kezelése'}
+                                                    {activeTab === 'poi_flags' && 'POI-khoz kapcsolódó bejelentések kezelése'}
                                                 </p>
                                             </div>
                                         </div>
@@ -501,7 +546,7 @@ export default function AdminPage() {
                                             )}
                                         </div>
 
-                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && (
+                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && (
                                             <>
                                                 <Separator orientation="vertical" className="h-8 bg-sidebar-border" />
                                                 <Button
@@ -630,8 +675,28 @@ export default function AdminPage() {
                                             onSelectRow={handleSelectRow}
                                             onSort={handleSort}
                                             sortConfig={sortConfig}
-                                            onRowClick={(item) => setDetailModal({ show: true, item, type: 'feedback' })} // Need to support feedback in DetailModal
+                                            onRowClick={(item) => setDetailModal({ show: true, item, type: 'feedback' })}
                                             onStatusChange={handleFeedbackStatusChange}
+                                            searchTerm={searchTerm}
+                                            currentPage={currentPage}
+                                            totalPages={totalPages}
+                                            onPageChange={setCurrentPage}
+                                            pageSize={pageSize}
+                                            onPageSizeChange={setPageSize}
+                                        />
+                                    )}
+                                    {activeTab === 'poi_flags' && (
+                                        <PoiFlagsTable
+                                            data={poiFlags}
+                                            isLoading={dataLoading}
+                                            selectedRows={selectedRows}
+                                            onSelectAll={handleSelectAll}
+                                            onSelectRow={handleSelectRow}
+                                            onSort={handleSort}
+                                            sortConfig={sortConfig}
+                                            onRowClick={(item) => setDetailModal({ show: true, item, type: 'poi_flags' })}
+                                            onStatusChange={handlePoiFlagStatusChange}
+                                            onDelete={(id) => handleDeleteClick(id)}
                                             searchTerm={searchTerm}
                                             currentPage={currentPage}
                                             totalPages={totalPages}
@@ -677,7 +742,7 @@ export default function AdminPage() {
                         setDetailModal({ ...detailModal, show: false });
                         setEditLocationModal({ show: true, item });
                     }}
-                    onStatusChange={handleFeedbackStatusChange}
+                    onStatusChange={detailModal.type === 'poi_flags' ? handlePoiFlagStatusChange : handleFeedbackStatusChange}
                 />
 
                 <DeleteConfirmModal

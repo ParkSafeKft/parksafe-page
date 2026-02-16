@@ -8,7 +8,8 @@ import {
     Wrench,
     Home,
     LogOut,
-    Shield
+    Shield,
+    Flag
 } from 'lucide-react';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 
@@ -35,6 +36,7 @@ export default function AdminSidebar({
         { id: 'services', label: 'Szervizek & Boltok', icon: Store, section: 'ADATKEZELÉS' },
         { id: 'repair', label: 'Javító Állomások', icon: Wrench, section: 'ADATKEZELÉS' },
         { id: 'feedback', label: 'Visszajelzések', icon: MessageSquare, section: 'ADATKEZELÉS' },
+        { id: 'poi_flags', label: 'POI Bejelentések', icon: Flag, section: 'ADATKEZELÉS' },
         { id: 'home', label: 'Vissza a főoldalra', icon: Home, section: 'EGYÉB' },
     ];
 
