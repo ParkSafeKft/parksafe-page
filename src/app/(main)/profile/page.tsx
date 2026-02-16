@@ -174,7 +174,7 @@ export default function ProfilePage() {
 
                     <div className="text-center md:text-left">
                         <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-2">
-                            {t('profile.greeting')}, {user.user_metadata?.full_name?.split(' ')[0] || 'Felhasználó'}!
+                            {t('profile.greeting')}, {user.username || user.full_name?.split(' ')[0] || user.user_metadata?.full_name?.split(' ')[0] || 'Felhasználó'}!
                         </h1>
                         <p className="text-slate-500 font-medium">
                             {t('profile.subtitle')}
