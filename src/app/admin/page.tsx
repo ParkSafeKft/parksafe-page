@@ -349,6 +349,40 @@ export default function AdminPage() {
         }
     };
 
+    const handleOpenPoiEdit = useCallback(async (poiId: string, poiType: string) => {
+        const tableMap: Record<string, string> = {
+            parking: 'parkingSpots',
+            bicycleService: 'bicycleService',
+            repairStation: 'repairStation',
+        };
+        const tabMap: Record<string, string> = {
+            parking: 'parking',
+            bicycleService: 'services',
+            repairStation: 'repair',
+        };
+        const table = tableMap[poiType];
+        const tab = tabMap[poiType];
+        if (!table || !tab) {
+            toast.error('Ismeretlen POI típus');
+            return;
+        }
+        setDetailModal(prev => ({ ...prev, show: false }));
+        try {
+            const { data, error } = await supabase.from(table).select('*').eq('id', poiId).single();
+            if (error) throw error;
+            if (!data) {
+                toast.error('POI nem található');
+                return;
+            }
+            setActiveTab(tab);
+            setEditLocationModal({ show: true, item: data });
+            toast.success('POI szerkesztés megnyitva');
+        } catch (err) {
+            if (process.env.NODE_ENV === 'development') console.error(err);
+            toast.error('POI betöltése sikertelen');
+        }
+    }, []);
+
     const handlePoiFlagStatusChange = async (id: string, newStatus: string) => {
         setToggleLoading(id);
         try {
@@ -743,6 +777,7 @@ export default function AdminPage() {
                         setEditLocationModal({ show: true, item });
                     }}
                     onStatusChange={detailModal.type === 'poi_flags' ? handlePoiFlagStatusChange : handleFeedbackStatusChange}
+                    onOpenPoiEdit={detailModal.type === 'poi_flags' ? handleOpenPoiEdit : undefined}
                 />
 
                 <DeleteConfirmModal

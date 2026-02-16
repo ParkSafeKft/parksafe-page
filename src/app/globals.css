@@ -595,3 +595,67 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ============================================
+   Unified Admin Scrollbar Styling
+   Thin, rounded, dark-themed scrollbar that
+   matches Radix ScrollArea across all admin
+   components (tables, modals, sidebar).
+   ============================================ */
+
+/* Webkit (Chrome, Edge, Safari) */
+.admin-dark *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.admin-dark *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-dark *::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.admin-dark *::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.admin-dark *::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox */
+.admin-dark * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}
+
+/* Portaled admin dialogs/modals (outside .admin-dark) */
+body:has(.admin-dark) [role="dialog"] *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+body:has(.admin-dark) [role="dialog"] *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body:has(.admin-dark) [role="dialog"] *::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+body:has(.admin-dark) [role="dialog"] *::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+body:has(.admin-dark) [role="dialog"] * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}

@@ -22,7 +22,9 @@ import {
     DollarSign
 } from 'lucide-react';
 import { Location, ParkingLocation, RepairStation, BicycleService } from '@/types';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
 
 interface EditLocationModalProps {
     isOpen: boolean;
@@ -236,29 +238,46 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
     if (!isOpen || !item) return null;
 
     const getTitle = () => {
-        if (locationType === 'parking') return 'Parkoló Szerkesztése';
-        if (locationType === 'services') return 'Szerviz Szerkesztése';
-        if (locationType === 'repair') return 'Javító Állomás Szerkesztése';
-        return 'Helyszín Szerkesztése';
+        if (locationType === 'parking') return 'Parkoló szerkesztése';
+        if (locationType === 'services') return 'Szerviz szerkesztése';
+        if (locationType === 'repair') return 'Javító állomás szerkesztése';
+        return 'Helyszín szerkesztése';
     };
+
+    const Icon = locationType === 'parking' ? MapPin : locationType === 'services' ? Building2 : Wrench;
+    const iconGradient = locationType === 'parking'
+        ? 'from-green-500/20 to-green-600/20 border-green-500/30 text-green-400'
+        : locationType === 'services'
+            ? 'from-blue-500/20 to-blue-600/20 border-blue-500/30 text-blue-400'
+            : 'from-orange-500/20 to-orange-600/20 border-orange-500/30 text-orange-400';
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && !isLoading && onClose()}>
-            <DialogContent className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-2xl translate-x-[-50%] translate-y-[-50%] p-0 bg-[#111111] border border-white/10 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-300">
-                <div className="flex flex-col max-h-[90vh]">
-                    {/* Header */}
-                    <div className="p-6 border-b border-white/5 flex items-center justify-between shrink-0">
-                        <div>
-                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                {getTitle()}
-                                <span className="text-zinc-600 text-xs font-normal">#{item.id}</span>
-                            </h3>
-                            <p className="text-xs text-zinc-500 mt-1">Módosítsd az adatokat és mentsd el a változtatásokat. A *-gal jelölt mezők kötelezőek.</p>
-                        </div>
+            <DialogContent className="admin-dark max-w-4xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
+                <div className="flex flex-col h-[85vh]">
+                    {/* Header - same as POI / DetailModal */}
+                    <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
+                        <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
+                            <div className="flex items-center gap-4 min-w-0 pr-8">
+                                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${iconGradient} border flex items-center justify-center flex-shrink-0 shadow-inner`}>
+                                    <Icon className="h-6 w-6" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h1 className="text-lg font-bold text-foreground truncate leading-tight">
+                                        {getTitle()}
+                                    </h1>
+                                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                        <span className="text-xs text-muted-foreground truncate">{item.name || 'Helyszín'}</span>
+                                        <span className="text-xs font-mono text-muted-foreground opacity-70">· ID: {item.id.substring(0, 8)}...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </DialogTitle>
                     </div>
 
-                    {/* Scrollable Form */}
-                    <div className="p-8 overflow-y-auto space-y-8">
+                    {/* Scrollable Form - same ScrollArea pattern as POI modal */}
+                    <ScrollArea className="flex-1 min-h-0">
+                        <div className="p-6 space-y-6">
                         {/* Basic Info */}
                         <div className="grid grid-cols-2 gap-6">
                             <div className="space-y-1.5">
@@ -517,23 +536,19 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                                 <span>Helyszín sikeresen frissítve!</span>
                             </div>
                         )}
-                    </div>
+                        </div>
+                    </ScrollArea>
 
-                    {/* Footer Actions */}
-                    <div className="p-6 bg-black/30 border-t border-white/5 flex gap-4 shrink-0">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            disabled={isLoading}
-                            className="px-8 py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 font-bold rounded-xl transition-all border border-zinc-800"
-                        >
+                    {/* Footer - same as other modals */}
+                    <div className="p-6 border-t border-border flex justify-end gap-2 flex-shrink-0">
+                        <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
                             Mégse
-                        </button>
-                        <button
-                            type="submit"
+                        </Button>
+                        <Button
+                            type="button"
                             onClick={handleSubmit}
                             disabled={isLoading || success}
-                            className="flex-1 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-green-500/20 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="gap-2"
                         >
                             {isLoading ? (
                                 <>
@@ -547,11 +562,11 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                                 </>
                             ) : (
                                 <>
-                                    <Save className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                                    <Save className="h-5 w-5" />
                                     Mentés
                                 </>
                             )}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </DialogContent>

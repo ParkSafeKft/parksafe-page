@@ -17,6 +17,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ImagePreview from './ImagePreview';
+import { toast } from 'sonner';
 import {
     Users,
     Shield,
@@ -38,7 +39,9 @@ import {
     Flag,
     Store,
     Wrench,
-    User
+    User,
+    Copy,
+    ExternalLink
 } from 'lucide-react';
 
 interface DetailModalProps {
@@ -50,6 +53,17 @@ interface DetailModalProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onEdit: (item: any) => void;
     onStatusChange?: (id: string, newStatus: string) => void;
+    /** POI flags only: open the reported POI in edit modal and switch tab */
+    onOpenPoiEdit?: (poiId: string, poiType: string) => void;
+}
+
+function copyId(id: string) {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        navigator.clipboard.writeText(id).then(
+            () => toast.success('ID vágólapra másolva'),
+            () => toast.error('Másolás sikertelen')
+        );
+    }
 }
 
 
@@ -60,6 +74,7 @@ export default function DetailModal({
     type,
     onEdit,
     onStatusChange,
+    onOpenPoiEdit,
 }: DetailModalProps) {
     const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
     const [currentStatus, setCurrentStatus] = useState<string | null>(null);
@@ -241,10 +256,18 @@ export default function DetailModal({
                                         <h1 className="text-lg font-bold text-foreground truncate leading-tight">
                                             POI Bejelentés részletei
                                         </h1>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <p className="text-xs font-mono text-muted-foreground truncate opacity-70">
+                                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                            <span className="text-xs font-mono text-muted-foreground truncate opacity-70">
                                                 ID: {item.id.substring(0, 8)}...
-                                            </p>
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => copyId(item.id)}
+                                                className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-white transition-colors"
+                                                title="ID másolása"
+                                            >
+                                                <Copy className="w-3.5 h-3.5" />
+                                            </button>
                                             <Badge variant="outline" className="text-[10px] h-5 px-1.5 border-white/10 bg-white/5">
                                                 {new Date(item.created_at).toLocaleDateString()}
                                             </Badge>
@@ -457,7 +480,23 @@ export default function DetailModal({
                             </div>
                         </ScrollArea>
 
-                        <div className="p-6 border-t border-border flex justify-end">
+                        <div className="p-6 border-t border-border flex justify-between gap-2 flex-wrap">
+                            <div>
+                                {onOpenPoiEdit && item.poi_id && item.poi_type && (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="gap-2"
+                                        onClick={() => {
+                                            onOpenPoiEdit(item.poi_id, item.poi_type);
+                                            onClose();
+                                        }}
+                                    >
+                                        <ExternalLink className="w-4 h-4" />
+                                        Ugrás a POI szerkesztéséhez
+                                    </Button>
+                                )}
+                            </div>
                             <Button onClick={onClose} variant="outline">Bezárás</Button>
                         </div>
                     </div>
@@ -472,9 +511,9 @@ export default function DetailModal({
                 <DialogContent className="admin-dark max-w-2xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
                     <div className="flex flex-col h-[85vh]">
                         {/* Header */}
-                        <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm sticky top-0 z-10">
+                        <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
                             <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
-                                <div className="flex items-center gap-4 min-w-0">
+                                <div className="flex items-center gap-4 min-w-0 pr-8">
                                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-600/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0 shadow-inner">
                                         <MessageSquare className="h-6 w-6 text-purple-400" />
                                     </div>
@@ -482,23 +521,28 @@ export default function DetailModal({
                                         <h1 className="text-lg font-bold text-foreground truncate leading-tight">
                                             Visszajelzés részletei
                                         </h1>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <p className="text-xs font-mono text-muted-foreground truncate opacity-70">
+                                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                            <span className="text-xs font-mono text-muted-foreground truncate opacity-70">
                                                 ID: {item.id.substring(0, 8)}...
-                                            </p>
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => copyId(item.id)}
+                                                className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-white transition-colors"
+                                                title="ID másolása"
+                                            >
+                                                <Copy className="w-3.5 h-3.5" />
+                                            </button>
                                             <Badge variant="outline" className="text-[10px] h-5 px-1.5 border-white/10 bg-white/5">
                                                 {new Date(item.created_at).toLocaleDateString()}
                                             </Badge>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex-shrink-0 pl-4">
-                                    {/* Optional: Add status badge here too for quick visibility */}
-                                </div>
                             </DialogTitle>
                         </div>
 
-                        <ScrollArea className="flex-1">
+                        <ScrollArea className="flex-1 min-h-0">
                             <div className="p-6 space-y-6">
                                 {/* Title & Description */}
                                 <div>
@@ -680,24 +724,26 @@ export default function DetailModal({
                 <DialogContent className="admin-dark max-w-2xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
                     <div className="flex flex-col h-[85vh]">
                         {/* Header */}
-                        <div className="p-6 border-b border-border flex-shrink-0">
+                        <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
                             <DialogTitle className="text-foreground flex items-center gap-4 text-xl font-bold">
-                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center flex-shrink-0">
-                                    <Users className="h-5 w-5 text-primary-foreground" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <h1 className="text-xl font-bold text-foreground truncate">
-                                        {item.username || 'Felhasználó'}
-                                    </h1>
-                                    <p className="text-muted-foreground text-sm mt-1 truncate">
-                                        Felhasználói profil és beállítások
-                                    </p>
+                                <div className="flex items-center gap-4 min-w-0 pr-8">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center flex-shrink-0">
+                                        <Users className="h-5 w-5 text-primary-foreground" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h1 className="text-xl font-bold text-foreground truncate">
+                                            {item.username || 'Felhasználó'}
+                                        </h1>
+                                        <p className="text-muted-foreground text-sm mt-1 truncate">
+                                            Felhasználói profil és beállítások
+                                        </p>
+                                    </div>
                                 </div>
                             </DialogTitle>
                         </div>
 
                         {/* Scrollable Content */}
-                        <ScrollArea className="flex-1">
+                        <ScrollArea className="flex-1 min-h-0">
                             <div className="p-6">
                                 <div className="space-y-6">
                                     {/* User Profile Section */}
@@ -726,6 +772,19 @@ export default function DetailModal({
                                                     >
                                                         {item.role === 'admin' ? 'Adminisztrátor' : 'Felhasználó'}
                                                     </Badge>
+                                                    {item.id && (
+                                                        <div className="flex items-center gap-2 mt-2">
+                                                            <span className="text-xs font-mono text-muted-foreground">ID: {item.id.substring(0, 8)}...</span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => copyId(item.id)}
+                                                                className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-white transition-colors"
+                                                                title="ID másolása"
+                                                            >
+                                                                <Copy className="w-3.5 h-3.5" />
+                                                            </button>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -811,39 +870,61 @@ export default function DetailModal({
     }
 
     // Location Details (Parking, Service, Repair)
+    const locationIcon = type === 'parking' ? MapPin : type === 'service' ? Store : Wrench;
+    const LocationIcon = locationIcon;
+    const locationGradient = type === 'parking'
+        ? 'from-green-500/20 to-green-600/20 border-green-500/30'
+        : type === 'service'
+            ? 'from-blue-500/20 to-blue-600/20 border-blue-500/30'
+            : 'from-orange-500/20 to-orange-600/20 border-orange-500/30';
+    const locationIconColor = type === 'parking' ? 'text-green-400' : type === 'service' ? 'text-blue-400' : 'text-orange-400';
+
     return (
         <>
             <Dialog open={isOpen} onOpenChange={onClose}>
-                <DialogContent className="admin-dark max-w-4xl max-h-[90vh] overflow-hidden bg-card border-border p-0 flex flex-col">
-                    {/* Header */}
-                    <div className="flex items-center justify-between px-5 py-3 border-b border-border flex-shrink-0">
-                        <div className="flex items-center gap-2">
-                            <DialogTitle className="text-lg font-bold text-foreground">
-                                {item.name || 'Helyszín'}
+                <DialogContent className="admin-dark max-w-4xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
+                    <div className="flex flex-col h-[85vh]">
+                        {/* Header - same pattern as POI / Feedback */}
+                        <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
+                            <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
+                                <div className="flex items-center gap-4 min-w-0 pr-8">
+                                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${locationGradient} border flex items-center justify-center flex-shrink-0 shadow-inner`}>
+                                        <LocationIcon className={`h-6 w-6 ${locationIconColor}`} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h1 className="text-lg font-bold text-foreground truncate leading-tight">
+                                            {item.name || 'Helyszín'}
+                                        </h1>
+                                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                            <Badge variant={item.available ? 'default' : 'destructive'} className="flex items-center gap-1 text-xs w-fit">
+                                                {item.available ? (
+                                                    <>
+                                                        <CheckCircle className="h-3 w-3" />
+                                                        Aktív
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <XCircle className="h-3 w-3" />
+                                                        Inaktív
+                                                    </>
+                                                )}
+                                            </Badge>
+                                            {item.city && (
+                                                <span className="text-xs text-muted-foreground">· {item.city}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
                             </DialogTitle>
-                            <Badge variant={item.available ? 'default' : 'destructive'} className="flex items-center gap-1 text-xs">
-                                {item.available ? (
-                                    <>
-                                        <CheckCircle className="h-3 w-3" />
-                                        Aktív
-                                    </>
-                                ) : (
-                                    <>
-                                        <XCircle className="h-3 w-3" />
-                                        Inaktív
-                                    </>
-                                )}
-                            </Badge>
                         </div>
-                    </div>
 
                     {/* Scrollable Content */}
-                    <ScrollArea className="flex-1 overflow-y-auto">
-                        <div className="p-4 space-y-6">
+                    <ScrollArea className="flex-1 min-h-0">
+                        <div className="p-6 space-y-6">
                             {/* Image Gallery */}
                             {item.picture_url && item.picture_url.length > 0 && (
                                 <div>
-                                    <h3 className="flex items-center gap-2 text-base font-semibold mb-3">
+                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-2">
                                         <Eye className="h-4 w-4" />
                                         Képek ({item.picture_url.length})
                                     </h3>
@@ -870,7 +951,7 @@ export default function DetailModal({
 
                             {/* Alapadatok */}
                             <div>
-                                <h3 className="text-base font-semibold mb-3">Alapadatok</h3>
+                                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Alapadatok</h3>
                                 <div className="flex flex-col gap-3">
                                     <div className="flex flex-wrap gap-3">
                                         <div className="flex-1 min-w-[200px]">
@@ -973,7 +1054,7 @@ export default function DetailModal({
                             {coords ? (
                                 <>
                                     <div>
-                                        <h3 className="text-base font-semibold mb-3">Koordináták</h3>
+                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Koordináták</h3>
                                         <div className="flex gap-6">
                                             <div className="flex-1">
                                                 <p className="text-xs text-muted-foreground mb-0.5">Szélesség (Latitude)</p>
@@ -987,7 +1068,7 @@ export default function DetailModal({
                                     </div>
 
                                     <div>
-                                        <h3 className="flex items-center gap-2 text-base font-semibold mb-3">
+                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
                                             <MapPin className="h-4 w-4" />
                                             Térkép
                                         </h3>
@@ -996,9 +1077,8 @@ export default function DetailModal({
                                                 width="100%"
                                                 height="350"
                                                 frameBorder="0"
-                                                style={{ border: 0 }}
+                                                style={{ border: 0, pointerEvents: 'none' }}
                                                 src={`https://www.openstreetmap.org/export/embed.html?bbox=${(coords.lon - 0.002).toFixed(6)},${(coords.lat - 0.002).toFixed(6)},${(coords.lon + 0.002).toFixed(6)},${(coords.lat + 0.002).toFixed(6)}&layer=mapnik&marker=${coords.lat.toFixed(6)},${coords.lon.toFixed(6)}`}
-                                                allowFullScreen
                                                 title="Location Map"
                                             />
                                         </div>
@@ -1015,18 +1095,28 @@ export default function DetailModal({
                                 </>
                             ) : (
                                 <div>
-                                    <h3 className="text-base font-semibold mb-3">Koordináták</h3>
+                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Koordináták</h3>
                                     <p className="text-sm text-muted-foreground">Koordináták nem érhetők el</p>
                                 </div>
                             )}
 
                             {/* Database Info */}
                             <div>
-                                <h3 className="text-base font-semibold mb-3">Adatbázis információk</h3>
+                                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Adatbázis információk</h3>
                                 <div className="flex flex-wrap gap-4">
                                     <div className="flex-1 min-w-[150px]">
                                         <p className="text-xs text-muted-foreground mb-0.5">ID</p>
-                                        <p className="text-xs font-mono text-foreground break-all">{item.id}</p>
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-xs font-mono text-foreground break-all">{item.id}</p>
+                                            <button
+                                                type="button"
+                                                onClick={() => copyId(item.id)}
+                                                className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-white transition-colors shrink-0"
+                                                title="ID másolása"
+                                            >
+                                                <Copy className="w-3.5 h-3.5" />
+                                            </button>
+                                        </div>
                                     </div>
                                     <div className="flex-1 min-w-[150px]">
                                         <p className="text-xs text-muted-foreground mb-0.5">Létrehozva</p>
@@ -1057,13 +1147,12 @@ export default function DetailModal({
                         </div>
                     </ScrollArea>
 
-                    {/* Footer */}
-                    <div className="px-4 py-3 border-t border-border flex justify-end gap-2 flex-shrink-0">
-                        <Button variant="outline" size="sm" onClick={onClose}>
+                    {/* Footer - same as other modals */}
+                    <div className="p-6 border-t border-border flex justify-end gap-2 flex-shrink-0">
+                        <Button variant="outline" onClick={onClose}>
                             Bezárás
                         </Button>
                         <Button
-                            size="sm"
                             onClick={() => {
                                 onEdit(item);
                                 onClose();
@@ -1072,6 +1161,7 @@ export default function DetailModal({
                             <Edit className="h-4 w-4 mr-2" />
                             Szerkesztés
                         </Button>
+                    </div>
                     </div>
                 </DialogContent>
             </Dialog>
