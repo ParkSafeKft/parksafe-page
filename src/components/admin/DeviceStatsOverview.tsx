@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import {
     Loader2,
@@ -32,13 +33,17 @@ export default function DeviceStatsOverview() {
     const [stats, setStats] = useState<DeviceStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
 
     const fetchStats = async () => {
         try {
             // Get the current session token for authenticated API calls
             const { data: { session } } = await supabase.auth.getSession();
             if (!session?.access_token) {
-                throw new Error('No active session');
+                // Session teljesen lejárt: kijelentkezés és vissza a bejelentkezéshez
+                await supabase.auth.signOut();
+                router.replace('/login');
+                return;
             }
 
             const res = await fetch('/api/device-stats', {
@@ -48,8 +53,29 @@ export default function DeviceStatsOverview() {
             });
 
             if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.error || 'Failed to fetch stats');
+                let errorMessage = 'Hiba történt a statisztikák lekérésekor.';
+                try {
+                    const errorData = await res.json();
+                    if (errorData?.error) {
+                        errorMessage = errorData.error;
+                    }
+                } catch {
+                    // ignore JSON parse errors
+                }
+
+                if (res.status === 401) {
+                    // Auth token már nem jó → kényszerített reauth
+                    await supabase.auth.signOut();
+                    router.replace('/login');
+                    return;
+                } else if (res.status === 403) {
+                    // Nincs már admin jogosultság → kijelentkeztetjük, hogy tiszta állapotból térjen vissza
+                    await supabase.auth.signOut();
+                    router.replace('/');
+                    return;
+                }
+
+                throw new Error(errorMessage);
             }
 
             const data = await res.json();

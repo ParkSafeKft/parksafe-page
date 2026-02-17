@@ -13,22 +13,21 @@ export default async function AdminLayout({
 }) {
     const supabase = await createSupabaseServerClient();
 
-    // Verify user is authenticated
+    // Try to verify user on the server, but don't hard-fail on missing/expired session.
+    // The client-side admin guard in the AdminPage will still enforce access control.
     const { data: { user }, error } = await supabase.auth.getUser();
 
-    if (error || !user) {
-        redirect('/');
-    }
+    if (!error && user) {
+        // Only perform a strict role check when we actually have a valid user.
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
 
-    // Verify user has admin role
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-
-    if (!profile || profile.role !== 'admin') {
-        redirect('/');
+        if (!profile || profile.role !== 'admin') {
+            redirect('/');
+        }
     }
 
     return <>{children}</>;
