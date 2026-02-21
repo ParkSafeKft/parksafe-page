@@ -416,7 +416,7 @@ export default function DetailModal({
                                             <User className="w-3 h-3" /> Bejelentő
                                         </h3>
                                         <p className="text-sm font-medium text-zinc-200 pl-1">
-                                            {item.reporter_username || 'Ismeretlen'}
+                                            {item.reporter_username || item.reporter_full_name || 'Ismeretlen'}
                                         </p>
                                     </div>
                                     <div className="space-y-2">
@@ -732,7 +732,7 @@ export default function DetailModal({
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <h1 className="text-xl font-bold text-foreground truncate">
-                                            {item.username || 'Felhasználó'}
+                                            {item.username || item.full_name || 'Felhasználó'}
                                         </h1>
                                         <p className="text-muted-foreground text-sm mt-1 truncate">
                                             Felhasználói profil és beállítások
@@ -756,14 +756,14 @@ export default function DetailModal({
                                             {/* Profile Section */}
                                             <div className="flex items-start gap-6">
                                                 <Avatar className="h-20 w-20 ring-2 ring-border flex-shrink-0">
-                                                    <AvatarImage src={item.avatar_url} alt={item.username || 'User'} />
+                                                    <AvatarImage src={item.avatar_url} alt={item.username || item.full_name || 'User'} />
                                                     <AvatarFallback className="bg-primary text-primary-foreground font-semibold text-2xl">
-                                                        {(item.username || item.email || 'U').charAt(0).toUpperCase()}
+                                                        {(item.username || item.full_name || item.email || 'U').charAt(0).toUpperCase()}
                                                     </AvatarFallback>
                                                 </Avatar>
                                                 <div className="flex-1 min-w-0 space-y-3">
                                                     <div>
-                                                        <h3 className="font-semibold text-foreground text-2xl">{item.username || 'Nincs megadva'}</h3>
+                                                        <h3 className="font-semibold text-foreground text-2xl">{item.username || item.full_name || 'Nincs megadva'}</h3>
                                                         <p className="text-muted-foreground text-base truncate">{item.email}</p>
                                                     </div>
                                                     <Badge

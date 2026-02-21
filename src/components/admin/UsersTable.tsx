@@ -83,13 +83,13 @@ export default function UsersTable({
                                     <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 group-hover:border-green-500/50 transition-colors">
                                         <ImageWithFallback
                                             src={user.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100&h=100'}
-                                            alt={user.username || 'User'}
+                                            alt={user.username || user.full_name || 'User'}
                                             className="w-full h-full object-cover"
                                         />
                                     </div>
                                 </td>
                                 <td className="p-4">
-                                    <span className="text-sm font-semibold text-white">{user.username || 'Nincs megadva'}</span>
+                                    <span className="text-sm font-semibold text-white">{user.username || user.full_name || 'Nincs megadva'}</span>
                                 </td>
                                 <td className="p-4">
                                     <span className="text-sm text-zinc-400">{user.email || 'Nincs email'}</span>

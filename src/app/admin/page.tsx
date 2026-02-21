@@ -191,7 +191,7 @@ export default function AdminPage() {
                     countQuery = supabase.from('feedback').select('*', { count: 'exact', head: true });
                     break;
                 case 'poi_flags':
-                    query = supabase.from('poi_flags').select('*, profiles!poi_flags_user_id_fkey(username)');
+                    query = supabase.from('poi_flags').select('*, profiles!poi_flags_user_id_fkey(username, full_name)');
                     countQuery = supabase.from('poi_flags').select('*', { count: 'exact', head: true });
                     break;
                 case 'dashboard':
@@ -206,8 +206,8 @@ export default function AdminPage() {
                 const safe = sanitizeSearchTerm(searchTerm);
                 if (safe) {
                     if (activeTab === 'users') {
-                        query = query.or(`username.ilike.%${safe}%,email.ilike.%${safe}%`);
-                        countQuery = countQuery.or(`username.ilike.%${safe}%,email.ilike.%${safe}%`);
+                        query = query.or(`username.ilike.%${safe}%,full_name.ilike.%${safe}%,email.ilike.%${safe}%`);
+                        countQuery = countQuery.or(`username.ilike.%${safe}%,full_name.ilike.%${safe}%,email.ilike.%${safe}%`);
                     } else if (activeTab === 'feedback') {
                         query = query.or(`title.ilike.%${safe}%,description.ilike.%${safe}%`);
                         countQuery = countQuery.or(`title.ilike.%${safe}%,description.ilike.%${safe}%`);
@@ -247,6 +247,7 @@ export default function AdminPage() {
                 const mapped = (dataRes.data || []).map((row: any) => ({
                     ...row,
                     reporter_username: row.profiles?.username || null,
+                    reporter_full_name: row.profiles?.full_name || null,
                 }));
                 setPoiFlags(mapped);
             }

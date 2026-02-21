@@ -27,6 +27,7 @@ interface PoiFlag {
     created_at: string;
     // Joined fields
     reporter_username?: string;
+    reporter_full_name?: string;
 }
 
 interface PoiFlagsTableProps {
@@ -217,7 +218,7 @@ export default function PoiFlagsTable({
                                 <td className="p-4">
                                     <div className="flex items-center gap-2 text-zinc-400">
                                         <User className="w-3.5 h-3.5" />
-                                        <span className="text-xs">{item.reporter_username || 'Ismeretlen'}</span>
+                                        <span className="text-xs">{item.reporter_username || item.reporter_full_name || 'Ismeretlen'}</span>
                                     </div>
                                 </td>
                                 <td className="p-4">
