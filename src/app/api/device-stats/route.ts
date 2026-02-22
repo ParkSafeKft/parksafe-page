@@ -76,6 +76,15 @@ export async function GET(request: NextRequest) {
             });
         }
 
+        // Get real registered user count from profiles (bypasses RLS via service role)
+        const { count: realUserCount, error: countError } = await supabase
+            .from('profiles')
+            .select('*', { count: 'exact', head: true });
+
+        if (!countError && realUserCount !== null) {
+            data[0].registered_users = realUserCount;
+        }
+
         return NextResponse.json(data[0]);
 
     } catch (error) {
