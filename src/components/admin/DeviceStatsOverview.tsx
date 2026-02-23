@@ -133,9 +133,9 @@ export default function DeviceStatsOverview() {
         : '0.0';
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500">
+        <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-500">
             {/* Main Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <StatCard
                     title="Összes Eszköz"
                     value={stats.total_devices.toLocaleString()}
@@ -166,7 +166,7 @@ export default function DeviceStatsOverview() {
                 />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                 {/* Platform Distribution */}
                 <Card className="bg-[#111111] border-white/5">
                     <CardHeader>
@@ -211,25 +211,25 @@ export default function DeviceStatsOverview() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                                <div className="text-sm text-zinc-400 mb-1 flex items-center gap-2">
-                                    <Calendar className="w-4 h-4" />
-                                    Utolsó 7 nap
+                        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                            <div className="p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10">
+                                <div className="text-xs sm:text-sm text-zinc-400 mb-1 flex items-center gap-1.5">
+                                    <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                                    <span>Utolsó 7 nap</span>
                                 </div>
-                                <div className="text-2xl font-bold text-white">
+                                <div className="text-xl sm:text-2xl font-bold text-white">
                                     {stats.active_last_7_days.toLocaleString()}
                                 </div>
                                 <div className="text-xs text-zinc-500 mt-1">
                                     Aktív eszközök
                                 </div>
                             </div>
-                            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                                <div className="text-sm text-zinc-400 mb-1 flex items-center gap-2">
-                                    <Calendar className="w-4 h-4" />
-                                    Utolsó 30 nap
+                            <div className="p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10">
+                                <div className="text-xs sm:text-sm text-zinc-400 mb-1 flex items-center gap-1.5">
+                                    <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                                    <span>Utolsó 30 nap</span>
                                 </div>
-                                <div className="text-2xl font-bold text-white">
+                                <div className="text-xl sm:text-2xl font-bold text-white">
                                     {stats.active_last_30_days.toLocaleString()}
                                 </div>
                                 <div className="text-xs text-zinc-500 mt-1">
@@ -239,9 +239,9 @@ export default function DeviceStatsOverview() {
                         </div>
 
                         {stats.active_last_30_days > 0 && (
-                            <div className="mt-6">
-                                <div className="flex justify-between text-sm text-zinc-400 mb-2">
-                                    <span>Retention (7 nap / 30 nap)</span>
+                            <div className="mt-4 sm:mt-6">
+                                <div className="flex justify-between text-xs sm:text-sm text-zinc-400 mb-2">
+                                    <span>Retention (7 / 30 nap)</span>
                                     <span>{((stats.active_last_7_days / stats.active_last_30_days) * 100).toFixed(1)}%</span>
                                 </div>
                                 <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
@@ -275,15 +275,15 @@ function StatCard({ title, value, icon, description, color }: {
 
     return (
         <Card className="bg-[#111111] border-white/5">
-            <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
+            <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
                     <div className={`p-2 rounded-lg ${colorClasses[color]}`}>
                         {icon}
                     </div>
                 </div>
                 <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-zinc-400">{title}</h3>
-                    <div className="text-2xl font-bold text-white">{value}</div>
+                    <h3 className="text-xs sm:text-sm font-medium text-zinc-400">{title}</h3>
+                    <div className="text-xl sm:text-2xl font-bold text-white">{value}</div>
                     <p className="text-xs text-zinc-500">{description}</p>
                 </div>
             </CardContent>

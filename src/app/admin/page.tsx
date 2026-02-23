@@ -67,6 +67,7 @@ export default function AdminPage() {
 
     const [activeTab, setActiveTab] = useState('dashboard');
     const [searchTerm, setSearchTerm] = useState('');
+    const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
     // Data states
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -268,6 +269,7 @@ export default function AdminPage() {
         setCurrentPage(1);
         setSelectedRows(new Set());
         setSelectAll(false);
+        setMobileSearchOpen(false);
     }, [activeTab, searchTerm]);
 
     useEffect(() => {
@@ -495,9 +497,9 @@ export default function AdminPage() {
                 />
 
                 <SidebarInset className="flex flex-col flex-1 h-screen overflow-hidden">
-                    <header className="flex-shrink-0 p-6 pb-2">
+                    <header className="flex-shrink-0 p-3 sm:p-4 xl:p-6 pb-2">
                         <Card className="bg-card border-border shadow-lg">
-                            <CardContent className="p-4">
+                            <CardContent className="p-3 xl:p-4">
                                 <div className="hidden xl:flex items-center justify-between">
                                     {/* Left Section */}
                                     <div className="flex items-center gap-4">
@@ -596,16 +598,76 @@ export default function AdminPage() {
                                     </div>
                                 </div>
 
-                                {/* Mobile Header logic - simiplified */}
-                                <div className="xl:hidden flex items-center justify-between">
+                                {/* Mobile Header */}
+                                <div className="xl:hidden flex items-center gap-2 min-h-[40px]">
                                     <SidebarTrigger />
-                                    <h1 className="text-lg font-bold">Admin</h1>
+                                    <Separator orientation="vertical" className="h-6 bg-sidebar-border" />
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                        <h1 className="text-base font-bold text-foreground truncate">
+                                            {activeTab === 'dashboard' && 'Vezérlőpult'}
+                                            {activeTab === 'users' && 'Felhasználók'}
+                                            {activeTab === 'parking' && 'Bicikli Parkolók'}
+                                            {activeTab === 'services' && 'Szervizek & Boltok'}
+                                            {activeTab === 'repair' && 'Javító Állomások'}
+                                            {activeTab === 'feedback' && 'Visszajelzések'}
+                                            {activeTab === 'poi_flags' && 'POI Bejelentések'}
+                                        </h1>
+                                        {activeTab !== 'dashboard' && (
+                                            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 shrink-0 text-xs">
+                                                {totalCount}
+                                            </Badge>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-1 shrink-0">
+                                        {activeTab !== 'dashboard' && (
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-8 w-8 p-0"
+                                                onClick={() => setMobileSearchOpen(v => !v)}
+                                            >
+                                                {mobileSearchOpen ? <XCircle className="h-4 w-4" /> : <Search className="h-4 w-4" />}
+                                            </Button>
+                                        )}
+                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && (
+                                            <Button
+                                                size="sm"
+                                                className="h-8 w-8 p-0"
+                                                onClick={() => setAddLocationModal(true)}
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                    </div>
                                 </div>
+                                {/* Mobile Search Bar */}
+                                {mobileSearchOpen && activeTab !== 'dashboard' && (
+                                    <div className="xl:hidden mt-3 relative">
+                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            placeholder="Keresés..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="pl-10 w-full"
+                                            autoFocus
+                                        />
+                                        {searchTerm && (
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                                                onClick={() => setSearchTerm('')}
+                                            >
+                                                <XCircle className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </header>
 
-                    <main className="flex-1 overflow-hidden p-6 pt-2">
+                    <main className="flex-1 overflow-hidden p-3 sm:p-4 xl:p-6 pt-2">
                         {dataLoading ? (
                             <Card className="bg-card border-border shadow-lg h-full flex items-center justify-center">
                                 <Loader2 className="h-10 w-10 animate-spin text-primary" />

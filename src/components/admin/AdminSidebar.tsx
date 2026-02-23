@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import {
     LayoutDashboard,
@@ -12,6 +14,7 @@ import {
     Flag
 } from 'lucide-react';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
+import { useSidebar } from '@/components/ui/sidebar';
 
 interface AdminSidebarProps {
     activeTab: string;
@@ -29,6 +32,8 @@ export default function AdminSidebar({
     onLogout,
     onHomeConfig,
 }: AdminSidebarProps) {
+    const { openMobile, setOpenMobile, isMobile } = useSidebar();
+
     const menuItems = [
         { id: 'dashboard', label: 'Vezérlőpult', icon: LayoutDashboard, section: 'ÁTTEKINTÉS' },
         { id: 'users', label: 'Felhasználók', icon: Users, section: 'ADATKEZELÉS' },
@@ -43,6 +48,7 @@ export default function AdminSidebar({
     const sections = ['ÁTTEKINTÉS', 'ADATKEZELÉS', 'EGYÉB'];
 
     const handleItemClick = (id: string) => {
+        if (isMobile) setOpenMobile(false);
         if (id === 'home') {
             onHomeConfig();
         } else {
@@ -50,8 +56,19 @@ export default function AdminSidebar({
         }
     };
 
+    const asideClasses = isMobile
+        ? `fixed left-0 top-0 h-full z-50 w-72 bg-[#0a0a0a] border-r border-white/5 flex flex-col overflow-y-auto transition-transform duration-300 ease-in-out ${openMobile ? 'translate-x-0' : '-translate-x-full'}`
+        : 'w-72 h-screen bg-[#0a0a0a] border-r border-white/5 flex flex-col shrink-0 overflow-y-auto';
+
     return (
-        <aside className="w-72 h-screen bg-[#0a0a0a] border-r border-white/5 flex flex-col shrink-0 overflow-y-auto">
+        <>
+        {isMobile && openMobile && (
+            <div
+                className="fixed inset-0 bg-black/60 z-40"
+                onClick={() => setOpenMobile(false)}
+            />
+        )}
+        <aside className={asideClasses}>
             {/* Header */}
             <div className="p-6 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center border border-green-500/20">
@@ -123,5 +140,6 @@ export default function AdminSidebar({
                 </button>
             </div>
         </aside>
+        </>
     );
 }
