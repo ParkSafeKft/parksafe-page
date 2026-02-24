@@ -24,7 +24,8 @@ import {
     MapPin,
     Building,
     Wrench,
-    ArrowLeft
+    ArrowLeft,
+    Camera,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -40,6 +41,7 @@ import DeleteConfirmModal from '@/components/admin/DeleteConfirmModal';
 import DeviceStatsOverview from '@/components/admin/DeviceStatsOverview';
 import FeedbackTable from '@/components/admin/FeedbackTable';
 import PoiFlagsTable from '@/components/admin/PoiFlagsTable';
+import ParkingImageSubmissionsTable from '@/components/admin/ParkingImageSubmissionsTable';
 
 /**
  * Sanitize a search term to prevent PostgREST filter injection.
@@ -59,6 +61,31 @@ function sanitizeSearchTerm(term: string): string {
 }
 
 const isDev = process.env.NODE_ENV === 'development';
+
+/**
+ * Delete a file from Supabase Storage given its public URL.
+ * Works for any public bucket by extracting bucket + path from the URL.
+ */
+async function deleteSupabasePublicFile(publicUrl: string) {
+    try {
+        const marker = '/storage/v1/object/public/';
+        const idx = publicUrl.indexOf(marker);
+        if (idx === -1) return;
+
+        const withoutPrefix = publicUrl.slice(idx + marker.length).split('?')[0];
+        const [bucket, ...rest] = withoutPrefix.split('/');
+        const path = rest.join('/');
+
+        if (!bucket || !path) return;
+
+        const { error } = await supabase.storage.from(bucket).remove([path]);
+        if (error && isDev) {
+            console.error('Storage delete error:', error);
+        }
+    } catch (e) {
+        if (isDev) console.error('Error while deleting from storage:', e);
+    }
+}
 
 export default function AdminPage() {
     const router = useRouter();
@@ -82,6 +109,8 @@ export default function AdminPage() {
     const [feedback, setFeedback] = useState<any[]>([]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [poiFlags, setPoiFlags] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [parkingImageSubmissions, setParkingImageSubmissions] = useState<any[]>([]);
 
     const [dataLoading, setDataLoading] = useState(false);
     const [toggleLoading, setToggleLoading] = useState<string | null>(null);
@@ -122,6 +151,7 @@ export default function AdminPage() {
         switch (tab) {
             case 'users': return 'profiles';
             case 'parking': return 'parkingSpots';
+            case 'parking_images': return 'parking_image_submissions';
             case 'services': return 'bicycleService';
             case 'repair': return 'repairStation';
             case 'feedback': return 'feedback';
@@ -179,6 +209,15 @@ export default function AdminPage() {
                     query = supabase.from('parkingSpots').select('*');
                     countQuery = supabase.from('parkingSpots').select('*', { count: 'exact', head: true });
                     break;
+                case 'parking_images':
+                    query = supabase
+                        .from('parking_image_submissions')
+                        .select(`
+                            *,
+                            parkingSpots!parking_image_submissions_parking_spot_id_fkey (name, city, coordinate)
+                        `);
+                    countQuery = supabase.from('parking_image_submissions').select('*', { count: 'exact', head: true });
+                    break;
                 case 'services':
                     query = supabase.from('bicycleService').select('*');
                     countQuery = supabase.from('bicycleService').select('*', { count: 'exact', head: true });
@@ -215,6 +254,9 @@ export default function AdminPage() {
                     } else if (activeTab === 'poi_flags') {
                         query = query.or(`reason.ilike.%${safe}%,comment.ilike.%${safe}%,poi_type.ilike.%${safe}%`);
                         countQuery = countQuery.or(`reason.ilike.%${safe}%,comment.ilike.%${safe}%,poi_type.ilike.%${safe}%`);
+                    } else if (activeTab === 'parking_images') {
+                        query = query.or(`image_url.ilike.%${safe}%`);
+                        countQuery = countQuery.or(`image_url.ilike.%${safe}%`);
                     } else {
                         query = query.or(`name.ilike.%${safe}%,city.ilike.%${safe}%`);
                         countQuery = countQuery.or(`name.ilike.%${safe}%,city.ilike.%${safe}%`);
@@ -251,6 +293,16 @@ export default function AdminPage() {
                     reporter_full_name: row.profiles?.full_name || null,
                 }));
                 setPoiFlags(mapped);
+            } else if (activeTab === 'parking_images') {
+                const mapped = (dataRes.data || []).map((row: any) => ({
+                    ...row,
+                    parking_name: row.parkingSpots?.name || null,
+                    parking_city: row.parkingSpots?.city || null,
+                    parking_coordinate: row.parkingSpots?.coordinate || null,
+                    reporter_username: row.user_id ? String(row.user_id).slice(0, 8) : null,
+                    reporter_full_name: null,
+                }));
+                setParkingImageSubmissions(mapped);
             }
 
         } catch (error) {
@@ -289,9 +341,10 @@ export default function AdminPage() {
         if (checked) {
             const currentData = activeTab === 'users' ? users :
                 activeTab === 'parking' ? parkingSpots :
-                    activeTab === 'services' ? bicycleServices :
-                        activeTab === 'repair' ? repairStations :
-                            activeTab === 'poi_flags' ? poiFlags : feedback;
+                    activeTab === 'parking_images' ? parkingImageSubmissions :
+                        activeTab === 'services' ? bicycleServices :
+                            activeTab === 'repair' ? repairStations :
+                                activeTab === 'poi_flags' ? poiFlags : feedback;
             setSelectedRows(new Set(currentData.map(item => item.id)));
         } else {
             setSelectedRows(new Set());
@@ -406,6 +459,66 @@ export default function AdminPage() {
         }
     };
 
+    const handleParkingImageStatusChange = async (id: string, newStatus: string) => {
+        if (!profile) return;
+        setToggleLoading(id);
+        try {
+            const { data, error } = await supabase
+                .rpc('parking_image_submission_set_status', {
+                    p_submission_id: id,
+                    p_new_status: newStatus,
+                });
+
+            if (error || (data && (data as any).error)) {
+                if (isDev) console.error('Error updating parking image status via RPC:', error || (data as any).error);
+                toast.error('Hiba történt a státusz frissítésekor');
+            } else {
+                toast.success('Kép státusza frissítve');
+                fetchData();
+            }
+        } catch (error) {
+            if (isDev) console.error('Error updating parking image status via RPC:', error);
+            toast.error('Hiba történt a státusz frissítésekor');
+        } finally {
+            setToggleLoading(null);
+        }
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleDeleteParkingImageSubmission = async (submission: any) => {
+        if (!submission) return;
+        const confirmed = window.confirm('Biztosan törlöd ezt a kérelmet, a hozzá tartozó képet és a markerhez csatolt képet is?');
+        if (!confirmed) return;
+
+        setToggleLoading(submission.id);
+
+        try {
+            const imageUrl = typeof submission.image_url === 'string' ? submission.image_url : null;
+
+            // 1) Kép törlése a storage-ból (Supabase Storage API-val)
+            if (imageUrl) {
+                await deleteSupabasePublicFile(imageUrl);
+            }
+
+            // 2) DB takarítás RPC-vel (picture_url tömb + submission sor)
+            const { data, error } = await supabase
+                .rpc('parking_image_submission_delete', { submission_id: submission.id });
+
+            if (error || (data && (data as any).error)) {
+                if (isDev) console.error('RPC delete error (parking_image_submission_delete):', error || (data as any).error);
+                toast.error('Hiba történt a kérelem törlésekor');
+            } else {
+                toast.success('Kérelem és kép sikeresen törölve');
+                fetchData();
+            }
+        } catch (err) {
+            if (isDev) console.error('Error deleting parking image submission via RPC:', err);
+            toast.error('Hiba történt a törlés közben');
+        } finally {
+            setToggleLoading(null);
+        }
+    };
+
     const handleDeleteClick = (id: string) => {
         const table = activeTab === 'users' ? 'profiles' :
             activeTab === 'parking' ? 'parkingSpots' :
@@ -510,6 +623,7 @@ export default function AdminPage() {
                                                 {activeTab === 'dashboard' && <Loader2 className="h-5 w-5 text-white" />}
                                                 {activeTab === 'users' && <Users className="h-5 w-5 text-white" />}
                                                 {activeTab === 'parking' && <MapPin className="h-5 w-5 text-white" />}
+                                                {activeTab === 'parking_images' && <Camera className="h-5 w-5 text-white" />}
                                                 {activeTab === 'services' && <Building className="h-5 w-5 text-white" />}
                                                 {activeTab === 'repair' && <Wrench className="h-5 w-5 text-white" />}
                                                 {activeTab === 'feedback' && <Users className="h-5 w-5 text-white" />}
@@ -520,6 +634,7 @@ export default function AdminPage() {
                                                     {activeTab === 'dashboard' && 'Vezérlőpult'}
                                                     {activeTab === 'users' && 'Felhasználók'}
                                                     {activeTab === 'parking' && 'Bicikli Parkolók'}
+                                                    {activeTab === 'parking_images' && 'Parkoló képek'}
                                                     {activeTab === 'services' && 'Szervizek & Boltok'}
                                                     {activeTab === 'repair' && 'Javító Állomások'}
                                                     {activeTab === 'feedback' && 'Visszajelzések'}
@@ -552,6 +667,7 @@ export default function AdminPage() {
                                                     {activeTab === 'dashboard' && 'Rendszerstatisztikák és áttekintés'}
                                                     {activeTab === 'users' && 'Összes regisztrált felhasználó kezelése'}
                                                     {activeTab === 'parking' && 'Bicikli parkolók létrehozása és kezelése'}
+                                                    {activeTab === 'parking_images' && 'Felhasználók által beküldött parkoló képek jóváhagyása'}
                                                     {activeTab === 'services' && 'Kerékpár szervizek és boltok kezelése'}
                                                     {activeTab === 'repair' && 'Önkiszolgáló javító állomások kezelése'}
                                                     {activeTab === 'feedback' && 'Felhasználói visszajelzések kezelése'}
@@ -583,7 +699,7 @@ export default function AdminPage() {
                                             )}
                                         </div>
 
-                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && (
+                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'parking_images' && (
                                             <>
                                                 <Separator orientation="vertical" className="h-8 bg-sidebar-border" />
                                                 <Button
@@ -607,6 +723,7 @@ export default function AdminPage() {
                                             {activeTab === 'dashboard' && 'Vezérlőpult'}
                                             {activeTab === 'users' && 'Felhasználók'}
                                             {activeTab === 'parking' && 'Bicikli Parkolók'}
+                                            {activeTab === 'parking_images' && 'Parkoló képek'}
                                             {activeTab === 'services' && 'Szervizek & Boltok'}
                                             {activeTab === 'repair' && 'Javító Állomások'}
                                             {activeTab === 'feedback' && 'Visszajelzések'}
@@ -629,7 +746,7 @@ export default function AdminPage() {
                                                 {mobileSearchOpen ? <XCircle className="h-4 w-4" /> : <Search className="h-4 w-4" />}
                                             </Button>
                                         )}
-                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && (
+                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'parking_images' && (
                                             <Button
                                                 size="sm"
                                                 className="h-8 w-8 p-0"
@@ -711,6 +828,21 @@ export default function AdminPage() {
                                             onDelete={(id) => handleDeleteClick(id)}
                                             onToggleAvailability={handleToggleAvailability}
                                             toggleLoading={toggleLoading}
+                                            searchTerm={searchTerm}
+                                            currentPage={currentPage}
+                                            totalPages={totalPages}
+                                            onPageChange={setCurrentPage}
+                                            pageSize={pageSize}
+                                            onPageSizeChange={setPageSize}
+                                        />
+                                    )}
+                                    {activeTab === 'parking_images' && (
+                                        <ParkingImageSubmissionsTable
+                                            data={parkingImageSubmissions}
+                                            isLoading={dataLoading}
+                                            onStatusChange={handleParkingImageStatusChange}
+                                            onOpenParkingEdit={(parkingSpotId) => handleOpenPoiEdit(parkingSpotId, 'parking')}
+                                            onDelete={handleDeleteParkingImageSubmission}
                                             searchTerm={searchTerm}
                                             currentPage={currentPage}
                                             totalPages={totalPages}

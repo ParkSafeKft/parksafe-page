@@ -43,7 +43,7 @@ const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(function Ima
         const filePath = `${locationType}/${fileName}`;
 
         const { error } = await supabase.storage
-            .from('location-images')
+            .from('marker-images')
             .upload(filePath, file, {
                 cacheControl: '3600',
                 upsert: false
@@ -56,7 +56,7 @@ const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(function Ima
 
         // Get public URL
         const { data: { publicUrl } } = supabase.storage
-            .from('location-images')
+            .from('marker-images')
             .getPublicUrl(filePath);
 
         return publicUrl;
@@ -184,13 +184,13 @@ const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(function Ima
 
         try {
             // Extract file path from URL
-            const urlParts = imageUrl.split('/location-images/');
+            const urlParts = imageUrl.split('/marker-images/');
             if (urlParts.length === 2) {
                 const filePath = urlParts[1];
 
                 // Delete from storage
                 const { error } = await supabase.storage
-                    .from('location-images')
+                    .from('marker-images')
                     .remove([filePath]);
 
                 if (error) {

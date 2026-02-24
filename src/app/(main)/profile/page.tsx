@@ -22,6 +22,31 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 const isDev = process.env.NODE_ENV === 'development';
 
+/**
+ * Delete a file from Supabase Storage given its public URL.
+ * Works for any public bucket by extracting bucket + path from the URL.
+ */
+async function deleteSupabasePublicFile(publicUrl: string) {
+    try {
+        const marker = '/storage/v1/object/public/';
+        const idx = publicUrl.indexOf(marker);
+        if (idx === -1) return;
+
+        const withoutPrefix = publicUrl.slice(idx + marker.length).split('?')[0];
+        const [bucket, ...rest] = withoutPrefix.split('/');
+        const path = rest.join('/');
+
+        if (!bucket || !path) return;
+
+        const { error } = await supabase.storage.from(bucket).remove([path]);
+        if (error && isDev) {
+            console.error('Avatar storage delete error:', error);
+        }
+    } catch (e) {
+        if (isDev) console.error('Error while deleting avatar from storage:', e);
+    }
+}
+
 export default function ProfilePage() {
     const { t } = useLanguage();
     const { user, loading, signOut } = useAuth();
@@ -82,6 +107,12 @@ export default function ProfilePage() {
         setDeleteLoading(true);
 
         try {
+            // Delete avatar image from storage (if exists)
+            const avatarUrlToDelete = profile?.avatar_url || user.user_metadata?.avatar_url;
+            if (avatarUrlToDelete) {
+                await deleteSupabasePublicFile(avatarUrlToDelete);
+            }
+
             // Delete the user account from Supabase Auth
             const { error } = await supabase
                 .rpc('delete_user_account', { user_id: user.id });

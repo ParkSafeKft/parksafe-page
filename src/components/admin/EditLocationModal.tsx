@@ -266,9 +266,11 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                                     <h1 className="text-lg font-bold text-foreground truncate leading-tight">
                                         {getTitle()}
                                     </h1>
-                                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                    <div className="flex flex-col mt-1 gap-0.5">
                                         <span className="text-xs text-muted-foreground truncate">{item.name || 'Helyszín'}</span>
-                                        <span className="text-xs font-mono text-muted-foreground opacity-70">· ID: {item.id.substring(0, 8)}...</span>
+                                        <span className="text-[11px] font-mono text-muted-foreground opacity-80 break-all">
+                                            ID: {item.id}
+                                        </span>
                                     </div>
                                 </div>
                             </div>

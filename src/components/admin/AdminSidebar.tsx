@@ -11,7 +11,8 @@ import {
     Home,
     LogOut,
     Shield,
-    Flag
+    Flag,
+    Camera,
 } from 'lucide-react';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import { useSidebar } from '@/components/ui/sidebar';
@@ -38,6 +39,7 @@ export default function AdminSidebar({
         { id: 'dashboard', label: 'Vezérlőpult', icon: LayoutDashboard, section: 'ÁTTEKINTÉS' },
         { id: 'users', label: 'Felhasználók', icon: Users, section: 'ADATKEZELÉS' },
         { id: 'parking', label: 'Bicikli Parkolók', icon: MapPin, section: 'ADATKEZELÉS' },
+        { id: 'parking_images', label: 'Parkoló képek', icon: Camera, section: 'ADATKEZELÉS' },
         { id: 'services', label: 'Szervizek & Boltok', icon: Store, section: 'ADATKEZELÉS' },
         { id: 'repair', label: 'Javító Állomások', icon: Wrench, section: 'ADATKEZELÉS' },
         { id: 'feedback', label: 'Visszajelzések', icon: MessageSquare, section: 'ADATKEZELÉS' },

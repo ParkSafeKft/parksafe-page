@@ -913,6 +913,11 @@ export default function DetailModal({
                                                 <span className="text-xs text-muted-foreground">· {item.city}</span>
                                             )}
                                         </div>
+                                        <div className="mt-1">
+                                            <span className="text-[11px] font-mono text-muted-foreground opacity-80 break-all">
+                                                ID: {item.id}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </DialogTitle>
