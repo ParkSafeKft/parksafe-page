@@ -83,6 +83,7 @@ export async function GET(request: NextRequest) {
 
         if (!countError && realUserCount !== null) {
             data[0].registered_users = realUserCount;
+            data[0].guest_users = Math.max(0, data[0].total_devices - realUserCount);
         }
 
         return NextResponse.json(data[0]);
