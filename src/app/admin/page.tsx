@@ -245,21 +245,24 @@ export default function AdminPage() {
             if (searchTerm) {
                 const safe = sanitizeSearchTerm(searchTerm);
                 if (safe) {
+                    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(searchTerm.trim());
+                    const idQuery = isUuid ? `id.eq.${searchTerm.trim()},` : '';
+
                     if (activeTab === 'users') {
-                        query = query.or(`username.ilike.%${safe}%,full_name.ilike.%${safe}%,email.ilike.%${safe}%`);
-                        countQuery = countQuery.or(`username.ilike.%${safe}%,full_name.ilike.%${safe}%,email.ilike.%${safe}%`);
+                        query = query.or(`${idQuery}username.ilike.%${safe}%,full_name.ilike.%${safe}%,email.ilike.%${safe}%`);
+                        countQuery = countQuery.or(`${idQuery}username.ilike.%${safe}%,full_name.ilike.%${safe}%,email.ilike.%${safe}%`);
                     } else if (activeTab === 'feedback') {
-                        query = query.or(`title.ilike.%${safe}%,description.ilike.%${safe}%`);
-                        countQuery = countQuery.or(`title.ilike.%${safe}%,description.ilike.%${safe}%`);
+                        query = query.or(`${idQuery}title.ilike.%${safe}%,description.ilike.%${safe}%`);
+                        countQuery = countQuery.or(`${idQuery}title.ilike.%${safe}%,description.ilike.%${safe}%`);
                     } else if (activeTab === 'poi_flags') {
-                        query = query.or(`reason.ilike.%${safe}%,comment.ilike.%${safe}%,poi_type.ilike.%${safe}%`);
-                        countQuery = countQuery.or(`reason.ilike.%${safe}%,comment.ilike.%${safe}%,poi_type.ilike.%${safe}%`);
+                        query = query.or(`${idQuery}reason.ilike.%${safe}%,comment.ilike.%${safe}%,poi_type.ilike.%${safe}%`);
+                        countQuery = countQuery.or(`${idQuery}reason.ilike.%${safe}%,comment.ilike.%${safe}%,poi_type.ilike.%${safe}%`);
                     } else if (activeTab === 'parking_images') {
-                        query = query.or(`image_url.ilike.%${safe}%`);
-                        countQuery = countQuery.or(`image_url.ilike.%${safe}%`);
+                        query = query.or(`${idQuery}image_url.ilike.%${safe}%`);
+                        countQuery = countQuery.or(`${idQuery}image_url.ilike.%${safe}%`);
                     } else {
-                        query = query.or(`name.ilike.%${safe}%,city.ilike.%${safe}%`);
-                        countQuery = countQuery.or(`name.ilike.%${safe}%,city.ilike.%${safe}%`);
+                        query = query.or(`${idQuery}name.ilike.%${safe}%,city.ilike.%${safe}%`);
+                        countQuery = countQuery.or(`${idQuery}name.ilike.%${safe}%,city.ilike.%${safe}%`);
                     }
                 }
             }
@@ -645,19 +648,17 @@ export default function AdminPage() {
                                                     {activeTab !== 'dashboard' && (
                                                         <Badge
                                                             variant="outline"
-                                                            className={`gap-1.5 text-xs ${
-                                                                isRealtimeConnected
+                                                            className={`gap-1.5 text-xs ${isRealtimeConnected
                                                                     ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
                                                                     : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
-                                                            }`}
+                                                                }`}
                                                         >
                                                             <span className="relative flex h-2 w-2">
                                                                 {isRealtimeConnected && (
                                                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                                                                 )}
-                                                                <span className={`relative inline-flex rounded-full h-2 w-2 ${
-                                                                    isRealtimeConnected ? 'bg-emerald-500' : 'bg-yellow-500'
-                                                                }`} />
+                                                                <span className={`relative inline-flex rounded-full h-2 w-2 ${isRealtimeConnected ? 'bg-emerald-500' : 'bg-yellow-500'
+                                                                    }`} />
                                                             </span>
                                                             {isRealtimeConnected ? 'Élő' : 'Kapcsolódás...'}
                                                         </Badge>

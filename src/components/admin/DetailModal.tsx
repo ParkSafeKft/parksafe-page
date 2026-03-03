@@ -376,12 +376,11 @@ export default function DetailModal({
                                                 <DropdownMenuTrigger asChild>
                                                     <Button
                                                         variant="outline"
-                                                        className={`w-full justify-between border-white/10 bg-zinc-900/50 hover:bg-zinc-900 hover:text-white capitalize font-normal ${
-                                                            currentStatus === 'resolved' ? 'text-green-400 border-green-900/50' :
-                                                            currentStatus === 'dismissed' ? 'text-zinc-400' :
-                                                            currentStatus === 'reviewed' ? 'text-blue-400 border-blue-900/50' :
-                                                            'text-zinc-200'
-                                                        }`}
+                                                        className={`w-full justify-between border-white/10 bg-zinc-900/50 hover:bg-zinc-900 hover:text-white capitalize font-normal ${currentStatus === 'resolved' ? 'text-green-400 border-green-900/50' :
+                                                                currentStatus === 'dismissed' ? 'text-zinc-400' :
+                                                                    currentStatus === 'reviewed' ? 'text-blue-400 border-blue-900/50' :
+                                                                        'text-zinc-200'
+                                                            }`}
                                                     >
                                                         <span className="flex items-center gap-2">
                                                             <span className={`w-2 h-2 rounded-full ${currentStatusObj.color}`} />
@@ -913,206 +912,10 @@ export default function DetailModal({
                                                 <span className="text-xs text-muted-foreground">· {item.city}</span>
                                             )}
                                         </div>
-                                        <div className="mt-1">
+                                        <div className="flex items-center gap-2 mt-1">
                                             <span className="text-[11px] font-mono text-muted-foreground opacity-80 break-all">
                                                 ID: {item.id}
                                             </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </DialogTitle>
-                        </div>
-
-                    {/* Scrollable Content */}
-                    <ScrollArea className="flex-1 min-h-0">
-                        <div className="p-6 space-y-6">
-                            {/* Image Gallery */}
-                            {item.picture_url && item.picture_url.length > 0 && (
-                                <div>
-                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-2">
-                                        <Eye className="h-4 w-4" />
-                                        Képek ({item.picture_url.length})
-                                    </h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {item.picture_url.map((url: string, index: number) => (
-                                            <div
-                                                key={index}
-                                                className="relative w-28 h-28 rounded-lg overflow-hidden border border-border cursor-pointer hover:border-primary transition-colors group"
-                                                onClick={() => setImagePreviewUrl(url)}
-                                            >
-                                                <img
-                                                    src={url}
-                                                    alt={`${item.name} - ${index + 1}`}
-                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                                                />
-                                                <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
-                                                    {index + 1}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Alapadatok */}
-                            <div>
-                                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Alapadatok</h3>
-                                <div className="flex flex-col gap-3">
-                                    <div className="flex flex-wrap gap-3">
-                                        <div className="flex-1 min-w-[200px]">
-                                            <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
-                                                <MapPin className="h-3 w-3" />
-                                                Város
-                                            </p>
-                                            <p className="text-sm font-medium">{item.city}</p>
-                                        </div>
-
-                                        {(type === 'parking' || type === 'repair') && item.covered !== undefined && (
-                                            <div className="flex-1 min-w-[200px]">
-                                                <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
-                                                    <Shield className="h-3 w-3" />
-                                                    Fedett
-                                                </p>
-                                                <p className="text-sm font-medium">{item.covered ? 'Igen' : 'Nem'}</p>
-                                            </div>
-                                        )}
-
-                                        {type === 'parking' && item.is_open_24h !== undefined && (
-                                            <div className="flex-1 min-w-[200px]">
-                                                <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
-                                                    <Clock className="h-3 w-3" />
-                                                    24 órás
-                                                </p>
-                                                <p className="text-sm font-medium">{item.is_open_24h ? 'Igen' : 'Nem'}</p>
-                                            </div>
-                                        )}
-
-                                        {type === 'parking' && item.has_camera !== undefined && (
-                                            <div className="flex-1 min-w-[200px]">
-                                                <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
-                                                    <Camera className="h-3 w-3" />
-                                                    Kamera
-                                                </p>
-                                                <p className="text-sm font-medium">{item.has_camera ? 'Igen' : 'Nem'}</p>
-                                            </div>
-                                        )}
-
-                                        {type === 'parking' && item.capacity_level && (
-                                            <div className="flex-1 min-w-[200px]">
-                                                <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
-                                                    <Users className="h-3 w-3" />
-                                                    Kapacitás
-                                                </p>
-                                                <p className="text-sm font-medium">
-                                                    {item.capacity_level === 'small' ? 'Kis (1-10 hely)' :
-                                                        item.capacity_level === 'medium' ? 'Közepes (11-50 hely)' :
-                                                            item.capacity_level === 'large' ? 'Nagy (50+ hely)' :
-                                                                item.capacity_level}
-                                                </p>
-                                            </div>
-                                        )}
-
-                                        {type === 'repair' && item.free !== undefined && (
-                                            <div className="flex-1 min-w-[200px]">
-                                                <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
-                                                    <Star className="h-3 w-3" />
-                                                    Ingyenes
-                                                </p>
-                                                <p className="text-sm font-medium">{item.free ? 'Igen' : 'Nem'}</p>
-                                            </div>
-                                        )}
-
-                                        {type === 'service' && item.phone && (
-                                            <div className="flex-1 min-w-[200px]">
-                                                <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
-                                                    <Phone className="h-3 w-3" />
-                                                    Telefonszám
-                                                </p>
-                                                <p className="text-sm font-medium">{item.phone}</p>
-                                            </div>
-                                        )}
-
-                                        {type === 'service' && item.rating && (
-                                            <div className="flex-1 min-w-[200px]">
-                                                <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
-                                                    <Star className="h-3 w-3" />
-                                                    Értékelés
-                                                </p>
-                                                <p className="text-sm font-medium">{item.rating} / 5</p>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {type === 'parking' && item.description && (
-                                        <div className="w-full">
-                                            <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
-                                                <Eye className="h-3 w-3" />
-                                                Leírás
-                                            </p>
-                                            <p className="text-sm">{item.description}</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Coordinates & Map */}
-                            {coords ? (
-                                <>
-                                    <div>
-                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Koordináták</h3>
-                                        <div className="flex gap-6">
-                                            <div className="flex-1">
-                                                <p className="text-xs text-muted-foreground mb-0.5">Szélesség (Latitude)</p>
-                                                <p className="text-sm font-mono font-semibold">{coords.lat.toFixed(6)}</p>
-                                            </div>
-                                            <div className="flex-1">
-                                                <p className="text-xs text-muted-foreground mb-0.5">Hosszúság (Longitude)</p>
-                                                <p className="text-sm font-mono font-semibold">{coords.lon.toFixed(6)}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
-                                            <MapPin className="h-4 w-4" />
-                                            Térkép
-                                        </h3>
-                                        <div className="rounded-lg overflow-hidden border border-border mb-3">
-                                            <iframe
-                                                width="100%"
-                                                height="350"
-                                                frameBorder="0"
-                                                style={{ border: 0, pointerEvents: 'none' }}
-                                                src={`https://www.openstreetmap.org/export/embed.html?bbox=${(coords.lon - 0.002).toFixed(6)},${(coords.lat - 0.002).toFixed(6)},${(coords.lon + 0.002).toFixed(6)},${(coords.lat + 0.002).toFixed(6)}&layer=mapnik&marker=${coords.lat.toFixed(6)},${coords.lon.toFixed(6)}`}
-                                                title="Location Map"
-                                            />
-                                        </div>
-                                        <Button
-                                            variant="outline"
-                                            className="w-full"
-                                            size="sm"
-                                            onClick={() => window.open(`https://www.google.com/maps?q=${coords.lat},${coords.lon}`, '_blank')}
-                                        >
-                                            <MapPin className="h-3.5 w-3.5 mr-2" />
-                                            Megnyitás Google Maps-en
-                                        </Button>
-                                    </div>
-                                </>
-                            ) : (
-                                <div>
-                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Koordináták</h3>
-                                    <p className="text-sm text-muted-foreground">Koordináták nem érhetők el</p>
-                                </div>
-                            )}
-
-                            {/* Database Info */}
-                            <div>
-                                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Adatbázis információk</h3>
-                                <div className="flex flex-wrap gap-4">
-                                    <div className="flex-1 min-w-[150px]">
-                                        <p className="text-xs text-muted-foreground mb-0.5">ID</p>
-                                        <div className="flex items-center gap-2">
-                                            <p className="text-xs font-mono text-foreground break-all">{item.id}</p>
                                             <button
                                                 type="button"
                                                 onClick={() => copyId(item.id)}
@@ -1123,50 +926,254 @@ export default function DetailModal({
                                             </button>
                                         </div>
                                     </div>
-                                    <div className="flex-1 min-w-[150px]">
-                                        <p className="text-xs text-muted-foreground mb-0.5">Létrehozva</p>
-                                        <p className="text-xs font-medium">
-                                            {new Date(item.created_at).toLocaleDateString('hu-HU', {
-                                                year: 'numeric',
-                                                month: 'long',
-                                                day: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
-                                        </p>
+                                </div>
+                            </DialogTitle>
+                        </div>
+
+                        {/* Scrollable Content */}
+                        <ScrollArea className="flex-1 min-h-0">
+                            <div className="p-6 space-y-6">
+                                {/* Image Gallery */}
+                                {item.picture_url && item.picture_url.length > 0 && (
+                                    <div>
+                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-2">
+                                            <Eye className="h-4 w-4" />
+                                            Képek ({item.picture_url.length})
+                                        </h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {item.picture_url.map((url: string, index: number) => (
+                                                <div
+                                                    key={index}
+                                                    className="relative w-28 h-28 rounded-lg overflow-hidden border border-border cursor-pointer hover:border-primary transition-colors group"
+                                                    onClick={() => setImagePreviewUrl(url)}
+                                                >
+                                                    <img
+                                                        src={url}
+                                                        alt={`${item.name} - ${index + 1}`}
+                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                                    />
+                                                    <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                                                        {index + 1}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                    <div className="flex-1 min-w-[150px]">
-                                        <p className="text-xs text-muted-foreground mb-0.5">Módosítva</p>
-                                        <p className="text-xs font-medium">
-                                            {new Date(item.updated_at).toLocaleDateString('hu-HU', {
-                                                year: 'numeric',
-                                                month: 'long',
-                                                day: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
-                                        </p>
+                                )}
+
+                                {/* Alapadatok */}
+                                <div>
+                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Alapadatok</h3>
+                                    <div className="flex flex-col gap-3">
+                                        <div className="flex flex-wrap gap-3">
+                                            <div className="flex-1 min-w-[200px]">
+                                                <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
+                                                    <MapPin className="h-3 w-3" />
+                                                    Város
+                                                </p>
+                                                <p className="text-sm font-medium">{item.city}</p>
+                                            </div>
+
+                                            {(type === 'parking' || type === 'repair') && item.covered !== undefined && (
+                                                <div className="flex-1 min-w-[200px]">
+                                                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
+                                                        <Shield className="h-3 w-3" />
+                                                        Fedett
+                                                    </p>
+                                                    <p className="text-sm font-medium">{item.covered ? 'Igen' : 'Nem'}</p>
+                                                </div>
+                                            )}
+
+                                            {type === 'parking' && item.is_open_24h !== undefined && (
+                                                <div className="flex-1 min-w-[200px]">
+                                                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
+                                                        <Clock className="h-3 w-3" />
+                                                        24 órás
+                                                    </p>
+                                                    <p className="text-sm font-medium">{item.is_open_24h ? 'Igen' : 'Nem'}</p>
+                                                </div>
+                                            )}
+
+                                            {type === 'parking' && item.has_camera !== undefined && (
+                                                <div className="flex-1 min-w-[200px]">
+                                                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
+                                                        <Camera className="h-3 w-3" />
+                                                        Kamera
+                                                    </p>
+                                                    <p className="text-sm font-medium">{item.has_camera ? 'Igen' : 'Nem'}</p>
+                                                </div>
+                                            )}
+
+                                            {type === 'parking' && item.capacity_level && (
+                                                <div className="flex-1 min-w-[200px]">
+                                                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
+                                                        <Users className="h-3 w-3" />
+                                                        Kapacitás
+                                                    </p>
+                                                    <p className="text-sm font-medium">
+                                                        {item.capacity_level === 'small' ? 'Kis (1-10 hely)' :
+                                                            item.capacity_level === 'medium' ? 'Közepes (11-50 hely)' :
+                                                                item.capacity_level === 'large' ? 'Nagy (50+ hely)' :
+                                                                    item.capacity_level}
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            {type === 'repair' && item.free !== undefined && (
+                                                <div className="flex-1 min-w-[200px]">
+                                                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
+                                                        <Star className="h-3 w-3" />
+                                                        Ingyenes
+                                                    </p>
+                                                    <p className="text-sm font-medium">{item.free ? 'Igen' : 'Nem'}</p>
+                                                </div>
+                                            )}
+
+                                            {type === 'service' && item.phone && (
+                                                <div className="flex-1 min-w-[200px]">
+                                                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
+                                                        <Phone className="h-3 w-3" />
+                                                        Telefonszám
+                                                    </p>
+                                                    <p className="text-sm font-medium">{item.phone}</p>
+                                                </div>
+                                            )}
+
+                                            {type === 'service' && item.rating && (
+                                                <div className="flex-1 min-w-[200px]">
+                                                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
+                                                        <Star className="h-3 w-3" />
+                                                        Értékelés
+                                                    </p>
+                                                    <p className="text-sm font-medium">{item.rating} / 5</p>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {type === 'parking' && item.description && (
+                                            <div className="w-full">
+                                                <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
+                                                    <Eye className="h-3 w-3" />
+                                                    Leírás
+                                                </p>
+                                                <p className="text-sm">{item.description}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Coordinates & Map */}
+                                {coords ? (
+                                    <>
+                                        <div>
+                                            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Koordináták</h3>
+                                            <div className="flex gap-6">
+                                                <div className="flex-1">
+                                                    <p className="text-xs text-muted-foreground mb-0.5">Szélesség (Latitude)</p>
+                                                    <p className="text-sm font-mono font-semibold">{coords.lat.toFixed(6)}</p>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-xs text-muted-foreground mb-0.5">Hosszúság (Longitude)</p>
+                                                    <p className="text-sm font-mono font-semibold">{coords.lon.toFixed(6)}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                                                <MapPin className="h-4 w-4" />
+                                                Térkép
+                                            </h3>
+                                            <div className="rounded-lg overflow-hidden border border-border mb-3">
+                                                <iframe
+                                                    width="100%"
+                                                    height="350"
+                                                    frameBorder="0"
+                                                    style={{ border: 0, pointerEvents: 'none' }}
+                                                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${(coords.lon - 0.002).toFixed(6)},${(coords.lat - 0.002).toFixed(6)},${(coords.lon + 0.002).toFixed(6)},${(coords.lat + 0.002).toFixed(6)}&layer=mapnik&marker=${coords.lat.toFixed(6)},${coords.lon.toFixed(6)}`}
+                                                    title="Location Map"
+                                                />
+                                            </div>
+                                            <Button
+                                                variant="outline"
+                                                className="w-full"
+                                                size="sm"
+                                                onClick={() => window.open(`https://www.google.com/maps?q=${coords.lat},${coords.lon}`, '_blank')}
+                                            >
+                                                <MapPin className="h-3.5 w-3.5 mr-2" />
+                                                Megnyitás Google Maps-en
+                                            </Button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div>
+                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Koordináták</h3>
+                                        <p className="text-sm text-muted-foreground">Koordináták nem érhetők el</p>
+                                    </div>
+                                )}
+
+                                {/* Database Info */}
+                                <div>
+                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Adatbázis információk</h3>
+                                    <div className="flex flex-wrap gap-4">
+                                        <div className="flex-1 min-w-[150px]">
+                                            <p className="text-xs text-muted-foreground mb-0.5">ID</p>
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-xs font-mono text-foreground break-all">{item.id}</p>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => copyId(item.id)}
+                                                    className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-white transition-colors shrink-0"
+                                                    title="ID másolása"
+                                                >
+                                                    <Copy className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="flex-1 min-w-[150px]">
+                                            <p className="text-xs text-muted-foreground mb-0.5">Létrehozva</p>
+                                            <p className="text-xs font-medium">
+                                                {new Date(item.created_at).toLocaleDateString('hu-HU', {
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </p>
+                                        </div>
+                                        <div className="flex-1 min-w-[150px]">
+                                            <p className="text-xs text-muted-foreground mb-0.5">Módosítva</p>
+                                            <p className="text-xs font-medium">
+                                                {new Date(item.updated_at).toLocaleDateString('hu-HU', {
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </ScrollArea>
+                        </ScrollArea>
 
-                    {/* Footer - same as other modals */}
-                    <div className="p-6 border-t border-border flex justify-end gap-2 flex-shrink-0">
-                        <Button variant="outline" onClick={onClose}>
-                            Bezárás
-                        </Button>
-                        <Button
-                            onClick={() => {
-                                onEdit(item);
-                                onClose();
-                            }}
-                        >
-                            <Edit className="h-4 w-4 mr-2" />
-                            Szerkesztés
-                        </Button>
-                    </div>
+                        {/* Footer - same as other modals */}
+                        <div className="p-6 border-t border-border flex justify-end gap-2 flex-shrink-0">
+                            <Button variant="outline" onClick={onClose}>
+                                Bezárás
+                            </Button>
+                            <Button
+                                onClick={() => {
+                                    onEdit(item);
+                                    onClose();
+                                }}
+                            >
+                                <Edit className="h-4 w-4 mr-2" />
+                                Szerkesztés
+                            </Button>
+                        </div>
                     </div>
                 </DialogContent>
             </Dialog>
