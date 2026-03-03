@@ -26,6 +26,7 @@ import {
     Wrench,
     ArrowLeft,
     Camera,
+    Droplet,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -42,6 +43,7 @@ import DeviceStatsOverview from '@/components/admin/DeviceStatsOverview';
 import FeedbackTable from '@/components/admin/FeedbackTable';
 import PoiFlagsTable from '@/components/admin/PoiFlagsTable';
 import ParkingImageSubmissionsTable from '@/components/admin/ParkingImageSubmissionsTable';
+import DrinkingFountainTable from '@/components/admin/DrinkingFountainTable';
 
 /**
  * Sanitize a search term to prevent PostgREST filter injection.
@@ -111,6 +113,8 @@ export default function AdminPage() {
     const [poiFlags, setPoiFlags] = useState<any[]>([]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [parkingImageSubmissions, setParkingImageSubmissions] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [drinkingFountains, setDrinkingFountains] = useState<any[]>([]);
 
     const [dataLoading, setDataLoading] = useState(false);
     const [toggleLoading, setToggleLoading] = useState<string | null>(null);
@@ -156,6 +160,7 @@ export default function AdminPage() {
             case 'repair': return 'repairStation';
             case 'feedback': return 'feedback';
             case 'poi_flags': return 'poi_flags';
+            case 'drinking_fountain': return 'drinkingFountain';
             default: return null;
         }
     };
@@ -226,6 +231,10 @@ export default function AdminPage() {
                     query = supabase.from('repairStation').select('*');
                     countQuery = supabase.from('repairStation').select('*', { count: 'exact', head: true });
                     break;
+                case 'drinking_fountain':
+                    query = supabase.from('drinkingFountain').select('*');
+                    countQuery = supabase.from('drinkingFountain').select('*', { count: 'exact', head: true });
+                    break;
                 case 'feedback':
                     query = supabase.from('feedback').select('*');
                     countQuery = supabase.from('feedback').select('*', { count: 'exact', head: true });
@@ -286,6 +295,7 @@ export default function AdminPage() {
             else if (activeTab === 'parking') setParkingSpots(dataRes.data || []);
             else if (activeTab === 'services') setBicycleServices(dataRes.data || []);
             else if (activeTab === 'repair') setRepairStations(dataRes.data || []);
+            else if (activeTab === 'drinking_fountain') setDrinkingFountains(dataRes.data || []);
             else if (activeTab === 'feedback') setFeedback(dataRes.data || []);
             else if (activeTab === 'poi_flags') {
                 // Flatten the joined profiles data
@@ -345,9 +355,10 @@ export default function AdminPage() {
             const currentData = activeTab === 'users' ? users :
                 activeTab === 'parking' ? parkingSpots :
                     activeTab === 'parking_images' ? parkingImageSubmissions :
-                        activeTab === 'services' ? bicycleServices :
-                            activeTab === 'repair' ? repairStations :
-                                activeTab === 'poi_flags' ? poiFlags : feedback;
+                        activeTab === 'drinking_fountain' ? drinkingFountains :
+                            activeTab === 'services' ? bicycleServices :
+                                activeTab === 'repair' ? repairStations :
+                                    activeTab === 'poi_flags' ? poiFlags : feedback;
             setSelectedRows(new Set(currentData.map(item => item.id)));
         } else {
             setSelectedRows(new Set());
@@ -368,7 +379,8 @@ export default function AdminPage() {
     const handleToggleAvailability = async (id: string, currentStatus: boolean) => {
         setToggleLoading(id);
         const table = activeTab === 'parking' ? 'parkingSpots' :
-            activeTab === 'services' ? 'bicycleService' : 'repairStation';
+            activeTab === 'services' ? 'bicycleService' :
+                activeTab === 'drinking_fountain' ? 'drinkingFountain' : 'repairStation';
 
         try {
             const { error } = await supabase
@@ -413,11 +425,13 @@ export default function AdminPage() {
             parking: 'parkingSpots',
             bicycleService: 'bicycleService',
             repairStation: 'repairStation',
+            drinkingFountain: 'drinkingFountain',
         };
         const tabMap: Record<string, string> = {
             parking: 'parking',
             bicycleService: 'services',
             repairStation: 'repair',
+            drinkingFountain: 'drinking_fountain',
         };
         const table = tableMap[poiType];
         const tab = tabMap[poiType];
@@ -525,9 +539,10 @@ export default function AdminPage() {
     const handleDeleteClick = (id: string) => {
         const table = activeTab === 'users' ? 'profiles' :
             activeTab === 'parking' ? 'parkingSpots' :
-                activeTab === 'services' ? 'bicycleService' :
-                    activeTab === 'repair' ? 'repairStation' :
-                        activeTab === 'poi_flags' ? 'poi_flags' : 'feedback';
+                activeTab === 'drinking_fountain' ? 'drinkingFountain' :
+                    activeTab === 'services' ? 'bicycleService' :
+                        activeTab === 'repair' ? 'repairStation' :
+                            activeTab === 'poi_flags' ? 'poi_flags' : 'feedback';
         setDeleteModal({ show: true, table, id });
     };
 
@@ -629,6 +644,7 @@ export default function AdminPage() {
                                                 {activeTab === 'parking_images' && <Camera className="h-5 w-5 text-white" />}
                                                 {activeTab === 'services' && <Building className="h-5 w-5 text-white" />}
                                                 {activeTab === 'repair' && <Wrench className="h-5 w-5 text-white" />}
+                                                {activeTab === 'drinking_fountain' && <Droplet className="h-5 w-5 text-white" />}
                                                 {activeTab === 'feedback' && <Users className="h-5 w-5 text-white" />}
                                                 {activeTab === 'poi_flags' && <MapPin className="h-5 w-5 text-white" />}
                                             </div>
@@ -640,6 +656,7 @@ export default function AdminPage() {
                                                     {activeTab === 'parking_images' && 'Parkoló képek'}
                                                     {activeTab === 'services' && 'Szervizek & Boltok'}
                                                     {activeTab === 'repair' && 'Javító Állomások'}
+                                                    {activeTab === 'drinking_fountain' && 'Ivókutak'}
                                                     {activeTab === 'feedback' && 'Visszajelzések'}
                                                     {activeTab === 'poi_flags' && 'POI Bejelentések'}
                                                     <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
@@ -649,8 +666,8 @@ export default function AdminPage() {
                                                         <Badge
                                                             variant="outline"
                                                             className={`gap-1.5 text-xs ${isRealtimeConnected
-                                                                    ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                                                                    : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                                                                ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                                                : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
                                                                 }`}
                                                         >
                                                             <span className="relative flex h-2 w-2">
@@ -671,6 +688,7 @@ export default function AdminPage() {
                                                     {activeTab === 'parking_images' && 'Felhasználók által beküldött parkoló képek jóváhagyása'}
                                                     {activeTab === 'services' && 'Kerékpár szervizek és boltok kezelése'}
                                                     {activeTab === 'repair' && 'Önkiszolgáló javító állomások kezelése'}
+                                                    {activeTab === 'drinking_fountain' && 'Ivókutak nyilvántartása és kezelése'}
                                                     {activeTab === 'feedback' && 'Felhasználói visszajelzések kezelése'}
                                                     {activeTab === 'poi_flags' && 'POI-khoz kapcsolódó bejelentések kezelése'}
                                                 </p>
@@ -727,6 +745,7 @@ export default function AdminPage() {
                                             {activeTab === 'parking_images' && 'Parkoló képek'}
                                             {activeTab === 'services' && 'Szervizek & Boltok'}
                                             {activeTab === 'repair' && 'Javító Állomások'}
+                                            {activeTab === 'drinking_fountain' && 'Ivókutak'}
                                             {activeTab === 'feedback' && 'Visszajelzések'}
                                             {activeTab === 'poi_flags' && 'POI Bejelentések'}
                                         </h1>
@@ -889,6 +908,27 @@ export default function AdminPage() {
                                             toggleLoading={toggleLoading}
                                             searchTerm={searchTerm}
                                             selectAll={selectAll}
+                                            currentPage={currentPage}
+                                            totalPages={totalPages}
+                                            onPageChange={setCurrentPage}
+                                            pageSize={pageSize}
+                                            onPageSizeChange={setPageSize}
+                                        />
+                                    )}
+                                    {activeTab === 'drinking_fountain' && (
+                                        <DrinkingFountainTable
+                                            data={drinkingFountains}
+                                            selectedRows={selectedRows}
+                                            onSelectAll={handleSelectAll}
+                                            onSelectRow={handleSelectRow}
+                                            onSort={handleSort}
+                                            sortConfig={sortConfig}
+                                            onRowClick={(item) => setDetailModal({ show: true, item, type: 'drinking_fountain' })}
+                                            onEdit={(item) => setEditLocationModal({ show: true, item })}
+                                            onDelete={(id) => handleDeleteClick(id)}
+                                            onToggleAvailability={handleToggleAvailability}
+                                            toggleLoading={toggleLoading}
+                                            searchTerm={searchTerm}
                                             currentPage={currentPage}
                                             totalPages={totalPages}
                                             onPageChange={setCurrentPage}

@@ -41,7 +41,8 @@ import {
     Wrench,
     User,
     Copy,
-    ExternalLink
+    ExternalLink,
+    Droplet
 } from 'lucide-react';
 
 interface DetailModalProps {
@@ -96,6 +97,7 @@ export default function DetailModal({
             parking: 'parkingSpots',
             bicycleService: 'bicycleService',
             repairStation: 'repairStation',
+            drinkingFountain: 'drinkingFountain',
         };
         const tableName = tableMap[item.poi_type];
         if (!tableName) return;
@@ -208,6 +210,7 @@ export default function DetailModal({
                 case 'parking': return 'Parkoló';
                 case 'bicycleService': return 'Szerviz';
                 case 'repairStation': return 'Javító állomás';
+                case 'drinkingFountain': return 'Ivókút';
                 default: return poiType;
             }
         };
@@ -217,6 +220,7 @@ export default function DetailModal({
                 case 'parking': return <MapPin className="h-5 w-5 text-green-400" />;
                 case 'bicycleService': return <Store className="h-5 w-5 text-blue-400" />;
                 case 'repairStation': return <Wrench className="h-5 w-5 text-orange-400" />;
+                case 'drinkingFountain': return <Droplet className="h-5 w-5 text-cyan-400" />;
                 default: return <MapPin className="h-5 w-5 text-zinc-400" />;
             }
         };
@@ -377,9 +381,9 @@ export default function DetailModal({
                                                     <Button
                                                         variant="outline"
                                                         className={`w-full justify-between border-white/10 bg-zinc-900/50 hover:bg-zinc-900 hover:text-white capitalize font-normal ${currentStatus === 'resolved' ? 'text-green-400 border-green-900/50' :
-                                                                currentStatus === 'dismissed' ? 'text-zinc-400' :
-                                                                    currentStatus === 'reviewed' ? 'text-blue-400 border-blue-900/50' :
-                                                                        'text-zinc-200'
+                                                            currentStatus === 'dismissed' ? 'text-zinc-400' :
+                                                                currentStatus === 'reviewed' ? 'text-blue-400 border-blue-900/50' :
+                                                                    'text-zinc-200'
                                                             }`}
                                                     >
                                                         <span className="flex items-center gap-2">
@@ -868,15 +872,17 @@ export default function DetailModal({
         );
     }
 
-    // Location Details (Parking, Service, Repair)
-    const locationIcon = type === 'parking' ? MapPin : type === 'service' ? Store : Wrench;
+    // Location Details (Parking, Service, Repair, Drinking Fountain)
+    const locationIcon = type === 'parking' ? MapPin : type === 'service' ? Store : type === 'drinking_fountain' ? Droplet : Wrench;
     const LocationIcon = locationIcon;
     const locationGradient = type === 'parking'
         ? 'from-green-500/20 to-green-600/20 border-green-500/30'
         : type === 'service'
             ? 'from-blue-500/20 to-blue-600/20 border-blue-500/30'
-            : 'from-orange-500/20 to-orange-600/20 border-orange-500/30';
-    const locationIconColor = type === 'parking' ? 'text-green-400' : type === 'service' ? 'text-blue-400' : 'text-orange-400';
+            : type === 'drinking_fountain'
+                ? 'from-cyan-500/20 to-cyan-600/20 border-cyan-500/30'
+                : 'from-orange-500/20 to-orange-600/20 border-orange-500/30';
+    const locationIconColor = type === 'parking' ? 'text-green-400' : type === 'service' ? 'text-blue-400' : type === 'drinking_fountain' ? 'text-cyan-400' : 'text-orange-400';
 
     return (
         <>

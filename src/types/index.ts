@@ -73,6 +73,10 @@ export interface BicycleService extends Location {
     price_range?: string;
 }
 
+export interface DrinkingFountain extends Location {
+    osm_id?: number | null;
+}
+
 export interface AuthContextType {
     user: User | null;
     loading: boolean;

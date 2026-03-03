@@ -20,9 +20,10 @@ import {
     Globe,
     Star,
     DollarSign,
-    Copy
+    Copy,
+    Droplet
 } from 'lucide-react';
-import { Location, ParkingLocation, RepairStation, BicycleService } from '@/types';
+import { Location, ParkingLocation, RepairStation, BicycleService, DrinkingFountain } from '@/types';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
@@ -211,6 +212,8 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                 tableName = 'repairStation';
                 updateData.covered = formData.covered;
                 updateData.free = formData.free;
+            } else if (locationType === 'drinking_fountain') {
+                tableName = 'drinkingFountain';
             }
 
             const { error: updateError } = await supabase
@@ -255,15 +258,18 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
         if (locationType === 'parking') return 'Parkoló szerkesztése';
         if (locationType === 'services') return 'Szerviz szerkesztése';
         if (locationType === 'repair') return 'Javító állomás szerkesztése';
+        if (locationType === 'drinking_fountain') return 'Ivókút szerkesztése';
         return 'Helyszín szerkesztése';
     };
 
-    const Icon = locationType === 'parking' ? MapPin : locationType === 'services' ? Building2 : Wrench;
+    const Icon = locationType === 'parking' ? MapPin : locationType === 'services' ? Building2 : locationType === 'drinking_fountain' ? Droplet : Wrench;
     const iconGradient = locationType === 'parking'
         ? 'from-green-500/20 to-green-600/20 border-green-500/30 text-green-400'
         : locationType === 'services'
             ? 'from-blue-500/20 to-blue-600/20 border-blue-500/30 text-blue-400'
-            : 'from-orange-500/20 to-orange-600/20 border-orange-500/30 text-orange-400';
+            : locationType === 'drinking_fountain'
+                ? 'from-cyan-500/20 to-cyan-600/20 border-cyan-500/30 text-cyan-400'
+                : 'from-orange-500/20 to-orange-600/20 border-orange-500/30 text-orange-400';
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && !isLoading && onClose()}>

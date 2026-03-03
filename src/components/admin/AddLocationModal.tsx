@@ -19,7 +19,8 @@ import {
     Globe,
     Star,
     DollarSign,
-    Plus
+    Plus,
+    Droplet
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -128,6 +129,8 @@ export default function AddLocationModal({ isOpen, onClose, locationType, onSucc
                 tableName = 'repairStation';
                 finalData.covered = formData.covered;
                 finalData.free = formData.free;
+            } else if (locationType === 'drinking_fountain') {
+                tableName = 'drinkingFountain';
             }
 
             // Insert with PostGIS coordinate
@@ -202,15 +205,18 @@ export default function AddLocationModal({ isOpen, onClose, locationType, onSucc
         if (locationType === 'parking') return 'Parkoló hozzáadása';
         if (locationType === 'services') return 'Szerviz hozzáadása';
         if (locationType === 'repair') return 'Javító állomás hozzáadása';
+        if (locationType === 'drinking_fountain') return 'Ivókút hozzáadása';
         return 'Helyszín hozzáadása';
     };
 
-    const Icon = locationType === 'parking' ? MapPin : locationType === 'services' ? Building2 : Wrench;
+    const Icon = locationType === 'parking' ? MapPin : locationType === 'services' ? Building2 : locationType === 'drinking_fountain' ? Droplet : Wrench;
     const iconGradient = locationType === 'parking'
         ? 'from-green-500/20 to-green-600/20 border-green-500/30 text-green-400'
         : locationType === 'services'
             ? 'from-blue-500/20 to-blue-600/20 border-blue-500/30 text-blue-400'
-            : 'from-orange-500/20 to-orange-600/20 border-orange-500/30 text-orange-400';
+            : locationType === 'drinking_fountain'
+                ? 'from-cyan-500/20 to-cyan-600/20 border-cyan-500/30 text-cyan-400'
+                : 'from-orange-500/20 to-orange-600/20 border-orange-500/30 text-orange-400';
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && !isLoading && onClose()}>
@@ -236,265 +242,265 @@ export default function AddLocationModal({ isOpen, onClose, locationType, onSucc
                     {/* Scrollable Form - same ScrollArea pattern as POI modal */}
                     <ScrollArea className="flex-1 min-h-0">
                         <div className="p-6 space-y-6">
-                        {/* Basic Info */}
-                        <div className="grid grid-cols-2 gap-6">
-                            <div className="space-y-1.5">
-                                <label htmlFor="name" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Név *</label>
-                                <input
-                                    id="name"
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    className="w-full bg-zinc-900/50 border border-white/5 focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 rounded-xl px-4 py-3 text-sm text-white transition-all outline-none"
-                                    placeholder="Helyszín neve"
-                                    required
-                                    disabled={isLoading}
-                                />
-                            </div>
-                            <div className="space-y-1.5">
-                                <label htmlFor="city" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Város *</label>
-                                <input
-                                    id="city"
-                                    name="city"
-                                    value={formData.city}
-                                    onChange={handleChange}
-                                    className="w-full bg-zinc-900/50 border border-white/5 focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 rounded-xl px-4 py-3 text-sm text-white transition-all outline-none"
-                                    placeholder="Város neve"
-                                    required
-                                    disabled={isLoading}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-1.5">
-                            <label htmlFor="description" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Leírás</label>
-                            <textarea
-                                id="description"
-                                name="description"
-                                value={formData.description}
-                                onChange={handleChange}
-                                rows={3}
-                                className="w-full bg-zinc-900/50 border border-white/5 focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 rounded-xl px-4 py-3 text-sm text-white transition-all outline-none resize-none"
-                                placeholder="Írjon egy rövid leírást..."
-                                disabled={isLoading}
-                            />
-                        </div>
-
-                        {/* Coordinates Group */}
-                        <div className="p-6 rounded-2xl bg-zinc-900/30 border border-white/5 space-y-4">
-                            <div className="flex items-center gap-2 text-zinc-400 mb-2">
-                                <MapPin className="w-4 h-4 text-green-500" />
-                                <span className="text-xs font-bold uppercase tracking-widest">Koordináták</span>
-                            </div>
+                            {/* Basic Info */}
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-1.5">
-                                    <label htmlFor="lat" className="text-[10px] text-zinc-500 uppercase tracking-widest">Szélesség (Latitude) *</label>
+                                    <label htmlFor="name" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Név *</label>
                                     <input
-                                        type="number"
-                                        id="lat"
-                                        name="lat"
-                                        value={formData.lat}
+                                        id="name"
+                                        name="name"
+                                        value={formData.name}
                                         onChange={handleChange}
-                                        className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-zinc-300 font-mono focus:border-green-500/50 outline-none"
-                                        placeholder="47.4979"
-                                        step="0.000001"
+                                        className="w-full bg-zinc-900/50 border border-white/5 focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 rounded-xl px-4 py-3 text-sm text-white transition-all outline-none"
+                                        placeholder="Helyszín neve"
                                         required
                                         disabled={isLoading}
                                     />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label htmlFor="lon" className="text-[10px] text-zinc-500 uppercase tracking-widest">Hosszúság (Longitude) *</label>
+                                    <label htmlFor="city" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Város *</label>
                                     <input
-                                        type="number"
-                                        id="lon"
-                                        name="lon"
-                                        value={formData.lon}
+                                        id="city"
+                                        name="city"
+                                        value={formData.city}
                                         onChange={handleChange}
-                                        className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-zinc-300 font-mono focus:border-green-500/50 outline-none"
-                                        placeholder="19.0402"
-                                        step="0.000001"
+                                        className="w-full bg-zinc-900/50 border border-white/5 focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 rounded-xl px-4 py-3 text-sm text-white transition-all outline-none"
+                                        placeholder="Város neve"
                                         required
                                         disabled={isLoading}
                                     />
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 mt-2">
-                                <Info className="w-3.5 h-3.5 text-blue-400" />
-                                <p className="text-[10px] text-zinc-500">
-                                    Tipp: A koordinátákat <a href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer" className="text-green-500 hover:underline">Google Maps</a>-ről vagy <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-green-500 hover:underline">OpenStreetMap</a>-ről tudod kimásolni.
-                                </p>
+
+                            <div className="space-y-1.5">
+                                <label htmlFor="description" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Leírás</label>
+                                <textarea
+                                    id="description"
+                                    name="description"
+                                    value={formData.description}
+                                    onChange={handleChange}
+                                    rows={3}
+                                    className="w-full bg-zinc-900/50 border border-white/5 focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 rounded-xl px-4 py-3 text-sm text-white transition-all outline-none resize-none"
+                                    placeholder="Írjon egy rövid leírást..."
+                                    disabled={isLoading}
+                                />
                             </div>
-                        </div>
 
-                        {/* Type Specific Settings */}
-                        {locationType === 'parking' && (
-                            <div className="p-6 rounded-2xl bg-zinc-900/30 border border-white/5 space-y-6">
+                            {/* Coordinates Group */}
+                            <div className="p-6 rounded-2xl bg-zinc-900/30 border border-white/5 space-y-4">
                                 <div className="flex items-center gap-2 text-zinc-400 mb-2">
-                                    <ShieldCheck className="w-4 h-4 text-green-500" />
-                                    <span className="text-xs font-bold uppercase tracking-widest">Parkoló információk</span>
+                                    <MapPin className="w-4 h-4 text-green-500" />
+                                    <span className="text-xs font-bold uppercase tracking-widest">Koordináták</span>
                                 </div>
-
-                                <ToggleItem label="Fedett parkoló" icon={Info} active={formData.covered} onClick={() => toggleBoolean('covered')} isLoading={isLoading} />
-                                <ToggleItem label="24 órás nyitvatartás" icon={Clock} active={formData.is_open_24h} onClick={() => toggleBoolean('is_open_24h')} isLoading={isLoading} />
-                                <ToggleItem label="Kamera biztonság" icon={Camera} active={formData.has_camera} onClick={() => toggleBoolean('has_camera')} isLoading={isLoading} />
-
-                                <div className="space-y-1.5 pt-2">
-                                    <label htmlFor="capacity_level" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Kapacitás szint</label>
-                                    <select
-                                        id="capacity_level"
-                                        name="capacity_level"
-                                        value={formData.capacity_level}
-                                        onChange={handleChange}
-                                        disabled={isLoading}
-                                        className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-3 text-sm text-white appearance-none cursor-pointer focus:border-green-500/50 outline-none"
-                                    >
-                                        <option value="">Válassz...</option>
-                                        <option value="small">Kis (1-10 hely)</option>
-                                        <option value="medium">Közepes (11-50 hely)</option>
-                                        <option value="large">Nagy (50+ hely)</option>
-                                    </select>
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-1.5">
+                                        <label htmlFor="lat" className="text-[10px] text-zinc-500 uppercase tracking-widest">Szélesség (Latitude) *</label>
+                                        <input
+                                            type="number"
+                                            id="lat"
+                                            name="lat"
+                                            value={formData.lat}
+                                            onChange={handleChange}
+                                            className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-zinc-300 font-mono focus:border-green-500/50 outline-none"
+                                            placeholder="47.4979"
+                                            step="0.000001"
+                                            required
+                                            disabled={isLoading}
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label htmlFor="lon" className="text-[10px] text-zinc-500 uppercase tracking-widest">Hosszúság (Longitude) *</label>
+                                        <input
+                                            type="number"
+                                            id="lon"
+                                            name="lon"
+                                            value={formData.lon}
+                                            onChange={handleChange}
+                                            className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-zinc-300 font-mono focus:border-green-500/50 outline-none"
+                                            placeholder="19.0402"
+                                            step="0.000001"
+                                            required
+                                            disabled={isLoading}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2 mt-2">
+                                    <Info className="w-3.5 h-3.5 text-blue-400" />
+                                    <p className="text-[10px] text-zinc-500">
+                                        Tipp: A koordinátákat <a href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer" className="text-green-500 hover:underline">Google Maps</a>-ről vagy <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-green-500 hover:underline">OpenStreetMap</a>-ről tudod kimásolni.
+                                    </p>
                                 </div>
                             </div>
-                        )}
 
-                        {locationType === 'services' && (
-                            <div className="p-6 rounded-2xl bg-zinc-900/30 border border-white/5 space-y-6">
-                                <div className="flex items-center gap-2 text-zinc-400 mb-2">
-                                    <Building2 className="w-4 h-4 text-green-500" />
-                                    <span className="text-xs font-bold uppercase tracking-widest">Üzlet információk</span>
-                                </div>
+                            {/* Type Specific Settings */}
+                            {locationType === 'parking' && (
+                                <div className="p-6 rounded-2xl bg-zinc-900/30 border border-white/5 space-y-6">
+                                    <div className="flex items-center gap-2 text-zinc-400 mb-2">
+                                        <ShieldCheck className="w-4 h-4 text-green-500" />
+                                        <span className="text-xs font-bold uppercase tracking-widest">Parkoló információk</span>
+                                    </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-1.5">
-                                        <label htmlFor="phone" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Telefonszám</label>
-                                        <div className="relative">
-                                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                                            <input
-                                                id="phone"
-                                                name="phone"
-                                                value={formData.phone}
-                                                onChange={handleChange}
-                                                className="w-full bg-zinc-900/50 border border-white/5 focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 rounded-xl pl-10 pr-4 py-3 text-sm text-white transition-all outline-none"
-                                                placeholder="+36 20 123 4567"
-                                                disabled={isLoading}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <label htmlFor="website" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Weboldal</label>
-                                        <div className="relative">
-                                            <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                                            <input
-                                                id="website"
-                                                name="website"
-                                                value={formData.website}
-                                                onChange={handleChange}
-                                                className="w-full bg-zinc-900/50 border border-white/5 focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 rounded-xl pl-10 pr-4 py-3 text-sm text-white transition-all outline-none"
-                                                placeholder="https://pelda.hu"
-                                                disabled={isLoading}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+                                    <ToggleItem label="Fedett parkoló" icon={Info} active={formData.covered} onClick={() => toggleBoolean('covered')} isLoading={isLoading} />
+                                    <ToggleItem label="24 órás nyitvatartás" icon={Clock} active={formData.is_open_24h} onClick={() => toggleBoolean('is_open_24h')} isLoading={isLoading} />
+                                    <ToggleItem label="Kamera biztonság" icon={Camera} active={formData.has_camera} onClick={() => toggleBoolean('has_camera')} isLoading={isLoading} />
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-1.5">
-                                        <label htmlFor="opening_hours" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Nyitvatartás</label>
-                                        <div className="relative">
-                                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                                            <input
-                                                id="opening_hours"
-                                                name="opening_hours"
-                                                value={formData.opening_hours}
-                                                onChange={handleChange}
-                                                className="w-full bg-zinc-900/50 border border-white/5 focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 rounded-xl pl-10 pr-4 py-3 text-sm text-white transition-all outline-none"
-                                                placeholder="H-P: 9:00-18:00"
-                                                disabled={isLoading}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <label htmlFor="rating" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Értékelés (1-5)</label>
-                                        <div className="relative">
-                                            <Star className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                                            <input
-                                                type="number"
-                                                id="rating"
-                                                name="rating"
-                                                value={formData.rating}
-                                                onChange={handleChange}
-                                                className="w-full bg-zinc-900/50 border border-white/5 focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 rounded-xl pl-10 pr-4 py-3 text-sm text-white transition-all outline-none"
-                                                placeholder="4.5"
-                                                min="1"
-                                                max="5"
-                                                step="0.1"
-                                                disabled={isLoading}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-1.5">
-                                    <label htmlFor="price_range" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Árkategória</label>
-                                    <div className="relative">
-                                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                                    <div className="space-y-1.5 pt-2">
+                                        <label htmlFor="capacity_level" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Kapacitás szint</label>
                                         <select
-                                            id="price_range"
-                                            name="price_range"
-                                            value={formData.price_range}
+                                            id="capacity_level"
+                                            name="capacity_level"
+                                            value={formData.capacity_level}
                                             onChange={handleChange}
                                             disabled={isLoading}
-                                            className="w-full bg-zinc-900/50 border border-white/5 rounded-xl pl-10 pr-4 py-3 text-sm text-white appearance-none cursor-pointer focus:border-green-500/50 outline-none"
+                                            className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-3 text-sm text-white appearance-none cursor-pointer focus:border-green-500/50 outline-none"
                                         >
                                             <option value="">Válassz...</option>
-                                            <option value="$">$ - Olcsó</option>
-                                            <option value="$$">$$ - Közepes</option>
-                                            <option value="$$$">$$$ - Drága</option>
+                                            <option value="small">Kis (1-10 hely)</option>
+                                            <option value="medium">Közepes (11-50 hely)</option>
+                                            <option value="large">Nagy (50+ hely)</option>
                                         </select>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {locationType === 'repair' && (
-                            <div className="p-6 rounded-2xl bg-zinc-900/30 border border-white/5 space-y-6">
-                                <div className="flex items-center gap-2 text-zinc-400 mb-2">
-                                    <Wrench className="w-4 h-4 text-green-500" />
-                                    <span className="text-xs font-bold uppercase tracking-widest">Szerviz információk</span>
+                            {locationType === 'services' && (
+                                <div className="p-6 rounded-2xl bg-zinc-900/30 border border-white/5 space-y-6">
+                                    <div className="flex items-center gap-2 text-zinc-400 mb-2">
+                                        <Building2 className="w-4 h-4 text-green-500" />
+                                        <span className="text-xs font-bold uppercase tracking-widest">Üzlet információk</span>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <label htmlFor="phone" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Telefonszám</label>
+                                            <div className="relative">
+                                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                                                <input
+                                                    id="phone"
+                                                    name="phone"
+                                                    value={formData.phone}
+                                                    onChange={handleChange}
+                                                    className="w-full bg-zinc-900/50 border border-white/5 focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 rounded-xl pl-10 pr-4 py-3 text-sm text-white transition-all outline-none"
+                                                    placeholder="+36 20 123 4567"
+                                                    disabled={isLoading}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label htmlFor="website" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Weboldal</label>
+                                            <div className="relative">
+                                                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                                                <input
+                                                    id="website"
+                                                    name="website"
+                                                    value={formData.website}
+                                                    onChange={handleChange}
+                                                    className="w-full bg-zinc-900/50 border border-white/5 focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 rounded-xl pl-10 pr-4 py-3 text-sm text-white transition-all outline-none"
+                                                    placeholder="https://pelda.hu"
+                                                    disabled={isLoading}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <label htmlFor="opening_hours" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Nyitvatartás</label>
+                                            <div className="relative">
+                                                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                                                <input
+                                                    id="opening_hours"
+                                                    name="opening_hours"
+                                                    value={formData.opening_hours}
+                                                    onChange={handleChange}
+                                                    className="w-full bg-zinc-900/50 border border-white/5 focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 rounded-xl pl-10 pr-4 py-3 text-sm text-white transition-all outline-none"
+                                                    placeholder="H-P: 9:00-18:00"
+                                                    disabled={isLoading}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label htmlFor="rating" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Értékelés (1-5)</label>
+                                            <div className="relative">
+                                                <Star className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                                                <input
+                                                    type="number"
+                                                    id="rating"
+                                                    name="rating"
+                                                    value={formData.rating}
+                                                    onChange={handleChange}
+                                                    className="w-full bg-zinc-900/50 border border-white/5 focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 rounded-xl pl-10 pr-4 py-3 text-sm text-white transition-all outline-none"
+                                                    placeholder="4.5"
+                                                    min="1"
+                                                    max="5"
+                                                    step="0.1"
+                                                    disabled={isLoading}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label htmlFor="price_range" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Árkategória</label>
+                                        <div className="relative">
+                                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                                            <select
+                                                id="price_range"
+                                                name="price_range"
+                                                value={formData.price_range}
+                                                onChange={handleChange}
+                                                disabled={isLoading}
+                                                className="w-full bg-zinc-900/50 border border-white/5 rounded-xl pl-10 pr-4 py-3 text-sm text-white appearance-none cursor-pointer focus:border-green-500/50 outline-none"
+                                            >
+                                                <option value="">Válassz...</option>
+                                                <option value="$">$ - Olcsó</option>
+                                                <option value="$$">$$ - Közepes</option>
+                                                <option value="$$$">$$$ - Drága</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
+                            )}
 
-                                <ToggleItem label="Fedett állomás" icon={Info} active={formData.covered} onClick={() => toggleBoolean('covered')} isLoading={isLoading} />
-                                <ToggleItem label="Ingyenes használat" icon={DollarSign} active={formData.free} onClick={() => toggleBoolean('free')} isLoading={isLoading} />
+                            {locationType === 'repair' && (
+                                <div className="p-6 rounded-2xl bg-zinc-900/30 border border-white/5 space-y-6">
+                                    <div className="flex items-center gap-2 text-zinc-400 mb-2">
+                                        <Wrench className="w-4 h-4 text-green-500" />
+                                        <span className="text-xs font-bold uppercase tracking-widest">Szerviz információk</span>
+                                    </div>
+
+                                    <ToggleItem label="Fedett állomás" icon={Info} active={formData.covered} onClick={() => toggleBoolean('covered')} isLoading={isLoading} />
+                                    <ToggleItem label="Ingyenes használat" icon={DollarSign} active={formData.free} onClick={() => toggleBoolean('free')} isLoading={isLoading} />
+                                </div>
+                            )}
+
+                            {/* Image Upload */}
+                            <div className="p-6 rounded-2xl bg-zinc-900/30 border border-white/5 space-y-4">
+                                <h3 className="text-sm font-semibold flex items-center gap-2 text-foreground">
+                                    Képek
+                                </h3>
+                                <ImageUpload
+                                    ref={imageUploadRef}
+                                    existingImages={pictureUrls}
+                                    onChange={setPictureUrls}
+                                    locationType={locationType}
+                                    locationId={null}
+                                />
                             </div>
-                        )}
 
-                        {/* Image Upload */}
-                        <div className="p-6 rounded-2xl bg-zinc-900/30 border border-white/5 space-y-4">
-                            <h3 className="text-sm font-semibold flex items-center gap-2 text-foreground">
-                                Képek
-                            </h3>
-                            <ImageUpload
-                                ref={imageUploadRef}
-                                existingImages={pictureUrls}
-                                onChange={setPictureUrls}
-                                locationType={locationType}
-                                locationId={null}
-                            />
-                        </div>
+                            {error && (
+                                <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 text-red-500 text-sm border border-red-500/20">
+                                    <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                                    <span>{error}</span>
+                                </div>
+                            )}
 
-                        {error && (
-                            <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 text-red-500 text-sm border border-red-500/20">
-                                <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                                <span>{error}</span>
-                            </div>
-                        )}
-
-                        {success && (
-                            <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 text-green-500 text-sm border border-green-500/20">
-                                <CheckCircle className="h-4 w-4 flex-shrink-0" />
-                                <span>Helyszín sikeresen létrehozva!</span>
-                            </div>
-                        )}
+                            {success && (
+                                <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 text-green-500 text-sm border border-green-500/20">
+                                    <CheckCircle className="h-4 w-4 flex-shrink-0" />
+                                    <span>Helyszín sikeresen létrehozva!</span>
+                                </div>
+                            )}
                         </div>
                     </ScrollArea>
 
