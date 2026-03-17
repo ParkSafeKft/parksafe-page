@@ -14,7 +14,7 @@ export default function PrivacyPage() {
                         Adatvédelmi Szabályzat
                     </h1>
                     <p className="text-zinc-500 font-medium">
-                        Utolsó frissítés: 2026. február 24.
+                        Utolsó frissítés: 2026. március 17.
                     </p>
                 </div>
 
@@ -147,22 +147,45 @@ export default function PrivacyPage() {
                                 </div>
 
                                 <div className="bg-zinc-50 rounded-xl p-6 border border-zinc-100">
-                                    <h3 className="text-lg font-bold text-zinc-900 mb-3">f) Kerékpáros statisztikák (ride stats)</h3>
+                                    <h3 className="text-lg font-bold text-zinc-900 mb-3">f) Kerékpáros útvonal-rögzítés és túrastatisztikák</h3>
+                                    <p className="text-zinc-600 mb-3">
+                                        A ParkSafe alkalmazás <strong className="text-zinc-900">Túra (Ride)</strong> funkciójával kerékpáros túráit rögzítheti.
+                                        A funkció első használata előtt az alkalmazás <strong className="text-zinc-900">kifejezett hozzájárulást</strong> kér.
+                                    </p>
+                                    <p className="text-zinc-600 mb-2 font-medium text-zinc-800">Az aktív menetkövetés során gyűjtött adatok:</p>
                                     <ul className="space-y-1 text-zinc-600 list-disc pl-5 marker:text-[#34aa56] mb-4">
-                                        <li>megtett távolság,</li>
-                                        <li>menet időtartama,</li>
-                                        <li>átlag- és maximális sebesség,</li>
-                                        <li>indulás időpontja.</li>
+                                        <li>GPS koordináták (szélességi fok, hosszúsági fok, tengerszint feletti magasság, időbélyeg) – 2–4 másodpercenként,</li>
+                                        <li>aktuális, átlagos és maximális sebesség (km/h),</li>
+                                        <li>megtett távolság (méterben),</li>
+                                        <li>menetidő és mozgási idő (másodpercben),</li>
+                                        <li>szintemelkedés (méterben),</li>
+                                        <li>túra kezdési időpontja (timestamp).</li>
                                     </ul>
-                                    <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-3 mb-4 text-emerald-900 text-sm font-medium">
-                                        GPS nyomvonalat (részletes útvonal-koordinátákat) nem tárolunk – kizárólag összesített statisztikai adatokat.
+                                    <p className="text-zinc-600 mb-2 font-medium text-zinc-800">Adatok tárolása:</p>
+                                    <ul className="space-y-1 text-zinc-600 list-disc pl-5 marker:text-[#34aa56] mb-4">
+                                        <li>Az aktív menet során az adatok kizárólag <strong className="text-zinc-900">a készülék memóriájában</strong> találhatók.</li>
+                                        <li>A túra befejezésekor a rendszer a mért adatokat a <strong className="text-zinc-900">Supabase felhőadatbázisba</strong> tölti fel.</li>
+                                        <li>Az útvonal <strong className="text-zinc-900">egyszerűsített formában</strong> kerül tárolásra: a Ramer–Douglas–Peucker algoritmus 5 méteres toleranciával csökkenti a tárolt koordináták számát.</li>
+                                    </ul>
+                                    <div className="bg-amber-50 border border-amber-100 rounded-lg p-4 mb-4 text-amber-900 text-sm">
+                                        <strong>Nyilvánosság és adatvédelmi trimming:</strong> Ha Ön egy túrát nyilvánosra (is_public = true) állít,
+                                        a rendszer automatikusan <strong>eltávolítja az útvonal első és utolsó 300 méterét</strong>, hogy
+                                        lakóhelyének körzetét ne lehessen beazonosítani. Más felhasználók kizárólag a csonkított útvonalat láthatják.
                                     </div>
-                                    <p className="text-zinc-600 mb-1">
-                                        <strong className="text-zinc-900">Cél:</strong> statisztikák biztosítása a felhasználó számára, teljesítménykövetés, anonim aggregált statisztikák.
-                                    </p>
-                                    <p className="text-zinc-600">
-                                        <strong className="text-zinc-900">Jogalap:</strong> szerződés teljesítése, jogos érdek (szolgáltatás fejlesztése).
-                                    </p>
+                                    <div className="space-y-1 text-zinc-600 mb-4">
+                                        <p className="mb-1"><strong className="text-zinc-900">Cél:</strong> kerékpáros túrák személyes rögzítése, egyéni teljesítményadatok és statisztikák megjelenítése.</p>
+                                        <p className="mb-1"><strong className="text-zinc-900">Jogalap:</strong> az Ön <strong>kifejezett hozzájárulása</strong> (GDPR 6. cikk (1) a) pont). Hozzájárulását bármikor visszavonhatja az alkalmazáson belül, aminek következtében új útvonalak rögzítése leáll (a korábban mentett túrák nem törlődnek automatikusan, de azokat Ön manuálisan törölheti).</p>
+                                        <p className="mb-1"><strong className="text-zinc-900">Adatmegőrzés:</strong> A túraadatok a felhasználói fiók fennállásáig megőrzésre kerülnek. Fiók törlésekor az összes túrarekord automatikusan törlődik (CASCADE törlés). Az egyes túrákat bármikor manuálisan is törölheti.</p>
+                                        <p><strong className="text-zinc-900">Adatbiztonság:</strong> Sor szintű hozzáférés-védelemmel (Row-Level Security) biztosítjuk, hogy minden felhasználó kizárólag saját túraadatait láthatja, módosíthatja és törölheti.</p>
+                                    </div>
+                                    <p className="text-zinc-600 mb-1 font-medium text-zinc-800">Az Ön jogai és kontrollja ezzel az adatkezeléssel kapcsolatban:</p>
+                                    <ul className="space-y-1 text-zinc-600 list-disc pl-5 marker:text-[#34aa56]">
+                                        <li>Minden túrájához hozzáférhet, megtekintheti azt az alkalmazásban.</li>
+                                        <li>Bármely túráját egyenként törölheti.</li>
+                                        <li>Meghatározhatja, hogy egy túra nyilvános vagy privát legyen.</li>
+                                        <li>A menetkövetési hozzájárulást az alkalmazásban visszavonhatja.</li>
+                                        <li>A háttér-helymeghatározási engedélyt bármikor visszavonhatja a készülék <strong className="text-zinc-900">Beállítások → Adatvédelem → Helyszolgáltatások</strong> menüjében.</li>
+                                    </ul>
                                 </div>
                             </div>
                         </section>
@@ -178,7 +201,7 @@ export default function PrivacyPage() {
                             <ul className="space-y-2 text-zinc-600 list-disc pl-5 marker:text-[#34aa56] mb-6">
                                 <li>helyadatokat <strong className="text-zinc-900">csak akkor gyűjtünk</strong>, ha Ön ehhez a készülék és az alkalmazás engedélyeiben hozzájárult,</li>
                                 <li>a pontos helyadatokat <strong className="text-zinc-900">elsősorban a szolgáltatás nyújtása közben</strong> használjuk,</li>
-                                <li><strong className="text-zinc-900">nem tárolunk</strong> folyamatos GPS útvonalat, nyomvonalat,</li>
+                                <li>a kerékpáros menetkövetés funkció esetén az útvonal <strong className="text-zinc-900">egyszerűsített formában</strong> (Ramer–Douglas–Peucker algoritmussal) kerül tárolásra – kizárólag az Ön hozzájárulásával és az Ön fiókjához rendelten,</li>
                                 <li>lehetősége van a helymeghatározás bármikori <strong className="text-zinc-900">kikapcsolására</strong>.</li>
                             </ul>
 
@@ -192,7 +215,7 @@ export default function PrivacyPage() {
                                     <li>a háttér-helymeghatározás engedélyezése <strong className="text-zinc-900">nem kötelező</strong>; megtagadása esetén a menetkövetés csak akkor működik, ha az alkalmazás előtérben van,</li>
                                     <li>a háttérben gyűjtött helyadatokat <strong className="text-zinc-900">kizárólag az aktív menetkövetés ideje alatt</strong> használjuk,</li>
                                     <li>a háttér-hozzáférés az útvonal leállításával automatikusan megszűnik,</li>
-                                    <li>a részletes GPS koordinátákat <strong className="text-zinc-900">nem tároljuk</strong> sem a készüléken, sem a szerveren,</li>
+                                    <li>a háttérben gyűjtött helyadatok feldolgozása <strong className="text-zinc-900">kizárólag az aktív menetkövetés céljára</strong> történik; az útvonal egyszerűsített formában kerül tárolásra (lásd az 1f pontot),</li>
                                     <li>a háttér-helyadat engedélyt bármikor visszavonhatja a készülék <strong className="text-zinc-900">Beállítások → Adatvédelem → Helyszolgáltatások</strong> menüjében.</li>
                                 </ul>
                             </div>
@@ -298,6 +321,7 @@ export default function PrivacyPage() {
                                     { label: "FIÓK", desc: "A fiók fennállásáig; fiók törlésekor ésszerű határidőn belül anonimizálásra vagy törlésre kerülnek." },
                                     { label: "TRANZAKCIÓK", desc: "Jogszabályban meghatározott ideig (pl. számviteli előírások)." },
                                     { label: "ÜGYFÉLSZOLGÁLAT", desc: "A szükséges ideig, hogy a panaszok, kérelmek kezelését biztosítsuk." },
+                                    { label: "TÚRAADATOK", desc: "A felhasználói fiók fennállásáig; fiók törlésekor automatikusan törlődnek (CASCADE). Az egyes túrák manuálisan is törölhetők bármikor." },
                                     { label: "KÖZÖSSÉGI TARTALOM", desc: "A szolgáltatás működése szempontjából szükséges ideig; kérheti egyes tartalmak eltávolítását." },
                                     { label: "ANALITIKA", desc: "Jellemzően anonimizált formában, hosszabb távon is megőrizhetők." },
                                 ].map((item, idx) => (
@@ -391,7 +415,7 @@ export default function PrivacyPage() {
                 {/* Footer info */}
                 <div className="mt-12 text-center border-t border-zinc-200 pt-8">
                     <p className="text-zinc-400 text-sm leading-relaxed">
-                        <strong className="text-zinc-600">Hatályos:</strong> 2026. február 24-től
+                        <strong className="text-zinc-600">Hatályos:</strong> 2026. március 17-től
                         <br />
                         <span className="opacity-75">Premiumtex Kft. • 6792 Zsombó, Dózsa dűlő 55. • info@parksafe.hu</span>
                     </p>
