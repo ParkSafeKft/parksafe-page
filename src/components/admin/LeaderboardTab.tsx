@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { Trophy, Crown, Medal, Loader2, Eye, EyeOff, Globe, Building2, ListChecks } from 'lucide-react';
+import DetailModal from '@/components/admin/DetailModal';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import { toast } from 'sonner';
 import { writeAuditLog } from '@/lib/adminAuditLog';
@@ -26,6 +27,7 @@ interface GlobalRow {
     current_streak: number;
     longest_streak: number;
     badge_count: number;
+    completed_challenges: number;
 }
 
 interface PerCityRow {
@@ -65,6 +67,8 @@ export default function LeaderboardTab({ cities, adminId }: LeaderboardTabProps)
     const [showHidden, setShowHidden] = useState(false);
     const [toggleId, setToggleId] = useState<string | null>(null);
     const [refreshTick, setRefreshTick] = useState(0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [userModal, setUserModal] = useState<{ open: boolean; item: any }>({ open: false, item: null });
 
     useEffect(() => {
         let cancelled = false;
@@ -79,29 +83,39 @@ export default function LeaderboardTab({ cities, adminId }: LeaderboardTabProps)
                         .limit(100);
                     if (!data) { if (!cancelled) setGlobalRows([]); return; }
                     const userIds = data.map(r => r.user_id).filter(Boolean);
-                    const { data: profs } = userIds.length
-                        ? await supabase.from('profiles').select('id, username, avatar_url').in('id', userIds)
-                        : { data: [] as { id: string; username?: string | null; avatar_url?: string | null }[] };
-                    const profMap = Object.fromEntries((profs || []).map(p => [p.id, p]));
+                    const [profsRes, attemptsRes] = await Promise.all([
+                        userIds.length
+                            ? supabase.from('profiles').select('id, username, full_name, avatar_url').in('id', userIds)
+                            : Promise.resolve({ data: [] as { id: string; username?: string | null; full_name?: string | null; avatar_url?: string | null }[] }),
+                        userIds.length
+                            ? supabase.from('challenge_attempts').select('user_id').eq('status', 'completed').in('user_id', userIds)
+                            : Promise.resolve({ data: [] as { user_id: string }[] }),
+                    ]);
+                    const profMap = Object.fromEntries((profsRes.data || []).map(p => [p.id, p]));
+                    const completedMap: Record<string, number> = {};
+                    for (const a of (attemptsRes.data || []) as { user_id: string }[]) {
+                        completedMap[a.user_id] = (completedMap[a.user_id] || 0) + 1;
+                    }
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const rows: GlobalRow[] = data.map((r: any) => {
                         const badgeCount = Object.entries(r)
                             .filter(([k, v]) => k.startsWith('badge_') && typeof v === 'number')
                             .reduce((sum, [, v]) => sum + (v as number), 0);
+                        const prof = profMap[r.user_id];
                         return {
                             user_id: r.user_id,
-                            username: profMap[r.user_id]?.username ?? null,
-                            avatar_url: profMap[r.user_id]?.avatar_url ?? null,
+                            username: prof?.username || prof?.full_name || null,
+                            avatar_url: prof?.avatar_url ?? null,
                             xp: r.xp ?? 0,
                             current_streak: r.current_streak ?? 0,
                             longest_streak: r.longest_streak ?? 0,
                             badge_count: badgeCount,
+                            completed_challenges: completedMap[r.user_id] || 0,
                         };
                     });
                     if (!cancelled) setGlobalRows(rows);
                 } else if (view === 'per_city') {
                     if (!cityId) { if (!cancelled) setPerCityRows([]); return; }
-                    // Fetch completed attempts for this city, then aggregate client-side.
                     const { data } = await supabase
                         .from('challenge_attempts')
                         .select('user_id, average_speed_kmh, distance_meters, daily_challenges!inner(city_id)')
@@ -118,13 +132,13 @@ export default function LeaderboardTab({ cities, adminId }: LeaderboardTabProps)
                     }
                     const userIds = Array.from(acc.keys());
                     const { data: profs } = userIds.length
-                        ? await supabase.from('profiles').select('id, username').in('id', userIds)
-                        : { data: [] as { id: string; username?: string | null }[] };
+                        ? await supabase.from('profiles').select('id, username, full_name').in('id', userIds)
+                        : { data: [] as { id: string; username?: string | null; full_name?: string | null }[] };
                     const profMap = Object.fromEntries((profs || []).map(p => [p.id, p]));
                     const rows: PerCityRow[] = Array.from(acc.values())
                         .map(a => ({
                             user_id: a.user_id,
-                            username: profMap[a.user_id]?.username ?? null,
+                            username: profMap[a.user_id]?.username || profMap[a.user_id]?.full_name || null,
                             completions: a.completions,
                             avg_speed: a.completions > 0 ? a.speedSum / a.completions : 0,
                             total_distance_km: a.distSum / 1000,
@@ -161,6 +175,15 @@ export default function LeaderboardTab({ cities, adminId }: LeaderboardTabProps)
         load();
         return () => { cancelled = true; };
     }, [view, cityId, showHidden, refreshTick]);
+
+    const handleUserClick = async (userId: string) => {
+        const { data } = await supabase
+            .from('profiles')
+            .select('id, username, full_name, email, avatar_url, role, created_at, phone')
+            .eq('id', userId)
+            .single();
+        if (data) setUserModal({ open: true, item: data });
+    };
 
     const handleToggleHidden = async (id: string, currentlyHidden: boolean) => {
         setToggleId(id);
@@ -246,15 +269,15 @@ export default function LeaderboardTab({ cities, adminId }: LeaderboardTabProps)
                         <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Felhasználó</th>
                         <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">XP</th>
                         <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Streak</th>
-                        <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Leghosszabb</th>
                         <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Badge-ek</th>
+                        <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Teljesített kihívások</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
                     {globalRows.map((r, i) => {
                         const rank = i + 1;
                         return (
-                            <tr key={r.user_id} className="hover:bg-white/[0.02] transition-colors">
+                            <tr key={r.user_id} onClick={() => handleUserClick(r.user_id)} className="hover:bg-white/[0.04] transition-colors cursor-pointer">
                                 <td className="p-4">
                                     <div className="flex items-center gap-2">
                                         {rankIcon(rank)}
@@ -274,9 +297,14 @@ export default function LeaderboardTab({ cities, adminId }: LeaderboardTabProps)
                                     </div>
                                 </td>
                                 <td className="p-4 text-amber-400 font-bold font-mono text-sm">{r.xp}</td>
-                                <td className="p-4 text-zinc-300 font-mono text-xs">🔥 {r.current_streak}</td>
-                                <td className="p-4 text-zinc-500 font-mono text-xs">{r.longest_streak}</td>
+                                <td className="p-4 font-mono text-xs">
+                                    <div className="flex flex-col gap-0.5">
+                                        <span className="text-zinc-300">🔥 {r.current_streak} <span className="text-zinc-600 font-normal">jelenlegi</span></span>
+                                        <span className="text-zinc-500">⬆ {r.longest_streak} <span className="text-zinc-700 font-normal">legjobb</span></span>
+                                    </div>
+                                </td>
                                 <td className="p-4 text-zinc-300 font-mono text-xs">{r.badge_count}</td>
+                                <td className="p-4 text-green-400 font-bold font-mono text-sm">{r.completed_challenges}</td>
                             </tr>
                         );
                     })}
@@ -301,7 +329,7 @@ export default function LeaderboardTab({ cities, adminId }: LeaderboardTabProps)
                     {perCityRows.map((r, i) => {
                         const rank = i + 1;
                         return (
-                            <tr key={r.user_id} className="hover:bg-white/[0.02] transition-colors">
+                            <tr key={r.user_id} onClick={() => handleUserClick(r.user_id)} className="hover:bg-white/[0.04] transition-colors cursor-pointer">
                                 <td className="p-4">
                                     <div className="flex items-center gap-2">
                                         {rankIcon(rank)}
@@ -402,6 +430,14 @@ export default function LeaderboardTab({ cities, adminId }: LeaderboardTabProps)
 
     return (
         <div className="flex flex-col gap-4 h-full">
+            <DetailModal
+                isOpen={userModal.open}
+                onClose={() => setUserModal({ open: false, item: null })}
+                item={userModal.item}
+                type="user"
+                onEdit={() => {}}
+                onStatusChange={() => {}}
+            />
             {renderToolbar()}
             {loading ? (
                 <div className="flex items-center justify-center py-24"><Loader2 className="w-6 h-6 animate-spin text-zinc-500" /></div>

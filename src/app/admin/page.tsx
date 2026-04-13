@@ -339,6 +339,7 @@ export default function AdminPage() {
                     break;
                 case 'leaderboard':
                     // Leaderboard tab manages its own data fetching internally.
+                    setTotalCount(0);
                     setDataLoading(false);
                     return;
                 case 'audit_log':

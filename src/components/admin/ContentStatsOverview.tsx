@@ -86,14 +86,14 @@ export default function ContentStatsOverview({ onNavigate }: ContentStatsOvervie
             tab: 'cities',
         },
         {
-            title: 'Mai kihívások',
-            value: stats.todays_challenges,
-            subtitle: `${stats.total_challenges} összes eddig`,
+            title: 'Összes teljesített',
+            value: stats.total_challenge_completions,
+            subtitle: `${stats.completions_last_7d} az elmúlt 7 napban`,
             icon: Trophy,
             color: 'text-amber-500',
             bg: 'bg-amber-500/10',
             border: 'border-amber-500/20',
-            tab: 'daily_challenges',
+            tab: 'leaderboard',
         },
         {
             title: 'Új útvonalak',
