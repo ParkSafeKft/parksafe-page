@@ -531,6 +531,7 @@
     background-color: oklch(0.269 0 0) !important;
   }
 
+
   /* Make the Edit (Szerkesztés) button green - more specific targeting */
   .admin-dark button[class*="bg-primary"]:not([role="checkbox"]),
   .admin-dark [role="dialog"] button[class*="bg-primary"]:not([role="checkbox"]),

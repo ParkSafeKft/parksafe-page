@@ -27,6 +27,10 @@ import {
     ArrowLeft,
     Camera,
     Droplet,
+    Building2,
+    Trophy,
+    Route,
+    ScrollText,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -44,6 +48,16 @@ import FeedbackTable from '@/components/admin/FeedbackTable';
 import PoiFlagsTable from '@/components/admin/PoiFlagsTable';
 import ParkingImageSubmissionsTable from '@/components/admin/ParkingImageSubmissionsTable';
 import DrinkingFountainTable from '@/components/admin/DrinkingFountainTable';
+import CitiesTable from '@/components/admin/CitiesTable';
+import DailyChallengesTable from '@/components/admin/DailyChallengesTable';
+import CommunityRoutesTable from '@/components/admin/CommunityRoutesTable';
+import CityFormModal from '@/components/admin/CityFormModal';
+import CommunityRouteReviewModal from '@/components/admin/CommunityRouteReviewModal';
+import DailyChallengeDetailModal from '@/components/admin/DailyChallengeDetailModal';
+import LeaderboardTab from '@/components/admin/LeaderboardTab';
+import AuditLogTable from '@/components/admin/AuditLogTable';
+import { writeAuditLog } from '@/lib/adminAuditLog';
+import ContentStatsOverview from '@/components/admin/ContentStatsOverview';
 
 /**
  * Sanitize a search term to prevent PostgREST filter injection.
@@ -115,6 +129,35 @@ export default function AdminPage() {
     const [parkingImageSubmissions, setParkingImageSubmissions] = useState<any[]>([]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [drinkingFountains, setDrinkingFountains] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [cities, setCities] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [dailyChallenges, setDailyChallenges] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [communityRoutes, setCommunityRoutes] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [citiesForFilter, setCitiesForFilter] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [auditLog, setAuditLog] = useState<any[]>([]);
+
+    // Filters
+    const [challengeCityFilter, setChallengeCityFilter] = useState('');
+    const [challengeDateFrom, setChallengeDateFrom] = useState('');
+    const [challengeDateTo, setChallengeDateTo] = useState('');
+    const [challengeActiveFilter, setChallengeActiveFilter] = useState<'all' | 'active' | 'inactive'>('all');
+    const [routeStatusFilter, setRouteStatusFilter] = useState('');
+    const [routeDateFrom, setRouteDateFrom] = useState('');
+    const [routeDateTo, setRouteDateTo] = useState('');
+    const [auditActionFilter, setAuditActionFilter] = useState('');
+    const [auditTargetTypeFilter, setAuditTargetTypeFilter] = useState('');
+
+    // New modals
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [cityFormModal, setCityFormModal] = useState<{ show: boolean; item: any | null }>({ show: false, item: null });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [routeReviewModal, setRouteReviewModal] = useState<{ show: boolean; item: any | null }>({ show: false, item: null });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [challengeDetailModal, setChallengeDetailModal] = useState<{ show: boolean; item: any | null }>({ show: false, item: null });
 
     const [dataLoading, setDataLoading] = useState(false);
     const [toggleLoading, setToggleLoading] = useState<string | null>(null);
@@ -161,6 +204,11 @@ export default function AdminPage() {
             case 'feedback': return 'feedback';
             case 'poi_flags': return 'poi_flags';
             case 'drinking_fountain': return 'drinkingFountain';
+            case 'cities': return 'cities';
+            case 'daily_challenges': return 'daily_challenges';
+            case 'community_routes': return 'community_bike_lanes';
+            case 'leaderboard': return 'challenge_attempts';
+            case 'audit_log': return 'admin_audit_log';
             default: return null;
         }
     };
@@ -243,6 +291,68 @@ export default function AdminPage() {
                     query = supabase.from('poi_flags').select('*, profiles!poi_flags_user_id_fkey(username, full_name)');
                     countQuery = supabase.from('poi_flags').select('*', { count: 'exact', head: true });
                     break;
+                case 'cities':
+                    query = supabase.from('cities').select('*');
+                    countQuery = supabase.from('cities').select('*', { count: 'exact', head: true });
+                    break;
+                case 'daily_challenges':
+                    query = supabase.from('daily_challenges').select('*, cities!daily_challenges_city_id_fkey(id, name, slug)');
+                    countQuery = supabase.from('daily_challenges').select('*', { count: 'exact', head: true });
+                    if (challengeCityFilter) {
+                        query = query.eq('city_id', challengeCityFilter);
+                        countQuery = countQuery.eq('city_id', challengeCityFilter);
+                    }
+                    if (challengeDateFrom) {
+                        query = query.gte('challenge_date', challengeDateFrom);
+                        countQuery = countQuery.gte('challenge_date', challengeDateFrom);
+                    }
+                    if (challengeDateTo) {
+                        query = query.lte('challenge_date', challengeDateTo);
+                        countQuery = countQuery.lte('challenge_date', challengeDateTo);
+                    }
+                    if (challengeActiveFilter === 'active') {
+                        query = query.eq('is_active', true);
+                        countQuery = countQuery.eq('is_active', true);
+                    } else if (challengeActiveFilter === 'inactive') {
+                        query = query.eq('is_active', false);
+                        countQuery = countQuery.eq('is_active', false);
+                    }
+                    break;
+                case 'community_routes':
+                    // community_bike_lanes.user_id FK -> auth.users, not profiles — can't use PostgREST join.
+                    query = supabase.from('community_bike_lanes').select('*');
+                    countQuery = supabase.from('community_bike_lanes').select('*', { count: 'exact', head: true });
+                    if (routeStatusFilter) {
+                        query = query.eq('status', routeStatusFilter);
+                        countQuery = countQuery.eq('status', routeStatusFilter);
+                    }
+                    if (routeDateFrom) {
+                        query = query.gte('created_at', routeDateFrom);
+                        countQuery = countQuery.gte('created_at', routeDateFrom);
+                    }
+                    if (routeDateTo) {
+                        // include end-of-day for inclusive range
+                        const endIso = `${routeDateTo}T23:59:59.999Z`;
+                        query = query.lte('created_at', endIso);
+                        countQuery = countQuery.lte('created_at', endIso);
+                    }
+                    break;
+                case 'leaderboard':
+                    // Leaderboard tab manages its own data fetching internally.
+                    setDataLoading(false);
+                    return;
+                case 'audit_log':
+                    query = supabase.from('admin_audit_log').select('*');
+                    countQuery = supabase.from('admin_audit_log').select('*', { count: 'exact', head: true });
+                    if (auditActionFilter) {
+                        query = query.eq('action', auditActionFilter);
+                        countQuery = countQuery.eq('action', auditActionFilter);
+                    }
+                    if (auditTargetTypeFilter) {
+                        query = query.eq('target_type', auditTargetTypeFilter);
+                        countQuery = countQuery.eq('target_type', auditTargetTypeFilter);
+                    }
+                    break;
                 case 'dashboard':
                     setDataLoading(false);
                     return;
@@ -269,6 +379,19 @@ export default function AdminPage() {
                     } else if (activeTab === 'parking_images') {
                         query = query.or(`${idQuery}image_url.ilike.%${safe}%`);
                         countQuery = countQuery.or(`${idQuery}image_url.ilike.%${safe}%`);
+                    } else if (activeTab === 'cities') {
+                        query = query.or(`${idQuery}name.ilike.%${safe}%,slug.ilike.%${safe}%,name_en.ilike.%${safe}%`);
+                        countQuery = countQuery.or(`${idQuery}name.ilike.%${safe}%,slug.ilike.%${safe}%,name_en.ilike.%${safe}%`);
+                    } else if (activeTab === 'daily_challenges') {
+                        // date-like search
+                        query = query.or(`${idQuery}generation_source.ilike.%${safe}%`);
+                        countQuery = countQuery.or(`${idQuery}generation_source.ilike.%${safe}%`);
+                    } else if (activeTab === 'community_routes') {
+                        query = query.or(`${idQuery}name.ilike.%${safe}%,description.ilike.%${safe}%,surface_type.ilike.%${safe}%`);
+                        countQuery = countQuery.or(`${idQuery}name.ilike.%${safe}%,description.ilike.%${safe}%,surface_type.ilike.%${safe}%`);
+                    } else if (activeTab === 'audit_log') {
+                        query = query.or(`${idQuery}action.ilike.%${safe}%,target_type.ilike.%${safe}%,notes.ilike.%${safe}%`);
+                        countQuery = countQuery.or(`${idQuery}action.ilike.%${safe}%,target_type.ilike.%${safe}%,notes.ilike.%${safe}%`);
                     } else {
                         query = query.or(`${idQuery}name.ilike.%${safe}%,city.ilike.%${safe}%`);
                         countQuery = countQuery.or(`${idQuery}name.ilike.%${safe}%,city.ilike.%${safe}%`);
@@ -276,8 +399,27 @@ export default function AdminPage() {
                 }
             }
 
-            // Sorting
-            query = query.order(sortConfig.key, { ascending: sortConfig.direction === 'asc' });
+            {
+            // Sorting — make sure the sort column actually exists on this tab's table.
+            // Allowlist of valid sortable columns per tab; falls back to the first entry if current key is unknown.
+            const validSortKeys: Record<string, string[]> = {
+                users: ['created_at', 'username', 'email', 'full_name', 'role'],
+                parking: ['created_at', 'name', 'city'],
+                parking_images: ['created_at', 'status'],
+                services: ['created_at', 'name', 'city'],
+                repair: ['created_at', 'name', 'city'],
+                drinking_fountain: ['created_at', 'name', 'city'],
+                feedback: ['created_at', 'status', 'priority', 'title'],
+                poi_flags: ['created_at', 'status', 'reason'],
+                cities: ['created_at', 'name', 'slug', 'country_code'],
+                daily_challenges: ['challenge_date', 'distance_meters', 'generated_at', 'generation_source'],
+                community_routes: ['created_at', 'status', 'name', 'quality_rating'],
+                audit_log: ['created_at', 'action', 'target_type'],
+            };
+            const allowed = validSortKeys[activeTab] || ['created_at'];
+            const sortKeyForTab = allowed.includes(sortConfig.key) ? sortConfig.key : allowed[0];
+            query = query.order(sortKeyForTab, { ascending: sortConfig.direction === 'asc' });
+            }
 
             // Pagination
             const from = (currentPage - 1) * pageSize;
@@ -307,6 +449,7 @@ export default function AdminPage() {
                 }));
                 setPoiFlags(mapped);
             } else if (activeTab === 'parking_images') {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const mapped = (dataRes.data || []).map((row: any) => ({
                     ...row,
                     parking_name: row.parkingSpots?.name || null,
@@ -316,6 +459,59 @@ export default function AdminPage() {
                     reporter_full_name: null,
                 }));
                 setParkingImageSubmissions(mapped);
+            } else if (activeTab === 'cities') {
+                const rows = dataRes.data || [];
+                const cityIds = rows.map((c: { id: string }) => c.id);
+                let countsMap: Record<string, number> = {};
+                if (cityIds.length > 0) {
+                    const { data: ch } = await supabase
+                        .from('daily_challenges')
+                        .select('city_id')
+                        .in('city_id', cityIds);
+                    countsMap = (ch || []).reduce<Record<string, number>>((acc, r: { city_id: string }) => {
+                        acc[r.city_id] = (acc[r.city_id] || 0) + 1;
+                        return acc;
+                    }, {});
+                }
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                setCities(rows.map((c: any) => ({ ...c, challenges_count: countsMap[c.id] || 0 })));
+            } else if (activeTab === 'daily_challenges') {
+                setDailyChallenges(dataRes.data || []);
+            } else if (activeTab === 'community_routes') {
+                const rows = dataRes.data || [];
+                // Resolve submitter usernames via a separate profiles lookup (no FK to profiles).
+                const userIds = Array.from(new Set(
+                    rows.map((r: { user_id?: string | null }) => r.user_id).filter((v): v is string => !!v)
+                ));
+                let profilesMap: Record<string, { username?: string | null; full_name?: string | null }> = {};
+                if (userIds.length > 0) {
+                    const { data: profs } = await supabase
+                        .from('profiles')
+                        .select('id, username, full_name')
+                        .in('id', userIds);
+                    profilesMap = Object.fromEntries(
+                        (profs || []).map((p: { id: string; username?: string | null; full_name?: string | null }) => [p.id, p])
+                    );
+                }
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const mapped = rows.map((r: any) => ({
+                    ...r,
+                    profiles: r.user_id ? profilesMap[r.user_id] || null : null,
+                }));
+                setCommunityRoutes(mapped);
+            } else if (activeTab === 'audit_log') {
+                const rows = dataRes.data || [];
+                const adminIds = Array.from(new Set(
+                    rows.map((r: { admin_id?: string | null }) => r.admin_id).filter((v): v is string => !!v)
+                ));
+                let profilesMap: Record<string, { username?: string | null; full_name?: string | null }> = {};
+                if (adminIds.length > 0) {
+                    const { data: profs } = await supabase.from('profiles').select('id, username, full_name').in('id', adminIds);
+                    profilesMap = Object.fromEntries((profs || []).map((p: { id: string; username?: string | null; full_name?: string | null }) => [p.id, p]));
+                }
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const mapped = rows.map((r: any) => ({ ...r, profiles: r.admin_id ? profilesMap[r.admin_id] || null : null }));
+                setAuditLog(mapped);
             }
 
         } catch (error) {
@@ -335,12 +531,24 @@ export default function AdminPage() {
         setSelectedRows(new Set());
         setSelectAll(false);
         setMobileSearchOpen(false);
+        // Reset sort key to a column that exists on this tab's table
+        const defaultSortKey = activeTab === 'daily_challenges' ? 'challenge_date' : 'created_at';
+        setSortConfig(prev => (prev.key === defaultSortKey ? prev : { key: defaultSortKey, direction: 'desc' }));
     }, [activeTab, searchTerm]);
 
     useEffect(() => {
         fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeTab, currentPage, sortConfig, searchTerm, profile, pageSize]);
+    }, [activeTab, currentPage, sortConfig, searchTerm, profile, pageSize, challengeCityFilter, challengeDateFrom, challengeDateTo, challengeActiveFilter, routeStatusFilter, routeDateFrom, routeDateTo, auditActionFilter, auditTargetTypeFilter]);
+
+    // Load cities for filter dropdowns when those tabs open
+    useEffect(() => {
+        if (activeTab !== 'daily_challenges' && activeTab !== 'leaderboard') return;
+        if (citiesForFilter.length > 0) return;
+        supabase.from('cities').select('id, name').order('name').then(({ data }) => {
+            if (data) setCitiesForFilter(data);
+        });
+    }, [activeTab, citiesForFilter.length]);
 
     const handleSort = (key: string) => {
         setSortConfig(prev => ({
@@ -537,13 +745,84 @@ export default function AdminPage() {
     };
 
     const handleDeleteClick = (id: string) => {
-        const table = activeTab === 'users' ? 'profiles' :
-            activeTab === 'parking' ? 'parkingSpots' :
-                activeTab === 'drinking_fountain' ? 'drinkingFountain' :
-                    activeTab === 'services' ? 'bicycleService' :
-                        activeTab === 'repair' ? 'repairStation' :
-                            activeTab === 'poi_flags' ? 'poi_flags' : 'feedback';
+        const table = getTableForTab(activeTab) || 'feedback';
         setDeleteModal({ show: true, table, id });
+    };
+
+    const handleToggleCityActive = async (id: string, currentStatus: boolean) => {
+        setToggleLoading(id);
+        try {
+            const { error } = await supabase.from('cities').update({ is_active: !currentStatus }).eq('id', id);
+            if (error) throw error;
+            await writeAuditLog({ adminId, action: 'toggle_city_active', targetType: 'city', targetId: id, notes: !currentStatus ? 'activated' : 'deactivated' });
+            toast.success('Státusz módosítva');
+            fetchData();
+        } catch (err) {
+            if (isDev) console.error(err);
+            toast.error('Hiba a státusz módosítása során');
+        } finally {
+            setToggleLoading(null);
+        }
+    };
+
+    const handleToggleChallengeActive = async (id: string, currentStatus: boolean) => {
+        setToggleLoading(id);
+        try {
+            const { error } = await supabase.from('daily_challenges').update({ is_active: !currentStatus }).eq('id', id);
+            if (error) throw error;
+            await writeAuditLog({ adminId, action: 'toggle_challenge_active', targetType: 'daily_challenge', targetId: id, notes: !currentStatus ? 'activated' : 'deactivated' });
+            toast.success('Kihívás státusza módosítva');
+            fetchData();
+        } catch (err) {
+            if (isDev) console.error(err);
+            toast.error('Hiba a státusz módosítása során');
+        } finally {
+            setToggleLoading(null);
+        }
+    };
+
+    const adminId = (profile as { id?: string } | null)?.id ?? null;
+
+    const handleUserToggleBan = async (id: string, currentlyBanned: boolean) => {
+        setToggleLoading(id);
+        try {
+            const { error } = await supabase.from('profiles')
+                .update({ banned_at: currentlyBanned ? null : new Date().toISOString() })
+                .eq('id', id);
+            if (error) throw error;
+            await writeAuditLog({
+                adminId,
+                action: currentlyBanned ? 'unban_user' : 'ban_user',
+                targetType: 'user',
+                targetId: id,
+            });
+            toast.success(currentlyBanned ? 'Tiltás feloldva' : 'Felhasználó tiltva');
+            fetchData();
+        } catch (err) {
+            if (isDev) console.error(err);
+            toast.error('Hiba a tiltás módosítása során');
+        } finally {
+            setToggleLoading(null);
+        }
+    };
+
+    const handleCommunityRouteStatusChange = async (id: string, newStatus: string) => {
+        setToggleLoading(id);
+        try {
+            const { error } = await supabase
+                .from('community_bike_lanes')
+                .update({ status: newStatus })
+                .eq('id', id);
+            if (error) throw error;
+            await writeAuditLog({ adminId, action: 'community_route_status', targetType: 'community_bike_lane', targetId: id, notes: newStatus });
+            toast.success('Útvonal státusza frissítve');
+            fetchData();
+        } catch (err) {
+            if (isDev) console.error(err);
+            toast.error('Hiba a státusz frissítésekor');
+        } finally {
+            setToggleLoading(null);
+        }
     };
 
     const confirmDelete = async () => {
@@ -647,6 +926,11 @@ export default function AdminPage() {
                                                 {activeTab === 'drinking_fountain' && <Droplet className="h-5 w-5 text-white" />}
                                                 {activeTab === 'feedback' && <Users className="h-5 w-5 text-white" />}
                                                 {activeTab === 'poi_flags' && <MapPin className="h-5 w-5 text-white" />}
+                                                {activeTab === 'cities' && <Building2 className="h-5 w-5 text-white" />}
+                                                {activeTab === 'daily_challenges' && <Trophy className="h-5 w-5 text-white" />}
+                                                {activeTab === 'community_routes' && <Route className="h-5 w-5 text-white" />}
+                                                {activeTab === 'leaderboard' && <Trophy className="h-5 w-5 text-white" />}
+                                                {activeTab === 'audit_log' && <ScrollText className="h-5 w-5 text-white" />}
                                             </div>
                                             <div>
                                                 <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
@@ -659,6 +943,11 @@ export default function AdminPage() {
                                                     {activeTab === 'drinking_fountain' && 'Ivókutak'}
                                                     {activeTab === 'feedback' && 'Visszajelzések'}
                                                     {activeTab === 'poi_flags' && 'POI Bejelentések'}
+                                                    {activeTab === 'cities' && 'Városok'}
+                                                    {activeTab === 'daily_challenges' && 'Napi kihívások'}
+                                                    {activeTab === 'community_routes' && 'Közösségi útvonalak'}
+                                                    {activeTab === 'leaderboard' && 'Ranglista'}
+                                                    {activeTab === 'audit_log' && 'Audit napló'}
                                                     <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
                                                         {activeTab === 'dashboard' ? 'Áttekintés' : `${totalCount} elem`}
                                                     </Badge>
@@ -691,6 +980,11 @@ export default function AdminPage() {
                                                     {activeTab === 'drinking_fountain' && 'Ivókutak nyilvántartása és kezelése'}
                                                     {activeTab === 'feedback' && 'Felhasználói visszajelzések kezelése'}
                                                     {activeTab === 'poi_flags' && 'POI-khoz kapcsolódó bejelentések kezelése'}
+                                                    {activeTab === 'cities' && 'Városok kezelése (slug, koordináták, bounding box)'}
+                                                    {activeTab === 'daily_challenges' && 'Automatikusan generált napi kihívások áttekintése'}
+                                                    {activeTab === 'community_routes' && 'Közösségi beküldésű kerékpárutak moderálása'}
+                                                    {activeTab === 'leaderboard' && 'Teljesített kihívások rangsora és láthatóság-kezelés'}
+                                                    {activeTab === 'audit_log' && 'Admin műveletek időrendi naplója'}
                                                 </p>
                                             </div>
                                         </div>
@@ -718,7 +1012,7 @@ export default function AdminPage() {
                                             )}
                                         </div>
 
-                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'parking_images' && (
+                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'daily_challenges' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'audit_log' && (
                                             <>
                                                 <Separator orientation="vertical" className="h-8 bg-sidebar-border" />
                                                 <Button
@@ -727,6 +1021,18 @@ export default function AdminPage() {
                                                 >
                                                     <Plus className="h-4 w-4" />
                                                     Új hozzáadása
+                                                </Button>
+                                            </>
+                                        )}
+                                        {activeTab === 'cities' && (
+                                            <>
+                                                <Separator orientation="vertical" className="h-8 bg-sidebar-border" />
+                                                <Button
+                                                    onClick={() => setCityFormModal({ show: true, item: null })}
+                                                    className="gap-2"
+                                                >
+                                                    <Plus className="h-4 w-4" />
+                                                    Új város
                                                 </Button>
                                             </>
                                         )}
@@ -748,6 +1054,11 @@ export default function AdminPage() {
                                             {activeTab === 'drinking_fountain' && 'Ivókutak'}
                                             {activeTab === 'feedback' && 'Visszajelzések'}
                                             {activeTab === 'poi_flags' && 'POI Bejelentések'}
+                                            {activeTab === 'cities' && 'Városok'}
+                                            {activeTab === 'daily_challenges' && 'Napi kihívások'}
+                                            {activeTab === 'community_routes' && 'Közösségi útvonalak'}
+                                            {activeTab === 'leaderboard' && 'Ranglista'}
+                                            {activeTab === 'audit_log' && 'Audit napló'}
                                         </h1>
                                         {activeTab !== 'dashboard' && (
                                             <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 shrink-0 text-xs">
@@ -766,11 +1077,20 @@ export default function AdminPage() {
                                                 {mobileSearchOpen ? <XCircle className="h-4 w-4" /> : <Search className="h-4 w-4" />}
                                             </Button>
                                         )}
-                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'parking_images' && (
+                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'daily_challenges' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'audit_log' && (
                                             <Button
                                                 size="sm"
                                                 className="h-8 w-8 p-0"
                                                 onClick={() => setAddLocationModal(true)}
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                        {activeTab === 'cities' && (
+                                            <Button
+                                                size="sm"
+                                                className="h-8 w-8 p-0"
+                                                onClick={() => setCityFormModal({ show: true, item: null })}
                                             >
                                                 <Plus className="h-4 w-4" />
                                             </Button>
@@ -815,6 +1135,7 @@ export default function AdminPage() {
                                     {activeTab === 'dashboard' && (
                                         <div className="overflow-y-auto h-full p-1">
                                             <DeviceStatsOverview />
+                                            <ContentStatsOverview onNavigate={setActiveTab} />
                                         </div>
                                     )}
                                     {activeTab === 'users' && (
@@ -827,6 +1148,8 @@ export default function AdminPage() {
                                             onSort={handleSort}
                                             sortConfig={sortConfig}
                                             onRowClick={(item) => setDetailModal({ show: true, item, type: 'user' })}
+                                            onToggleBan={handleUserToggleBan}
+                                            toggleLoading={toggleLoading}
                                             searchTerm={searchTerm}
                                             currentPage={currentPage}
                                             totalPages={totalPages}
@@ -955,6 +1278,85 @@ export default function AdminPage() {
                                             onPageSizeChange={setPageSize}
                                         />
                                     )}
+                                    {activeTab === 'cities' && (
+                                        <CitiesTable
+                                            data={cities}
+                                            onRowClick={(item) => setCityFormModal({ show: true, item })}
+                                            onEdit={(item) => setCityFormModal({ show: true, item })}
+                                            onDelete={(id) => handleDeleteClick(id)}
+                                            onToggleActive={handleToggleCityActive}
+                                            toggleLoading={toggleLoading}
+                                            searchTerm={searchTerm}
+                                            currentPage={currentPage}
+                                            totalPages={totalPages}
+                                            onPageChange={setCurrentPage}
+                                            pageSize={pageSize}
+                                            onPageSizeChange={setPageSize}
+                                        />
+                                    )}
+                                    {activeTab === 'daily_challenges' && (
+                                        <DailyChallengesTable
+                                            data={dailyChallenges}
+                                            onRowClick={(item) => setChallengeDetailModal({ show: true, item })}
+                                            onDelete={(id) => handleDeleteClick(id)}
+                                            onToggleActive={handleToggleChallengeActive}
+                                            toggleLoading={toggleLoading}
+                                            searchTerm={searchTerm}
+                                            cityFilter={challengeCityFilter}
+                                            onCityFilterChange={setChallengeCityFilter}
+                                            dateFrom={challengeDateFrom}
+                                            onDateFromChange={setChallengeDateFrom}
+                                            dateTo={challengeDateTo}
+                                            onDateToChange={setChallengeDateTo}
+                                            activeFilter={challengeActiveFilter}
+                                            onActiveFilterChange={setChallengeActiveFilter}
+                                            cities={citiesForFilter}
+                                            currentPage={currentPage}
+                                            totalPages={totalPages}
+                                            onPageChange={setCurrentPage}
+                                            pageSize={pageSize}
+                                            onPageSizeChange={setPageSize}
+                                        />
+                                    )}
+                                    {activeTab === 'community_routes' && (
+                                        <CommunityRoutesTable
+                                            data={communityRoutes}
+                                            onRowClick={(item) => setRouteReviewModal({ show: true, item })}
+                                            onDelete={(id) => handleDeleteClick(id)}
+                                            onStatusChange={handleCommunityRouteStatusChange}
+                                            toggleLoading={toggleLoading}
+                                            statusFilter={routeStatusFilter}
+                                            onStatusFilterChange={setRouteStatusFilter}
+                                            dateFrom={routeDateFrom}
+                                            onDateFromChange={setRouteDateFrom}
+                                            dateTo={routeDateTo}
+                                            onDateToChange={setRouteDateTo}
+                                            searchTerm={searchTerm}
+                                            currentPage={currentPage}
+                                            totalPages={totalPages}
+                                            onPageChange={setCurrentPage}
+                                            pageSize={pageSize}
+                                            onPageSizeChange={setPageSize}
+                                        />
+                                    )}
+                                    {activeTab === 'leaderboard' && (
+                                        <LeaderboardTab cities={citiesForFilter} adminId={adminId} />
+                                    )}
+                                    {activeTab === 'audit_log' && (
+                                        <AuditLogTable
+                                            data={auditLog}
+                                            actionFilter={auditActionFilter}
+                                            onActionFilterChange={setAuditActionFilter}
+                                            targetTypeFilter={auditTargetTypeFilter}
+                                            onTargetTypeFilterChange={setAuditTargetTypeFilter}
+                                            searchTerm={searchTerm}
+                                            currentPage={currentPage}
+                                            totalPages={totalPages}
+                                            onPageChange={setCurrentPage}
+                                            pageSize={pageSize}
+                                            onPageSizeChange={setPageSize}
+                                        />
+                                    )}
                                     {activeTab === 'poi_flags' && (
                                         <PoiFlagsTable
                                             data={poiFlags}
@@ -1020,6 +1422,33 @@ export default function AdminPage() {
                     isOpen={deleteModal.show}
                     onClose={() => setDeleteModal({ show: false, table: null, id: null })}
                     onConfirm={confirmDelete}
+                />
+
+                <CityFormModal
+                    isOpen={cityFormModal.show}
+                    onClose={() => setCityFormModal({ show: false, item: null })}
+                    city={cityFormModal.item}
+                    onSuccess={() => {
+                        setCityFormModal({ show: false, item: null });
+                        fetchData();
+                    }}
+                />
+
+                <DailyChallengeDetailModal
+                    isOpen={challengeDetailModal.show}
+                    onClose={() => setChallengeDetailModal({ show: false, item: null })}
+                    challenge={challengeDetailModal.item}
+                    adminId={adminId}
+                />
+
+                <CommunityRouteReviewModal
+                    isOpen={routeReviewModal.show}
+                    onClose={() => setRouteReviewModal({ show: false, item: null })}
+                    route={routeReviewModal.item}
+                    onSuccess={() => {
+                        setRouteReviewModal({ show: false, item: null });
+                        fetchData();
+                    }}
                 />
             </div>
         </SidebarProvider>

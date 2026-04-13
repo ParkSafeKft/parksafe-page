@@ -14,6 +14,10 @@ import {
     Flag,
     Camera,
     Droplet,
+    Building2,
+    Trophy,
+    Route,
+    ScrollText,
 } from 'lucide-react';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import { useSidebar } from '@/components/ui/sidebar';
@@ -38,18 +42,28 @@ export default function AdminSidebar({
 
     const menuItems = [
         { id: 'dashboard', label: 'Vezérlőpult', icon: LayoutDashboard, section: 'ÁTTEKINTÉS' },
-        { id: 'users', label: 'Felhasználók', icon: Users, section: 'ADATKEZELÉS' },
-        { id: 'parking', label: 'Bicikli Parkolók', icon: MapPin, section: 'ADATKEZELÉS' },
-        { id: 'drinking_fountain', label: 'Ivókutak', icon: Droplet, section: 'ADATKEZELÉS' },
-        { id: 'parking_images', label: 'Parkoló képek', icon: Camera, section: 'ADATKEZELÉS' },
-        { id: 'services', label: 'Szervizek & Boltok', icon: Store, section: 'ADATKEZELÉS' },
-        { id: 'repair', label: 'Javító Állomások', icon: Wrench, section: 'ADATKEZELÉS' },
-        { id: 'feedback', label: 'Visszajelzések', icon: MessageSquare, section: 'ADATKEZELÉS' },
-        { id: 'poi_flags', label: 'POI Bejelentések', icon: Flag, section: 'ADATKEZELÉS' },
+
+        { id: 'parking', label: 'Bicikli Parkolók', icon: MapPin, section: 'POI & HELYEK' },
+        { id: 'drinking_fountain', label: 'Ivókutak', icon: Droplet, section: 'POI & HELYEK' },
+        { id: 'services', label: 'Szervizek & Boltok', icon: Store, section: 'POI & HELYEK' },
+        { id: 'repair', label: 'Javító Állomások', icon: Wrench, section: 'POI & HELYEK' },
+        { id: 'parking_images', label: 'Parkoló képek', icon: Camera, section: 'POI & HELYEK' },
+        { id: 'poi_flags', label: 'POI Bejelentések', icon: Flag, section: 'POI & HELYEK' },
+        { id: 'community_routes', label: 'Közösségi útvonalak', icon: Route, section: 'POI & HELYEK' },
+
+        { id: 'cities', label: 'Városok', icon: Building2, section: 'KIHÍVÁSOK' },
+        { id: 'daily_challenges', label: 'Napi kihívások', icon: Trophy, section: 'KIHÍVÁSOK' },
+        { id: 'leaderboard', label: 'Ranglista', icon: Trophy, section: 'KIHÍVÁSOK' },
+
+        { id: 'users', label: 'Felhasználók', icon: Users, section: 'KÖZÖSSÉG' },
+        { id: 'feedback', label: 'Visszajelzések', icon: MessageSquare, section: 'KÖZÖSSÉG' },
+
+        { id: 'audit_log', label: 'Audit napló', icon: ScrollText, section: 'NAPLÓ' },
+
         { id: 'home', label: 'Vissza a főoldalra', icon: Home, section: 'EGYÉB' },
     ];
 
-    const sections = ['ÁTTEKINTÉS', 'ADATKEZELÉS', 'EGYÉB'];
+    const sections = ['ÁTTEKINTÉS', 'POI & HELYEK', 'KIHÍVÁSOK', 'KÖZÖSSÉG', 'NAPLÓ', 'EGYÉB'];
 
     const handleItemClick = (id: string) => {
         if (isMobile) setOpenMobile(false);

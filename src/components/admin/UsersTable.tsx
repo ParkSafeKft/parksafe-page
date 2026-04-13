@@ -2,8 +2,20 @@ import {
     MoreHorizontal,
     Users,
     ChevronDown,
+    Ban,
+    UserCheck,
+    Eye,
 } from 'lucide-react';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 interface UsersTableProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -16,6 +28,8 @@ interface UsersTableProps {
     sortConfig: { key: string; direction: string };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onRowClick: (item: any) => void;
+    onToggleBan?: (id: string, currentlyBanned: boolean) => void;
+    toggleLoading?: string | null;
     searchTerm?: string;
     currentPage: number;
     totalPages: number;
@@ -32,6 +46,8 @@ export default function UsersTable({
     // onSort,
     // sortConfig,
     onRowClick,
+    onToggleBan,
+    toggleLoading,
     searchTerm,
     // selectAll,
     currentPage,
@@ -68,6 +84,7 @@ export default function UsersTable({
                             <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Felhasználónév</th>
                             <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Email</th>
                             <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Szerepkör</th>
+                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Állapot</th>
                             <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Létrehozva</th>
                             <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider text-right">Műveletek</th>
                         </tr>
@@ -103,6 +120,17 @@ export default function UsersTable({
                                     </span>
                                 </td>
                                 <td className="p-4">
+                                    {user.banned_at ? (
+                                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border bg-red-500/10 text-red-400 border-red-500/20">
+                                            <Ban className="w-3 h-3" /> Tiltva
+                                        </span>
+                                    ) : (
+                                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border bg-green-500/10 text-green-500 border-green-500/20">
+                                            <UserCheck className="w-3 h-3" /> Aktív
+                                        </span>
+                                    )}
+                                </td>
+                                <td className="p-4">
                                     <span className="text-sm text-zinc-500">
                                         {user.created_at
                                             ? new Date(user.created_at).toLocaleDateString('hu-HU', {
@@ -114,15 +142,36 @@ export default function UsersTable({
                                     </span>
                                 </td>
                                 <td className="p-4 text-right">
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onRowClick(user);
-                                        }}
-                                        className="p-2 rounded-lg text-zinc-500 hover:text-white hover:bg-white/10 transition-all"
-                                    >
-                                        <MoreHorizontal className="w-5 h-5" />
-                                    </button>
+                                    <div onClick={(e) => e.stopPropagation()}>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" className="h-8 w-8 p-0 text-zinc-500 hover:text-white hover:bg-white/10" disabled={toggleLoading === user.id}>
+                                                    <span className="sr-only">Open menu</span>
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="bg-[#111111] border-white/10 text-zinc-400">
+                                                <DropdownMenuLabel className="text-white">Műveletek</DropdownMenuLabel>
+                                                <DropdownMenuItem onClick={() => onRowClick(user)} className="hover:bg-white/5 hover:text-white cursor-pointer focus:bg-white/5 focus:text-white">
+                                                    <Eye className="mr-2 h-4 w-4" /> Részletek
+                                                </DropdownMenuItem>
+                                                {onToggleBan && (
+                                                    <>
+                                                        <DropdownMenuSeparator className="bg-white/10" />
+                                                        {user.banned_at ? (
+                                                            <DropdownMenuItem onClick={() => onToggleBan(user.id, true)} className="text-green-500 hover:bg-green-500/10 hover:text-green-400 cursor-pointer focus:bg-green-500/10 focus:text-green-400">
+                                                                <UserCheck className="mr-2 h-4 w-4" /> Tiltás feloldása
+                                                            </DropdownMenuItem>
+                                                        ) : (
+                                                            <DropdownMenuItem onClick={() => onToggleBan(user.id, false)} className="text-red-500 hover:bg-red-500/10 hover:text-red-400 cursor-pointer focus:bg-red-500/10 focus:text-red-400">
+                                                                <Ban className="mr-2 h-4 w-4" /> Felhasználó tiltása
+                                                            </DropdownMenuItem>
+                                                        )}
+                                                    </>
+                                                )}
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
