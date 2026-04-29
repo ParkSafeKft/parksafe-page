@@ -7,6 +7,7 @@ import FAQSection from "@/components/FAQSection";
 import PartnerBenefits from "@/components/PartnerBenefits";
 import HowItWorks from "@/components/HowItWorks";
 import { AboutHighlight } from "@/components/AboutHighlight";
+import Co2Impact from "@/components/Co2Impact";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function HomePage() {
@@ -262,6 +263,8 @@ export default function HomePage() {
             </section>
 
             <AboutHighlight />
+
+            <Co2Impact />
 
             <HowItWorks />
 

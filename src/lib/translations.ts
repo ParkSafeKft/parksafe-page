@@ -48,6 +48,21 @@ export const translations = {
                 titleHighlight: "jövőre?",
                 desc: "Csatlakozz a ParkSafe közösséghez, és légy része a városi közlekedés forradalmának. Töltsd le még ma.",
                 security: "v2.4 Kiadás • Nagyvállalati Szintű Biztonság • GDPR Megfelelő",
+            },
+            impact: {
+                badge: "Élő közösségi hatás",
+                title: "Együtt mentettünk",
+                titleHighlight: "CO₂-t a városoknak.",
+                description: "Minden kerékpáros út valós megtakarítás. Ezek az adatok a ParkSafe közösség által rögzített útvonalakból származnak, és naponta frissülnek.",
+                heroLabel: "Eddigi össz CO₂ megtakarítás",
+                heroSubtitle: "Annyi szén-dioxid, amit nem engedtünk a város levegőjébe — autós utak helyett kerékpárral.",
+                last30Days: "Utolsó 30 nap",
+                totalRides: "Rögzített utak",
+                kmLabel: "Megtett kilométer",
+                carTripsLabel: "Kiváltott autós út",
+                treesLabel: "Évnyi fa CO₂-megkötése",
+                methodology: "Számítás: 150 g CO₂ / km megtakarítás (átlagos városi autóutat helyettesítve), 5 km átlagos autós úthossz, 21 kg CO₂ / év érett fa megkötése alapján.",
+                updatedOn: "frissítve",
             }
         },
         howItWorks: {
@@ -291,6 +306,21 @@ export const translations = {
                 titleHighlight: "future?",
                 desc: "Join the ParkSafe community and be part of the urban transport revolution. Download today.",
                 security: "v2.4 Release • Enterprise Grade Security • GDPR Compliant",
+            },
+            impact: {
+                badge: "Live community impact",
+                title: "Together we've saved",
+                titleHighlight: "CO₂ for our cities.",
+                description: "Every ride is a real saving. These figures are aggregated from rides logged by the ParkSafe community and refreshed daily.",
+                heroLabel: "Total CO₂ saved to date",
+                heroSubtitle: "Carbon dioxide we kept out of the city air — by choosing the bike over the car.",
+                last30Days: "Last 30 days",
+                totalRides: "Logged rides",
+                kmLabel: "Kilometres ridden",
+                carTripsLabel: "Car trips replaced",
+                treesLabel: "Tree-years of CO₂ absorption",
+                methodology: "Calculation: 150 g CO₂ / km saved (versus an average urban car trip), 5 km mean car-trip length, 21 kg CO₂ / year absorbed by a mature tree.",
+                updatedOn: "updated",
             }
         },
         howItWorks: {

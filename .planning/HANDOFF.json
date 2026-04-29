@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "timestamp": "2026-04-29T11:28:26.613Z",
+  "timestamp": "2026-04-29T11:43:23.097Z",
   "source": "auto-postool",
   "partial": false,
   "phase": null,
@@ -22,13 +22,21 @@
     },
     {
       "status": "M",
-      "path": "src/components/admin/CommunityRouteReviewModal.tsx"
+      "path": "src/app/(main)/page.tsx"
     },
     {
       "status": "M",
-      "path": "src/components/admin/InteractiveRouteMap.tsx"
+      "path": "src/lib/translations.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/app/api/co2-stats/"
+    },
+    {
+      "status": "??",
+      "path": "src/components/Co2Impact.tsx"
     }
   ],
   "next_action": null,
-  "context_notes": "Recent commits:\n809955a feat: enhance admin page with image submission management and cross-navigation\n36bd192 feat: enhance admin page with dynamic tab routing and modal management\n7e169f9 feat: add admin page for comprehensive management of users, services, and locations\n7532c97 feat: implement admin dashboard with content statistics and leaderboard management tabs\nc5cddb2 feat: integrate maplibre-gl for enhanced mapping capabilities"
+  "context_notes": "Recent commits:\n87d33ea refactor: enhance CommunityRouteReviewModal and InteractiveRouteMap for user-dropped pins\n809955a feat: enhance admin page with image submission management and cross-navigation\n36bd192 feat: enhance admin page with dynamic tab routing and modal management\n7e169f9 feat: add admin page for comprehensive management of users, services, and locations\n7532c97 feat: implement admin dashboard with content statistics and leaderboard management tabs"
 }
