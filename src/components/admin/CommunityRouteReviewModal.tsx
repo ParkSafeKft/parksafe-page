@@ -28,17 +28,28 @@ type Pt = [number, number]; // [lng, lat]
 
 function extractLngLatPoints(raw: unknown): Pt[] {
     if (!raw) return [];
+    // GeoJSON Feature wrapper
+    if (typeof raw === 'object' && raw !== null && 'geometry' in raw) {
+        return extractLngLatPoints((raw as { geometry: unknown }).geometry);
+    }
+    // GeoJSON geometry with coordinates (LineString, MultiLineString, Point, etc.)
     if (typeof raw === 'object' && raw !== null && 'coordinates' in raw) {
-        const coords = (raw as { coordinates?: unknown }).coordinates;
-        if (Array.isArray(coords)) return extractLngLatPoints(coords);
+        return extractLngLatPoints((raw as { coordinates?: unknown }).coordinates);
     }
     if (!Array.isArray(raw)) return [];
     const out: Pt[] = [];
     for (const p of raw) {
+        // Nested array — MultiLineString segment, flatten by recursing
+        if (Array.isArray(p) && p.length > 0 && Array.isArray(p[0])) {
+            out.push(...extractLngLatPoints(p));
+            continue;
+        }
+        // Plain coordinate pair [lng, lat]
         if (Array.isArray(p) && p.length >= 2 && typeof p[0] === 'number' && typeof p[1] === 'number') {
             out.push([p[0], p[1]]);
             continue;
         }
+        // Object form { lat, lng } / { latitude, longitude }
         if (p && typeof p === 'object') {
             const o = p as { lng?: number; lon?: number; longitude?: number; lat?: number; latitude?: number };
             const lng = o.lng ?? o.lon ?? o.longitude;
@@ -109,10 +120,17 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
         setSelectedStatus((route?.status as Status) ?? 'pending');
     }, [route, isOpen]);
 
+    // The polyline drawn on the map — prefer the routed road geometry, fall back to the raw user pins.
     const points = useMemo<Pt[]>(() => {
         if (!route) return [];
         const fromGeom = extractLngLatPoints(route.geometry);
         if (fromGeom.length >= 2) return fromGeom;
+        return extractLngLatPoints(route.points);
+    }, [route]);
+
+    // The yellow numbered pins the user actually dropped (separate from the routed polyline).
+    const userPins = useMemo<Pt[]>(() => {
+        if (!route) return [];
         return extractLngLatPoints(route.points);
     }, [route]);
 
@@ -221,9 +239,10 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
                                     <CurrentIcon className="w-3.5 h-3.5" />
                                     Jelenlegi: {currentMeta.label}
                                 </span>
-                                {points.length > 0 && (
+                                {(userPins.length > 0 || points.length > 0) && (
                                     <span className="text-xs text-muted-foreground">
-                                        {points.length} pont · {lengthKm.toFixed(2)} km
+                                        {userPins.length > 0 ? `${userPins.length} pin · ` : ''}
+                                        {lengthKm.toFixed(2)} km
                                     </span>
                                 )}
                             </div>
@@ -297,8 +316,13 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
                                     </div>
                                 </div>
                                 <div className="rounded-2xl border border-white/10 overflow-hidden">
-                                    {points.length >= 1 ? (
-                                        <InteractiveRouteMap points={points} height={360} lineColor={previewLineColor} />
+                                    {points.length >= 1 || userPins.length >= 1 ? (
+                                        <InteractiveRouteMap
+                                            points={points}
+                                            pinPoints={userPins}
+                                            height={360}
+                                            lineColor={previewLineColor}
+                                        />
                                     ) : (
                                         <div className="flex items-center justify-center h-40 text-sm text-zinc-500 bg-zinc-900/40">
                                             Nincs értelmezhető útvonal geometria
