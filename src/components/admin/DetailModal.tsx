@@ -49,7 +49,18 @@ import {
     Database,
     Languages,
     RefreshCw,
-    Hash
+    Hash,
+    Activity,
+    Bike,
+    Gauge,
+    Mountain,
+    Timer,
+    Trophy,
+    Flame,
+    Award,
+    Zap,
+    Route as RouteIcon,
+    Loader2,
 } from 'lucide-react';
 
 interface DetailModalProps {
@@ -82,6 +93,112 @@ function copyId(id: string) {
     }
 }
 
+interface UserActivityProgress {
+    xp: number | null;
+    current_streak: number | null;
+    longest_streak: number | null;
+    challenge_completions: number | null;
+    challenge_cities: number | null;
+    badge_first_ride: number | null;
+    badge_commuter: number | null;
+    badge_night_rider: number | null;
+    badge_supporter: number | null;
+    badge_community_hero: number | null;
+    badge_marathon_rider: number | null;
+    badge_speedster: number | null;
+    badge_long_ride: number | null;
+    badge_early_bird: number | null;
+    badge_weekend_warrior: number | null;
+    badge_streak_7: number | null;
+    badge_streak_30: number | null;
+    badge_explorer: number | null;
+    badge_map_scout: number | null;
+    badge_challenger: number | null;
+    badge_city_racer: number | null;
+    badge_globe_trotter: number | null;
+}
+
+interface UserActivityRide {
+    id: string;
+    distance_meters: number | null;
+    duration_seconds: number | null;
+    average_speed_kmh: number | string | null;
+    max_speed_kmh: number | string | null;
+    elevation_gain_meters: number | null;
+    started_at: string | null;
+    challenge_completed: boolean | null;
+    favorite_name: string | null;
+    is_favorite: boolean | null;
+    kind: string | null;
+}
+
+interface UserActivityStats {
+    totalRides: number;
+    totalDistanceKm: number;
+    totalDurationSec: number;
+    avgSpeedKmh: number;
+    maxSpeedKmh: number;
+    totalElevationM: number;
+    longestRideKm: number;
+    fastestAttemptSec: number | null;
+    challengeRides: number;
+}
+
+const ACTIVITY_BADGE_KEYS: (keyof UserActivityProgress)[] = [
+    'badge_first_ride',
+    'badge_commuter',
+    'badge_night_rider',
+    'badge_supporter',
+    'badge_community_hero',
+    'badge_marathon_rider',
+    'badge_speedster',
+    'badge_long_ride',
+    'badge_early_bird',
+    'badge_weekend_warrior',
+    'badge_streak_7',
+    'badge_streak_30',
+    'badge_explorer',
+    'badge_map_scout',
+    'badge_challenger',
+    'badge_city_racer',
+    'badge_globe_trotter',
+];
+
+const BADGE_LABELS: Record<string, string> = {
+    badge_first_ride: 'Első túra',
+    badge_commuter: 'Ingázó',
+    badge_night_rider: 'Éjszakai lovas',
+    badge_supporter: 'Támogató',
+    badge_community_hero: 'Közösségi hős',
+    badge_marathon_rider: 'Maratoni',
+    badge_speedster: 'Gyorsulás',
+    badge_long_ride: 'Hosszú túra',
+    badge_early_bird: 'Korán kelő',
+    badge_weekend_warrior: 'Hétvégi harcos',
+    badge_streak_7: '7-napos sorozat',
+    badge_streak_30: '30-napos sorozat',
+    badge_explorer: 'Felfedező',
+    badge_map_scout: 'Térkép-felderítő',
+    badge_challenger: 'Kihívó',
+    badge_city_racer: 'Városi versenyző',
+    badge_globe_trotter: 'Világjáró',
+};
+
+function formatActivityDuration(totalSec: number): string {
+    if (!totalSec || totalSec <= 0) return '0p';
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    if (h > 0) return `${h}ó ${m}p`;
+    return `${m}p`;
+}
+
+function formatActivityShort(sec: number | null | undefined): string {
+    if (!sec || sec <= 0) return '—';
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${String(s).padStart(2, '0')}`;
+}
+
 
 export default function DetailModal({
     isOpen,
@@ -100,6 +217,14 @@ export default function DetailModal({
     const [currentStatus, setCurrentStatus] = useState<string | null>(null);
     const [poiCoords, setPoiCoords] = useState<{ lat: number; lon: number; name: string } | null>(null);
     const [poiCoordsLoading, setPoiCoordsLoading] = useState(false);
+
+    // User activity data (loaded only when type === 'user')
+    const [activityLoading, setActivityLoading] = useState(false);
+    const [activityProgress, setActivityProgress] = useState<UserActivityProgress | null>(null);
+    const [activityStats, setActivityStats] = useState<UserActivityStats | null>(null);
+    const [activityRecent, setActivityRecent] = useState<UserActivityRide[]>([]);
+    const [activityHomeCity, setActivityHomeCity] = useState<string | null>(null);
+    const [activitySupporter, setActivitySupporter] = useState<{ is_supporter: boolean; supporter_since: string | null } | null>(null);
 
     useEffect(() => {
         if (item?.status) {
@@ -169,6 +294,136 @@ export default function DetailModal({
     useEffect(() => {
         fetchPoiCoords();
     }, [fetchPoiCoords]);
+
+    useEffect(() => {
+        let cancelled = false;
+        const loadActivity = async () => {
+            if (!isOpen || type !== 'user' || !item?.id) {
+                setActivityProgress(null);
+                setActivityStats(null);
+                setActivityRecent([]);
+                setActivityHomeCity(null);
+                setActivitySupporter(null);
+                return;
+            }
+            setActivityLoading(true);
+            try {
+                const userId = item.id as string;
+                const [
+                    { data: profileExtra },
+                    { data: progressData },
+                    { data: rideRows },
+                    { data: bestAttempt },
+                ] = await Promise.all([
+                    supabase
+                        .from('profiles')
+                        .select('home_city_id, is_supporter, supporter_since')
+                        .eq('id', userId)
+                        .maybeSingle(),
+                    supabase
+                        .from('user_progress')
+                        .select('xp, current_streak, longest_streak, challenge_completions, challenge_cities, badge_first_ride, badge_commuter, badge_night_rider, badge_supporter, badge_community_hero, badge_marathon_rider, badge_speedster, badge_long_ride, badge_early_bird, badge_weekend_warrior, badge_streak_7, badge_streak_30, badge_explorer, badge_map_scout, badge_challenger, badge_city_racer, badge_globe_trotter')
+                        .eq('user_id', userId)
+                        .maybeSingle(),
+                    supabase
+                        .from('ride_summaries')
+                        .select('id, distance_meters, duration_seconds, average_speed_kmh, max_speed_kmh, elevation_gain_meters, started_at, challenge_completed, favorite_name, is_favorite, kind')
+                        .eq('user_id', userId)
+                        .order('started_at', { ascending: false, nullsFirst: false }),
+                    supabase
+                        .from('challenge_attempts')
+                        .select('duration_seconds')
+                        .eq('user_id', userId)
+                        .eq('status', 'completed')
+                        .order('duration_seconds', { ascending: true, nullsFirst: false })
+                        .limit(1)
+                        .maybeSingle(),
+                ]);
+
+                if (cancelled) return;
+
+                if (profileExtra) {
+                    setActivitySupporter({
+                        is_supporter: !!profileExtra.is_supporter,
+                        supporter_since: profileExtra.supporter_since ?? null,
+                    });
+                    if (profileExtra.home_city_id) {
+                        const { data: cityData } = await supabase
+                            .from('cities')
+                            .select('name')
+                            .eq('id', profileExtra.home_city_id)
+                            .maybeSingle();
+                        if (!cancelled) setActivityHomeCity(cityData?.name ?? null);
+                    } else {
+                        setActivityHomeCity(null);
+                    }
+                }
+
+                setActivityProgress(progressData ? (progressData as UserActivityProgress) : null);
+
+                const rides = (rideRows || []) as UserActivityRide[];
+                if (rides.length > 0) {
+                    let totalDistance = 0;
+                    let totalDuration = 0;
+                    let speedSum = 0;
+                    let speedSamples = 0;
+                    let maxSpeed = 0;
+                    let totalElev = 0;
+                    let longestKm = 0;
+                    let challengeRides = 0;
+                    for (const r of rides) {
+                        const distM = Number(r.distance_meters ?? 0);
+                        const durS = Number(r.duration_seconds ?? 0);
+                        const avgKmh = Number(r.average_speed_kmh ?? 0);
+                        const maxKmh = Number(r.max_speed_kmh ?? 0);
+                        const elev = Number(r.elevation_gain_meters ?? 0);
+                        totalDistance += distM;
+                        totalDuration += durS;
+                        if (avgKmh > 0) {
+                            speedSum += avgKmh;
+                            speedSamples += 1;
+                        }
+                        if (maxKmh > maxSpeed) maxSpeed = maxKmh;
+                        totalElev += elev;
+                        const km = distM / 1000;
+                        if (km > longestKm) longestKm = km;
+                        if (r.challenge_completed) challengeRides += 1;
+                    }
+                    setActivityStats({
+                        totalRides: rides.length,
+                        totalDistanceKm: totalDistance / 1000,
+                        totalDurationSec: totalDuration,
+                        avgSpeedKmh: speedSamples > 0 ? speedSum / speedSamples : 0,
+                        maxSpeedKmh: maxSpeed,
+                        totalElevationM: totalElev,
+                        longestRideKm: longestKm,
+                        fastestAttemptSec: bestAttempt?.duration_seconds ?? null,
+                        challengeRides,
+                    });
+                    setActivityRecent(rides.slice(0, 5));
+                } else {
+                    setActivityStats({
+                        totalRides: 0,
+                        totalDistanceKm: 0,
+                        totalDurationSec: 0,
+                        avgSpeedKmh: 0,
+                        maxSpeedKmh: 0,
+                        totalElevationM: 0,
+                        longestRideKm: 0,
+                        fastestAttemptSec: bestAttempt?.duration_seconds ?? null,
+                        challengeRides: 0,
+                    });
+                    setActivityRecent([]);
+                }
+            } catch (err) {
+                console.error('Error loading user activity:', err);
+            } finally {
+                if (!cancelled) setActivityLoading(false);
+            }
+        };
+        loadActivity();
+        return () => { cancelled = true; };
+    }, [isOpen, type, item?.id]);
 
     const handleStatusChange = (newStatus: string) => {
         setCurrentStatus(newStatus);
@@ -1205,17 +1460,254 @@ export default function DetailModal({
                                         </div>
                                     </div>
 
-                                    {/* Additional User Stats */}
-                                    <div>
-                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2 mb-4">
-                                            <Users className="h-4 w-4 flex-shrink-0" />
-                                            <span>Aktivitás</span>
-                                        </h3>
-                                        <div className="text-center py-8">
-                                            <Users className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-                                            <p className="text-muted-foreground text-sm">Jelenleg nincs aktivitási információ elérhető erről a felhasználóról.</p>
-                                        </div>
-                                    </div>
+                                    {/* User Activity */}
+                                    {(() => {
+                                        const xpVal = activityProgress?.xp ?? 0;
+                                        const currentStreak = activityProgress?.current_streak ?? 0;
+                                        const longestStreak = activityProgress?.longest_streak ?? 0;
+                                        const challengeCompletions = activityProgress?.challenge_completions ?? 0;
+                                        const challengeCities = activityProgress?.challenge_cities ?? 0;
+                                        const unlockedBadges = activityProgress
+                                            ? ACTIVITY_BADGE_KEYS.filter(k => Number(activityProgress[k] ?? 0) > 0)
+                                            : [];
+                                        const stats = activityStats;
+                                        const hasAny = (stats?.totalRides ?? 0) > 0 || challengeCompletions > 0 || xpVal > 0;
+
+                                        return (
+                                            <div>
+                                                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2 mb-4">
+                                                    <Activity className="h-4 w-4 flex-shrink-0" />
+                                                    <span>Aktivitás</span>
+                                                </h3>
+
+                                                {/* Header chips */}
+                                                {(activityHomeCity || activitySupporter?.is_supporter || xpVal > 0) && (
+                                                    <div className="flex flex-wrap items-center gap-2 mb-4">
+                                                        {activityHomeCity && (
+                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-zinc-900 border border-zinc-800 text-zinc-200">
+                                                                <MapPin size={12} className="text-green-400" />
+                                                                {activityHomeCity}
+                                                            </span>
+                                                        )}
+                                                        {activitySupporter?.is_supporter && (
+                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                                                                <Star size={12} className="fill-amber-400" />
+                                                                Támogató
+                                                                {activitySupporter.supporter_since && (
+                                                                    <span className="text-[10px] text-amber-300/70 ml-1">
+                                                                        ({new Date(activitySupporter.supporter_since).toLocaleDateString('hu-HU', { year: 'numeric', month: 'short' })})
+                                                                    </span>
+                                                                )}
+                                                            </span>
+                                                        )}
+                                                        {xpVal > 0 && (
+                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-500/10 border border-green-500/20 text-green-400">
+                                                                <Zap size={12} />
+                                                                {xpVal.toLocaleString('hu-HU')} XP
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {activityLoading ? (
+                                                    <div className="flex items-center justify-center py-12 border border-dashed border-border rounded-xl bg-background/30">
+                                                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                                                    </div>
+                                                ) : !hasAny ? (
+                                                    <div className="text-center py-8 border border-dashed border-border rounded-xl bg-background/30">
+                                                        <Bike className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                                                        <p className="text-muted-foreground text-sm">Még nincs rögzített aktivitás ennél a felhasználónál.</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="space-y-4">
+                                                        {/* Key Stats Grid */}
+                                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                                            <div className="rounded-xl border border-white/5 bg-background/50 p-4">
+                                                                <div className="flex items-center justify-between mb-2">
+                                                                    <Bike className="w-4 h-4 text-green-400" />
+                                                                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Túrák</span>
+                                                                </div>
+                                                                <div className="text-2xl font-extrabold text-foreground">
+                                                                    {(stats?.totalRides ?? 0).toLocaleString('hu-HU')}
+                                                                </div>
+                                                            </div>
+                                                            <div className="rounded-xl border border-white/5 bg-background/50 p-4">
+                                                                <div className="flex items-center justify-between mb-2">
+                                                                    <RouteIcon className="w-4 h-4 text-blue-400" />
+                                                                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Össztáv</span>
+                                                                </div>
+                                                                <div className="text-2xl font-extrabold text-foreground">
+                                                                    {(stats?.totalDistanceKm ?? 0).toFixed(1)}
+                                                                    <span className="text-sm font-bold text-muted-foreground ml-1">km</span>
+                                                                </div>
+                                                            </div>
+                                                            <div className="rounded-xl border border-white/5 bg-background/50 p-4">
+                                                                <div className="flex items-center justify-between mb-2">
+                                                                    <Gauge className="w-4 h-4 text-purple-400" />
+                                                                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Átlag seb.</span>
+                                                                </div>
+                                                                <div className="text-2xl font-extrabold text-foreground">
+                                                                    {(stats?.avgSpeedKmh ?? 0).toFixed(1)}
+                                                                    <span className="text-sm font-bold text-muted-foreground ml-1">km/h</span>
+                                                                </div>
+                                                            </div>
+                                                            <div className="rounded-xl border border-white/5 bg-background/50 p-4">
+                                                                <div className="flex items-center justify-between mb-2">
+                                                                    <Trophy className="w-4 h-4 text-amber-400" />
+                                                                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">XP</span>
+                                                                </div>
+                                                                <div className="text-2xl font-extrabold text-foreground">
+                                                                    {xpVal.toLocaleString('hu-HU')}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Riding + Challenges side by side */}
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                            <div className="rounded-xl border border-white/5 bg-background/50 p-4">
+                                                                <div className="flex items-center gap-2 mb-3">
+                                                                    <Bike className="w-4 h-4 text-zinc-400" />
+                                                                    <h4 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Kerékpározás</h4>
+                                                                </div>
+                                                                <div className="grid grid-cols-2 gap-2">
+                                                                    <div className="rounded-lg bg-zinc-900/60 border border-white/5 p-2.5">
+                                                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase mb-1">
+                                                                            <Gauge size={11} /> Max seb.
+                                                                        </div>
+                                                                        <div className="text-sm font-mono font-bold text-foreground">{(stats?.maxSpeedKmh ?? 0).toFixed(1)} km/h</div>
+                                                                    </div>
+                                                                    <div className="rounded-lg bg-zinc-900/60 border border-white/5 p-2.5">
+                                                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase mb-1">
+                                                                            <Timer size={11} /> Össz idő
+                                                                        </div>
+                                                                        <div className="text-sm font-mono font-bold text-foreground">{formatActivityDuration(stats?.totalDurationSec ?? 0)}</div>
+                                                                    </div>
+                                                                    <div className="rounded-lg bg-zinc-900/60 border border-white/5 p-2.5">
+                                                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase mb-1">
+                                                                            <RouteIcon size={11} /> Leghosszabb
+                                                                        </div>
+                                                                        <div className="text-sm font-mono font-bold text-foreground">{(stats?.longestRideKm ?? 0).toFixed(2)} km</div>
+                                                                    </div>
+                                                                    <div className="rounded-lg bg-zinc-900/60 border border-white/5 p-2.5">
+                                                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase mb-1">
+                                                                            <Mountain size={11} /> Szintemelk.
+                                                                        </div>
+                                                                        <div className="text-sm font-mono font-bold text-foreground">{Math.round(stats?.totalElevationM ?? 0).toLocaleString('hu-HU')} m</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="rounded-xl border border-white/5 bg-background/50 p-4">
+                                                                <div className="flex items-center gap-2 mb-3">
+                                                                    <Trophy className="w-4 h-4 text-amber-400" />
+                                                                    <h4 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Kihívások &amp; sorozatok</h4>
+                                                                </div>
+                                                                <div className="grid grid-cols-2 gap-2">
+                                                                    <div className="rounded-lg bg-zinc-900/60 border border-white/5 p-2.5">
+                                                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase mb-1">
+                                                                            <Trophy size={11} /> Teljesítések
+                                                                        </div>
+                                                                        <div className="text-sm font-mono font-bold text-foreground">{challengeCompletions.toLocaleString('hu-HU')}</div>
+                                                                    </div>
+                                                                    <div className="rounded-lg bg-zinc-900/60 border border-white/5 p-2.5">
+                                                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase mb-1">
+                                                                            <MapPin size={11} /> Városok
+                                                                        </div>
+                                                                        <div className="text-sm font-mono font-bold text-foreground">{challengeCities.toLocaleString('hu-HU')}</div>
+                                                                    </div>
+                                                                    <div className="rounded-lg bg-zinc-900/60 border border-white/5 p-2.5">
+                                                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase mb-1">
+                                                                            <Timer size={11} /> Legjobb idő
+                                                                        </div>
+                                                                        <div className="text-sm font-mono font-bold text-foreground">{formatActivityShort(stats?.fastestAttemptSec)}</div>
+                                                                    </div>
+                                                                    <div className="rounded-lg bg-zinc-900/60 border border-white/5 p-2.5">
+                                                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase mb-1">
+                                                                            <Flame size={11} /> Sorozat (most/leghosszabb)
+                                                                        </div>
+                                                                        <div className="text-sm font-mono font-bold text-foreground">
+                                                                            {currentStreak} <span className="text-zinc-500">/</span> {longestStreak} <span className="text-[10px] text-zinc-500">nap</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Badges */}
+                                                        <div className="rounded-xl border border-white/5 bg-background/50 p-4">
+                                                            <div className="flex items-center justify-between mb-3">
+                                                                <div className="flex items-center gap-2">
+                                                                    <Award className="w-4 h-4 text-purple-400" />
+                                                                    <h4 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Jelvények</h4>
+                                                                </div>
+                                                                <span className="text-xs font-mono text-zinc-400">{unlockedBadges.length} / {ACTIVITY_BADGE_KEYS.length}</span>
+                                                            </div>
+                                                            {unlockedBadges.length === 0 ? (
+                                                                <p className="text-xs text-muted-foreground italic">Nincs megszerzett jelvény.</p>
+                                                            ) : (
+                                                                <div className="flex flex-wrap gap-1.5">
+                                                                    {unlockedBadges.map(k => (
+                                                                        <span
+                                                                            key={k}
+                                                                            title={`${BADGE_LABELS[k] || k} — szint ${activityProgress?.[k] ?? 0}`}
+                                                                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-purple-500/10 border border-purple-500/20 text-purple-200"
+                                                                        >
+                                                                            <Award className="w-3 h-3 text-purple-400" />
+                                                                            {BADGE_LABELS[k] || k}
+                                                                            {Number(activityProgress?.[k] ?? 0) > 1 && (
+                                                                                <span className="text-purple-400 font-mono">×{activityProgress?.[k]}</span>
+                                                                            )}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Recent rides */}
+                                                        {activityRecent.length > 0 && (
+                                                            <div className="rounded-xl border border-white/5 bg-background/50 p-4">
+                                                                <div className="flex items-center gap-2 mb-3">
+                                                                    <Clock className="w-4 h-4 text-zinc-400" />
+                                                                    <h4 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Legutóbbi túrák</h4>
+                                                                </div>
+                                                                <div className="space-y-1.5">
+                                                                    {activityRecent.map(r => {
+                                                                        const km = ((r.distance_meters ?? 0) / 1000).toFixed(1);
+                                                                        const date = r.started_at
+                                                                            ? new Date(r.started_at).toLocaleDateString('hu-HU', { year: '2-digit', month: 'short', day: 'numeric' })
+                                                                            : '—';
+                                                                        const avg = Number(r.average_speed_kmh ?? 0).toFixed(1);
+                                                                        return (
+                                                                            <div key={r.id} className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-zinc-900/60 border border-white/5 text-xs">
+                                                                                <div className="flex items-center gap-2 min-w-0">
+                                                                                    {r.challenge_completed ? (
+                                                                                        <Trophy className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                                                                                    ) : (
+                                                                                        <Bike className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
+                                                                                    )}
+                                                                                    <span className="font-semibold text-zinc-200 truncate">
+                                                                                        {r.favorite_name || date}
+                                                                                    </span>
+                                                                                    {r.favorite_name && (
+                                                                                        <span className="text-[10px] text-zinc-500">{date}</span>
+                                                                                    )}
+                                                                                </div>
+                                                                                <div className="flex items-center gap-3 font-mono text-zinc-400 flex-shrink-0">
+                                                                                    <span>{km} km</span>
+                                                                                    <span>{formatActivityShort(r.duration_seconds)}</span>
+                                                                                    <span className="text-zinc-500">{avg} km/h</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
                             </div>
 
