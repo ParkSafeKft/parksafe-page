@@ -21,7 +21,8 @@ import {
     Star,
     DollarSign,
     Copy,
-    Droplet
+    Droplet,
+    Trash2
 } from 'lucide-react';
 import { Location, ParkingLocation, RepairStation, BicycleService, DrinkingFountain } from '@/types';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -35,6 +36,8 @@ interface EditLocationModalProps {
     locationType: string;
     item: Location | ParkingLocation | RepairStation | BicycleService | null;
     onSuccess: () => void;
+    /** Optional. When provided, a destructive "Törlés" button is shown in the footer. */
+    onDelete?: (id: string) => void;
 }
 
 function copyId(id: string) {
@@ -45,7 +48,7 @@ function copyId(id: string) {
         );
     }
 }
-export default function EditLocationModal({ isOpen, onClose, locationType, item, onSuccess }: EditLocationModalProps) {
+export default function EditLocationModal({ isOpen, onClose, locationType, item, onSuccess, onDelete }: EditLocationModalProps) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const formDataPayload: any = {
         name: '',
@@ -581,33 +584,49 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                     </ScrollArea>
 
                     {/* Footer - same as other modals */}
-                    <div className="p-6 border-t border-border flex justify-end gap-2 flex-shrink-0">
-                        <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
-                            Mégse
-                        </Button>
-                        <Button
-                            type="button"
-                            onClick={handleSubmit}
-                            disabled={isLoading || success}
-                            className="gap-2"
-                        >
-                            {isLoading ? (
-                                <>
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                    Mentés...
-                                </>
-                            ) : success ? (
-                                <>
-                                    <CheckCircle className="h-5 w-5" />
-                                    Mentve!
-                                </>
-                            ) : (
-                                <>
-                                    <Save className="h-5 w-5" />
-                                    Mentés
-                                </>
+                    <div className="p-6 border-t border-border flex items-center justify-between gap-2 flex-shrink-0">
+                        <div>
+                            {onDelete && (
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    onClick={() => onDelete(item.id)}
+                                    disabled={isLoading}
+                                    className="gap-2 bg-red-600 hover:bg-red-700 text-white border border-red-500/40 shadow-lg shadow-red-900/30"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                    Törlés
+                                </Button>
                             )}
-                        </Button>
+                        </div>
+                        <div className="flex gap-2">
+                            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
+                                Mégse
+                            </Button>
+                            <Button
+                                type="button"
+                                onClick={handleSubmit}
+                                disabled={isLoading || success}
+                                className="gap-2"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        Mentés...
+                                    </>
+                                ) : success ? (
+                                    <>
+                                        <CheckCircle className="h-5 w-5" />
+                                        Mentve!
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save className="h-5 w-5" />
+                                        Mentés
+                                    </>
+                                )}
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </DialogContent>

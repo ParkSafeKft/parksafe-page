@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
@@ -79,6 +79,43 @@ function sanitizeSearchTerm(term: string): string {
 const isDev = process.env.NODE_ENV === 'development';
 
 /**
+ * URL routing for the admin panel.
+ * Each tab maps to a path segment under /admin so the browser back button
+ * navigates between tabs (and opened records) instead of leaving the panel.
+ */
+const TAB_SLUGS: Record<string, string> = {
+    dashboard: '',
+    users: 'users',
+    parking: 'parking',
+    parking_images: 'parking-images',
+    services: 'services',
+    repair: 'repair',
+    drinking_fountain: 'drinking-fountains',
+    feedback: 'feedback',
+    poi_flags: 'poi-flags',
+    cities: 'cities',
+    daily_challenges: 'daily-challenges',
+    community_routes: 'community-routes',
+    leaderboard: 'leaderboard',
+    audit_log: 'audit-log',
+};
+
+const SLUG_TO_TAB: Record<string, string> = Object.fromEntries(
+    Object.entries(TAB_SLUGS).filter(([, v]) => v).map(([k, v]) => [v, k])
+);
+
+const tabFromSlug = (slug: string | undefined): string => {
+    if (!slug) return 'dashboard';
+    return SLUG_TO_TAB[slug] || 'dashboard';
+};
+
+const buildAdminUrl = (tab: string, recordId?: string): string => {
+    const slug = TAB_SLUGS[tab] ?? '';
+    const base = slug ? `/admin/${slug}` : '/admin';
+    return recordId ? `${base}/${recordId}` : base;
+};
+
+/**
  * Delete a file from Supabase Storage given its public URL.
  * Works for any public bucket by extracting bucket + path from the URL.
  */
@@ -107,8 +144,20 @@ export default function AdminPage() {
     const router = useRouter();
     const { user: profile, loading: authLoading, signOut } = useAuth();
 
+    // URL is the source of truth for which tab is active.
+    // /admin            → dashboard
+    // /admin/<tab-slug> → that tab
+    // Records open as in-page modals only — opening a record does not change
+    // the URL, but switching tabs (or pressing browser back to a previous tab)
+    // closes any open modal so the visible state matches the URL.
+    const params = useParams<{ slug?: string[] }>();
+    const slugSegments = (params?.slug as string[] | undefined) || [];
+    const activeTab = tabFromSlug(slugSegments[0]);
 
-    const [activeTab, setActiveTab] = useState('dashboard');
+    const setActiveTab = useCallback((tab: string) => {
+        router.push(buildAdminUrl(tab));
+    }, [router]);
+
     const [searchTerm, setSearchTerm] = useState('');
     const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
@@ -532,6 +581,14 @@ export default function AdminPage() {
         setSelectedRows(new Set());
         setSelectAll(false);
         setMobileSearchOpen(false);
+        // Close any open modal when the user switches tabs (or pops back
+        // through the URL history). Without this, an opened detail/edit
+        // modal would linger on the wrong tab.
+        setDetailModal(prev => (prev.show ? { ...prev, show: false } : prev));
+        setEditLocationModal(prev => (prev.show ? { show: false, item: null } : prev));
+        setCityFormModal(prev => (prev.show ? { show: false, item: null } : prev));
+        setChallengeDetailModal(prev => (prev.show ? { show: false, item: null } : prev));
+        setRouteReviewModal(prev => (prev.show ? { show: false, item: null } : prev));
         // Reset sort key to a column that exists on this tab's table
         const defaultSortKey = activeTab === 'daily_challenges' ? 'challenge_date' : 'created_at';
         setSortConfig(prev => (prev.key === defaultSortKey ? prev : { key: defaultSortKey, direction: 'desc' }));
@@ -663,7 +720,7 @@ export default function AdminPage() {
             if (process.env.NODE_ENV === 'development') console.error(err);
             toast.error('POI betöltése sikertelen');
         }
-    }, []);
+    }, [setActiveTab]);
 
     const handlePoiFlagStatusChange = async (id: string, newStatus: string) => {
         setToggleLoading(id);
@@ -1403,6 +1460,13 @@ export default function AdminPage() {
                     onSuccess={() => {
                         setEditLocationModal({ show: false, item: null });
                         fetchData();
+                    }}
+                    onDelete={(id) => {
+                        // Close the edit modal first, then surface the existing
+                        // delete-confirm modal. Confirming runs confirmDelete()
+                        // which deletes from the table for the current activeTab.
+                        setEditLocationModal({ show: false, item: null });
+                        handleDeleteClick(id);
                     }}
                 />
 

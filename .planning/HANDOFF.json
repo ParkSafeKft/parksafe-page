@@ -1,0 +1,34 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-04-29T10:36:53.836Z",
+  "source": "auto-postool",
+  "partial": false,
+  "phase": null,
+  "phase_name": null,
+  "phase_dir": null,
+  "plan": null,
+  "task": null,
+  "total_tasks": null,
+  "status": "auto-checkpoint",
+  "completed_tasks": [],
+  "remaining_tasks": [],
+  "blockers": [],
+  "human_actions_pending": [],
+  "decisions": [],
+  "uncommitted_files": [
+    {
+      "status": "M",
+      "path": "src/app/admin/[[...slug]]/page.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/admin/EditLocationModal.tsx"
+    },
+    {
+      "status": "??",
+      "path": ".planning/"
+    }
+  ],
+  "next_action": null,
+  "context_notes": "Recent commits:\n7e169f9 feat: add admin page for comprehensive management of users, services, and locations\n7532c97 feat: implement admin dashboard with content statistics and leaderboard management tabs\nc5cddb2 feat: integrate maplibre-gl for enhanced mapping capabilities\n83aedfe fix: update translations for FAQs to reflect broader availability of ParkSafe in Central Europe\n726bacb feat: add privacy policy and terms of service pages with bilingual support"
+}
