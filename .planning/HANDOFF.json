@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "timestamp": "2026-04-29T11:43:23.097Z",
+  "timestamp": "2026-04-29T12:34:51.656Z",
   "source": "auto-postool",
   "partial": false,
   "phase": null,
@@ -22,21 +22,21 @@
     },
     {
       "status": "M",
-      "path": "src/app/(main)/page.tsx"
+      "path": "src/app/admin/[[...slug]]/page.tsx"
     },
     {
       "status": "M",
-      "path": "src/lib/translations.ts"
+      "path": "src/components/admin/AdminSidebar.tsx"
     },
     {
       "status": "??",
-      "path": "src/app/api/co2-stats/"
+      "path": "src/app/api/app-config/"
     },
     {
       "status": "??",
-      "path": "src/components/Co2Impact.tsx"
+      "path": "src/components/admin/AppConfigTab.tsx"
     }
   ],
   "next_action": null,
-  "context_notes": "Recent commits:\n87d33ea refactor: enhance CommunityRouteReviewModal and InteractiveRouteMap for user-dropped pins\n809955a feat: enhance admin page with image submission management and cross-navigation\n36bd192 feat: enhance admin page with dynamic tab routing and modal management\n7e169f9 feat: add admin page for comprehensive management of users, services, and locations\n7532c97 feat: implement admin dashboard with content statistics and leaderboard management tabs"
+  "context_notes": "Recent commits:\n312c43b chore: update HANDOFF.json and enhance translations for CO₂ impact\n87d33ea refactor: enhance CommunityRouteReviewModal and InteractiveRouteMap for user-dropped pins\n809955a feat: enhance admin page with image submission management and cross-navigation\n36bd192 feat: enhance admin page with dynamic tab routing and modal management\n7e169f9 feat: add admin page for comprehensive management of users, services, and locations"
 }

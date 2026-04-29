@@ -31,6 +31,7 @@ import {
     Trophy,
     Route,
     ScrollText,
+    Settings,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -57,6 +58,7 @@ import CommunityRouteReviewModal from '@/components/admin/CommunityRouteReviewMo
 import DailyChallengeDetailModal from '@/components/admin/DailyChallengeDetailModal';
 import LeaderboardTab from '@/components/admin/LeaderboardTab';
 import AuditLogTable from '@/components/admin/AuditLogTable';
+import AppConfigTab from '@/components/admin/AppConfigTab';
 import { writeAuditLog } from '@/lib/adminAuditLog';
 import ContentStatsOverview from '@/components/admin/ContentStatsOverview';
 
@@ -99,6 +101,7 @@ const TAB_SLUGS: Record<string, string> = {
     community_routes: 'community-routes',
     leaderboard: 'leaderboard',
     audit_log: 'audit-log',
+    app_config: 'app-config',
 };
 
 const SLUG_TO_TAB: Record<string, string> = Object.fromEntries(
@@ -417,6 +420,7 @@ export default function AdminPage() {
                     }
                     break;
                 case 'dashboard':
+                case 'app_config':
                     setDataLoading(false);
                     return;
                 default:
@@ -1129,6 +1133,7 @@ export default function AdminPage() {
                                                 {activeTab === 'community_routes' && <Route className="h-5 w-5 text-white" />}
                                                 {activeTab === 'leaderboard' && <Trophy className="h-5 w-5 text-white" />}
                                                 {activeTab === 'audit_log' && <ScrollText className="h-5 w-5 text-white" />}
+                                                {activeTab === 'app_config' && <Settings className="h-5 w-5 text-white" />}
                                             </div>
                                             <div>
                                                 <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
@@ -1146,10 +1151,11 @@ export default function AdminPage() {
                                                     {activeTab === 'community_routes' && 'Közösségi útvonalak'}
                                                     {activeTab === 'leaderboard' && 'Ranglista'}
                                                     {activeTab === 'audit_log' && 'Audit napló'}
+                                                    {activeTab === 'app_config' && 'App-konfiguráció'}
                                                     <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                                                        {activeTab === 'dashboard' ? 'Áttekintés' : `${totalCount} elem`}
+                                                        {activeTab === 'dashboard' || activeTab === 'app_config' ? 'Beállítások' : `${totalCount} elem`}
                                                     </Badge>
-                                                    {activeTab !== 'dashboard' && (
+                                                    {activeTab !== 'dashboard' && activeTab !== 'app_config' && (
                                                         <Badge
                                                             variant="outline"
                                                             className={`gap-1.5 text-xs ${isRealtimeConnected
@@ -1183,6 +1189,7 @@ export default function AdminPage() {
                                                     {activeTab === 'community_routes' && 'Közösségi beküldésű kerékpárutak moderálása'}
                                                     {activeTab === 'leaderboard' && 'Teljesített kihívások rangsora és láthatóság-kezelés'}
                                                     {activeTab === 'audit_log' && 'Admin műveletek időrendi naplója'}
+                                                    {activeTab === 'app_config' && 'Karbantartás, minimum app verzió és feature flags kezelése'}
                                                 </p>
                                             </div>
                                         </div>
@@ -1190,27 +1197,29 @@ export default function AdminPage() {
 
                                     {/* Right Section */}
                                     <div className="flex items-center gap-4">
-                                        <div className="relative">
-                                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                            <Input
-                                                placeholder="Keresés..."
-                                                value={searchTerm}
-                                                onChange={(e) => setSearchTerm(e.target.value)}
-                                                className="pl-10 w-80"
-                                            />
-                                            {searchTerm && (
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-                                                    onClick={() => setSearchTerm('')}
-                                                >
-                                                    <XCircle className="h-4 w-4" />
-                                                </Button>
-                                            )}
-                                        </div>
+                                        {activeTab !== 'app_config' && (
+                                            <div className="relative">
+                                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                <Input
+                                                    placeholder="Keresés..."
+                                                    value={searchTerm}
+                                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                                    className="pl-10 w-80"
+                                                />
+                                                {searchTerm && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                                                        onClick={() => setSearchTerm('')}
+                                                    >
+                                                        <XCircle className="h-4 w-4" />
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        )}
 
-                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'daily_challenges' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'audit_log' && (
+                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'daily_challenges' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'audit_log' && activeTab !== 'app_config' && (
                                             <>
                                                 <Separator orientation="vertical" className="h-8 bg-sidebar-border" />
                                                 <Button
@@ -1257,15 +1266,16 @@ export default function AdminPage() {
                                             {activeTab === 'community_routes' && 'Közösségi útvonalak'}
                                             {activeTab === 'leaderboard' && 'Ranglista'}
                                             {activeTab === 'audit_log' && 'Audit napló'}
+                                            {activeTab === 'app_config' && 'App-konfiguráció'}
                                         </h1>
-                                        {activeTab !== 'dashboard' && (
+                                        {activeTab !== 'dashboard' && activeTab !== 'app_config' && (
                                             <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 shrink-0 text-xs">
                                                 {totalCount}
                                             </Badge>
                                         )}
                                     </div>
                                     <div className="flex items-center gap-1 shrink-0">
-                                        {activeTab !== 'dashboard' && (
+                                        {activeTab !== 'dashboard' && activeTab !== 'app_config' && (
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
@@ -1275,7 +1285,7 @@ export default function AdminPage() {
                                                 {mobileSearchOpen ? <XCircle className="h-4 w-4" /> : <Search className="h-4 w-4" />}
                                             </Button>
                                         )}
-                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'daily_challenges' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'audit_log' && (
+                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'daily_challenges' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'audit_log' && activeTab !== 'app_config' && (
                                             <Button
                                                 size="sm"
                                                 className="h-8 w-8 p-0"
@@ -1296,7 +1306,7 @@ export default function AdminPage() {
                                     </div>
                                 </div>
                                 {/* Mobile Search Bar */}
-                                {mobileSearchOpen && activeTab !== 'dashboard' && (
+                                {mobileSearchOpen && activeTab !== 'dashboard' && activeTab !== 'app_config' && (
                                     <div className="xl:hidden mt-3 relative">
                                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                         <Input
@@ -1541,6 +1551,9 @@ export default function AdminPage() {
                                     )}
                                     {activeTab === 'leaderboard' && (
                                         <LeaderboardTab cities={citiesForFilter} adminId={adminId} />
+                                    )}
+                                    {activeTab === 'app_config' && (
+                                        <AppConfigTab />
                                     )}
                                     {activeTab === 'audit_log' && (
                                         <AuditLogTable

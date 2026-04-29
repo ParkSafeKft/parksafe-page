@@ -18,6 +18,7 @@ import {
     Trophy,
     Route,
     ScrollText,
+    Settings,
 } from 'lucide-react';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import { useSidebar } from '@/components/ui/sidebar';
@@ -60,10 +61,12 @@ export default function AdminSidebar({
 
         { id: 'audit_log', label: 'Audit napló', icon: ScrollText, section: 'NAPLÓ' },
 
+        { id: 'app_config', label: 'App-konfiguráció', icon: Settings, section: 'RENDSZER' },
+
         { id: 'home', label: 'Vissza a főoldalra', icon: Home, section: 'EGYÉB' },
     ];
 
-    const sections = ['ÁTTEKINTÉS', 'POI & HELYEK', 'KIHÍVÁSOK', 'KÖZÖSSÉG', 'NAPLÓ', 'EGYÉB'];
+    const sections = ['ÁTTEKINTÉS', 'POI & HELYEK', 'KIHÍVÁSOK', 'KÖZÖSSÉG', 'NAPLÓ', 'RENDSZER', 'EGYÉB'];
 
     const handleItemClick = (id: string) => {
         if (isMobile) setOpenMobile(false);
