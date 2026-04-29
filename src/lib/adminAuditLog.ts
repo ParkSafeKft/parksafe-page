@@ -12,7 +12,9 @@ export type AuditAction =
     | 'community_route_status'
     | 'delete_community_route'
     | 'create_city'
-    | 'update_city';
+    | 'update_city'
+    | 'regional_visibility_on'
+    | 'regional_visibility_off';
 
 export type AuditTargetType =
     | 'challenge_attempt'

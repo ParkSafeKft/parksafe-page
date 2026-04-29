@@ -644,7 +644,7 @@ export default function AdminPage() {
     useEffect(() => {
         if (activeTab !== 'daily_challenges' && activeTab !== 'leaderboard') return;
         if (citiesForFilter.length > 0) return;
-        supabase.from('cities').select('id, name').order('name').then(({ data }) => {
+        supabase.from('cities').select('id, name, country_code').order('name').then(({ data }) => {
             if (data) setCitiesForFilter(data);
         });
     }, [activeTab, citiesForFilter.length]);
