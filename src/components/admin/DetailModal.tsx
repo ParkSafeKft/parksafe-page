@@ -43,7 +43,13 @@ import {
     Copy,
     ExternalLink,
     Droplet,
-    ArrowLeft
+    ArrowLeft,
+    Globe,
+    DollarSign,
+    Database,
+    Languages,
+    RefreshCw,
+    Hash
 } from 'lucide-react';
 
 interface DetailModalProps {
@@ -53,7 +59,7 @@ interface DetailModalProps {
     item: any;
     type: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onEdit: (item: any) => void;
+    onEdit: (item: any, type: string) => void;
     onStatusChange?: (id: string, newStatus: string) => void;
     /** POI flags only: open the reported POI in this same detail modal, no tab switch */
     onOpenPoiDetail?: (poiId: string, poiType: string) => void;
@@ -1416,6 +1422,28 @@ export default function DetailModal({
                                                 </div>
                                             )}
 
+                                            {type === 'service' && item.website && (
+                                                <div className="flex-1 min-w-[200px]">
+                                                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
+                                                        <Globe className="h-3 w-3" />
+                                                        Weboldal
+                                                    </p>
+                                                    <a href={item.website} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-primary hover:underline break-all">
+                                                        {item.website}
+                                                    </a>
+                                                </div>
+                                            )}
+
+                                            {type === 'service' && item.opening_hours && (
+                                                <div className="flex-1 min-w-[200px]">
+                                                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
+                                                        <Clock className="h-3 w-3" />
+                                                        Nyitvatartás
+                                                    </p>
+                                                    <p className="text-sm font-medium">{item.opening_hours}</p>
+                                                </div>
+                                            )}
+
                                             {type === 'service' && item.rating && (
                                                 <div className="flex-1 min-w-[200px]">
                                                     <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
@@ -1425,19 +1453,132 @@ export default function DetailModal({
                                                     <p className="text-sm font-medium">{item.rating} / 5</p>
                                                 </div>
                                             )}
+
+                                            {type === 'service' && item.price_range && (
+                                                <div className="flex-1 min-w-[200px]">
+                                                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
+                                                        <DollarSign className="h-3 w-3" />
+                                                        Árkategória
+                                                    </p>
+                                                    <p className="text-sm font-medium">{item.price_range}</p>
+                                                </div>
+                                            )}
                                         </div>
 
-                                        {type === 'parking' && item.description && (
+                                        {type === 'service' && Array.isArray(item.services) && item.services.length > 0 && (
+                                            <div className="w-full">
+                                                <p className="text-xs text-muted-foreground flex items-center gap-1 mb-1.5">
+                                                    <Wrench className="h-3 w-3" />
+                                                    Szolgáltatások
+                                                </p>
+                                                <div className="flex flex-wrap gap-1.5">
+                                                    {item.services.map((s: string, idx: number) => (
+                                                        <Badge key={idx} variant="secondary" className="text-xs">{s}</Badge>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {item.description && (
                                             <div className="w-full">
                                                 <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
                                                     <Eye className="h-3 w-3" />
                                                     Leírás
                                                 </p>
-                                                <p className="text-sm">{item.description}</p>
+                                                <p className="text-sm whitespace-pre-wrap">{item.description}</p>
                                             </div>
                                         )}
                                     </div>
                                 </div>
+
+                                {/* Name translations */}
+                                {item.name_translations && typeof item.name_translations === 'object' && Object.keys(item.name_translations).length > 0 && (
+                                    <div>
+                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                                            <Languages className="h-4 w-4" />
+                                            Fordítások
+                                        </h3>
+                                        <div className="flex flex-wrap gap-3">
+                                            {Object.entries(item.name_translations as Record<string, string>).map(([lang, name]) => (
+                                                <div key={lang} className="flex-1 min-w-[160px]">
+                                                    <p className="text-xs text-muted-foreground mb-0.5 uppercase tracking-wider">{lang}</p>
+                                                    <p className="text-sm font-medium">{name}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* OSM information — present on parking, service, repair, drinking_fountain */}
+                                {(item.osm_id !== undefined && item.osm_id !== null) || item.osm_type || item.osm_version || item.last_synced_at || item.osm_deleted ? (
+                                    <div>
+                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                                            <Database className="h-4 w-4" />
+                                            OSM információk
+                                        </h3>
+                                        <div className="flex flex-wrap gap-4">
+                                            {item.osm_id !== undefined && item.osm_id !== null && (
+                                                <div className="flex-1 min-w-[150px]">
+                                                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
+                                                        <Hash className="h-3 w-3" />
+                                                        OSM ID
+                                                    </p>
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-xs font-mono text-foreground break-all">{String(item.osm_id)}</p>
+                                                        {item.osm_type && (
+                                                            <a
+                                                                href={`https://www.openstreetmap.org/${item.osm_type}/${item.osm_id}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-white transition-colors shrink-0"
+                                                                title="Megnyitás OpenStreetMap-en"
+                                                            >
+                                                                <ExternalLink className="w-3.5 h-3.5" />
+                                                            </a>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {item.osm_type && (
+                                                <div className="flex-1 min-w-[150px]">
+                                                    <p className="text-xs text-muted-foreground mb-0.5">OSM típus</p>
+                                                    <p className="text-sm font-medium capitalize">{item.osm_type}</p>
+                                                </div>
+                                            )}
+                                            {item.osm_version !== undefined && item.osm_version !== null && (
+                                                <div className="flex-1 min-w-[150px]">
+                                                    <p className="text-xs text-muted-foreground mb-0.5">OSM verzió</p>
+                                                    <p className="text-sm font-medium">v{item.osm_version}</p>
+                                                </div>
+                                            )}
+                                            {item.last_synced_at && (
+                                                <div className="flex-1 min-w-[200px]">
+                                                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-0.5">
+                                                        <RefreshCw className="h-3 w-3" />
+                                                        Utolsó szinkronizálás
+                                                    </p>
+                                                    <p className="text-xs font-medium">
+                                                        {new Date(item.last_synced_at).toLocaleDateString('hu-HU', {
+                                                            year: 'numeric',
+                                                            month: 'long',
+                                                            day: 'numeric',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })}
+                                                    </p>
+                                                </div>
+                                            )}
+                                            {item.osm_deleted !== undefined && item.osm_deleted !== null && (
+                                                <div className="flex-1 min-w-[150px]">
+                                                    <p className="text-xs text-muted-foreground mb-0.5">OSM-ben törölve</p>
+                                                    <Badge variant={item.osm_deleted ? 'destructive' : 'secondary'} className="text-xs">
+                                                        {item.osm_deleted ? 'Igen' : 'Nem'}
+                                                    </Badge>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : null}
 
                                 {/* Coordinates & Map */}
                                 {coords ? (
@@ -1543,7 +1684,7 @@ export default function DetailModal({
                             </Button>
                             <Button
                                 onClick={() => {
-                                    onEdit(item);
+                                    onEdit(item, type);
                                     onClose();
                                 }}
                             >

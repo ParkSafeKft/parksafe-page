@@ -203,6 +203,12 @@ export default function AdminPage() {
     const [routeDateTo, setRouteDateTo] = useState('');
     const [auditActionFilter, setAuditActionFilter] = useState('');
     const [auditTargetTypeFilter, setAuditTargetTypeFilter] = useState('');
+    const [feedbackStatusFilter, setFeedbackStatusFilter] = useState('');
+    const [feedbackPriorityFilter, setFeedbackPriorityFilter] = useState('');
+    const [feedbackCategoryFilter, setFeedbackCategoryFilter] = useState('');
+    const [poiFlagStatusFilter, setPoiFlagStatusFilter] = useState('');
+    const [poiFlagReasonFilter, setPoiFlagReasonFilter] = useState('');
+    const [parkingImageStatusFilter, setParkingImageStatusFilter] = useState('');
 
     // New modals
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -230,7 +236,7 @@ export default function AdminPage() {
     // Modals
     const [addLocationModal, setAddLocationModal] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [editLocationModal, setEditLocationModal] = useState<{ show: boolean; item: any }>({
+    const [editLocationModal, setEditLocationModal] = useState<{ show: boolean; item: any; locationType?: string }>({
         show: false,
         item: null
     });
@@ -335,6 +341,10 @@ export default function AdminPage() {
                             parkingSpots!parking_image_submissions_parking_spot_id_fkey (name, city, coordinate)
                         `);
                     countQuery = supabase.from('parking_image_submissions').select('*', { count: 'exact', head: true });
+                    if (parkingImageStatusFilter) {
+                        query = query.eq('status', parkingImageStatusFilter);
+                        countQuery = countQuery.eq('status', parkingImageStatusFilter);
+                    }
                     break;
                 case 'services':
                     query = supabase.from('bicycleService').select('*');
@@ -351,10 +361,30 @@ export default function AdminPage() {
                 case 'feedback':
                     query = supabase.from('feedback').select('*');
                     countQuery = supabase.from('feedback').select('*', { count: 'exact', head: true });
+                    if (feedbackStatusFilter) {
+                        query = query.eq('status', feedbackStatusFilter);
+                        countQuery = countQuery.eq('status', feedbackStatusFilter);
+                    }
+                    if (feedbackPriorityFilter) {
+                        query = query.eq('priority', feedbackPriorityFilter);
+                        countQuery = countQuery.eq('priority', feedbackPriorityFilter);
+                    }
+                    if (feedbackCategoryFilter) {
+                        query = query.eq('category', feedbackCategoryFilter);
+                        countQuery = countQuery.eq('category', feedbackCategoryFilter);
+                    }
                     break;
                 case 'poi_flags':
                     query = supabase.from('poi_flags').select('*, profiles!poi_flags_user_id_fkey(username, full_name, avatar_url)');
                     countQuery = supabase.from('poi_flags').select('*', { count: 'exact', head: true });
+                    if (poiFlagStatusFilter) {
+                        query = query.eq('status', poiFlagStatusFilter);
+                        countQuery = countQuery.eq('status', poiFlagStatusFilter);
+                    }
+                    if (poiFlagReasonFilter) {
+                        query = query.eq('reason', poiFlagReasonFilter);
+                        countQuery = countQuery.eq('reason', poiFlagReasonFilter);
+                    }
                     break;
                 case 'cities':
                     query = supabase.from('cities').select('*');
@@ -638,7 +668,7 @@ export default function AdminPage() {
     useEffect(() => {
         fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeTab, currentPage, sortConfig, searchTerm, profile, pageSize, challengeCityFilter, challengeDateFrom, challengeDateTo, challengeActiveFilter, routeStatusFilter, routeDateFrom, routeDateTo, auditActionFilter, auditTargetTypeFilter]);
+    }, [activeTab, currentPage, sortConfig, searchTerm, profile, pageSize, challengeCityFilter, challengeDateFrom, challengeDateTo, challengeActiveFilter, routeStatusFilter, routeDateFrom, routeDateTo, auditActionFilter, auditTargetTypeFilter, feedbackStatusFilter, feedbackPriorityFilter, feedbackCategoryFilter, poiFlagStatusFilter, poiFlagReasonFilter, parkingImageStatusFilter]);
 
     // Load cities for filter dropdowns when those tabs open
     useEffect(() => {
@@ -1016,7 +1046,10 @@ export default function AdminPage() {
                 .update({ status: newStatus })
                 .eq('id', id);
             if (error) throw error;
-            await writeAuditLog({ adminId, action: 'community_route_status', targetType: 'community_bike_lane', targetId: id, notes: newStatus });
+            // The action+target already convey what changed. Keep the status in a structured
+            // action name (e.g. `community_route_${newStatus}`) so the Megjegyzés column stays
+            // free for actual admin remarks set via the review modal.
+            await writeAuditLog({ adminId, action: `community_route_${newStatus}` as 'community_route_pending' | 'community_route_in_review' | 'community_route_accepted' | 'community_route_rejected', targetType: 'community_bike_lane', targetId: id });
             toast.success('Útvonal státusza frissítve');
             fetchData();
         } catch (err) {
@@ -1397,6 +1430,8 @@ export default function AdminPage() {
                                             onRowClick={(item) => openFreshDetail(item, 'parking_image')}
                                             onPreviewImage={(url) => setImagePreviewUrl(url)}
                                             searchTerm={searchTerm}
+                                            statusFilter={parkingImageStatusFilter}
+                                            onStatusFilterChange={setParkingImageStatusFilter}
                                             currentPage={currentPage}
                                             totalPages={totalPages}
                                             onPageChange={setCurrentPage}
@@ -1481,6 +1516,12 @@ export default function AdminPage() {
                                             onRowClick={(item) => openFreshDetail(item, 'feedback')}
                                             onStatusChange={handleFeedbackStatusChange}
                                             searchTerm={searchTerm}
+                                            statusFilter={feedbackStatusFilter}
+                                            onStatusFilterChange={setFeedbackStatusFilter}
+                                            priorityFilter={feedbackPriorityFilter}
+                                            onPriorityFilterChange={setFeedbackPriorityFilter}
+                                            categoryFilter={feedbackCategoryFilter}
+                                            onCategoryFilterChange={setFeedbackCategoryFilter}
                                             currentPage={currentPage}
                                             totalPages={totalPages}
                                             onPageChange={setCurrentPage}
@@ -1583,6 +1624,10 @@ export default function AdminPage() {
                                             onStatusChange={handlePoiFlagStatusChange}
                                             onDelete={(id) => handleDeleteClick(id)}
                                             searchTerm={searchTerm}
+                                            statusFilter={poiFlagStatusFilter}
+                                            onStatusFilterChange={setPoiFlagStatusFilter}
+                                            reasonFilter={poiFlagReasonFilter}
+                                            onReasonFilterChange={setPoiFlagReasonFilter}
                                             currentPage={currentPage}
                                             totalPages={totalPages}
                                             onPageChange={setCurrentPage}
@@ -1610,7 +1655,7 @@ export default function AdminPage() {
                 <EditLocationModal
                     isOpen={editLocationModal.show}
                     onClose={() => setEditLocationModal({ show: false, item: null })}
-                    locationType={activeTab}
+                    locationType={editLocationModal.locationType ?? activeTab}
                     item={editLocationModal.item}
                     onSuccess={() => {
                         setEditLocationModal({ show: false, item: null });
@@ -1631,9 +1676,20 @@ export default function AdminPage() {
                     item={detailModal.item}
                     type={detailModal.type}
                     onBack={detailHistory.length > 0 ? goBackDetail : undefined}
-                    onEdit={(item) => {
+                    onEdit={(item, type) => {
+                        // Map DetailModal's `type` (parking/service/repair/drinking_fountain)
+                        // to EditLocationModal's `locationType` (parking/services/repair/drinking_fountain).
+                        // Without this the edit modal falls back to `activeTab`, which is wrong when the
+                        // user reached this detail via cross-nav from another tab (e.g. POI flag → spot).
+                        const detailToEditType: Record<string, string> = {
+                            parking: 'parking',
+                            service: 'services',
+                            repair: 'repair',
+                            drinking_fountain: 'drinking_fountain',
+                        };
+                        const locationType = detailToEditType[type];
                         closeDetail();
-                        setEditLocationModal({ show: true, item });
+                        setEditLocationModal({ show: true, item, locationType });
                     }}
                     onStatusChange={
                         detailModal.type === 'poi_flags' ? handlePoiFlagStatusChange :
@@ -1681,6 +1737,7 @@ export default function AdminPage() {
                     isOpen={routeReviewModal.show}
                     onClose={() => setRouteReviewModal({ show: false, item: null })}
                     route={routeReviewModal.item}
+                    adminId={adminId}
                     onSuccess={() => {
                         setRouteReviewModal({ show: false, item: null });
                         fetchData();

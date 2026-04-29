@@ -35,12 +35,35 @@ interface ParkingImageSubmissionsTableProps {
     onRowClick: (submission: ParkingImageSubmission) => void;
     onPreviewImage: (url: string) => void;
     searchTerm?: string;
+    statusFilter: string;
+    onStatusFilterChange: (value: string) => void;
     currentPage: number;
     totalPages: number;
     onPageChange: (page: number) => void;
     pageSize: number;
     onPageSizeChange: (size: number) => void;
 }
+
+const StatusFilter = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+    <div className="flex flex-wrap items-center gap-3 px-2">
+        <div className="flex items-center gap-2">
+            <span className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Státusz:</span>
+            <div className="relative">
+                <select
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    className="appearance-none bg-[#111111] border border-white/10 text-zinc-300 text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:border-green-500/50 cursor-pointer hover:border-white/20 transition-colors"
+                >
+                    <option value="">Mind</option>
+                    <option value="pending">Függőben</option>
+                    <option value="approved">Jóváhagyva</option>
+                    <option value="rejected">Elutasítva</option>
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-500 pointer-events-none" />
+            </div>
+        </div>
+    </div>
+);
 
 export default function ParkingImageSubmissionsTable({
     data,
@@ -51,6 +74,8 @@ export default function ParkingImageSubmissionsTable({
     onRowClick,
     onPreviewImage,
     searchTerm,
+    statusFilter,
+    onStatusFilterChange,
     currentPage,
     totalPages,
     onPageChange,
@@ -59,18 +84,21 @@ export default function ParkingImageSubmissionsTable({
 }: ParkingImageSubmissionsTableProps) {
     if (!isLoading && data.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-32 border-2 border-dashed border-zinc-800 rounded-3xl bg-zinc-900/20">
-                <div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center mb-4">
-                    <Camera className="w-8 h-8 text-zinc-700" />
+            <div className="flex flex-col gap-4 h-full">
+                <StatusFilter value={statusFilter} onChange={onStatusFilterChange} />
+                <div className="flex flex-col items-center justify-center py-32 border-2 border-dashed border-zinc-800 rounded-3xl bg-zinc-900/20">
+                    <div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center mb-4">
+                        <Camera className="w-8 h-8 text-zinc-700" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">
+                        {searchTerm || statusFilter ? 'Nincs találat' : 'Nincsenek jóváhagyásra váró képek'}
+                    </h3>
+                    <p className="text-zinc-500 max-w-xs text-center mt-2">
+                        {searchTerm || statusFilter
+                            ? 'Próbálj más szűrési feltételt.'
+                            : 'Ha a felhasználók képeket töltenek fel a parkolókhoz, itt fognak megjelenni.'}
+                    </p>
                 </div>
-                <h3 className="text-lg font-semibold text-white">
-                    {searchTerm ? 'Nincs találat' : 'Nincsenek jóváhagyásra váró képek'}
-                </h3>
-                <p className="text-zinc-500 max-w-xs text-center mt-2">
-                    {searchTerm
-                        ? 'Próbálj meg más keresési kifejezést használni.'
-                        : 'Ha a felhasználók képeket töltenek fel a parkolókhoz, itt fognak megjelenni.'}
-                </p>
             </div>
         );
     }
@@ -100,6 +128,7 @@ export default function ParkingImageSubmissionsTable({
 
     return (
         <div className="flex flex-col gap-4 h-full">
+            <StatusFilter value={statusFilter} onChange={onStatusFilterChange} />
             <div className="flex-1 overflow-auto min-h-0 rounded-xl border border-white/5 bg-[#111111]">
                 <table className="w-full text-left border-collapse">
                     <thead className="sticky top-0 z-10 bg-[#111111]">

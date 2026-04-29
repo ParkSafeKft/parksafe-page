@@ -23,6 +23,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import InteractiveRouteMap from './InteractiveRouteMap';
+import { writeAuditLog, type AuditAction } from '@/lib/adminAuditLog';
 
 type Pt = [number, number]; // [lng, lat]
 
@@ -90,6 +91,7 @@ interface CommunityRouteReviewModalProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     route: any | null;
     onSuccess: () => void;
+    adminId?: string | null;
 }
 
 const REJECT_REASONS = [
@@ -110,7 +112,7 @@ const statusMeta: Record<string, { label: string; className: string; icon: typeo
 
 type Status = 'pending' | 'in_review' | 'accepted' | 'rejected';
 
-export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSuccess }: CommunityRouteReviewModalProps) {
+export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSuccess, adminId }: CommunityRouteReviewModalProps) {
     const [adminNotes, setAdminNotes] = useState('');
     const [selectedStatus, setSelectedStatus] = useState<Status>('pending');
     const [saving, setSaving] = useState(false);
@@ -166,10 +168,8 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
 
     const handleSave = async () => {
         const trimmedNotes = adminNotes.trim();
-        if (selectedStatus === 'rejected' && trimmedNotes.length < 5) {
-            toast.error('Elutasításhoz indoklás kötelező (min. 5 karakter)');
-            return;
-        }
+        const statusChanged = selectedStatus !== route.status;
+        const notesChanged = trimmedNotes !== ((route.admin_notes ?? '') as string).trim();
         setSaving(true);
         try {
             const { error } = await supabase
@@ -177,6 +177,18 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
                 .update({ status: selectedStatus, admin_notes: trimmedNotes || null })
                 .eq('id', route.id);
             if (error) throw error;
+            // Record an audit-log entry only when something actually changed. Carry the
+            // admin's actual message into the Megjegyzés column so it isn't shadowed
+            // by the previous "rejected"-as-notes default.
+            if (statusChanged || notesChanged) {
+                await writeAuditLog({
+                    adminId,
+                    action: `community_route_${selectedStatus}` as AuditAction,
+                    targetType: 'community_bike_lane',
+                    targetId: route.id,
+                    notes: trimmedNotes || null,
+                });
+            }
             if (selectedStatus === 'accepted' && route.status !== 'accepted') {
                 toast.success('Elfogadva — ne felejtsd el felvinni OSM-re manuálisan!', { duration: 6000 });
             } else {
@@ -353,13 +365,13 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
                             {/* Admin notes */}
                             <div className="space-y-1.5">
                                 <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">
-                                    Admin jegyzet {selectedStatus === 'rejected' && <span className="text-red-400 normal-case">(kötelező, min. 5 karakter)</span>}
+                                    Admin jegyzet <span className="text-zinc-600 normal-case">(opcionális)</span>
                                 </label>
                                 <textarea
                                     value={adminNotes}
                                     onChange={e => setAdminNotes(e.target.value)}
                                     rows={3}
-                                    placeholder={selectedStatus === 'rejected' ? 'Indoklás kötelező…' : 'Megjegyzés…'}
+                                    placeholder="Megjegyzés…"
                                     className="w-full bg-zinc-900/50 border border-white/5 focus:border-green-500/50 focus:ring-1 focus:ring-green-500/20 rounded-xl px-4 py-3 text-sm text-white placeholder:text-zinc-600 transition-all outline-none resize-none"
                                 />
                                 {selectedStatus === 'rejected' && (

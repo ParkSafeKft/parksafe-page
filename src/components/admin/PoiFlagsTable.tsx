@@ -42,12 +42,66 @@ interface PoiFlagsTableProps {
     onStatusChange: (id: string, newStatus: string) => void;
     onDelete?: (id: string) => void;
     searchTerm?: string;
+    statusFilter: string;
+    onStatusFilterChange: (value: string) => void;
+    reasonFilter: string;
+    onReasonFilterChange: (value: string) => void;
     currentPage: number;
     totalPages: number;
     onPageChange: (page: number) => void;
     pageSize: number;
     onPageSizeChange: (size: number) => void;
 }
+
+const Filters = ({
+    statusValue,
+    onStatusChange,
+    reasonValue,
+    onReasonChange,
+}: {
+    statusValue: string;
+    onStatusChange: (v: string) => void;
+    reasonValue: string;
+    onReasonChange: (v: string) => void;
+}) => (
+    <div className="flex flex-wrap items-center gap-3 px-2">
+        <div className="flex items-center gap-2">
+            <span className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Státusz:</span>
+            <div className="relative">
+                <select
+                    value={statusValue}
+                    onChange={(e) => onStatusChange(e.target.value)}
+                    className="appearance-none bg-[#111111] border border-white/10 text-zinc-300 text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:border-green-500/50 cursor-pointer hover:border-white/20 transition-colors"
+                >
+                    <option value="">Mind</option>
+                    <option value="pending">Függőben</option>
+                    <option value="reviewed">Áttekintve</option>
+                    <option value="resolved">Megoldva</option>
+                    <option value="dismissed">Elutasítva</option>
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-500 pointer-events-none" />
+            </div>
+        </div>
+        <div className="flex items-center gap-2">
+            <span className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Ok:</span>
+            <div className="relative">
+                <select
+                    value={reasonValue}
+                    onChange={(e) => onReasonChange(e.target.value)}
+                    className="appearance-none bg-[#111111] border border-white/10 text-zinc-300 text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:border-green-500/50 cursor-pointer hover:border-white/20 transition-colors"
+                >
+                    <option value="">Mind</option>
+                    <option value="wrong_location">Rossz helyen van</option>
+                    <option value="doesnt_exist">Nem létezik</option>
+                    <option value="incorrect_info">Hibás információ</option>
+                    <option value="duplicate">Duplikált</option>
+                    <option value="other">Egyéb</option>
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-500 pointer-events-none" />
+            </div>
+        </div>
+    </div>
+);
 
 export default function PoiFlagsTable({
     data,
@@ -57,6 +111,10 @@ export default function PoiFlagsTable({
     onStatusChange,
     onDelete,
     searchTerm,
+    statusFilter,
+    onStatusFilterChange,
+    reasonFilter,
+    onReasonFilterChange,
     currentPage,
     totalPages,
     onPageChange,
@@ -65,18 +123,26 @@ export default function PoiFlagsTable({
 }: PoiFlagsTableProps) {
     if (data.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-32 border-2 border-dashed border-zinc-800 rounded-3xl bg-zinc-900/20">
-                <div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center mb-4">
-                    <Flag className="w-8 h-8 text-zinc-700" />
+            <div className="flex flex-col gap-4 h-full">
+                <Filters
+                    statusValue={statusFilter}
+                    onStatusChange={onStatusFilterChange}
+                    reasonValue={reasonFilter}
+                    onReasonChange={onReasonFilterChange}
+                />
+                <div className="flex flex-col items-center justify-center py-32 border-2 border-dashed border-zinc-800 rounded-3xl bg-zinc-900/20">
+                    <div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center mb-4">
+                        <Flag className="w-8 h-8 text-zinc-700" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">
+                        {searchTerm || statusFilter || reasonFilter ? 'Nincs találat' : 'Nincs POI bejelentés'}
+                    </h3>
+                    <p className="text-zinc-500 max-w-xs text-center mt-2">
+                        {searchTerm || statusFilter || reasonFilter
+                            ? 'Próbálj más szűrési feltételt.'
+                            : 'Még nem érkezett POI bejelentés.'}
+                    </p>
                 </div>
-                <h3 className="text-lg font-semibold text-white">
-                    {searchTerm ? 'Nincs találat' : 'Nincs POI bejelentés'}
-                </h3>
-                <p className="text-zinc-500 max-w-xs text-center mt-2">
-                    {searchTerm
-                        ? 'Próbálj meg más keresési kifejezést használni.'
-                        : 'Még nem érkezett POI bejelentés.'}
-                </p>
             </div>
         );
     }
@@ -145,6 +211,12 @@ export default function PoiFlagsTable({
 
     return (
         <div className="flex flex-col gap-4 h-full">
+            <Filters
+                statusValue={statusFilter}
+                onStatusChange={onStatusFilterChange}
+                reasonValue={reasonFilter}
+                onReasonChange={onReasonFilterChange}
+            />
             <div className="flex-1 overflow-auto min-h-0 rounded-xl border border-white/5 bg-[#111111]">
                 <table className="w-full text-left border-collapse">
                     <thead className="sticky top-0 z-10 bg-[#111111]">

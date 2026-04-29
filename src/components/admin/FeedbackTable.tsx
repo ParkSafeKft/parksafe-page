@@ -37,12 +37,89 @@ interface FeedbackTableProps {
     onRowClick: (item: Feedback) => void;
     onStatusChange: (id: string, newStatus: string) => void;
     searchTerm?: string;
+    statusFilter: string;
+    onStatusFilterChange: (value: string) => void;
+    priorityFilter: string;
+    onPriorityFilterChange: (value: string) => void;
+    categoryFilter: string;
+    onCategoryFilterChange: (value: string) => void;
     currentPage: number;
     totalPages: number;
     onPageChange: (page: number) => void;
     pageSize: number;
     onPageSizeChange: (size: number) => void;
 }
+
+const Filters = ({
+    statusValue,
+    onStatusChange,
+    priorityValue,
+    onPriorityChange,
+    categoryValue,
+    onCategoryChange,
+}: {
+    statusValue: string;
+    onStatusChange: (v: string) => void;
+    priorityValue: string;
+    onPriorityChange: (v: string) => void;
+    categoryValue: string;
+    onCategoryChange: (v: string) => void;
+}) => (
+    <div className="flex flex-wrap items-center gap-3 px-2">
+        <div className="flex items-center gap-2">
+            <span className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Státusz:</span>
+            <div className="relative">
+                <select
+                    value={statusValue}
+                    onChange={(e) => onStatusChange(e.target.value)}
+                    className="appearance-none bg-[#111111] border border-white/10 text-zinc-300 text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:border-green-500/50 cursor-pointer hover:border-white/20 transition-colors"
+                >
+                    <option value="">Mind</option>
+                    <option value="open">Nyitott</option>
+                    <option value="in_progress">Folyamatban</option>
+                    <option value="resolved">Megoldva</option>
+                    <option value="closed">Lezárt</option>
+                    <option value="duplicate">Duplikált</option>
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-500 pointer-events-none" />
+            </div>
+        </div>
+        <div className="flex items-center gap-2">
+            <span className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Prioritás:</span>
+            <div className="relative">
+                <select
+                    value={priorityValue}
+                    onChange={(e) => onPriorityChange(e.target.value)}
+                    className="appearance-none bg-[#111111] border border-white/10 text-zinc-300 text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:border-green-500/50 cursor-pointer hover:border-white/20 transition-colors"
+                >
+                    <option value="">Mind</option>
+                    <option value="high">Magas</option>
+                    <option value="medium">Közepes</option>
+                    <option value="low">Alacsony</option>
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-500 pointer-events-none" />
+            </div>
+        </div>
+        <div className="flex items-center gap-2">
+            <span className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Kategória:</span>
+            <div className="relative">
+                <select
+                    value={categoryValue}
+                    onChange={(e) => onCategoryChange(e.target.value)}
+                    className="appearance-none bg-[#111111] border border-white/10 text-zinc-300 text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:border-green-500/50 cursor-pointer hover:border-white/20 transition-colors"
+                >
+                    <option value="">Mind</option>
+                    <option value="bug">Hiba</option>
+                    <option value="feature">Funkció</option>
+                    <option value="ui_ux">UI / UX</option>
+                    <option value="content">Tartalom</option>
+                    <option value="other">Egyéb</option>
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-500 pointer-events-none" />
+            </div>
+        </div>
+    </div>
+);
 
 export default function FeedbackTable({
     data,
@@ -54,6 +131,12 @@ export default function FeedbackTable({
     onRowClick,
     onStatusChange,
     searchTerm,
+    statusFilter,
+    onStatusFilterChange,
+    priorityFilter,
+    onPriorityFilterChange,
+    categoryFilter,
+    onCategoryFilterChange,
     currentPage,
     totalPages,
     onPageChange,
@@ -62,18 +145,28 @@ export default function FeedbackTable({
 }: FeedbackTableProps) {
     if (data.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-32 border-2 border-dashed border-zinc-800 rounded-3xl bg-zinc-900/20">
-                <div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center mb-4">
-                    <MessageSquare className="w-8 h-8 text-zinc-700" />
+            <div className="flex flex-col gap-4 h-full">
+                <Filters
+                    statusValue={statusFilter}
+                    onStatusChange={onStatusFilterChange}
+                    priorityValue={priorityFilter}
+                    onPriorityChange={onPriorityFilterChange}
+                    categoryValue={categoryFilter}
+                    onCategoryChange={onCategoryFilterChange}
+                />
+                <div className="flex flex-col items-center justify-center py-32 border-2 border-dashed border-zinc-800 rounded-3xl bg-zinc-900/20">
+                    <div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center mb-4">
+                        <MessageSquare className="w-8 h-8 text-zinc-700" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">
+                        {searchTerm || statusFilter || priorityFilter || categoryFilter ? 'Nincs találat' : 'Nincs visszajelzés'}
+                    </h3>
+                    <p className="text-zinc-500 max-w-xs text-center mt-2">
+                        {searchTerm || statusFilter || priorityFilter || categoryFilter
+                            ? 'Próbálj más szűrési feltételt.'
+                            : 'Még nem érkezett visszajelzés.'}
+                    </p>
                 </div>
-                <h3 className="text-lg font-semibold text-white">
-                    {searchTerm ? 'Nincs találat' : 'Nincs visszajelzés'}
-                </h3>
-                <p className="text-zinc-500 max-w-xs text-center mt-2">
-                    {searchTerm
-                        ? 'Próbálj meg más keresési kifejezést használni.'
-                        : 'Még nem érkezett visszajelzés.'}
-                </p>
             </div>
         );
     }
@@ -130,8 +223,39 @@ export default function FeedbackTable({
         );
     };
 
+    const getCategoryBadge = (category: string) => {
+        const styles: Record<string, string> = {
+            bug: 'text-red-500',
+            feature: 'text-purple-500',
+            ui_ux: 'text-blue-500',
+            content: 'text-emerald-500',
+            other: 'text-zinc-400',
+        };
+        const labels: Record<string, string> = {
+            bug: 'Hiba',
+            feature: 'Funkció',
+            ui_ux: 'UI / UX',
+            content: 'Tartalom',
+            other: 'Egyéb',
+        };
+
+        return (
+            <span className={`text-xs font-medium ${styles[category] || 'text-zinc-500'}`}>
+                {labels[category] || category}
+            </span>
+        );
+    };
+
     return (
         <div className="flex flex-col gap-4 h-full">
+            <Filters
+                statusValue={statusFilter}
+                onStatusChange={onStatusFilterChange}
+                priorityValue={priorityFilter}
+                onPriorityChange={onPriorityFilterChange}
+                categoryValue={categoryFilter}
+                onCategoryChange={onCategoryFilterChange}
+            />
             <div className="flex-1 overflow-auto min-h-0 rounded-xl border border-white/5 bg-[#111111]">
                 <table className="w-full text-left border-collapse">
                     <thead className="sticky top-0 z-10 bg-[#111111]">
@@ -156,6 +280,12 @@ export default function FeedbackTable({
                                 onClick={() => onSort('priority')}
                             >
                                 Prioritás
+                            </th>
+                            <th
+                                className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider cursor-pointer hover:text-zinc-300 transition-colors"
+                                onClick={() => onSort('category')}
+                            >
+                                Kategória
                             </th>
                             <th
                                 className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider cursor-pointer hover:text-zinc-300 transition-colors"
@@ -196,6 +326,9 @@ export default function FeedbackTable({
                                 </td>
                                 <td className="p-4">
                                     {getPriorityBadge(item.priority)}
+                                </td>
+                                <td className="p-4">
+                                    {getCategoryBadge(item.category)}
                                 </td>
                                 <td className="p-4">
                                     <span className="text-sm text-zinc-500">

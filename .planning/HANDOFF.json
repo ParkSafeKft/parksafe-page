@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "timestamp": "2026-04-29T12:50:36.005Z",
+  "timestamp": "2026-04-29T17:01:50.750Z",
   "source": "auto-postool",
   "partial": false,
   "phase": null,
@@ -26,7 +26,23 @@
     },
     {
       "status": "M",
-      "path": "src/components/admin/LeaderboardTab.tsx"
+      "path": "src/components/admin/CommunityRouteReviewModal.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/admin/DetailModal.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/admin/FeedbackTable.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/admin/ParkingImageSubmissionsTable.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/admin/PoiFlagsTable.tsx"
     },
     {
       "status": "M",
@@ -34,5 +50,5 @@
     }
   ],
   "next_action": null,
-  "context_notes": "Recent commits:\n961a326 feat: add app configuration tab to admin page\n312c43b chore: update HANDOFF.json and enhance translations for CO₂ impact\n87d33ea refactor: enhance CommunityRouteReviewModal and InteractiveRouteMap for user-dropped pins\n809955a feat: enhance admin page with image submission management and cross-navigation\n36bd192 feat: enhance admin page with dynamic tab routing and modal management"
+  "context_notes": "Recent commits:\nba2eac4 chore: update HANDOFF.json and enhance LeaderboardTab functionality\n961a326 feat: add app configuration tab to admin page\n312c43b chore: update HANDOFF.json and enhance translations for CO₂ impact\n87d33ea refactor: enhance CommunityRouteReviewModal and InteractiveRouteMap for user-dropped pins\n809955a feat: enhance admin page with image submission management and cross-navigation"
 }
