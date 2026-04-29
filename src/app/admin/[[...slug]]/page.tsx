@@ -35,6 +35,7 @@ import {
 import { toast } from 'sonner';
 
 import AdminSidebar from '@/components/admin/AdminSidebar';
+import ImagePreview from '@/components/admin/ImagePreview';
 import UsersTable from '@/components/admin/UsersTable';
 import ParkingTable from '@/components/admin/ParkingTable';
 import ServicesTable from '@/components/admin/ServicesTable';
@@ -236,11 +237,23 @@ export default function AdminPage() {
         item: null,
         type: 'user'
     });
+    // Stack of previously-shown detail records, so cross-nav (e.g. parking-image → user → spot)
+    // can offer a back button without losing the chain.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [detailHistory, setDetailHistory] = useState<Array<{ item: any; type: string }>>([]);
+    // Refs mirror state so the helpers can read the current values without forcing re-creation
+    // of the useCallbacks. Without this, the React 19 strict-mode double-invocation of state
+    // updaters caused history to be pushed twice.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const detailModalRef = useRef<{ show: boolean; item: any; type: string }>({ show: false, item: null, type: 'user' });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const detailHistoryRef = useRef<Array<{ item: any; type: string }>>([]);
     const [deleteModal, setDeleteModal] = useState<{ show: boolean; table: string | null; id: string | null }>({
         show: false,
         table: null,
         id: null
     });
+    const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
 
     // Map active tab to Supabase table name
     const getTableForTab = (tab: string): string | null => {
@@ -337,7 +350,7 @@ export default function AdminPage() {
                     countQuery = supabase.from('feedback').select('*', { count: 'exact', head: true });
                     break;
                 case 'poi_flags':
-                    query = supabase.from('poi_flags').select('*, profiles!poi_flags_user_id_fkey(username, full_name)');
+                    query = supabase.from('poi_flags').select('*, profiles!poi_flags_user_id_fkey(username, full_name, avatar_url)');
                     countQuery = supabase.from('poi_flags').select('*', { count: 'exact', head: true });
                     break;
                 case 'cities':
@@ -496,18 +509,39 @@ export default function AdminPage() {
                     ...row,
                     reporter_username: row.profiles?.username || null,
                     reporter_full_name: row.profiles?.full_name || null,
+                    reporter_avatar_url: row.profiles?.avatar_url || null,
                 }));
                 setPoiFlags(mapped);
             } else if (activeTab === 'parking_images') {
+                const rows = dataRes.data || [];
+                // user_id FK points at auth.users, not profiles — resolve via separate lookup.
+                const userIds = Array.from(new Set(
+                    rows.map((r: { user_id?: string | null }) => r.user_id).filter((v): v is string => !!v)
+                ));
+                let profilesMap: Record<string, { id: string; username?: string | null; full_name?: string | null; avatar_url?: string | null; email?: string | null }> = {};
+                if (userIds.length > 0) {
+                    const { data: profs } = await supabase
+                        .from('profiles')
+                        .select('id, username, full_name, avatar_url, email')
+                        .in('id', userIds);
+                    profilesMap = Object.fromEntries(
+                        (profs || []).map((p: { id: string; username?: string | null; full_name?: string | null; avatar_url?: string | null; email?: string | null }) => [p.id, p])
+                    );
+                }
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const mapped = (dataRes.data || []).map((row: any) => ({
-                    ...row,
-                    parking_name: row.parkingSpots?.name || null,
-                    parking_city: row.parkingSpots?.city || null,
-                    parking_coordinate: row.parkingSpots?.coordinate || null,
-                    reporter_username: row.user_id ? String(row.user_id).slice(0, 8) : null,
-                    reporter_full_name: null,
-                }));
+                const mapped = rows.map((row: any) => {
+                    const prof = row.user_id ? profilesMap[row.user_id] : null;
+                    return {
+                        ...row,
+                        parking_name: row.parkingSpots?.name || null,
+                        parking_city: row.parkingSpots?.city || null,
+                        parking_coordinate: row.parkingSpots?.coordinate || null,
+                        reporter_username: prof?.username || null,
+                        reporter_full_name: prof?.full_name || null,
+                        reporter_avatar_url: prof?.avatar_url || null,
+                        reporter_email: prof?.email || null,
+                    };
+                });
                 setParkingImageSubmissions(mapped);
             } else if (activeTab === 'cities') {
                 const rows = dataRes.data || [];
@@ -585,6 +619,9 @@ export default function AdminPage() {
         // through the URL history). Without this, an opened detail/edit
         // modal would linger on the wrong tab.
         setDetailModal(prev => (prev.show ? { ...prev, show: false } : prev));
+        detailHistoryRef.current = [];
+        detailModalRef.current = { ...detailModalRef.current, show: false };
+        setDetailHistory([]);
         setEditLocationModal(prev => (prev.show ? { show: false, item: null } : prev));
         setCityFormModal(prev => (prev.show ? { show: false, item: null } : prev));
         setChallengeDetailModal(prev => (prev.show ? { show: false, item: null } : prev));
@@ -686,6 +723,46 @@ export default function AdminPage() {
         }
     };
 
+    // Open a record in the detail modal as a *fresh* navigation (used by table row clicks).
+    // Resets the back-stack so the user can't go back to whatever was open in a previous tab.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const openFreshDetail = useCallback((item: any, type: string) => {
+        detailModalRef.current = { show: true, item, type };
+        detailHistoryRef.current = [];
+        setDetailHistory([]);
+        setDetailModal({ show: true, item, type });
+    }, []);
+
+    // Open a record as a *linked* navigation (used by cross-nav cards inside DetailModal).
+    // Pushes the currently-shown record onto the back-stack so the user can return.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const openLinkedDetail = useCallback((item: any, type: string) => {
+        const prev = detailModalRef.current;
+        if (prev.show && prev.item) {
+            detailHistoryRef.current = [...detailHistoryRef.current, { item: prev.item, type: prev.type }];
+            setDetailHistory(detailHistoryRef.current);
+        }
+        detailModalRef.current = { show: true, item, type };
+        setDetailModal({ show: true, item, type });
+    }, []);
+
+    const goBackDetail = useCallback(() => {
+        const stack = detailHistoryRef.current;
+        if (stack.length === 0) return;
+        const last = stack[stack.length - 1];
+        detailHistoryRef.current = stack.slice(0, -1);
+        detailModalRef.current = { show: true, item: last.item, type: last.type };
+        setDetailHistory(detailHistoryRef.current);
+        setDetailModal({ show: true, item: last.item, type: last.type });
+    }, []);
+
+    const closeDetail = useCallback(() => {
+        detailModalRef.current = { ...detailModalRef.current, show: false };
+        detailHistoryRef.current = [];
+        setDetailModal(prev => ({ ...prev, show: false }));
+        setDetailHistory([]);
+    }, []);
+
     const handleOpenPoiEdit = useCallback(async (poiId: string, poiType: string) => {
         const tableMap: Record<string, string> = {
             parking: 'parkingSpots',
@@ -721,6 +798,69 @@ export default function AdminPage() {
             toast.error('POI betöltése sikertelen');
         }
     }, [setActiveTab]);
+
+    const handleOpenUserProfile = useCallback(async (userId: string) => {
+        try {
+            const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
+            if (error) throw error;
+            if (!data) {
+                toast.error('Felhasználó nem található');
+                return;
+            }
+            openLinkedDetail(data, 'user');
+        } catch (err) {
+            if (isDev) console.error(err);
+            toast.error('Felhasználó betöltése sikertelen');
+        }
+    }, [openLinkedDetail]);
+
+    const handleOpenPoiDetail = useCallback(async (poiId: string, poiType: string) => {
+        const tableMap: Record<string, string> = {
+            parking: 'parkingSpots',
+            bicycleService: 'bicycleService',
+            repairStation: 'repairStation',
+            drinkingFountain: 'drinkingFountain',
+        };
+        const detailTypeMap: Record<string, string> = {
+            parking: 'parking',
+            bicycleService: 'service',
+            repairStation: 'repair',
+            drinkingFountain: 'drinking_fountain',
+        };
+        const table = tableMap[poiType];
+        const detailType = detailTypeMap[poiType];
+        if (!table || !detailType) {
+            toast.error('Ismeretlen POI típus');
+            return;
+        }
+        try {
+            const { data, error } = await supabase.from(table).select('*').eq('id', poiId).single();
+            if (error) throw error;
+            if (!data) {
+                toast.error('POI nem található');
+                return;
+            }
+            openLinkedDetail(data, detailType);
+        } catch (err) {
+            if (isDev) console.error(err);
+            toast.error('POI betöltése sikertelen');
+        }
+    }, [openLinkedDetail]);
+
+    const handleOpenParkingSpotDetail = useCallback(async (spotId: string) => {
+        try {
+            const { data, error } = await supabase.from('parkingSpots').select('*').eq('id', spotId).single();
+            if (error) throw error;
+            if (!data) {
+                toast.error('Parkoló nem található');
+                return;
+            }
+            openLinkedDetail(data, 'parking');
+        } catch (err) {
+            if (isDev) console.error(err);
+            toast.error('Parkoló betöltése sikertelen');
+        }
+    }, [openLinkedDetail]);
 
     const handlePoiFlagStatusChange = async (id: string, newStatus: string) => {
         setToggleLoading(id);
@@ -1205,7 +1345,7 @@ export default function AdminPage() {
                                             onSelectRow={handleSelectRow}
                                             onSort={handleSort}
                                             sortConfig={sortConfig}
-                                            onRowClick={(item) => setDetailModal({ show: true, item, type: 'user' })}
+                                            onRowClick={(item) => openFreshDetail(item, 'user')}
                                             onToggleBan={handleUserToggleBan}
                                             toggleLoading={toggleLoading}
                                             searchTerm={searchTerm}
@@ -1224,7 +1364,7 @@ export default function AdminPage() {
                                             onSelectRow={handleSelectRow}
                                             onSort={handleSort}
                                             sortConfig={sortConfig}
-                                            onRowClick={(item) => setDetailModal({ show: true, item, type: 'parking' })}
+                                            onRowClick={(item) => openFreshDetail(item, 'parking')}
                                             onEdit={(item) => setEditLocationModal({ show: true, item })}
                                             onDelete={(id) => handleDeleteClick(id)}
                                             onToggleAvailability={handleToggleAvailability}
@@ -1244,6 +1384,8 @@ export default function AdminPage() {
                                             onStatusChange={handleParkingImageStatusChange}
                                             onOpenParkingEdit={(parkingSpotId) => handleOpenPoiEdit(parkingSpotId, 'parking')}
                                             onDelete={handleDeleteParkingImageSubmission}
+                                            onRowClick={(item) => openFreshDetail(item, 'parking_image')}
+                                            onPreviewImage={(url) => setImagePreviewUrl(url)}
                                             searchTerm={searchTerm}
                                             currentPage={currentPage}
                                             totalPages={totalPages}
@@ -1260,7 +1402,7 @@ export default function AdminPage() {
                                             onSelectRow={handleSelectRow}
                                             onSort={handleSort}
                                             sortConfig={sortConfig}
-                                            onRowClick={(item) => setDetailModal({ show: true, item, type: 'service' })}
+                                            onRowClick={(item) => openFreshDetail(item, 'service')}
                                             onEdit={(item) => setEditLocationModal({ show: true, item })}
                                             onDelete={(id) => handleDeleteClick(id)}
                                             onToggleAvailability={handleToggleAvailability}
@@ -1282,7 +1424,7 @@ export default function AdminPage() {
                                             onSelectRow={handleSelectRow}
                                             onSort={handleSort}
                                             sortConfig={sortConfig}
-                                            onRowClick={(item) => setDetailModal({ show: true, item, type: 'repair' })}
+                                            onRowClick={(item) => openFreshDetail(item, 'repair')}
                                             onEdit={(item) => setEditLocationModal({ show: true, item })}
                                             onDelete={(id) => handleDeleteClick(id)}
                                             onToggleAvailability={handleToggleAvailability}
@@ -1304,7 +1446,7 @@ export default function AdminPage() {
                                             onSelectRow={handleSelectRow}
                                             onSort={handleSort}
                                             sortConfig={sortConfig}
-                                            onRowClick={(item) => setDetailModal({ show: true, item, type: 'drinking_fountain' })}
+                                            onRowClick={(item) => openFreshDetail(item, 'drinking_fountain')}
                                             onEdit={(item) => setEditLocationModal({ show: true, item })}
                                             onDelete={(id) => handleDeleteClick(id)}
                                             onToggleAvailability={handleToggleAvailability}
@@ -1326,7 +1468,7 @@ export default function AdminPage() {
                                             onSelectRow={handleSelectRow}
                                             onSort={handleSort}
                                             sortConfig={sortConfig}
-                                            onRowClick={(item) => setDetailModal({ show: true, item, type: 'feedback' })}
+                                            onRowClick={(item) => openFreshDetail(item, 'feedback')}
                                             onStatusChange={handleFeedbackStatusChange}
                                             searchTerm={searchTerm}
                                             currentPage={currentPage}
@@ -1424,7 +1566,7 @@ export default function AdminPage() {
                                             onSelectRow={handleSelectRow}
                                             onSort={handleSort}
                                             sortConfig={sortConfig}
-                                            onRowClick={(item) => setDetailModal({ show: true, item, type: 'poi_flags' })}
+                                            onRowClick={(item) => openFreshDetail(item, 'poi_flags')}
                                             onStatusChange={handlePoiFlagStatusChange}
                                             onDelete={(id) => handleDeleteClick(id)}
                                             searchTerm={searchTerm}
@@ -1472,16 +1614,32 @@ export default function AdminPage() {
 
                 <DetailModal
                     isOpen={detailModal.show}
-                    onClose={() => setDetailModal({ ...detailModal, show: false })}
+                    onClose={closeDetail}
                     item={detailModal.item}
                     type={detailModal.type}
+                    onBack={detailHistory.length > 0 ? goBackDetail : undefined}
                     onEdit={(item) => {
-                        setDetailModal({ ...detailModal, show: false });
+                        closeDetail();
                         setEditLocationModal({ show: true, item });
                     }}
-                    onStatusChange={detailModal.type === 'poi_flags' ? handlePoiFlagStatusChange : handleFeedbackStatusChange}
-                    onOpenPoiEdit={detailModal.type === 'poi_flags' ? handleOpenPoiEdit : undefined}
+                    onStatusChange={
+                        detailModal.type === 'poi_flags' ? handlePoiFlagStatusChange :
+                        detailModal.type === 'parking_image' ? handleParkingImageStatusChange :
+                        handleFeedbackStatusChange
+                    }
+                    onOpenPoiDetail={detailModal.type === 'poi_flags' ? handleOpenPoiDetail : undefined}
+                    onOpenUser={handleOpenUserProfile}
+                    onOpenParkingSpot={handleOpenParkingSpotDetail}
+                    onDeleteSubmission={detailModal.type === 'parking_image' ? handleDeleteParkingImageSubmission : undefined}
                 />
+
+                {imagePreviewUrl && (
+                    <ImagePreview
+                        src={imagePreviewUrl}
+                        alt="Kép előnézet"
+                        onClose={() => setImagePreviewUrl(null)}
+                    />
+                )}
 
                 <DeleteConfirmModal
                     isOpen={deleteModal.show}

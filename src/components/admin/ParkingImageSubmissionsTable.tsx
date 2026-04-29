@@ -32,6 +32,8 @@ interface ParkingImageSubmissionsTableProps {
     onStatusChange: (id: string, newStatus: 'approved' | 'rejected') => void;
     onOpenParkingEdit: (parkingSpotId: string) => void;
     onDelete: (submission: ParkingImageSubmission) => void;
+    onRowClick: (submission: ParkingImageSubmission) => void;
+    onPreviewImage: (url: string) => void;
     searchTerm?: string;
     currentPage: number;
     totalPages: number;
@@ -46,6 +48,8 @@ export default function ParkingImageSubmissionsTable({
     onStatusChange,
     onOpenParkingEdit,
     onDelete,
+    onRowClick,
+    onPreviewImage,
     searchTerm,
     currentPage,
     totalPages,
@@ -110,16 +114,31 @@ export default function ParkingImageSubmissionsTable({
                     </thead>
                     <tbody className="divide-y divide-white/5">
                         {data.map((item) => (
-                            <tr key={item.id} className="hover:bg-white/[0.02] transition-colors group">
+                            <tr
+                                key={item.id}
+                                className="hover:bg-white/[0.02] transition-colors group cursor-pointer"
+                                onClick={() => onRowClick(item)}
+                            >
                                 <td className="p-4">
-                                    <div className="w-16 h-16 rounded-lg overflow-hidden border border-white/10 bg-zinc-900">
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onPreviewImage(item.image_url);
+                                        }}
+                                        className="block w-16 h-16 rounded-lg overflow-hidden border border-white/10 bg-zinc-900 hover:border-green-500/50 transition-colors relative group/img"
+                                        title="Kép nagyítása"
+                                    >
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
                                             src={item.image_url}
                                             alt="Parkoló kép"
                                             className="w-full h-full object-cover"
                                         />
-                                    </div>
+                                        <span className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                                            <Camera className="w-4 h-4 text-white" />
+                                        </span>
+                                    </button>
                                 </td>
                                 <td className="p-4">
                                     <div className="flex flex-col gap-1">
@@ -156,7 +175,7 @@ export default function ParkingImageSubmissionsTable({
                                         })}
                                     </span>
                                 </td>
-                                <td className="p-4 text-right">
+                                <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                             <button

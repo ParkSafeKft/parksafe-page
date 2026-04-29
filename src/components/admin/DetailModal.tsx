@@ -42,7 +42,8 @@ import {
     User,
     Copy,
     ExternalLink,
-    Droplet
+    Droplet,
+    ArrowLeft
 } from 'lucide-react';
 
 interface DetailModalProps {
@@ -54,8 +55,16 @@ interface DetailModalProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onEdit: (item: any) => void;
     onStatusChange?: (id: string, newStatus: string) => void;
-    /** POI flags only: open the reported POI in edit modal and switch tab */
-    onOpenPoiEdit?: (poiId: string, poiType: string) => void;
+    /** POI flags only: open the reported POI in this same detail modal, no tab switch */
+    onOpenPoiDetail?: (poiId: string, poiType: string) => void;
+    /** Open another record in this same detail modal — enables cross-navigation between linked entities */
+    onOpenUser?: (userId: string) => void;
+    onOpenParkingSpot?: (spotId: string) => void;
+    /** Parking-image submissions only: hard delete the submission + image */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onDeleteSubmission?: (submission: any) => void;
+    /** When set, render a back arrow in the header — pops the cross-nav history one step */
+    onBack?: () => void;
 }
 
 function copyId(id: string) {
@@ -75,7 +84,11 @@ export default function DetailModal({
     type,
     onEdit,
     onStatusChange,
-    onOpenPoiEdit,
+    onOpenPoiDetail,
+    onOpenUser,
+    onOpenParkingSpot,
+    onDeleteSubmission,
+    onBack,
 }: DetailModalProps) {
     const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
     const [currentStatus, setCurrentStatus] = useState<string | null>(null);
@@ -204,6 +217,303 @@ export default function DetailModal({
 
     const coords = getCoordinates();
 
+    if (type === 'parking_image') {
+        const submissionCoords = parseWKBPoint(item.parking_coordinate);
+
+        const submissionStatuses = [
+            { value: 'pending', label: 'Függőben', color: 'bg-yellow-500' },
+            { value: 'approved', label: 'Jóváhagyva', color: 'bg-green-500' },
+            { value: 'rejected', label: 'Elutasítva', color: 'bg-red-500' },
+        ];
+        const currentSubmissionStatus = submissionStatuses.find(s => s.value === currentStatus) || submissionStatuses[0];
+        const uploaderDisplayName = item.reporter_username || item.reporter_full_name || (item.user_id ? `${String(item.user_id).slice(0, 8)}…` : 'Ismeretlen');
+        const uploaderInitial = (item.reporter_username || item.reporter_full_name || item.reporter_email || 'U').charAt(0).toUpperCase();
+
+        return (
+            <>
+                <Dialog open={isOpen} onOpenChange={onClose}>
+                    <DialogContent className="admin-dark max-w-3xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
+                        <div className="flex flex-col h-[85vh]">
+                            {/* Header */}
+                            <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
+                                <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
+                                    <div className="flex items-center gap-4 min-w-0 pr-8">
+                                    {onBack && (
+                                        <button
+                                            type="button"
+                                            onClick={onBack}
+                                            className="p-2 rounded-lg text-muted-foreground hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
+                                            title="Vissza az előző modálra"
+                                        >
+                                            <ArrowLeft className="h-5 w-5" />
+                                        </button>
+                                    )}
+                                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-600/20 border border-green-500/30 flex items-center justify-center flex-shrink-0 shadow-inner">
+                                            <Camera className="h-6 w-6 text-green-400" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h1 className="text-lg font-bold text-foreground truncate leading-tight">
+                                                Parkoló kép kérelem
+                                            </h1>
+                                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                                <span className="text-xs font-mono text-muted-foreground truncate opacity-70">
+                                                    ID: {item.id?.substring(0, 8)}…
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => copyId(item.id)}
+                                                    className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-white transition-colors"
+                                                    title="ID másolása"
+                                                >
+                                                    <Copy className="w-3.5 h-3.5" />
+                                                </button>
+                                                <Badge variant="outline" className="text-[10px] h-5 px-1.5 border-white/10 bg-white/5">
+                                                    {new Date(item.created_at).toLocaleDateString()}
+                                                </Badge>
+                                                <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${currentStatus === 'approved' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                                                    currentStatus === 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                                        'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                                                    }`}>
+                                                    <span className={`w-1.5 h-1.5 rounded-full ${currentSubmissionStatus.color}`} />
+                                                    {currentSubmissionStatus.label}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </DialogTitle>
+                            </div>
+
+                            <ScrollArea className="flex-1 min-h-0">
+                                <div className="p-6 space-y-6">
+                                    {/* Image — click to enlarge */}
+                                    {item.image_url && (
+                                        <div>
+                                            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                                                <Eye className="h-4 w-4" />
+                                                Beküldött kép
+                                            </h3>
+                                            <button
+                                                type="button"
+                                                onClick={() => setImagePreviewUrl(item.image_url)}
+                                                className="block w-full rounded-xl overflow-hidden border border-white/10 bg-zinc-950 group relative"
+                                                title="Kattints a nagyításhoz"
+                                            >
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img
+                                                    src={item.image_url}
+                                                    alt="Parkoló kép"
+                                                    className="w-full max-h-[420px] object-contain transition-transform duration-300 group-hover:scale-[1.01]"
+                                                />
+                                                <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Eye className="h-3.5 w-3.5" />
+                                                    Nagyítás
+                                                </div>
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* Uploader card — clickable */}
+                                    <div>
+                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                                            <User className="h-4 w-4" />
+                                            Feltöltő
+                                        </h3>
+                                        {onOpenUser && item.user_id ? (
+                                            <button
+                                                type="button"
+                                                onClick={() => onOpenUser(item.user_id)}
+                                                className="w-full p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-colors flex items-center gap-4 group text-left"
+                                            >
+                                                <Avatar className="h-12 w-12 ring-2 ring-border flex-shrink-0">
+                                                    <AvatarImage src={item.reporter_avatar_url} alt={uploaderDisplayName} />
+                                                    <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+                                                        {uploaderInitial}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-semibold text-white truncate">
+                                                        {uploaderDisplayName}
+                                                    </p>
+                                                    {item.reporter_email && (
+                                                        <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                                            {item.reporter_email}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-white transition-colors flex-shrink-0" />
+                                            </button>
+                                        ) : (
+                                            <div className="p-4 rounded-lg bg-white/5 border border-white/10 flex items-center gap-4">
+                                                <Avatar className="h-12 w-12 ring-2 ring-border flex-shrink-0">
+                                                    <AvatarImage src={item.reporter_avatar_url} alt={uploaderDisplayName} />
+                                                    <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+                                                        {uploaderInitial}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-semibold text-white truncate">{uploaderDisplayName}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Parking-spot card — clickable */}
+                                    <div>
+                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                                            <MapPin className="h-4 w-4" />
+                                            Érintett parkoló
+                                        </h3>
+                                        {onOpenParkingSpot && item.parking_spot_id ? (
+                                            <button
+                                                type="button"
+                                                onClick={() => onOpenParkingSpot(item.parking_spot_id)}
+                                                className="w-full p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-colors flex items-center gap-4 group text-left"
+                                            >
+                                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-600/20 border border-green-500/30 flex items-center justify-center flex-shrink-0">
+                                                    <MapPin className="h-5 w-5 text-green-400" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-semibold text-white truncate">
+                                                        {item.parking_name || 'Ismeretlen parkoló'}
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                                        {item.parking_city || 'Nincs város megadva'}
+                                                    </p>
+                                                </div>
+                                                <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-white transition-colors flex-shrink-0" />
+                                            </button>
+                                        ) : (
+                                            <div className="p-4 rounded-lg bg-white/5 border border-white/10 flex items-center gap-4">
+                                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-600/20 border border-green-500/30 flex items-center justify-center flex-shrink-0">
+                                                    <MapPin className="h-5 w-5 text-green-400" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-semibold text-white truncate">
+                                                        {item.parking_name || 'Ismeretlen parkoló'}
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                                        {item.parking_city || 'Nincs város megadva'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Map — only when we have coordinates */}
+                                    {submissionCoords && (
+                                        <div>
+                                            <h3 className="flex items-center gap-2 text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                                                <MapPin className="h-4 w-4" />
+                                                Hely a térképen
+                                            </h3>
+                                            <div className="flex gap-6 mb-3">
+                                                <div className="flex-1">
+                                                    <p className="text-xs text-muted-foreground mb-0.5">Szélesség (Latitude)</p>
+                                                    <p className="text-sm font-mono font-semibold text-white">{submissionCoords.lat.toFixed(6)}</p>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-xs text-muted-foreground mb-0.5">Hosszúság (Longitude)</p>
+                                                    <p className="text-sm font-mono font-semibold text-white">{submissionCoords.lon.toFixed(6)}</p>
+                                                </div>
+                                            </div>
+                                            <div className="rounded-lg overflow-hidden border border-border mb-3">
+                                                <iframe
+                                                    width="100%"
+                                                    height="250"
+                                                    frameBorder="0"
+                                                    style={{ border: 0, pointerEvents: 'none' }}
+                                                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${(submissionCoords.lon - 0.002).toFixed(6)},${(submissionCoords.lat - 0.002).toFixed(6)},${(submissionCoords.lon + 0.002).toFixed(6)},${(submissionCoords.lat + 0.002).toFixed(6)}&layer=mapnik&marker=${submissionCoords.lat.toFixed(6)},${submissionCoords.lon.toFixed(6)}`}
+                                                    title="Parking Spot Map"
+                                                />
+                                            </div>
+                                            <Button
+                                                variant="outline"
+                                                className="w-full"
+                                                size="sm"
+                                                onClick={() => window.open(`https://www.google.com/maps?q=${submissionCoords.lat},${submissionCoords.lon}`, '_blank')}
+                                            >
+                                                <MapPin className="h-3.5 w-3.5 mr-2" />
+                                                Megnyitás Google Maps-en
+                                            </Button>
+                                        </div>
+                                    )}
+
+                                    {/* Review trail */}
+                                    {item.reviewed_at && (
+                                        <>
+                                            <Separator className="bg-border" />
+                                            <div>
+                                                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                                                    Áttekintés
+                                                </h3>
+                                                <div className="p-3 bg-blue-500/10 border border-blue-500/20 text-blue-200 rounded-lg text-sm">
+                                                    {new Date(item.reviewed_at).toLocaleDateString('hu-HU', {
+                                                        year: 'numeric',
+                                                        month: 'long',
+                                                        day: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </ScrollArea>
+
+                            {/* Footer — full action bar so admin doesn't have to exit and reopen the dropdown */}
+                            <div className="p-6 border-t border-border flex justify-between gap-2 flex-wrap">
+                                <div className="flex gap-2">
+                                    {onDeleteSubmission && (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="gap-2 border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                                            onClick={() => {
+                                                onDeleteSubmission(item);
+                                                onClose();
+                                            }}
+                                        >
+                                            <XCircle className="w-4 h-4" />
+                                            Kérelem és kép törlése
+                                        </Button>
+                                    )}
+                                </div>
+                                <div className="flex gap-2 flex-wrap">
+                                    <Button onClick={onClose} variant="outline" size="sm">Bezárás</Button>
+                                    {onStatusChange && currentStatus !== 'rejected' && (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="gap-2 border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                                            onClick={() => handleStatusChange('rejected')}
+                                        >
+                                            <XCircle className="w-4 h-4" />
+                                            Elutasítás
+                                        </Button>
+                                    )}
+                                    {onStatusChange && currentStatus !== 'approved' && (
+                                        <Button
+                                            size="sm"
+                                            className="gap-2 bg-green-600 hover:bg-green-500 text-white"
+                                            onClick={() => handleStatusChange('approved')}
+                                        >
+                                            <CheckCircle className="w-4 h-4" />
+                                            Jóváhagyás
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+                {imagePreviewUrl && (
+                    <ImagePreview src={imagePreviewUrl} alt="Parkoló kép" onClose={() => setImagePreviewUrl(null)} />
+                )}
+            </>
+        );
+    }
+
     if (type === 'poi_flags') {
         const getPoiTypeLabel = (poiType: string) => {
             switch (poiType) {
@@ -245,24 +555,38 @@ export default function DetailModal({
 
         const currentStatusObj = poiFlagStatuses.find(s => s.value === currentStatus) || poiFlagStatuses[0];
 
+        const reporterDisplayName = item.reporter_username || item.reporter_full_name || (item.user_id ? `${String(item.user_id).slice(0, 8)}…` : 'Ismeretlen');
+        const reporterInitial = (item.reporter_username || item.reporter_full_name || 'U').charAt(0).toUpperCase();
+        const poiName = poiCoords?.name || getPoiTypeLabel(item.poi_type);
+
         return (
             <Dialog open={isOpen} onOpenChange={onClose}>
-                <DialogContent className="admin-dark max-w-2xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
+                <DialogContent className="admin-dark max-w-3xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
                     <div className="flex flex-col h-[85vh]">
-                        {/* Header */}
+                        {/* Header — same shape as parking_image */}
                         <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
                             <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
                                 <div className="flex items-center gap-4 min-w-0 pr-8">
+                                    {onBack && (
+                                        <button
+                                            type="button"
+                                            onClick={onBack}
+                                            className="p-2 rounded-lg text-muted-foreground hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
+                                            title="Vissza az előző modálra"
+                                        >
+                                            <ArrowLeft className="h-5 w-5" />
+                                        </button>
+                                    )}
                                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500/20 to-red-600/20 border border-orange-500/30 flex items-center justify-center flex-shrink-0 shadow-inner">
                                         <Flag className="h-6 w-6 text-orange-400" />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <h1 className="text-lg font-bold text-foreground truncate leading-tight">
-                                            POI Bejelentés részletei
+                                            POI Bejelentés
                                         </h1>
                                         <div className="flex items-center gap-2 mt-1 flex-wrap">
                                             <span className="text-xs font-mono text-muted-foreground truncate opacity-70">
-                                                ID: {item.id.substring(0, 8)}...
+                                                ID: {item.id.substring(0, 8)}…
                                             </span>
                                             <button
                                                 type="button"
@@ -275,6 +599,14 @@ export default function DetailModal({
                                             <Badge variant="outline" className="text-[10px] h-5 px-1.5 border-white/10 bg-white/5">
                                                 {new Date(item.created_at).toLocaleDateString()}
                                             </Badge>
+                                            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${currentStatus === 'resolved' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                                                currentStatus === 'dismissed' ? 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' :
+                                                    currentStatus === 'reviewed' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                                                        'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                                                }`}>
+                                                <span className={`w-1.5 h-1.5 rounded-full ${currentStatusObj.color}`} />
+                                                {currentStatusObj.label}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -283,37 +615,120 @@ export default function DetailModal({
 
                         <ScrollArea className="flex-1 min-h-0">
                             <div className="p-6 space-y-6">
-                                {/* POI Info */}
+                                {/* POI card — clickable, opens POI in this same modal */}
                                 <div>
-                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                                        <MapPin className="h-4 w-4" />
                                         Érintett POI
                                     </h3>
-                                    <div className="p-4 rounded-lg bg-white/5 border border-white/10 flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-lg bg-zinc-900 flex items-center justify-center border border-white/10">
-                                            {getPoiTypeIcon(item.poi_type)}
+                                    {onOpenPoiDetail && item.poi_id && item.poi_type ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => onOpenPoiDetail(item.poi_id, item.poi_type)}
+                                            className="w-full p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-colors flex items-center gap-4 group text-left"
+                                        >
+                                            <div className="w-10 h-10 rounded-lg bg-zinc-900 flex items-center justify-center border border-white/10 flex-shrink-0">
+                                                {getPoiTypeIcon(item.poi_type)}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-semibold text-white truncate">{poiName}</p>
+                                                <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                                                    {getPoiTypeLabel(item.poi_type)} · <span className="font-mono">ID: {item.poi_id?.substring(0, 8)}…</span>
+                                                </p>
+                                            </div>
+                                            <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-white transition-colors flex-shrink-0" />
+                                        </button>
+                                    ) : (
+                                        <div className="p-4 rounded-lg bg-white/5 border border-white/10 flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-lg bg-zinc-900 flex items-center justify-center border border-white/10 flex-shrink-0">
+                                                {getPoiTypeIcon(item.poi_type)}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-semibold text-white truncate">{poiName}</p>
+                                                <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                                                    {getPoiTypeLabel(item.poi_type)} · <span className="font-mono">ID: {item.poi_id?.substring(0, 8)}…</span>
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="flex-1">
-                                            <p className="text-sm font-semibold text-white">
-                                                {poiCoords?.name || getPoiTypeLabel(item.poi_type)}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground mt-0.5">
-                                                {getPoiTypeLabel(item.poi_type)} &middot; <span className="font-mono">ID: {item.poi_id?.substring(0, 8)}...</span>
-                                            </p>
+                                    )}
+                                </div>
+
+                                {/* Reporter card — clickable, matches parking_image uploader */}
+                                <div>
+                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                                        <User className="h-4 w-4" />
+                                        Bejelentő
+                                    </h3>
+                                    {onOpenUser && item.user_id ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => onOpenUser(item.user_id)}
+                                            className="w-full p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-colors flex items-center gap-4 group text-left"
+                                        >
+                                            <Avatar className="h-12 w-12 ring-2 ring-border flex-shrink-0">
+                                                <AvatarImage src={item.reporter_avatar_url} alt={reporterDisplayName} />
+                                                <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+                                                    {reporterInitial}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-semibold text-white truncate">{reporterDisplayName}</p>
+                                                <p className="text-xs text-muted-foreground mt-0.5">
+                                                    Bejelentve: {new Date(item.created_at).toLocaleDateString('hu-HU', {
+                                                        year: 'numeric',
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </p>
+                                            </div>
+                                            <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-white transition-colors flex-shrink-0" />
+                                        </button>
+                                    ) : (
+                                        <div className="p-4 rounded-lg bg-white/5 border border-white/10 flex items-center gap-4">
+                                            <Avatar className="h-12 w-12 ring-2 ring-border flex-shrink-0">
+                                                <AvatarImage src={item.reporter_avatar_url} alt={reporterDisplayName} />
+                                                <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+                                                    {reporterInitial}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-semibold text-white truncate">{reporterDisplayName}</p>
+                                            </div>
                                         </div>
+                                    )}
+                                </div>
+
+                                {/* Reason + comment */}
+                                <div>
+                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                                        <AlertCircle className="h-4 w-4" />
+                                        Bejelentés oka
+                                    </h3>
+                                    <div className="p-4 rounded-lg bg-white/5 border border-white/10 space-y-3">
+                                        <Badge variant="secondary" className="px-3 py-1 text-sm font-medium bg-zinc-800 text-zinc-100 hover:bg-zinc-700 border-zinc-700">
+                                            {getReasonLabel(item.reason)}
+                                        </Badge>
+                                        {item.comment && (
+                                            <div className="text-sm text-zinc-300 whitespace-pre-wrap pt-1 border-t border-white/5">
+                                                {item.comment}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
-                                {/* POI Map */}
+                                {/* Map — only when we have coordinates */}
                                 {poiCoordsLoading ? (
                                     <div className="flex items-center justify-center py-8">
                                         <div className="w-5 h-5 border-2 border-zinc-600 border-t-zinc-300 rounded-full animate-spin" />
-                                        <span className="ml-3 text-sm text-zinc-500">Térkép betöltése...</span>
+                                        <span className="ml-3 text-sm text-zinc-500">Térkép betöltése…</span>
                                     </div>
                                 ) : poiCoords ? (
                                     <div>
                                         <h3 className="flex items-center gap-2 text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
                                             <MapPin className="h-4 w-4" />
-                                            POI helye a térképen
+                                            Hely a térképen
                                         </h3>
                                         <div className="flex gap-6 mb-3">
                                             <div className="flex-1">
@@ -325,7 +740,7 @@ export default function DetailModal({
                                                 <p className="text-sm font-mono font-semibold text-white">{poiCoords.lon.toFixed(6)}</p>
                                             </div>
                                         </div>
-                                        <div className="relative rounded-lg overflow-hidden border border-border mb-3">
+                                        <div className="rounded-lg overflow-hidden border border-border mb-3">
                                             <iframe
                                                 width="100%"
                                                 height="250"
@@ -347,98 +762,7 @@ export default function DetailModal({
                                     </div>
                                 ) : null}
 
-                                {/* Comment */}
-                                {item.comment && (
-                                    <div>
-                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                                            Megjegyzés
-                                        </h3>
-                                        <div className="p-4 rounded-lg bg-white/5 border border-white/10 text-zinc-300 whitespace-pre-wrap">
-                                            {item.comment}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Metadata Grid */}
-                                <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-                                    <div className="space-y-2">
-                                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                                            <AlertCircle className="w-3 h-3" /> Ok
-                                        </h3>
-                                        <div className="flex items-center">
-                                            <Badge variant="secondary" className="px-3 py-1 text-sm font-medium capitalize bg-zinc-800 text-zinc-100 hover:bg-zinc-700 border-zinc-700">
-                                                {getReasonLabel(item.reason)}
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                                            <CheckCircle className="w-3 h-3" /> Státusz
-                                        </h3>
-                                        {onStatusChange ? (
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        variant="outline"
-                                                        className={`w-full justify-between border-white/10 bg-zinc-900/50 hover:bg-zinc-900 hover:text-white capitalize font-normal ${currentStatus === 'resolved' ? 'text-green-400 border-green-900/50' :
-                                                            currentStatus === 'dismissed' ? 'text-zinc-400' :
-                                                                currentStatus === 'reviewed' ? 'text-blue-400 border-blue-900/50' :
-                                                                    'text-zinc-200'
-                                                            }`}
-                                                    >
-                                                        <span className="flex items-center gap-2">
-                                                            <span className={`w-2 h-2 rounded-full ${currentStatusObj.color}`} />
-                                                            {currentStatusObj.label}
-                                                        </span>
-                                                        <ChevronDown className="h-4 w-4 opacity-50" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="start" className="w-[180px] bg-zinc-900 border-zinc-800">
-                                                    {poiFlagStatuses.map(s => (
-                                                        <DropdownMenuItem
-                                                            key={s.value}
-                                                            onClick={() => handleStatusChange(s.value)}
-                                                            className="text-zinc-200 focus:bg-zinc-800 focus:text-white cursor-pointer group"
-                                                        >
-                                                            <span className={`w-2 h-2 rounded-full ${s.color} mr-2 ${s.hoverShadow} transition-shadow`} />
-                                                            {s.label}
-                                                            {currentStatus === s.value && <Check className="ml-auto h-3 w-3" />}
-                                                        </DropdownMenuItem>
-                                                    ))}
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        ) : (
-                                            <div className="flex items-center gap-2 text-white capitalize pl-1">
-                                                <span className={`w-2 h-2 rounded-full ${currentStatusObj.color}`} />
-                                                {currentStatusObj.label}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                                            <User className="w-3 h-3" /> Bejelentő
-                                        </h3>
-                                        <p className="text-sm font-medium text-zinc-200 pl-1">
-                                            {item.reporter_username || item.reporter_full_name || 'Ismeretlen'}
-                                        </p>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                                            <Clock className="w-3 h-3" /> Bejelentés dátuma
-                                        </h3>
-                                        <p className="text-sm font-medium text-zinc-200 pl-1">
-                                            {new Date(item.created_at).toLocaleDateString('hu-HU', {
-                                                year: 'numeric',
-                                                month: 'long',
-                                                day: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Reported Coordinates */}
+                                {/* Reported coordinates — only if user submitted them with the flag */}
                                 {item.reported_latitude && item.reported_longitude && (
                                     <>
                                         <Separator className="bg-border" />
@@ -446,7 +770,7 @@ export default function DetailModal({
                                             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
                                                 Bejelentett koordináták
                                             </h3>
-                                            <div className="flex gap-6 mb-3">
+                                            <div className="flex gap-6">
                                                 <div className="flex-1">
                                                     <p className="text-xs text-muted-foreground mb-0.5">Szélesség</p>
                                                     <p className="text-sm font-mono font-semibold text-white">{item.reported_latitude.toFixed(6)}</p>
@@ -460,16 +784,16 @@ export default function DetailModal({
                                     </>
                                 )}
 
-                                {/* Review info */}
+                                {/* Review trail */}
                                 {item.reviewed_at && (
                                     <>
                                         <Separator className="bg-border" />
                                         <div>
                                             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                                                Áttekintés információ
+                                                Áttekintés
                                             </h3>
                                             <div className="p-3 bg-blue-500/10 border border-blue-500/20 text-blue-200 rounded-lg text-sm">
-                                                Áttekintve: {new Date(item.reviewed_at).toLocaleDateString('hu-HU', {
+                                                {new Date(item.reviewed_at).toLocaleDateString('hu-HU', {
                                                     year: 'numeric',
                                                     month: 'long',
                                                     day: 'numeric',
@@ -483,24 +807,41 @@ export default function DetailModal({
                             </div>
                         </ScrollArea>
 
-                        <div className="p-6 border-t border-border flex justify-between gap-2 flex-wrap">
-                            <div>
-                                {onOpenPoiEdit && item.poi_id && item.poi_type && (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="gap-2"
-                                        onClick={() => {
-                                            onOpenPoiEdit(item.poi_id, item.poi_type);
-                                            onClose();
-                                        }}
-                                    >
-                                        <ExternalLink className="w-4 h-4" />
-                                        Ugrás a POI szerkesztéséhez
-                                    </Button>
-                                )}
-                            </div>
-                            <Button onClick={onClose} variant="outline">Bezárás</Button>
+                        {/* Footer — quick status actions, same shape as parking_image accept/reject */}
+                        <div className="p-6 border-t border-border flex justify-end gap-2 flex-wrap">
+                            <Button onClick={onClose} variant="outline" size="sm">Bezárás</Button>
+                            {onStatusChange && currentStatus !== 'dismissed' && (
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="gap-2 border-zinc-500/30 text-zinc-300 hover:bg-zinc-500/10"
+                                    onClick={() => handleStatusChange('dismissed')}
+                                >
+                                    <XCircle className="w-4 h-4" />
+                                    Elutasítás
+                                </Button>
+                            )}
+                            {onStatusChange && currentStatus !== 'reviewed' && currentStatus !== 'resolved' && (
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="gap-2 border-blue-500/30 text-blue-400 hover:bg-blue-500/10 hover:text-blue-300"
+                                    onClick={() => handleStatusChange('reviewed')}
+                                >
+                                    <Eye className="w-4 h-4" />
+                                    Áttekintve
+                                </Button>
+                            )}
+                            {onStatusChange && currentStatus !== 'resolved' && (
+                                <Button
+                                    size="sm"
+                                    className="gap-2 bg-green-600 hover:bg-green-500 text-white"
+                                    onClick={() => handleStatusChange('resolved')}
+                                >
+                                    <CheckCircle className="w-4 h-4" />
+                                    Megoldva
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </DialogContent>
@@ -517,6 +858,16 @@ export default function DetailModal({
                         <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
                             <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
                                 <div className="flex items-center gap-4 min-w-0 pr-8">
+                                    {onBack && (
+                                        <button
+                                            type="button"
+                                            onClick={onBack}
+                                            className="p-2 rounded-lg text-muted-foreground hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
+                                            title="Vissza az előző modálra"
+                                        >
+                                            <ArrowLeft className="h-5 w-5" />
+                                        </button>
+                                    )}
                                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-600/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0 shadow-inner">
                                         <MessageSquare className="h-6 w-6 text-purple-400" />
                                     </div>
@@ -730,6 +1081,16 @@ export default function DetailModal({
                         <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
                             <DialogTitle className="text-foreground flex items-center gap-4 text-xl font-bold">
                                 <div className="flex items-center gap-4 min-w-0 pr-8">
+                                    {onBack && (
+                                        <button
+                                            type="button"
+                                            onClick={onBack}
+                                            className="p-2 rounded-lg text-muted-foreground hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
+                                            title="Vissza az előző modálra"
+                                        >
+                                            <ArrowLeft className="h-5 w-5" />
+                                        </button>
+                                    )}
                                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center flex-shrink-0">
                                         <Users className="h-5 w-5 text-primary-foreground" />
                                     </div>
@@ -893,6 +1254,16 @@ export default function DetailModal({
                         <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
                             <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
                                 <div className="flex items-center gap-4 min-w-0 pr-8">
+                                    {onBack && (
+                                        <button
+                                            type="button"
+                                            onClick={onBack}
+                                            className="p-2 rounded-lg text-muted-foreground hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
+                                            title="Vissza az előző modálra"
+                                        >
+                                            <ArrowLeft className="h-5 w-5" />
+                                        </button>
+                                    )}
                                     <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${locationGradient} border flex items-center justify-center flex-shrink-0 shadow-inner`}>
                                         <LocationIcon className={`h-6 w-6 ${locationIconColor}`} />
                                     </div>
