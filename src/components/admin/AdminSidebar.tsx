@@ -19,6 +19,7 @@ import {
     Route,
     ScrollText,
     Settings,
+    Lightbulb,
 } from 'lucide-react';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import { useSidebar } from '@/components/ui/sidebar';
@@ -50,6 +51,7 @@ export default function AdminSidebar({
         { id: 'repair', label: 'Javító Állomások', icon: Wrench, section: 'POI & HELYEK' },
         { id: 'parking_images', label: 'Parkoló képek', icon: Camera, section: 'POI & HELYEK' },
         { id: 'poi_flags', label: 'POI Bejelentések', icon: Flag, section: 'POI & HELYEK' },
+        { id: 'poi_suggestions', label: 'POI Javaslatok', icon: Lightbulb, section: 'POI & HELYEK' },
         { id: 'community_routes', label: 'Közösségi útvonalak', icon: Route, section: 'POI & HELYEK' },
 
         { id: 'cities', label: 'Városok', icon: Building2, section: 'KIHÍVÁSOK' },

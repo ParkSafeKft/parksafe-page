@@ -61,7 +61,7 @@ export const translations = {
                 kmLabel: "Megtett kilométer",
                 carTripsLabel: "Kiváltott autós út",
                 treesLabel: "Évnyi fa CO₂-megkötése",
-                methodology: "Számítás: 150 g CO₂ / km megtakarítás (átlagos városi autóutat helyettesítve), 5 km átlagos autós úthossz, 21 kg CO₂ / év érett fa megkötése alapján.",
+                methodology: "Számítás: 90 g CO₂ / km megtakarítás (150 g/km városi autókibocsátás × ~60% modal shift), 5 km átlagos autós úthossz, 21 kg CO₂ / év érett fa megkötése alapján.",
                 updatedOn: "frissítve",
             }
         },
@@ -319,7 +319,7 @@ export const translations = {
                 kmLabel: "Kilometres ridden",
                 carTripsLabel: "Car trips replaced",
                 treesLabel: "Tree-years of CO₂ absorption",
-                methodology: "Calculation: 150 g CO₂ / km saved (versus an average urban car trip), 5 km mean car-trip length, 21 kg CO₂ / year absorbed by a mature tree.",
+                methodology: "Calculation: 90 g CO₂ / km saved (150 g/km urban car emissions × ~60% modal shift), 5 km mean car-trip length, 21 kg CO₂ / year absorbed by a mature tree.",
                 updatedOn: "updated",
             }
         },

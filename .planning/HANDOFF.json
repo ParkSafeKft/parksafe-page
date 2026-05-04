@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "timestamp": "2026-04-29T17:59:16.869Z",
+  "timestamp": "2026-05-04T02:43:30.663Z",
   "source": "auto-postool",
   "partial": false,
   "phase": null,
@@ -22,9 +22,21 @@
     },
     {
       "status": "M",
-      "path": "src/components/admin/DetailModal.tsx"
+      "path": "src/app/admin/[[...slug]]/page.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/admin/AdminSidebar.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/translations.ts"
+    },
+    {
+      "status": "??",
+      "path": "src/components/admin/PoiSuggestionsTable.tsx"
     }
   ],
   "next_action": null,
-  "context_notes": "Recent commits:\n0b45867 chore: update HANDOFF.json and enhance admin page filters\nba2eac4 chore: update HANDOFF.json and enhance LeaderboardTab functionality\n961a326 feat: add app configuration tab to admin page\n312c43b chore: update HANDOFF.json and enhance translations for CO₂ impact\n87d33ea refactor: enhance CommunityRouteReviewModal and InteractiveRouteMap for user-dropped pins"
+  "context_notes": "Recent commits:\nb6f9b1b chore: update HANDOFF.json and enhance DetailModal with user activity tracking\n0b45867 chore: update HANDOFF.json and enhance admin page filters\nba2eac4 chore: update HANDOFF.json and enhance LeaderboardTab functionality\n961a326 feat: add app configuration tab to admin page\n312c43b chore: update HANDOFF.json and enhance translations for CO₂ impact"
 }

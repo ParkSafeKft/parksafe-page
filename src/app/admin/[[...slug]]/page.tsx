@@ -32,6 +32,7 @@ import {
     Route,
     ScrollText,
     Settings,
+    Lightbulb,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -48,6 +49,7 @@ import DeleteConfirmModal from '@/components/admin/DeleteConfirmModal';
 import DeviceStatsOverview from '@/components/admin/DeviceStatsOverview';
 import FeedbackTable from '@/components/admin/FeedbackTable';
 import PoiFlagsTable from '@/components/admin/PoiFlagsTable';
+import PoiSuggestionsTable, { PoiSuggestion } from '@/components/admin/PoiSuggestionsTable';
 import ParkingImageSubmissionsTable from '@/components/admin/ParkingImageSubmissionsTable';
 import DrinkingFountainTable from '@/components/admin/DrinkingFountainTable';
 import CitiesTable from '@/components/admin/CitiesTable';
@@ -81,6 +83,10 @@ function sanitizeSearchTerm(term: string): string {
 
 const isDev = process.env.NODE_ENV === 'development';
 
+type RpcResultWithError = {
+    error?: string | null;
+};
+
 /**
  * URL routing for the admin panel.
  * Each tab maps to a path segment under /admin so the browser back button
@@ -96,6 +102,7 @@ const TAB_SLUGS: Record<string, string> = {
     drinking_fountain: 'drinking-fountains',
     feedback: 'feedback',
     poi_flags: 'poi-flags',
+    poi_suggestions: 'poi-suggestions',
     cities: 'cities',
     daily_challenges: 'daily-challenges',
     community_routes: 'community-routes',
@@ -179,6 +186,8 @@ export default function AdminPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [poiFlags, setPoiFlags] = useState<any[]>([]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [poiSuggestions, setPoiSuggestions] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [parkingImageSubmissions, setParkingImageSubmissions] = useState<any[]>([]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [drinkingFountains, setDrinkingFountains] = useState<any[]>([]);
@@ -208,6 +217,8 @@ export default function AdminPage() {
     const [feedbackCategoryFilter, setFeedbackCategoryFilter] = useState('');
     const [poiFlagStatusFilter, setPoiFlagStatusFilter] = useState('');
     const [poiFlagReasonFilter, setPoiFlagReasonFilter] = useState('');
+    const [poiSuggestionStatusFilter, setPoiSuggestionStatusFilter] = useState('');
+    const [poiSuggestionTypeFilter, setPoiSuggestionTypeFilter] = useState('');
     const [parkingImageStatusFilter, setParkingImageStatusFilter] = useState('');
 
     // New modals
@@ -274,6 +285,7 @@ export default function AdminPage() {
             case 'repair': return 'repairStation';
             case 'feedback': return 'feedback';
             case 'poi_flags': return 'poi_flags';
+            case 'poi_suggestions': return 'poi_suggestions';
             case 'drinking_fountain': return 'drinkingFountain';
             case 'cities': return 'cities';
             case 'daily_challenges': return 'daily_challenges';
@@ -386,6 +398,18 @@ export default function AdminPage() {
                         countQuery = countQuery.eq('reason', poiFlagReasonFilter);
                     }
                     break;
+                case 'poi_suggestions':
+                    query = supabase.from('poi_suggestions').select('*');
+                    countQuery = supabase.from('poi_suggestions').select('*', { count: 'exact', head: true });
+                    if (poiSuggestionStatusFilter) {
+                        query = query.eq('status', poiSuggestionStatusFilter);
+                        countQuery = countQuery.eq('status', poiSuggestionStatusFilter);
+                    }
+                    if (poiSuggestionTypeFilter) {
+                        query = query.eq('suggested_type', poiSuggestionTypeFilter);
+                        countQuery = countQuery.eq('suggested_type', poiSuggestionTypeFilter);
+                    }
+                    break;
                 case 'cities':
                     query = supabase.from('cities').select('*');
                     countQuery = supabase.from('cities').select('*', { count: 'exact', head: true });
@@ -473,6 +497,9 @@ export default function AdminPage() {
                     } else if (activeTab === 'poi_flags') {
                         query = query.or(`${idQuery}reason.ilike.%${safe}%,comment.ilike.%${safe}%,poi_type.ilike.%${safe}%`);
                         countQuery = countQuery.or(`${idQuery}reason.ilike.%${safe}%,comment.ilike.%${safe}%,poi_type.ilike.%${safe}%`);
+                    } else if (activeTab === 'poi_suggestions') {
+                        query = query.or(`${idQuery}comment.ilike.%${safe}%,suggested_type.ilike.%${safe}%`);
+                        countQuery = countQuery.or(`${idQuery}comment.ilike.%${safe}%,suggested_type.ilike.%${safe}%`);
                     } else if (activeTab === 'parking_images') {
                         query = query.or(`${idQuery}image_url.ilike.%${safe}%`);
                         countQuery = countQuery.or(`${idQuery}image_url.ilike.%${safe}%`);
@@ -508,6 +535,7 @@ export default function AdminPage() {
                 drinking_fountain: ['created_at', 'name', 'city'],
                 feedback: ['created_at', 'status', 'priority', 'title'],
                 poi_flags: ['created_at', 'status', 'reason'],
+                poi_suggestions: ['created_at', 'status', 'suggested_type'],
                 cities: ['created_at', 'name', 'slug', 'country_code'],
                 daily_challenges: ['challenge_date', 'distance_meters', 'generated_at', 'generation_source'],
                 community_routes: ['created_at', 'status', 'name', 'quality_rating'],
@@ -546,6 +574,32 @@ export default function AdminPage() {
                     reporter_avatar_url: row.profiles?.avatar_url || null,
                 }));
                 setPoiFlags(mapped);
+            } else if (activeTab === 'poi_suggestions') {
+                const rows = dataRes.data || [];
+                const userIds = Array.from(new Set(
+                    rows.map((r: { user_id?: string | null }) => r.user_id).filter((v): v is string => !!v)
+                ));
+                let profilesMap: Record<string, { id: string; username?: string | null; full_name?: string | null; avatar_url?: string | null }> = {};
+                if (userIds.length > 0) {
+                    const { data: profs } = await supabase
+                        .from('profiles')
+                        .select('id, username, full_name, avatar_url')
+                        .in('id', userIds);
+                    profilesMap = Object.fromEntries(
+                        (profs || []).map((p: { id: string; username?: string | null; full_name?: string | null; avatar_url?: string | null }) => [p.id, p])
+                    );
+                }
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const mapped = rows.map((row: any) => {
+                    const prof = row.user_id ? profilesMap[row.user_id] : null;
+                    return {
+                        ...row,
+                        reporter_username: prof?.username || null,
+                        reporter_full_name: prof?.full_name || null,
+                        reporter_avatar_url: prof?.avatar_url || null,
+                    };
+                });
+                setPoiSuggestions(mapped);
             } else if (activeTab === 'parking_images') {
                 const rows = dataRes.data || [];
                 // user_id FK points at auth.users, not profiles — resolve via separate lookup.
@@ -668,7 +722,7 @@ export default function AdminPage() {
     useEffect(() => {
         fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeTab, currentPage, sortConfig, searchTerm, profile, pageSize, challengeCityFilter, challengeDateFrom, challengeDateTo, challengeActiveFilter, routeStatusFilter, routeDateFrom, routeDateTo, auditActionFilter, auditTargetTypeFilter, feedbackStatusFilter, feedbackPriorityFilter, feedbackCategoryFilter, poiFlagStatusFilter, poiFlagReasonFilter, parkingImageStatusFilter]);
+    }, [activeTab, currentPage, sortConfig, searchTerm, profile, pageSize, challengeCityFilter, challengeDateFrom, challengeDateTo, challengeActiveFilter, routeStatusFilter, routeDateFrom, routeDateTo, auditActionFilter, auditTargetTypeFilter, feedbackStatusFilter, feedbackPriorityFilter, feedbackCategoryFilter, poiFlagStatusFilter, poiFlagReasonFilter, poiSuggestionStatusFilter, poiSuggestionTypeFilter, parkingImageStatusFilter]);
 
     // Load cities for filter dropdowns when those tabs open
     useEffect(() => {
@@ -695,7 +749,8 @@ export default function AdminPage() {
                         activeTab === 'drinking_fountain' ? drinkingFountains :
                             activeTab === 'services' ? bicycleServices :
                                 activeTab === 'repair' ? repairStations :
-                                    activeTab === 'poi_flags' ? poiFlags : feedback;
+                                    activeTab === 'poi_flags' ? poiFlags :
+                                        activeTab === 'poi_suggestions' ? poiSuggestions : feedback;
             setSelectedRows(new Set(currentData.map(item => item.id)));
         } else {
             setSelectedRows(new Set());
@@ -916,6 +971,52 @@ export default function AdminPage() {
         }
     };
 
+    const handlePoiSuggestionSave = async (id: string, updates: Partial<PoiSuggestion>) => {
+        setToggleLoading(id);
+        try {
+            const { error } = await supabase
+                .from('poi_suggestions')
+                .update({
+                    suggested_type: updates.suggested_type ?? null,
+                    status: updates.status ?? 'pending',
+                    latitude: updates.latitude ?? null,
+                    longitude: updates.longitude ?? null,
+                    comment: updates.comment ?? null,
+                })
+                .eq('id', id);
+
+            if (error) throw error;
+
+            toast.success('POI javaslat frissítve');
+            fetchData();
+        } catch (error) {
+            if (isDev) console.error('Error updating poi suggestion:', error);
+            toast.error('Hiba történt a POI javaslat mentésekor');
+        } finally {
+            setToggleLoading(null);
+        }
+    };
+
+    const handlePoiSuggestionStatusChange = async (id: string, newStatus: string) => {
+        setToggleLoading(id);
+        try {
+            const { error } = await supabase
+                .from('poi_suggestions')
+                .update({ status: newStatus })
+                .eq('id', id);
+
+            if (error) throw error;
+
+            toast.success('POI javaslat státusza frissítve');
+            fetchData();
+        } catch (error) {
+            if (isDev) console.error('Error updating poi suggestion status:', error);
+            toast.error('Hiba történt a státusz frissítésekor');
+        } finally {
+            setToggleLoading(null);
+        }
+    };
+
     const handleParkingImageStatusChange = async (id: string, newStatus: string) => {
         if (!profile) return;
         setToggleLoading(id);
@@ -926,8 +1027,9 @@ export default function AdminPage() {
                     p_new_status: newStatus,
                 });
 
-            if (error || (data && (data as any).error)) {
-                if (isDev) console.error('Error updating parking image status via RPC:', error || (data as any).error);
+            const rpcData = data as RpcResultWithError | null;
+            if (error || rpcData?.error) {
+                if (isDev) console.error('Error updating parking image status via RPC:', error || rpcData?.error);
                 toast.error('Hiba történt a státusz frissítésekor');
             } else {
                 toast.success('Kép státusza frissítve');
@@ -961,8 +1063,9 @@ export default function AdminPage() {
             const { data, error } = await supabase
                 .rpc('parking_image_submission_delete', { submission_id: submission.id });
 
-            if (error || (data && (data as any).error)) {
-                if (isDev) console.error('RPC delete error (parking_image_submission_delete):', error || (data as any).error);
+            const rpcData = data as RpcResultWithError | null;
+            if (error || rpcData?.error) {
+                if (isDev) console.error('RPC delete error (parking_image_submission_delete):', error || rpcData?.error);
                 toast.error('Hiba történt a kérelem törlésekor');
             } else {
                 toast.success('Kérelem és kép sikeresen törölve');
@@ -1161,6 +1264,7 @@ export default function AdminPage() {
                                                 {activeTab === 'drinking_fountain' && <Droplet className="h-5 w-5 text-white" />}
                                                 {activeTab === 'feedback' && <Users className="h-5 w-5 text-white" />}
                                                 {activeTab === 'poi_flags' && <MapPin className="h-5 w-5 text-white" />}
+                                                {activeTab === 'poi_suggestions' && <Lightbulb className="h-5 w-5 text-white" />}
                                                 {activeTab === 'cities' && <Building2 className="h-5 w-5 text-white" />}
                                                 {activeTab === 'daily_challenges' && <Trophy className="h-5 w-5 text-white" />}
                                                 {activeTab === 'community_routes' && <Route className="h-5 w-5 text-white" />}
@@ -1179,6 +1283,7 @@ export default function AdminPage() {
                                                     {activeTab === 'drinking_fountain' && 'Ivókutak'}
                                                     {activeTab === 'feedback' && 'Visszajelzések'}
                                                     {activeTab === 'poi_flags' && 'POI Bejelentések'}
+                                                    {activeTab === 'poi_suggestions' && 'POI Javaslatok'}
                                                     {activeTab === 'cities' && 'Városok'}
                                                     {activeTab === 'daily_challenges' && 'Napi kihívások'}
                                                     {activeTab === 'community_routes' && 'Közösségi útvonalak'}
@@ -1217,6 +1322,7 @@ export default function AdminPage() {
                                                     {activeTab === 'drinking_fountain' && 'Ivókutak nyilvántartása és kezelése'}
                                                     {activeTab === 'feedback' && 'Felhasználói visszajelzések kezelése'}
                                                     {activeTab === 'poi_flags' && 'POI-khoz kapcsolódó bejelentések kezelése'}
+                                                    {activeTab === 'poi_suggestions' && 'Felhasználói POI javaslatok áttekintése és szerkesztése'}
                                                     {activeTab === 'cities' && 'Városok kezelése (slug, koordináták, bounding box)'}
                                                     {activeTab === 'daily_challenges' && 'Automatikusan generált napi kihívások áttekintése'}
                                                     {activeTab === 'community_routes' && 'Közösségi beküldésű kerékpárutak moderálása'}
@@ -1252,7 +1358,7 @@ export default function AdminPage() {
                                             </div>
                                         )}
 
-                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'daily_challenges' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'audit_log' && activeTab !== 'app_config' && (
+                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'poi_suggestions' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'daily_challenges' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'audit_log' && activeTab !== 'app_config' && (
                                             <>
                                                 <Separator orientation="vertical" className="h-8 bg-sidebar-border" />
                                                 <Button
@@ -1294,6 +1400,7 @@ export default function AdminPage() {
                                             {activeTab === 'drinking_fountain' && 'Ivókutak'}
                                             {activeTab === 'feedback' && 'Visszajelzések'}
                                             {activeTab === 'poi_flags' && 'POI Bejelentések'}
+                                            {activeTab === 'poi_suggestions' && 'POI Javaslatok'}
                                             {activeTab === 'cities' && 'Városok'}
                                             {activeTab === 'daily_challenges' && 'Napi kihívások'}
                                             {activeTab === 'community_routes' && 'Közösségi útvonalak'}
@@ -1318,7 +1425,7 @@ export default function AdminPage() {
                                                 {mobileSearchOpen ? <XCircle className="h-4 w-4" /> : <Search className="h-4 w-4" />}
                                             </Button>
                                         )}
-                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'daily_challenges' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'audit_log' && activeTab !== 'app_config' && (
+                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'poi_suggestions' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'daily_challenges' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'audit_log' && activeTab !== 'app_config' && (
                                             <Button
                                                 size="sm"
                                                 className="h-8 w-8 p-0"
@@ -1628,6 +1735,27 @@ export default function AdminPage() {
                                             onStatusFilterChange={setPoiFlagStatusFilter}
                                             reasonFilter={poiFlagReasonFilter}
                                             onReasonFilterChange={setPoiFlagReasonFilter}
+                                            currentPage={currentPage}
+                                            totalPages={totalPages}
+                                            onPageChange={setCurrentPage}
+                                            pageSize={pageSize}
+                                            onPageSizeChange={setPageSize}
+                                        />
+                                    )}
+                                    {activeTab === 'poi_suggestions' && (
+                                        <PoiSuggestionsTable
+                                            data={poiSuggestions}
+                                            onSort={handleSort}
+                                            sortConfig={sortConfig}
+                                            onSave={handlePoiSuggestionSave}
+                                            onStatusChange={handlePoiSuggestionStatusChange}
+                                            onDelete={(id) => handleDeleteClick(id)}
+                                            onOpenUser={handleOpenUserProfile}
+                                            searchTerm={searchTerm}
+                                            statusFilter={poiSuggestionStatusFilter}
+                                            onStatusFilterChange={setPoiSuggestionStatusFilter}
+                                            typeFilter={poiSuggestionTypeFilter}
+                                            onTypeFilterChange={setPoiSuggestionTypeFilter}
                                             currentPage={currentPage}
                                             totalPages={totalPages}
                                             onPageChange={setCurrentPage}
