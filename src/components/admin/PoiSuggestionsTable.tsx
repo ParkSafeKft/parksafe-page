@@ -2,17 +2,27 @@
 
 import { useState } from 'react';
 import {
+    Building,
+    Camera,
     CheckCircle2,
     ChevronDown,
+    Clock,
     Copy,
+    DollarSign,
+    Droplet,
     Edit,
     ExternalLink,
     Eye,
+    Globe,
     Lightbulb,
     MapPin,
     MoreHorizontal,
+    Phone,
+    Settings,
+    Shield,
     Trash2,
     User,
+    Wrench,
     XCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -34,14 +44,33 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
+export type CapacityLevel = 'small' | 'medium' | 'large';
+
+export interface PoiSuggestionDetails {
+    covered?: boolean | null;
+    is_open_24h?: boolean | null;
+    has_camera?: boolean | null;
+    capacity_level?: CapacityLevel | null;
+    phone?: string | null;
+    website?: string | null;
+    opening_hours?: string | null;
+    services?: string[] | null;
+    price_range?: string | null;
+    free?: boolean | null;
+    [key: string]: unknown;
+}
+
 export interface PoiSuggestion {
     id: string;
     user_id: string | null;
     suggested_type: string | null;
+    name: string | null;
+    city: string | null;
     latitude: number | null;
     longitude: number | null;
     comment: string | null;
     status: string | null;
+    details: PoiSuggestionDetails | null;
     created_at: string;
     reporter_username?: string | null;
     reporter_full_name?: string | null;
@@ -82,6 +111,32 @@ const TYPE_OPTIONS = [
     { value: 'drinkingFountain', label: 'Ivókút' },
 ];
 
+const CAPACITY_OPTIONS: { value: CapacityLevel; label: string }[] = [
+    { value: 'small', label: 'Kicsi' },
+    { value: 'medium', label: 'Közepes' },
+    { value: 'large', label: 'Nagy' },
+];
+
+type TriState = 'unset' | 'true' | 'false';
+
+function boolToTri(value: boolean | null | undefined): TriState {
+    if (value === true) return 'true';
+    if (value === false) return 'false';
+    return 'unset';
+}
+
+function triToBool(value: TriState): boolean | null {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return null;
+}
+
+const TRI_OPTIONS: { value: TriState; label: string }[] = [
+    { value: 'unset', label: 'Nincs megadva' },
+    { value: 'true', label: 'Igen' },
+    { value: 'false', label: 'Nem' },
+];
+
 function copyId(id: string) {
     if (typeof navigator === 'undefined' || !navigator.clipboard) return;
     navigator.clipboard.writeText(id).then(
@@ -97,6 +152,48 @@ function getTypeLabel(type?: string | null) {
 function getStatusLabel(status?: string | null) {
     if (status === 'dismissed') return 'Elvetve';
     return STATUS_OPTIONS.find(option => option.value === status)?.label || status || 'Ismeretlen';
+}
+
+const CAPACITY_LABELS: Record<CapacityLevel, string> = {
+    small: 'Kicsi',
+    medium: 'Közepes',
+    large: 'Nagy',
+};
+
+function renderDetailChips(
+    type: string | null | undefined,
+    details: PoiSuggestionDetails | null | undefined
+): { label: string; title?: string }[] {
+    if (!details || typeof details !== 'object') return [];
+    const chips: { label: string; title?: string }[] = [];
+    const pushBool = (key: keyof PoiSuggestionDetails, yes: string, no: string) => {
+        const value = details[key];
+        if (value === true) chips.push({ label: yes });
+        else if (value === false) chips.push({ label: no });
+    };
+
+    if (type === 'parking') {
+        pushBool('covered', 'Fedett', 'Nyitott');
+        pushBool('is_open_24h', '0–24', 'Nem 0–24');
+        pushBool('has_camera', 'Kamerás', 'Kamera nélkül');
+        const cap = details.capacity_level;
+        if (cap === 'small' || cap === 'medium' || cap === 'large') {
+            chips.push({ label: CAPACITY_LABELS[cap], title: 'Kapacitás' });
+        }
+    } else if (type === 'bicycleService') {
+        if (details.phone) chips.push({ label: 'Telefon', title: String(details.phone) });
+        if (details.website) chips.push({ label: 'Web', title: String(details.website) });
+        if (details.opening_hours) chips.push({ label: 'Nyitvatartás', title: String(details.opening_hours) });
+        if (details.price_range) chips.push({ label: String(details.price_range), title: 'Árkategória' });
+        if (Array.isArray(details.services) && details.services.length > 0) {
+            chips.push({ label: `${details.services.length} szolgáltatás`, title: details.services.join(', ') });
+        }
+    } else if (type === 'repairStation') {
+        pushBool('covered', 'Fedett', 'Nyitott');
+        pushBool('free', 'Ingyenes', 'Fizetős');
+    }
+
+    return chips;
 }
 
 function getStatusStyle(status?: string | null) {
@@ -158,6 +255,92 @@ const Filters = ({
     </div>
 );
 
+function TriStateSelect({
+    label,
+    value,
+    onChange,
+    icon,
+}: {
+    label: string;
+    value: TriState;
+    onChange: (next: TriState) => void;
+    icon?: React.ReactNode;
+}) {
+    return (
+        <label className="space-y-2">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
+                {icon}
+                {label}
+            </span>
+            <div className="relative">
+                <select
+                    value={value}
+                    onChange={(event) => onChange(event.target.value as TriState)}
+                    className="w-full appearance-none bg-[#111111] border border-white/10 text-zinc-200 text-sm rounded-lg pl-3 pr-8 py-2.5 focus:outline-none focus:border-green-500/50"
+                >
+                    {TRI_OPTIONS.map(option => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+            </div>
+        </label>
+    );
+}
+
+function buildDetailsForType(
+    type: string,
+    state: {
+        covered: TriState;
+        isOpen24h: TriState;
+        hasCamera: TriState;
+        capacityLevel: CapacityLevel | '';
+        phone: string;
+        website: string;
+        openingHours: string;
+        services: string;
+        priceRange: string;
+        free: TriState;
+    }
+): PoiSuggestionDetails {
+    const trim = (value: string) => {
+        const v = value.trim();
+        return v === '' ? null : v;
+    };
+
+    if (type === 'parking') {
+        return {
+            covered: triToBool(state.covered),
+            is_open_24h: triToBool(state.isOpen24h),
+            has_camera: triToBool(state.hasCamera),
+            capacity_level: state.capacityLevel === '' ? null : state.capacityLevel,
+        };
+    }
+
+    if (type === 'bicycleService') {
+        const services = state.services
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean);
+        return {
+            phone: trim(state.phone),
+            website: trim(state.website),
+            opening_hours: trim(state.openingHours),
+            services: services.length > 0 ? services : null,
+            price_range: trim(state.priceRange),
+        };
+    }
+
+    if (type === 'repairStation') {
+        return {
+            covered: triToBool(state.covered),
+            free: triToBool(state.free),
+        };
+    }
+
+    return {};
+}
+
 function EditSuggestionModal({
     item,
     isOpen,
@@ -173,11 +356,28 @@ function EditSuggestionModal({
     onStatusChange: (id: string, newStatus: string) => void;
     onOpenUser?: (userId: string) => void;
 }) {
+    const initialDetails = (item?.details ?? {}) as PoiSuggestionDetails;
+
     const [suggestedType, setSuggestedType] = useState(item?.suggested_type || '');
     const [status, setStatus] = useState(item?.status || 'pending');
+    const [name, setName] = useState(item?.name || '');
+    const [city, setCity] = useState(item?.city || '');
     const [latitude, setLatitude] = useState(item?.latitude == null ? '' : String(item.latitude));
     const [longitude, setLongitude] = useState(item?.longitude == null ? '' : String(item.longitude));
     const [comment, setComment] = useState(item?.comment || '');
+
+    const [covered, setCovered] = useState<TriState>(boolToTri(initialDetails.covered));
+    const [isOpen24h, setIsOpen24h] = useState<TriState>(boolToTri(initialDetails.is_open_24h));
+    const [hasCamera, setHasCamera] = useState<TriState>(boolToTri(initialDetails.has_camera));
+    const [capacityLevel, setCapacityLevel] = useState<CapacityLevel | ''>(
+        (initialDetails.capacity_level as CapacityLevel | null | undefined) || ''
+    );
+    const [phone, setPhone] = useState(initialDetails.phone || '');
+    const [website, setWebsite] = useState(initialDetails.website || '');
+    const [openingHours, setOpeningHours] = useState(initialDetails.opening_hours || '');
+    const [services, setServices] = useState((initialDetails.services || []).join(', '));
+    const [priceRange, setPriceRange] = useState(initialDetails.price_range || '');
+    const [free, setFree] = useState<TriState>(boolToTri(initialDetails.free));
 
     if (!item) return null;
 
@@ -196,13 +396,41 @@ function EditSuggestionModal({
             toast.error('Érvénytelen koordináta');
             return;
         }
+        if (name.length > 100) {
+            toast.error('A név maximum 100 karakter lehet');
+            return;
+        }
+        if (city.length > 80) {
+            toast.error('A város maximum 80 karakter lehet');
+            return;
+        }
+        if (comment.length > 1000) {
+            toast.error('A komment maximum 1000 karakter lehet');
+            return;
+        }
+
+        const details = buildDetailsForType(suggestedType, {
+            covered,
+            isOpen24h,
+            hasCamera,
+            capacityLevel,
+            phone,
+            website,
+            openingHours,
+            services,
+            priceRange,
+            free,
+        });
 
         onSave(item.id, {
             suggested_type: suggestedType || null,
             status,
+            name: name.trim() || null,
+            city: city.trim() || null,
             latitude: latNumber,
             longitude: lonNumber,
             comment: comment || null,
+            details,
         });
         onClose();
     };
@@ -294,6 +522,24 @@ function EditSuggestionModal({
                                 </div>
                             </label>
                             <label className="space-y-2">
+                                <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Név</span>
+                                <Input
+                                    value={name}
+                                    onChange={(event) => setName(event.target.value)}
+                                    maxLength={100}
+                                    placeholder="POI neve (opcionális)"
+                                />
+                            </label>
+                            <label className="space-y-2">
+                                <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Város</span>
+                                <Input
+                                    value={city}
+                                    onChange={(event) => setCity(event.target.value)}
+                                    maxLength={80}
+                                    placeholder="Budapest"
+                                />
+                            </label>
+                            <label className="space-y-2">
                                 <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Latitude</span>
                                 <Input value={latitude} onChange={(event) => setLatitude(event.target.value)} placeholder="47.497912" />
                             </label>
@@ -309,9 +555,137 @@ function EditSuggestionModal({
                                 value={comment}
                                 onChange={(event) => setComment(event.target.value)}
                                 rows={6}
+                                maxLength={1000}
                                 placeholder="Felhasználói megjegyzés vagy admin pontosítás"
                             />
                         </label>
+
+                        {suggestedType === 'parking' && (
+                            <div>
+                                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                                    <Building className="h-4 w-4" />
+                                    Parkoló részletek
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <TriStateSelect
+                                        label="Fedett"
+                                        value={covered}
+                                        onChange={setCovered}
+                                        icon={<Shield className="w-3.5 h-3.5" />}
+                                    />
+                                    <TriStateSelect
+                                        label="0–24 nyitva"
+                                        value={isOpen24h}
+                                        onChange={setIsOpen24h}
+                                        icon={<Clock className="w-3.5 h-3.5" />}
+                                    />
+                                    <TriStateSelect
+                                        label="Kamerás"
+                                        value={hasCamera}
+                                        onChange={setHasCamera}
+                                        icon={<Camera className="w-3.5 h-3.5" />}
+                                    />
+                                    <label className="space-y-2">
+                                        <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
+                                            <Settings className="w-3.5 h-3.5" />
+                                            Kapacitás
+                                        </span>
+                                        <div className="relative">
+                                            <select
+                                                value={capacityLevel}
+                                                onChange={(event) => setCapacityLevel(event.target.value as CapacityLevel | '')}
+                                                className="w-full appearance-none bg-[#111111] border border-white/10 text-zinc-200 text-sm rounded-lg pl-3 pr-8 py-2.5 focus:outline-none focus:border-green-500/50"
+                                            >
+                                                <option value="">Nincs megadva</option>
+                                                {CAPACITY_OPTIONS.map(option => (
+                                                    <option key={option.value} value={option.value}>{option.label}</option>
+                                                ))}
+                                            </select>
+                                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        )}
+
+                        {suggestedType === 'bicycleService' && (
+                            <div>
+                                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                                    <Wrench className="h-4 w-4" />
+                                    Szerviz részletek
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <label className="space-y-2">
+                                        <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
+                                            <Phone className="w-3.5 h-3.5" />
+                                            Telefon
+                                        </span>
+                                        <Input value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="+36 1 234 5678" />
+                                    </label>
+                                    <label className="space-y-2">
+                                        <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
+                                            <Globe className="w-3.5 h-3.5" />
+                                            Weboldal
+                                        </span>
+                                        <Input value={website} onChange={(event) => setWebsite(event.target.value)} placeholder="https://..." />
+                                    </label>
+                                    <label className="space-y-2">
+                                        <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
+                                            <Clock className="w-3.5 h-3.5" />
+                                            Nyitvatartás
+                                        </span>
+                                        <Input value={openingHours} onChange={(event) => setOpeningHours(event.target.value)} placeholder="H–P 9–18" />
+                                    </label>
+                                    <label className="space-y-2">
+                                        <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
+                                            <DollarSign className="w-3.5 h-3.5" />
+                                            Árkategória
+                                        </span>
+                                        <Input value={priceRange} onChange={(event) => setPriceRange(event.target.value)} placeholder="$ / $$ / $$$" />
+                                    </label>
+                                </div>
+                                <label className="block space-y-2 mt-4">
+                                    <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+                                        Szolgáltatások (vesszővel elválasztva)
+                                    </span>
+                                    <Input
+                                        value={services}
+                                        onChange={(event) => setServices(event.target.value)}
+                                        placeholder="javítás, alkatrész, kerékpárkölcsönzés"
+                                    />
+                                </label>
+                            </div>
+                        )}
+
+                        {suggestedType === 'repairStation' && (
+                            <div>
+                                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                                    <Wrench className="h-4 w-4" />
+                                    Javító állomás részletek
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <TriStateSelect
+                                        label="Fedett"
+                                        value={covered}
+                                        onChange={setCovered}
+                                        icon={<Shield className="w-3.5 h-3.5" />}
+                                    />
+                                    <TriStateSelect
+                                        label="Ingyenes"
+                                        value={free}
+                                        onChange={setFree}
+                                        icon={<DollarSign className="w-3.5 h-3.5" />}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {suggestedType === 'drinkingFountain' && (
+                            <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4 flex items-center gap-3 text-zinc-400">
+                                <Droplet className="w-4 h-4 text-blue-400 shrink-0" />
+                                <span className="text-xs">Az ivókúthoz nincs típus-specifikus mező — a név, város és koordináták elegendőek.</span>
+                            </div>
+                        )}
 
                         {hasValidCoords && (
                             <div>
@@ -446,7 +820,19 @@ export default function PoiSuggestionsTable({
                     <thead className="sticky top-0 z-10 bg-[#111111]">
                         <tr className="border-b border-white/5 bg-white/[0.02]">
                             <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Típus</th>
-                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Komment</th>
+                            <th
+                                className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider cursor-pointer hover:text-zinc-300 transition-colors"
+                                onClick={() => onSort('name')}
+                            >
+                                Név
+                            </th>
+                            <th
+                                className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider cursor-pointer hover:text-zinc-300 transition-colors"
+                                onClick={() => onSort('city')}
+                            >
+                                Város
+                            </th>
+                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Részletek</th>
                             <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Koordináták</th>
                             <th
                                 className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider cursor-pointer hover:text-zinc-300 transition-colors"
@@ -468,6 +854,7 @@ export default function PoiSuggestionsTable({
                         {data.map((item) => {
                             const reporterName = item.reporter_username || item.reporter_full_name || 'Ismeretlen';
                             const hasCoords = item.latitude != null && item.longitude != null;
+                            const detailChips = renderDetailChips(item.suggested_type, item.details);
                             return (
                                 <tr
                                     key={item.id}
@@ -478,9 +865,38 @@ export default function PoiSuggestionsTable({
                                         <span className="text-sm font-medium text-white">{getTypeLabel(item.suggested_type)}</span>
                                     </td>
                                     <td className="p-4">
-                                        <span className="text-sm text-zinc-400 max-w-[260px] truncate block" title={item.comment || '-'}>
-                                            {item.comment || '-'}
+                                        <div className="max-w-[220px]">
+                                            <span className="text-sm text-white truncate block" title={item.name || ''}>
+                                                {item.name || <span className="text-zinc-600">—</span>}
+                                            </span>
+                                            {item.comment && (
+                                                <span className="text-xs text-zinc-500 truncate block mt-0.5" title={item.comment}>
+                                                    {item.comment}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="p-4">
+                                        <span className="text-sm text-zinc-400 truncate block max-w-[140px]" title={item.city || ''}>
+                                            {item.city || <span className="text-zinc-600">—</span>}
                                         </span>
+                                    </td>
+                                    <td className="p-4">
+                                        {detailChips.length > 0 ? (
+                                            <div className="flex flex-wrap gap-1 max-w-[220px]">
+                                                {detailChips.map((chip, idx) => (
+                                                    <span
+                                                        key={idx}
+                                                        className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border border-white/10 bg-white/5 text-zinc-300"
+                                                        title={chip.title}
+                                                    >
+                                                        {chip.label}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <span className="text-xs text-zinc-600">—</span>
+                                        )}
                                     </td>
                                     <td className="p-4">
                                         {hasCoords ? (

@@ -498,8 +498,8 @@ export default function AdminPage() {
                         query = query.or(`${idQuery}reason.ilike.%${safe}%,comment.ilike.%${safe}%,poi_type.ilike.%${safe}%`);
                         countQuery = countQuery.or(`${idQuery}reason.ilike.%${safe}%,comment.ilike.%${safe}%,poi_type.ilike.%${safe}%`);
                     } else if (activeTab === 'poi_suggestions') {
-                        query = query.or(`${idQuery}comment.ilike.%${safe}%,suggested_type.ilike.%${safe}%`);
-                        countQuery = countQuery.or(`${idQuery}comment.ilike.%${safe}%,suggested_type.ilike.%${safe}%`);
+                        query = query.or(`${idQuery}comment.ilike.%${safe}%,suggested_type.ilike.%${safe}%,name.ilike.%${safe}%,city.ilike.%${safe}%`);
+                        countQuery = countQuery.or(`${idQuery}comment.ilike.%${safe}%,suggested_type.ilike.%${safe}%,name.ilike.%${safe}%,city.ilike.%${safe}%`);
                     } else if (activeTab === 'parking_images') {
                         query = query.or(`${idQuery}image_url.ilike.%${safe}%`);
                         countQuery = countQuery.or(`${idQuery}image_url.ilike.%${safe}%`);
@@ -535,7 +535,7 @@ export default function AdminPage() {
                 drinking_fountain: ['created_at', 'name', 'city'],
                 feedback: ['created_at', 'status', 'priority', 'title'],
                 poi_flags: ['created_at', 'status', 'reason'],
-                poi_suggestions: ['created_at', 'status', 'suggested_type'],
+                poi_suggestions: ['created_at', 'status', 'suggested_type', 'name', 'city'],
                 cities: ['created_at', 'name', 'slug', 'country_code'],
                 daily_challenges: ['challenge_date', 'distance_meters', 'generated_at', 'generation_source'],
                 community_routes: ['created_at', 'status', 'name', 'quality_rating'],
@@ -979,9 +979,12 @@ export default function AdminPage() {
                 .update({
                     suggested_type: updates.suggested_type ?? null,
                     status: updates.status ?? 'pending',
+                    name: updates.name ?? null,
+                    city: updates.city ?? null,
                     latitude: updates.latitude ?? null,
                     longitude: updates.longitude ?? null,
                     comment: updates.comment ?? null,
+                    details: updates.details ?? {},
                 })
                 .eq('id', id);
 
