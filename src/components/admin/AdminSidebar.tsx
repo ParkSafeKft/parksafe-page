@@ -20,6 +20,7 @@ import {
     ScrollText,
     Settings,
     Lightbulb,
+    ChartNoAxesCombined,
 } from 'lucide-react';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import { useSidebar } from '@/components/ui/sidebar';
@@ -58,6 +59,8 @@ export default function AdminSidebar({
         { id: 'daily_challenges', label: 'Napi kihívások', icon: Trophy, section: 'KIHÍVÁSOK' },
         { id: 'leaderboard', label: 'Ranglista', icon: Trophy, section: 'KIHÍVÁSOK' },
 
+        { id: 'route_heatmap', label: 'Útvonal hőtérkép', icon: ChartNoAxesCombined, section: 'ADATOK' },
+
         { id: 'users', label: 'Felhasználók', icon: Users, section: 'KÖZÖSSÉG' },
         { id: 'feedback', label: 'Visszajelzések', icon: MessageSquare, section: 'KÖZÖSSÉG' },
 
@@ -68,7 +71,7 @@ export default function AdminSidebar({
         { id: 'home', label: 'Vissza a főoldalra', icon: Home, section: 'EGYÉB' },
     ];
 
-    const sections = ['ÁTTEKINTÉS', 'POI & HELYEK', 'KIHÍVÁSOK', 'KÖZÖSSÉG', 'NAPLÓ', 'RENDSZER', 'EGYÉB'];
+    const sections = ['ÁTTEKINTÉS', 'POI & HELYEK', 'KIHÍVÁSOK', 'ADATOK', 'KÖZÖSSÉG', 'NAPLÓ', 'RENDSZER', 'EGYÉB'];
 
     const handleItemClick = (id: string) => {
         if (isMobile) setOpenMobile(false);
