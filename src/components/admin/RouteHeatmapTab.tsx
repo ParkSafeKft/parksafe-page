@@ -4,12 +4,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type * as Leaflet from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { toCanvas } from 'html-to-image';
-import { Activity, CalendarDays, Crop, Loader2, MapPinned, Maximize, Minimize } from 'lucide-react';
+import { Activity, CalendarDays, Download, Loader2, MapPinned, Maximize, Minimize } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { createTrackHeatLayer, type Track, type TrackHeatLayer } from './trackHeatLayer';
 import RegionExportPanel from './RegionExportPanel';
-import { boundsFromCorners, fetchOsmStreets, topStreets, toCsv, type StreetCount } from './regionExport';
+import { fetchOsmStreets, topStreets, toCsv, type StreetCount } from './regionExport';
 
 type RangeKey = '30d' | '90d' | '365d' | 'all';
 
@@ -47,19 +47,10 @@ const asTracks = (data: unknown): Track[] => {
     });
 };
 
-/** Capture a DOM element with html-to-image and crop to a pixel rectangle → PNG blob. */
-async function captureRegionPng(
-    el: HTMLElement,
-    rect: { x: number; y: number; w: number; h: number }
-): Promise<Blob | null> {
-    const full = await toCanvas(el, { pixelRatio: 1, cacheBust: true });
-    const out = document.createElement('canvas');
-    out.width = Math.max(1, Math.round(rect.w));
-    out.height = Math.max(1, Math.round(rect.h));
-    const ctx = out.getContext('2d');
-    if (!ctx) return null;
-    ctx.drawImage(full, rect.x, rect.y, rect.w, rect.h, 0, 0, rect.w, rect.h);
-    return await new Promise<Blob | null>((resolve) => out.toBlob(resolve, 'image/png'));
+/** Render a DOM element to a PNG blob via html-to-image. */
+async function elementToPngBlob(el: HTMLElement): Promise<Blob | null> {
+    const canvas = await toCanvas(el, { pixelRatio: 1, cacheBust: true });
+    return await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
 }
 
 function triggerDownload(url: string, filename: string) {
@@ -84,7 +75,7 @@ export default function RouteHeatmapTab() {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const mapRef = useRef<Leaflet.Map | null>(null);
     // Leaflet touches `window` at import time, so it can't be SSR'd — import()-ed
-    // lazily on the client and kept in refs for the layer/draw effects.
+    // lazily on the client and kept in refs for the layer/export effects.
     const LRef = useRef<typeof Leaflet | null>(null);
     const layerRef = useRef<TrackHeatLayer | null>(null);
     const tracksRef = useRef<Track[]>([]);
@@ -92,7 +83,6 @@ export default function RouteHeatmapTab() {
     const [tracks, setTracks] = useState<Track[]>([]);
     const [range, setRange] = useState<RangeKey>('90d');
     const [loading, setLoading] = useState(true);
-    const [selecting, setSelecting] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [exportState, setExportState] = useState<ExportState>(CLOSED_EXPORT);
 
@@ -202,115 +192,41 @@ export default function RouteHeatmapTab() {
         }
     }, [tracks, ready]);
 
-    // Run the export for a drawn rectangle: capture PNG, fetch OSM streets, match, open panel.
-    const runRegionExport = useCallback(
-        async (c1: { lat: number; lng: number }, c2: { lat: number; lng: number }) => {
-            const map = mapRef.current;
-            const container = containerRef.current;
-            if (!map || !container) return;
-
-            const p1 = map.latLngToContainerPoint([c1.lat, c1.lng]);
-            const p2 = map.latLngToContainerPoint([c2.lat, c2.lng]);
-            const rectPx = {
-                x: Math.min(p1.x, p2.x),
-                y: Math.min(p1.y, p2.y),
-                w: Math.abs(p1.x - p2.x),
-                h: Math.abs(p1.y - p2.y),
-            };
-            const bounds = boundsFromCorners(c1, c2);
-
-            const toastId = toast.loading('Régió exportálása…');
-
-            let imageUrl: string | null = null;
-            try {
-                const blob = await captureRegionPng(container, rectPx);
-                if (blob) imageUrl = URL.createObjectURL(blob);
-            } catch {
-                imageUrl = null;
-            }
-
-            setExportState((prev) => {
-                if (prev.imageUrl) URL.revokeObjectURL(prev.imageUrl);
-                return { open: true, loading: true, imageUrl, rows: [], error: imageUrl ? null : 'image' };
-            });
-
-            try {
-                const streets = await fetchOsmStreets(bounds);
-                const rows = topStreets(tracksRef.current, bounds, streets);
-                setExportState((prev) => ({ ...prev, loading: false, rows, error: imageUrl ? null : 'image' }));
-                toast.success('Régió kész', { id: toastId });
-            } catch {
-                setExportState((prev) => ({ ...prev, loading: false, rows: [], error: prev.error === 'image' ? 'image' : 'streets' }));
-                toast.error('Az utcaadatok lekérése nem sikerült', { id: toastId });
-            }
-        },
-        []
-    );
-
-    // Rectangle-draw mode: drag on the map to select a region. Uses NATIVE DOM
-    // events (container `mousedown` + document `mousemove`/`mouseup`) instead of
-    // Leaflet's synthetic map events, so it fires reliably regardless of overlay
-    // panes/renderers and works even when the mouse is released outside the map.
-    useEffect(() => {
+    // Export the CURRENT map view: capture it as PNG and compute the top streets
+    // for the visible bounds, then open the result panel.
+    const runViewExport = useCallback(async () => {
         const map = mapRef.current;
-        const L = LRef.current;
-        if (!map || !L || !selecting) return;
+        const container = containerRef.current;
+        if (!map || !container) return;
 
-        // Non-null locals: control-flow narrowing of `map`/`L` does not reach the
-        // hoisted handler functions below, so capture them as non-null consts.
-        const m = map;
-        const l = L;
-        const containerEl = m.getContainer();
-        m.dragging.disable();
-        containerEl.style.cursor = 'crosshair';
+        const b = map.getBounds();
+        const bounds = { south: b.getSouth(), west: b.getWest(), north: b.getNorth(), east: b.getEast() };
 
-        let start: Leaflet.LatLng | null = null;
-        let rect: Leaflet.Rectangle | null = null;
+        const toastId = toast.loading('Nézet exportálása…');
 
-        function finish() {
-            document.removeEventListener('mousemove', onMove);
-            document.removeEventListener('mouseup', onUp);
-            m.dragging.enable();
-            containerEl.style.cursor = '';
-            start = null;
-            setSelecting(false);
-        }
-        function onMove(ev: MouseEvent) {
-            if (!start || !rect) return;
-            rect.setBounds(l.latLngBounds(start, m.mouseEventToLatLng(ev)));
-        }
-        function onUp(ev: MouseEvent) {
-            const s = start;
-            if (rect) { m.removeLayer(rect); rect = null; }
-            if (!s) { finish(); return; }
-            const end = m.mouseEventToLatLng(ev);
-            const p1 = m.latLngToContainerPoint(s);
-            const p2 = m.latLngToContainerPoint(end);
-            finish();
-            if (Math.abs(p1.x - p2.x) < 12 && Math.abs(p1.y - p2.y) < 12) return; // ignore tiny/click
-            void runRegionExport({ lat: s.lat, lng: s.lng }, { lat: end.lat, lng: end.lng });
-        }
-        function onDown(ev: MouseEvent) {
-            if (ev.button !== 0) return;
-            ev.preventDefault();
-            start = m.mouseEventToLatLng(ev);
-            rect = l.rectangle(l.latLngBounds(start, start), {
-                color: '#ffffff', weight: 2, dashArray: '6 4', fillColor: '#ffffff', fillOpacity: 0.08,
-            }).addTo(m);
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onUp);
+        let imageUrl: string | null = null;
+        try {
+            const blob = await elementToPngBlob(container);
+            if (blob) imageUrl = URL.createObjectURL(blob);
+        } catch {
+            imageUrl = null;
         }
 
-        containerEl.addEventListener('mousedown', onDown);
-        return () => {
-            containerEl.removeEventListener('mousedown', onDown);
-            document.removeEventListener('mousemove', onMove);
-            document.removeEventListener('mouseup', onUp);
-            if (rect) m.removeLayer(rect);
-            m.dragging.enable();
-            containerEl.style.cursor = '';
-        };
-    }, [selecting, runRegionExport]);
+        setExportState((prev) => {
+            if (prev.imageUrl) URL.revokeObjectURL(prev.imageUrl);
+            return { open: true, loading: true, imageUrl, rows: [], error: imageUrl ? null : 'image' };
+        });
+
+        try {
+            const streets = await fetchOsmStreets(bounds);
+            const rows = topStreets(tracksRef.current, bounds, streets);
+            setExportState((prev) => ({ ...prev, loading: false, rows, error: imageUrl ? null : 'image' }));
+            toast.success('Nézet kész', { id: toastId });
+        } catch {
+            setExportState((prev) => ({ ...prev, loading: false, rows: [], error: prev.error === 'image' ? 'image' : 'streets' }));
+            toast.error('Az utcaadatok lekérése nem sikerült', { id: toastId });
+        }
+    }, []);
 
     // Keep the React fullscreen flag in sync and resize the map after the transition.
     useEffect(() => {
@@ -341,13 +257,13 @@ export default function RouteHeatmapTab() {
     };
 
     const downloadPng = () => {
-        if (exportState.imageUrl) triggerDownload(exportState.imageUrl, `regio-heatmap-${range}.png`);
+        if (exportState.imageUrl) triggerDownload(exportState.imageUrl, `nezet-heatmap-${range}.png`);
     };
 
     const downloadCsv = () => {
         const csv = toCsv(exportState.rows);
         const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-        triggerDownload(url, `regio-utcak-${range}.csv`);
+        triggerDownload(url, `nezet-utcak-${range}.csv`);
         setTimeout(() => URL.revokeObjectURL(url), 1000);
     };
 
@@ -358,42 +274,20 @@ export default function RouteHeatmapTab() {
 
     return (
         <div className="flex flex-col gap-4 h-full min-h-[720px]">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex flex-wrap items-center gap-2">
-                    {(Object.keys(rangeLabels) as RangeKey[]).map((key) => (
-                        <button
-                            key={key}
-                            onClick={() => setRange(key)}
-                            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-colors ${range === key
-                                ? 'bg-green-500/15 text-green-400 border-green-500/30'
-                                : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white hover:bg-zinc-800'
-                                }`}
-                        >
-                            <CalendarDays className="w-3.5 h-3.5" />
-                            {rangeLabels[key]}
-                        </button>
-                    ))}
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+                {(Object.keys(rangeLabels) as RangeKey[]).map((key) => (
                     <button
-                        onClick={() => setSelecting((s) => !s)}
-                        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-colors ${selecting
+                        key={key}
+                        onClick={() => setRange(key)}
+                        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-colors ${range === key
                             ? 'bg-green-500/15 text-green-400 border-green-500/30'
                             : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white hover:bg-zinc-800'
                             }`}
                     >
-                        <Crop className="w-3.5 h-3.5" />
-                        {selecting ? 'Húzz egy téglalapot…' : 'Régió kijelölése'}
+                        <CalendarDays className="w-3.5 h-3.5" />
+                        {rangeLabels[key]}
                     </button>
-                    <button
-                        onClick={toggleFullscreen}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-900 text-xs font-bold text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-white"
-                    >
-                        {isFullscreen ? <Minimize className="w-3.5 h-3.5" /> : <Maximize className="w-3.5 h-3.5" />}
-                        {isFullscreen ? 'Kilépés' : 'Teljes képernyő'}
-                    </button>
-                </div>
+                ))}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -404,13 +298,33 @@ export default function RouteHeatmapTab() {
 
             <div ref={wrapperRef} className="relative flex-1 min-h-[560px] overflow-hidden rounded-xl border border-white/10 bg-zinc-950">
                 <div ref={containerRef} className="absolute inset-0 z-0" />
+
+                {/* Controls overlay — kept outside the captured map container, so they
+                    don't appear in the exported PNG, and visible in fullscreen. */}
+                <div className="absolute top-3 left-3 z-[1100] flex items-center gap-2">
+                    <button
+                        onClick={runViewExport}
+                        className="inline-flex items-center gap-2 rounded-lg border border-green-500/30 bg-green-500/15 px-3 py-1.5 text-xs font-bold text-green-400 shadow-lg backdrop-blur transition-colors hover:bg-green-500/25"
+                    >
+                        <Download className="w-3.5 h-3.5" />
+                        Export (nézet)
+                    </button>
+                    <button
+                        onClick={toggleFullscreen}
+                        className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-[#111111]/90 px-3 py-1.5 text-xs font-bold text-zinc-300 shadow-lg backdrop-blur transition-colors hover:bg-zinc-800 hover:text-white"
+                    >
+                        {isFullscreen ? <Minimize className="w-3.5 h-3.5" /> : <Maximize className="w-3.5 h-3.5" />}
+                        {isFullscreen ? 'Kilépés' : 'Teljes képernyő'}
+                    </button>
+                </div>
+
                 {loading && (
-                    <div className="absolute inset-0 z-[1100] flex items-center justify-center bg-black/45">
+                    <div className="absolute inset-0 z-[1150] flex items-center justify-center bg-black/45">
                         <Loader2 className="w-7 h-7 animate-spin text-green-400" />
                     </div>
                 )}
                 {!loading && tracks.length === 0 && (
-                    <div className="absolute inset-x-4 top-4 z-[1100] rounded-xl border border-white/10 bg-[#111111]/95 p-4 shadow-xl">
+                    <div className="absolute inset-x-4 top-16 z-[1100] rounded-xl border border-white/10 bg-[#111111]/95 p-4 shadow-xl">
                         <p className="text-sm font-semibold text-white">Nincs megjeleníthető nyomvonal</p>
                         <p className="mt-1 text-xs text-zinc-400">A kiválasztott időszakban nincs rögzített útvonal.</p>
                     </div>
