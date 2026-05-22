@@ -109,7 +109,8 @@ export default function RouteHeatmapTab() {
                 const { data, error } = await supabase.rpc('admin_get_route_tracks', {
                     p_start_at: startForRange(range),
                     p_end_at: null,
-                    p_limit: 2000,
+                    // No ride cap — the RPC trims a 300 m privacy radius off each
+                    // track's start/end, so every ride can safely go into the heatmap.
                     p_max_points: 300,
                 });
                 if (error) throw error;
