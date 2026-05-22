@@ -53,7 +53,7 @@ function pointToSegmentMeters(p: [number, number], a: [number, number], b: [numb
 
 /** Fetch named OSM streets (highways) inside the bounds via the Overpass API. */
 export async function fetchOsmStreets(bounds: Bounds, signal?: AbortSignal): Promise<OsmStreet[]> {
-    const query = `[out:json][timeout:25];way["highway"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});out geom;`;
+    const query = `[out:json][timeout:25];way["highway"]["name"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});out geom;`;
     const res = await fetch('https://overpass-api.de/api/interpreter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -85,7 +85,11 @@ export function topStreets(
 ): StreetCount[] {
     const threshold = opts.thresholdMeters ?? 30;
     const limit = opts.limit ?? 15;
-    const degPad = (threshold / M_PER_DEG_LAT) * 1.5;
+    // Pad the per-segment bbox prefilter by ~1.5× the threshold, computed separately per axis
+    // (a degree of longitude is fewer metres than a degree of latitude away from the equator).
+    const midLat = (bounds.south + bounds.north) / 2;
+    const degPadLat = (threshold / M_PER_DEG_LAT) * 1.5;
+    const degPadLng = (threshold / mPerDegLng(midLat)) * 1.5;
 
     interface Seg {
         name: string;
@@ -113,7 +117,7 @@ export function topStreets(
             let best = threshold;
             let bestName: string | null = null;
             for (const s of segs) {
-                if (lng < s.minLng - degPad || lng > s.maxLng + degPad || lat < s.minLat - degPad || lat > s.maxLat + degPad) continue;
+                if (lng < s.minLng - degPadLng || lng > s.maxLng + degPadLng || lat < s.minLat - degPadLat || lat > s.maxLat + degPadLat) continue;
                 const d = pointToSegmentMeters(pt, s.a, s.b);
                 if (d < best) { best = d; bestName = s.name; }
             }
