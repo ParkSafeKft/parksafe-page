@@ -33,6 +33,7 @@ import {
     ScrollText,
     Settings,
     Lightbulb,
+    ChartNoAxesCombined,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -59,6 +60,7 @@ import CityFormModal from '@/components/admin/CityFormModal';
 import CommunityRouteReviewModal from '@/components/admin/CommunityRouteReviewModal';
 import DailyChallengeDetailModal from '@/components/admin/DailyChallengeDetailModal';
 import LeaderboardTab from '@/components/admin/LeaderboardTab';
+import RouteHeatmapTab from '@/components/admin/RouteHeatmapTab';
 import AuditLogTable from '@/components/admin/AuditLogTable';
 import AppConfigTab from '@/components/admin/AppConfigTab';
 import { writeAuditLog } from '@/lib/adminAuditLog';
@@ -107,6 +109,7 @@ const TAB_SLUGS: Record<string, string> = {
     daily_challenges: 'daily-challenges',
     community_routes: 'community-routes',
     leaderboard: 'leaderboard',
+    route_heatmap: 'route-heatmap',
     audit_log: 'audit-log',
     app_config: 'app-config',
 };
@@ -458,6 +461,11 @@ export default function AdminPage() {
                     break;
                 case 'leaderboard':
                     // Leaderboard tab manages its own data fetching internally.
+                    setTotalCount(0);
+                    setDataLoading(false);
+                    return;
+                case 'route_heatmap':
+                    // Heatmap tab uses a privacy-preserving RPC and manages its own loading.
                     setTotalCount(0);
                     setDataLoading(false);
                     return;
@@ -1272,6 +1280,7 @@ export default function AdminPage() {
                                                 {activeTab === 'daily_challenges' && <Trophy className="h-5 w-5 text-white" />}
                                                 {activeTab === 'community_routes' && <Route className="h-5 w-5 text-white" />}
                                                 {activeTab === 'leaderboard' && <Trophy className="h-5 w-5 text-white" />}
+                                                {activeTab === 'route_heatmap' && <ChartNoAxesCombined className="h-5 w-5 text-white" />}
                                                 {activeTab === 'audit_log' && <ScrollText className="h-5 w-5 text-white" />}
                                                 {activeTab === 'app_config' && <Settings className="h-5 w-5 text-white" />}
                                             </div>
@@ -1291,12 +1300,13 @@ export default function AdminPage() {
                                                     {activeTab === 'daily_challenges' && 'Napi kihívások'}
                                                     {activeTab === 'community_routes' && 'Közösségi útvonalak'}
                                                     {activeTab === 'leaderboard' && 'Ranglista'}
+                                                    {activeTab === 'route_heatmap' && 'Útvonal hőtérkép'}
                                                     {activeTab === 'audit_log' && 'Audit napló'}
                                                     {activeTab === 'app_config' && 'App-konfiguráció'}
                                                     <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                                                        {activeTab === 'dashboard' || activeTab === 'app_config' ? 'Beállítások' : `${totalCount} elem`}
+                                                        {activeTab === 'dashboard' || activeTab === 'app_config' || activeTab === 'route_heatmap' ? 'Beállítások' : `${totalCount} elem`}
                                                     </Badge>
-                                                    {activeTab !== 'dashboard' && activeTab !== 'app_config' && (
+                                                    {activeTab !== 'dashboard' && activeTab !== 'app_config' && activeTab !== 'route_heatmap' && (
                                                         <Badge
                                                             variant="outline"
                                                             className={`gap-1.5 text-xs ${isRealtimeConnected
@@ -1330,6 +1340,7 @@ export default function AdminPage() {
                                                     {activeTab === 'daily_challenges' && 'Automatikusan generált napi kihívások áttekintése'}
                                                     {activeTab === 'community_routes' && 'Közösségi beküldésű kerékpárutak moderálása'}
                                                     {activeTab === 'leaderboard' && 'Teljesített kihívások rangsora és láthatóság-kezelés'}
+                                                    {activeTab === 'route_heatmap' && 'Anonimizált, aggregált kerékpáros útvonalforgalom városfejlesztési döntésekhez'}
                                                     {activeTab === 'audit_log' && 'Admin műveletek időrendi naplója'}
                                                     {activeTab === 'app_config' && 'Karbantartás, minimum app verzió és feature flags kezelése'}
                                                 </p>
@@ -1361,7 +1372,7 @@ export default function AdminPage() {
                                             </div>
                                         )}
 
-                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'poi_suggestions' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'daily_challenges' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'audit_log' && activeTab !== 'app_config' && (
+                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'poi_suggestions' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'daily_challenges' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'route_heatmap' && activeTab !== 'audit_log' && activeTab !== 'app_config' && (
                                             <>
                                                 <Separator orientation="vertical" className="h-8 bg-sidebar-border" />
                                                 <Button
@@ -1408,17 +1419,18 @@ export default function AdminPage() {
                                             {activeTab === 'daily_challenges' && 'Napi kihívások'}
                                             {activeTab === 'community_routes' && 'Közösségi útvonalak'}
                                             {activeTab === 'leaderboard' && 'Ranglista'}
+                                            {activeTab === 'route_heatmap' && 'Útvonal hőtérkép'}
                                             {activeTab === 'audit_log' && 'Audit napló'}
                                             {activeTab === 'app_config' && 'App-konfiguráció'}
                                         </h1>
-                                        {activeTab !== 'dashboard' && activeTab !== 'app_config' && (
+                                        {activeTab !== 'dashboard' && activeTab !== 'app_config' && activeTab !== 'route_heatmap' && (
                                             <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 shrink-0 text-xs">
                                                 {totalCount}
                                             </Badge>
                                         )}
                                     </div>
                                     <div className="flex items-center gap-1 shrink-0">
-                                        {activeTab !== 'dashboard' && activeTab !== 'app_config' && (
+                                        {activeTab !== 'dashboard' && activeTab !== 'app_config' && activeTab !== 'route_heatmap' && (
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
@@ -1428,7 +1440,7 @@ export default function AdminPage() {
                                                 {mobileSearchOpen ? <XCircle className="h-4 w-4" /> : <Search className="h-4 w-4" />}
                                             </Button>
                                         )}
-                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'poi_suggestions' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'daily_challenges' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'audit_log' && activeTab !== 'app_config' && (
+                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'poi_suggestions' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'daily_challenges' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'route_heatmap' && activeTab !== 'audit_log' && activeTab !== 'app_config' && (
                                             <Button
                                                 size="sm"
                                                 className="h-8 w-8 p-0"
@@ -1449,7 +1461,7 @@ export default function AdminPage() {
                                     </div>
                                 </div>
                                 {/* Mobile Search Bar */}
-                                {mobileSearchOpen && activeTab !== 'dashboard' && activeTab !== 'app_config' && (
+                                {mobileSearchOpen && activeTab !== 'dashboard' && activeTab !== 'app_config' && activeTab !== 'route_heatmap' && (
                                     <div className="xl:hidden mt-3 relative">
                                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                         <Input
@@ -1702,6 +1714,9 @@ export default function AdminPage() {
                                     )}
                                     {activeTab === 'leaderboard' && (
                                         <LeaderboardTab cities={citiesForFilter} adminId={adminId} />
+                                    )}
+                                    {activeTab === 'route_heatmap' && (
+                                        <RouteHeatmapTab />
                                     )}
                                     {activeTab === 'app_config' && (
                                         <AppConfigTab />

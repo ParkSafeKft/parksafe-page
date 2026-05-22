@@ -40,7 +40,13 @@ export default function InteractiveRouteMap({ points, height = 360, lineColor = 
         return () => {
             markersRef.current.forEach(m => m.remove());
             markersRef.current = [];
+            // Release the GPU context immediately rather than waiting for GC — opening
+            // and closing route modals otherwise accumulates WebGL contexts past the
+            // browser limit, which surfaces as "WebGL context was lost".
+            const canvas = map.getCanvas();
             map.remove();
+            const gl = (canvas.getContext('webgl2') || canvas.getContext('webgl')) as WebGLRenderingContext | WebGL2RenderingContext | null;
+            gl?.getExtension('WEBGL_lose_context')?.loseContext();
             mapRef.current = null;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
