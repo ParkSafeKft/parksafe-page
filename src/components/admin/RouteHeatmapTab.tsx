@@ -247,70 +247,68 @@ export default function RouteHeatmapTab() {
         []
     );
 
-    // Rectangle-draw mode: drag on the map to select a region.
+    // Rectangle-draw mode: drag on the map to select a region. Uses NATIVE DOM
+    // events (container `mousedown` + document `mousemove`/`mouseup`) instead of
+    // Leaflet's synthetic map events, so it fires reliably regardless of overlay
+    // panes/renderers and works even when the mouse is released outside the map.
     useEffect(() => {
         const map = mapRef.current;
         const L = LRef.current;
         if (!map || !L || !selecting) return;
 
-        map.dragging.disable();
-        map.getContainer().style.cursor = 'crosshair';
+        // Non-null locals: control-flow narrowing of `map`/`L` does not reach the
+        // hoisted handler functions below, so capture them as non-null consts.
+        const m = map;
+        const l = L;
+        const containerEl = m.getContainer();
+        m.dragging.disable();
+        containerEl.style.cursor = 'crosshair';
 
         let start: Leaflet.LatLng | null = null;
         let rect: Leaflet.Rectangle | null = null;
 
-        const finish = () => {
-            setSelecting(false);
-            map.dragging.enable();
-            map.getContainer().style.cursor = '';
+        function finish() {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+            m.dragging.enable();
+            containerEl.style.cursor = '';
             start = null;
-        };
-
-        const onDown = (e: Leaflet.LeafletMouseEvent) => {
-            start = e.latlng;
-            rect = L.rectangle([[e.latlng.lat, e.latlng.lng], [e.latlng.lat, e.latlng.lng]], {
-                color: '#22c55e', weight: 2, fillOpacity: 0.1,
-            }).addTo(map);
-        };
-        const onMove = (e: Leaflet.LeafletMouseEvent) => {
-            if (start && rect) rect.setBounds(L.latLngBounds(start, e.latlng));
-        };
-        const onUp = (e: Leaflet.LeafletMouseEvent) => {
-            const startLatLng = start;
-            const p1 = startLatLng ? map.latLngToContainerPoint(startLatLng) : null;
-            const p2 = map.latLngToContainerPoint(e.latlng);
-            if (rect) { map.removeLayer(rect); rect = null; }
+            setSelecting(false);
+        }
+        function onMove(ev: MouseEvent) {
+            if (!start || !rect) return;
+            rect.setBounds(l.latLngBounds(start, m.mouseEventToLatLng(ev)));
+        }
+        function onUp(ev: MouseEvent) {
+            const s = start;
+            if (rect) { m.removeLayer(rect); rect = null; }
+            if (!s) { finish(); return; }
+            const end = m.mouseEventToLatLng(ev);
+            const p1 = m.latLngToContainerPoint(s);
+            const p2 = m.latLngToContainerPoint(end);
             finish();
-            if (!startLatLng || !p1) return;
             if (Math.abs(p1.x - p2.x) < 12 && Math.abs(p1.y - p2.y) < 12) return; // ignore tiny/click
-            void runRegionExport(
-                { lat: startLatLng.lat, lng: startLatLng.lng },
-                { lat: e.latlng.lat, lng: e.latlng.lng }
-            );
-        };
+            void runRegionExport({ lat: s.lat, lng: s.lng }, { lat: end.lat, lng: end.lng });
+        }
+        function onDown(ev: MouseEvent) {
+            if (ev.button !== 0) return;
+            ev.preventDefault();
+            start = m.mouseEventToLatLng(ev);
+            rect = l.rectangle(l.latLngBounds(start, start), {
+                color: '#ffffff', weight: 2, dashArray: '6 4', fillColor: '#ffffff', fillOpacity: 0.08,
+            }).addTo(m);
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        }
 
-        // Safety net: if the mouse is released OUTSIDE the map, Leaflet's 'mouseup'
-        // never fires — without this the rectangle and the disabled-dragging state
-        // would get stuck until the user toggled the button again. On an in-map
-        // release, Leaflet's onUp runs first and nulls `start`, so this is a no-op.
-        const onWindowUp = () => {
-            if (!start) return;
-            if (rect) { map.removeLayer(rect); rect = null; }
-            finish();
-        };
-
-        map.on('mousedown', onDown);
-        map.on('mousemove', onMove);
-        map.on('mouseup', onUp);
-        window.addEventListener('mouseup', onWindowUp);
+        containerEl.addEventListener('mousedown', onDown);
         return () => {
-            map.off('mousedown', onDown);
-            map.off('mousemove', onMove);
-            map.off('mouseup', onUp);
-            window.removeEventListener('mouseup', onWindowUp);
-            if (rect) map.removeLayer(rect);
-            map.dragging.enable();
-            map.getContainer().style.cursor = '';
+            containerEl.removeEventListener('mousedown', onDown);
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+            if (rect) m.removeLayer(rect);
+            m.dragging.enable();
+            containerEl.style.cursor = '';
         };
     }, [selecting, runRegionExport]);
 
