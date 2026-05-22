@@ -214,7 +214,7 @@ export default function RouteHeatmapTab() {
                         <span>Ritka</span>
                         <span>Gyakori</span>
                     </div>
-                    <div className="h-2 rounded-full bg-gradient-to-r from-zinc-700 via-[#16f2c8] to-white" />
+                    <div className="h-2 rounded-full bg-gradient-to-r from-zinc-800 via-[#22c55e] to-white" />
                 </div>
             </div>
         </div>

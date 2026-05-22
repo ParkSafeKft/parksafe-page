@@ -40,7 +40,7 @@ export function createTrackHeatLayer(
     options: TrackHeatLayerOptions = {}
 ): TrackHeatLayer {
     const opts = {
-        color: options.color ?? '#16f2c8',
+        color: options.color ?? '#22c55e',
         haloWidth: options.haloWidth ?? 6,
         coreWidth: options.coreWidth ?? 1.5,
         haloAlpha: options.haloAlpha ?? 0.06,
