@@ -229,7 +229,10 @@ export default function RouteHeatmapTab() {
                 imageUrl = null;
             }
 
-            setExportState({ open: true, loading: true, imageUrl, rows: [], error: imageUrl ? null : 'image' });
+            setExportState((prev) => {
+                if (prev.imageUrl) URL.revokeObjectURL(prev.imageUrl);
+                return { open: true, loading: true, imageUrl, rows: [], error: imageUrl ? null : 'image' };
+            });
 
             try {
                 const streets = await fetchOsmStreets(bounds);
@@ -237,7 +240,7 @@ export default function RouteHeatmapTab() {
                 setExportState((prev) => ({ ...prev, loading: false, rows, error: imageUrl ? null : 'image' }));
                 toast.success('Régió kész', { id: toastId });
             } catch {
-                setExportState((prev) => ({ ...prev, loading: false, rows: [], error: 'streets' }));
+                setExportState((prev) => ({ ...prev, loading: false, rows: [], error: prev.error === 'image' ? 'image' : 'streets' }));
                 toast.error('Az utcaadatok lekérése nem sikerült', { id: toastId });
             }
         },
@@ -279,20 +282,32 @@ export default function RouteHeatmapTab() {
             if (rect) { map.removeLayer(rect); rect = null; }
             finish();
             if (!startLatLng || !p1) return;
-            if (Math.abs(p1.x - p2.x) < 12 || Math.abs(p1.y - p2.y) < 12) return; // ignore tiny/click
+            if (Math.abs(p1.x - p2.x) < 12 && Math.abs(p1.y - p2.y) < 12) return; // ignore tiny/click
             void runRegionExport(
                 { lat: startLatLng.lat, lng: startLatLng.lng },
                 { lat: e.latlng.lat, lng: e.latlng.lng }
             );
         };
 
+        // Safety net: if the mouse is released OUTSIDE the map, Leaflet's 'mouseup'
+        // never fires — without this the rectangle and the disabled-dragging state
+        // would get stuck until the user toggled the button again. On an in-map
+        // release, Leaflet's onUp runs first and nulls `start`, so this is a no-op.
+        const onWindowUp = () => {
+            if (!start) return;
+            if (rect) { map.removeLayer(rect); rect = null; }
+            finish();
+        };
+
         map.on('mousedown', onDown);
         map.on('mousemove', onMove);
         map.on('mouseup', onUp);
+        window.addEventListener('mouseup', onWindowUp);
         return () => {
             map.off('mousedown', onDown);
             map.off('mousemove', onMove);
             map.off('mouseup', onUp);
+            window.removeEventListener('mouseup', onWindowUp);
             if (rect) map.removeLayer(rect);
             map.dragging.enable();
             map.getContainer().style.cursor = '';
