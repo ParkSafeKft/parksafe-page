@@ -41,7 +41,7 @@ export default function AdminSidebar({
     onLogout,
     onHomeConfig,
 }: AdminSidebarProps) {
-    const { openMobile, setOpenMobile, isMobile } = useSidebar();
+    const { open, openMobile, setOpenMobile, isMobile } = useSidebar();
 
     const menuItems = [
         { id: 'dashboard', label: 'Vezérlőpult', icon: LayoutDashboard, section: 'ÁTTEKINTÉS' },
@@ -84,7 +84,7 @@ export default function AdminSidebar({
 
     const asideClasses = isMobile
         ? `fixed left-0 top-0 h-full z-50 w-72 bg-[#0a0a0a] border-r border-white/5 flex flex-col overflow-y-auto transition-transform duration-300 ease-in-out ${openMobile ? 'translate-x-0' : '-translate-x-full'}`
-        : 'w-72 h-screen bg-[#0a0a0a] border-r border-white/5 flex flex-col shrink-0 overflow-y-auto';
+        : `${open ? 'w-72' : 'hidden'} h-screen bg-[#0a0a0a] border-r border-white/5 flex flex-col shrink-0 overflow-y-auto`;
 
     return (
         <>
