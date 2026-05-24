@@ -1,12 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type * as Leaflet from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Activity, CalendarDays, Loader2, MapPinned, ShieldCheck } from 'lucide-react';
+import { toCanvas } from 'html-to-image';
+import { Activity, CalendarDays, Download, Loader2, MapPinned, Maximize, Minimize } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { createTrackHeatLayer, type Track, type TrackHeatLayer } from './trackHeatLayer';
+import RegionExportPanel from './RegionExportPanel';
+import { fetchOsmStreets, topStreets, toCsv, type StreetCount } from './regionExport';
 
 type RangeKey = '30d' | '90d' | '365d' | 'all';
 
@@ -44,17 +47,46 @@ const asTracks = (data: unknown): Track[] => {
     });
 };
 
+/** Render a DOM element to a PNG blob via html-to-image. */
+async function elementToPngBlob(el: HTMLElement): Promise<Blob | null> {
+    const canvas = await toCanvas(el, { pixelRatio: 1, cacheBust: true });
+    return await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+}
+
+function triggerDownload(url: string, filename: string) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+}
+
+interface ExportState {
+    open: boolean;
+    loading: boolean;
+    imageUrl: string | null;
+    rows: StreetCount[];
+    error: 'image' | 'streets' | null;
+}
+
+const CLOSED_EXPORT: ExportState = { open: false, loading: false, imageUrl: null, rows: [], error: null };
+
 export default function RouteHeatmapTab() {
+    const wrapperRef = useRef<HTMLDivElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const mapRef = useRef<Leaflet.Map | null>(null);
     // Leaflet touches `window` at import time, so it can't be SSR'd — import()-ed
-    // lazily on the client and kept in refs for the layer effect.
+    // lazily on the client and kept in refs for the layer/export effects.
     const LRef = useRef<typeof Leaflet | null>(null);
     const layerRef = useRef<TrackHeatLayer | null>(null);
+    const tracksRef = useRef<Track[]>([]);
     const [ready, setReady] = useState(false);
     const [tracks, setTracks] = useState<Track[]>([]);
     const [range, setRange] = useState<RangeKey>('90d');
     const [loading, setLoading] = useState(true);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [exportState, setExportState] = useState<ExportState>(CLOSED_EXPORT);
+
+    tracksRef.current = tracks;
 
     // Initialise the map once, client-side only.
     useEffect(() => {
@@ -78,6 +110,7 @@ export default function RouteHeatmapTab() {
                 subdomains: 'abcd',
                 maxZoom: 19,
                 opacity: 0.95,
+                crossOrigin: 'anonymous',
                 attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
             }).addTo(map);
 
@@ -145,7 +178,6 @@ export default function RouteHeatmapTab() {
             layerRef.current.addTo(map);
         }
 
-        // Fit to the bounding box of all points (min/max avoids a huge array).
         let minLat = Infinity, minLng = Infinity, maxLat = -Infinity, maxLng = -Infinity;
         for (const t of tracks) {
             for (const [lng, lat] of t.points) {
@@ -160,6 +192,81 @@ export default function RouteHeatmapTab() {
         }
     }, [tracks, ready]);
 
+    // Export the CURRENT map view: capture it as PNG and compute the top streets
+    // for the visible bounds, then open the result panel.
+    const runViewExport = useCallback(async () => {
+        const map = mapRef.current;
+        const container = containerRef.current;
+        if (!map || !container) return;
+
+        const b = map.getBounds();
+        const bounds = { south: b.getSouth(), west: b.getWest(), north: b.getNorth(), east: b.getEast() };
+
+        const toastId = toast.loading('Nézet exportálása…');
+
+        let imageUrl: string | null = null;
+        try {
+            const blob = await elementToPngBlob(container);
+            if (blob) imageUrl = URL.createObjectURL(blob);
+        } catch {
+            imageUrl = null;
+        }
+
+        setExportState((prev) => {
+            if (prev.imageUrl) URL.revokeObjectURL(prev.imageUrl);
+            return { open: true, loading: true, imageUrl, rows: [], error: imageUrl ? null : 'image' };
+        });
+
+        try {
+            const streets = await fetchOsmStreets(bounds);
+            const rows = topStreets(tracksRef.current, bounds, streets);
+            setExportState((prev) => ({ ...prev, loading: false, rows, error: imageUrl ? null : 'image' }));
+            toast.success('Nézet kész', { id: toastId });
+        } catch {
+            setExportState((prev) => ({ ...prev, loading: false, rows: [], error: prev.error === 'image' ? 'image' : 'streets' }));
+            toast.error('Az utcaadatok lekérése nem sikerült', { id: toastId });
+        }
+    }, []);
+
+    // Keep the React fullscreen flag in sync and resize the map after the transition.
+    useEffect(() => {
+        const onFsChange = () => {
+            setIsFullscreen(Boolean(document.fullscreenElement));
+            const map = mapRef.current;
+            if (map) window.requestAnimationFrame(() => map.invalidateSize());
+        };
+        document.addEventListener('fullscreenchange', onFsChange);
+        return () => document.removeEventListener('fullscreenchange', onFsChange);
+    }, []);
+
+    const toggleFullscreen = () => {
+        const el = wrapperRef.current;
+        if (!el) return;
+        if (document.fullscreenElement) {
+            void document.exitFullscreen();
+        } else {
+            void el.requestFullscreen?.();
+        }
+    };
+
+    const closeExport = () => {
+        setExportState((prev) => {
+            if (prev.imageUrl) URL.revokeObjectURL(prev.imageUrl);
+            return CLOSED_EXPORT;
+        });
+    };
+
+    const downloadPng = () => {
+        if (exportState.imageUrl) triggerDownload(exportState.imageUrl, `nezet-heatmap-${range}.png`);
+    };
+
+    const downloadCsv = () => {
+        const csv = toCsv(exportState.rows);
+        const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+        triggerDownload(url, `nezet-utcak-${range}.csv`);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    };
+
     const stats = useMemo(() => {
         const totalPoints = tracks.reduce((sum, t) => sum + t.points.length, 0);
         return { rides: tracks.length, totalPoints };
@@ -167,27 +274,20 @@ export default function RouteHeatmapTab() {
 
     return (
         <div className="flex flex-col gap-4 h-full min-h-[720px]">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex flex-wrap items-center gap-2">
-                    {(Object.keys(rangeLabels) as RangeKey[]).map((key) => (
-                        <button
-                            key={key}
-                            onClick={() => setRange(key)}
-                            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-colors ${range === key
-                                ? 'bg-green-500/15 text-green-400 border-green-500/30'
-                                : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white hover:bg-zinc-800'
-                                }`}
-                        >
-                            <CalendarDays className="w-3.5 h-3.5" />
-                            {rangeLabels[key]}
-                        </button>
-                    ))}
-                </div>
-
-                <div className="inline-flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-300">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    minden rögzített ride nyomvonala megjelenik
-                </div>
+            <div className="flex flex-wrap items-center gap-2">
+                {(Object.keys(rangeLabels) as RangeKey[]).map((key) => (
+                    <button
+                        key={key}
+                        onClick={() => setRange(key)}
+                        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-colors ${range === key
+                            ? 'bg-green-500/15 text-green-400 border-green-500/30'
+                            : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white hover:bg-zinc-800'
+                            }`}
+                    >
+                        <CalendarDays className="w-3.5 h-3.5" />
+                        {rangeLabels[key]}
+                    </button>
+                ))}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -196,15 +296,35 @@ export default function RouteHeatmapTab() {
                 <Stat label="Időszak" value={rangeLabels[range]} icon={CalendarDays} />
             </div>
 
-            <div className="relative flex-1 min-h-[560px] overflow-hidden rounded-xl border border-white/10 bg-zinc-950">
+            <div ref={wrapperRef} className="relative flex-1 min-h-[560px] overflow-hidden rounded-xl border border-white/10 bg-zinc-950">
                 <div ref={containerRef} className="absolute inset-0 z-0" />
+
+                {/* Controls overlay — kept outside the captured map container, so they
+                    don't appear in the exported PNG, and visible in fullscreen. */}
+                <div className="absolute top-3 left-3 z-[1100] flex items-center gap-2">
+                    <button
+                        onClick={runViewExport}
+                        className="inline-flex items-center gap-2 rounded-lg border border-green-500/30 bg-green-500/15 px-3 py-1.5 text-xs font-bold text-green-400 shadow-lg backdrop-blur transition-colors hover:bg-green-500/25"
+                    >
+                        <Download className="w-3.5 h-3.5" />
+                        Export (nézet)
+                    </button>
+                    <button
+                        onClick={toggleFullscreen}
+                        className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-[#111111]/90 px-3 py-1.5 text-xs font-bold text-zinc-300 shadow-lg backdrop-blur transition-colors hover:bg-zinc-800 hover:text-white"
+                    >
+                        {isFullscreen ? <Minimize className="w-3.5 h-3.5" /> : <Maximize className="w-3.5 h-3.5" />}
+                        {isFullscreen ? 'Kilépés' : 'Teljes képernyő'}
+                    </button>
+                </div>
+
                 {loading && (
-                    <div className="absolute inset-0 z-[1100] flex items-center justify-center bg-black/45">
+                    <div className="absolute inset-0 z-[1150] flex items-center justify-center bg-black/45">
                         <Loader2 className="w-7 h-7 animate-spin text-green-400" />
                     </div>
                 )}
                 {!loading && tracks.length === 0 && (
-                    <div className="absolute inset-x-4 top-4 z-[1100] rounded-xl border border-white/10 bg-[#111111]/95 p-4 shadow-xl">
+                    <div className="absolute inset-x-4 top-16 z-[1100] rounded-xl border border-white/10 bg-[#111111]/95 p-4 shadow-xl">
                         <p className="text-sm font-semibold text-white">Nincs megjeleníthető nyomvonal</p>
                         <p className="mt-1 text-xs text-zinc-400">A kiválasztott időszakban nincs rögzített útvonal.</p>
                     </div>
@@ -216,6 +336,17 @@ export default function RouteHeatmapTab() {
                     </div>
                     <div className="h-2 rounded-full bg-gradient-to-r from-zinc-800 via-[#22c55e] to-white" />
                 </div>
+                {exportState.open && (
+                    <RegionExportPanel
+                        loading={exportState.loading}
+                        imageUrl={exportState.imageUrl}
+                        rows={exportState.rows}
+                        error={exportState.error}
+                        onClose={closeExport}
+                        onDownloadPng={downloadPng}
+                        onDownloadCsv={downloadCsv}
+                    />
+                )}
             </div>
         </div>
     );

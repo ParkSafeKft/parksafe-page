@@ -1,19 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import { Building2, Trophy, Route, CheckCircle2, Loader2, UserPlus } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Bike, Clock3, Loader2, Map, UserPlus, UsersRound } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
-interface ContentStats {
-    active_cities: number;
-    total_cities: number;
-    todays_challenges: number;
-    total_challenges: number;
-    pending_community_routes: number;
-    total_challenge_completions: number;
-    completions_last_7d: number;
-    new_users_last_7d: number;
+interface UsageStats {
+    active_users_7d: number;
+    rides_7d: number;
+    distance_meters_7d: number;
+    duration_seconds_7d: number;
+    new_users_7d: number;
+    computed_at: string;
 }
 
 interface ContentStatsOverviewProps {
@@ -23,46 +22,97 @@ interface ContentStatsOverviewProps {
 const isDev = process.env.NODE_ENV === 'development';
 
 export default function ContentStatsOverview({ onNavigate }: ContentStatsOverviewProps) {
-    const [stats, setStats] = useState<ContentStats | null>(null);
+    const [stats, setStats] = useState<UsageStats | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
+
+    const loadStats = useCallback(async () => {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.access_token) {
+                await supabase.auth.signOut();
+                router.replace('/login');
+                return;
+            }
+
+            const res = await fetch('/api/admin-usage-stats', {
+                headers: {
+                    Authorization: `Bearer ${session.access_token}`,
+                },
+            });
+
+            if (!res.ok) {
+                if (res.status === 401) {
+                    await supabase.auth.signOut();
+                    router.replace('/login');
+                    return;
+                }
+                if (res.status === 403) {
+                    await supabase.auth.signOut();
+                    router.replace('/');
+                    return;
+                }
+                throw new Error('Hiba történt a heti aktivitás betöltésekor.');
+            }
+
+            setStats(await res.json());
+        } catch (err) {
+            if (isDev) console.error(err);
+            setError(err instanceof Error ? err.message : 'Ismeretlen hiba');
+        } finally {
+            setLoading(false);
+        }
+    }, [router]);
 
     useEffect(() => {
-        let cancelled = false;
-        const load = async () => {
-            setLoading(true);
-            try {
-                const today = new Date().toISOString().slice(0, 10);
-                const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-                const [citiesAll, citiesActive, chAll, chToday, crPending, caDone, caLast7d, usersLast7d] = await Promise.all([
-                    supabase.from('cities').select('*', { count: 'exact', head: true }),
-                    supabase.from('cities').select('*', { count: 'exact', head: true }).eq('is_active', true),
-                    supabase.from('daily_challenges').select('*', { count: 'exact', head: true }),
-                    supabase.from('daily_challenges').select('*', { count: 'exact', head: true }).eq('challenge_date', today),
-                    supabase.from('community_bike_lanes').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-                    supabase.from('challenge_attempts').select('*', { count: 'exact', head: true }).eq('status', 'completed'),
-                    supabase.from('challenge_attempts').select('*', { count: 'exact', head: true }).eq('status', 'completed').gte('finished_at', sevenDaysAgo),
-                    supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', sevenDaysAgo),
-                ]);
-                if (cancelled) return;
-                setStats({
-                    active_cities: citiesActive.count ?? 0,
-                    total_cities: citiesAll.count ?? 0,
-                    todays_challenges: chToday.count ?? 0,
-                    total_challenges: chAll.count ?? 0,
-                    pending_community_routes: crPending.count ?? 0,
-                    total_challenge_completions: caDone.count ?? 0,
-                    completions_last_7d: caLast7d.count ?? 0,
-                    new_users_last_7d: usersLast7d.count ?? 0,
-                });
-            } catch (err) {
-                if (isDev) console.error(err);
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        };
-        load();
-        return () => { cancelled = true; };
-    }, []);
+        loadStats();
+    }, [loadStats]);
+
+    const cards = useMemo(() => {
+        if (!stats) return [];
+
+        const totalKm = stats.distance_meters_7d / 1000;
+        const totalMinutes = Math.round(stats.duration_seconds_7d / 60);
+
+        return [
+            {
+                title: 'Aktív userek',
+                value: stats.active_users_7d.toLocaleString('hu-HU'),
+                subtitle: 'ride-ot indítottak',
+                icon: UsersRound,
+                color: 'emerald',
+            },
+            {
+                title: 'Ride-ok',
+                value: stats.rides_7d.toLocaleString('hu-HU'),
+                subtitle: 'rögzített út',
+                icon: Bike,
+                color: 'blue',
+            },
+            {
+                title: 'Összes km',
+                value: totalKm.toLocaleString('hu-HU', { maximumFractionDigits: totalKm >= 100 ? 0 : 1 }),
+                subtitle: 'megtett távolság',
+                icon: Map,
+                color: 'green',
+            },
+            {
+                title: 'Összes perc',
+                value: totalMinutes.toLocaleString('hu-HU'),
+                subtitle: 'rögzített idő',
+                icon: Clock3,
+                color: 'amber',
+            },
+            {
+                title: 'Új userek',
+                value: stats.new_users_7d.toLocaleString('hu-HU'),
+                subtitle: 'regisztráció',
+                icon: UserPlus,
+                color: 'purple',
+            },
+        ];
+    }, [stats]);
 
     if (loading) {
         return (
@@ -72,88 +122,81 @@ export default function ContentStatsOverview({ onNavigate }: ContentStatsOvervie
         );
     }
 
+    if (error) {
+        return (
+            <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
+                {error}
+            </div>
+        );
+    }
+
     if (!stats) return null;
 
-    const cards = [
-        {
-            title: 'Aktív városok',
-            value: stats.active_cities,
-            subtitle: `${stats.total_cities} összesen`,
-            icon: Building2,
-            color: 'text-emerald-500',
-            bg: 'bg-emerald-500/10',
-            border: 'border-emerald-500/20',
-            tab: 'cities',
-        },
-        {
-            title: 'Összes teljesített',
-            value: stats.total_challenge_completions,
-            subtitle: `${stats.completions_last_7d} az elmúlt 7 napban`,
-            icon: Trophy,
-            color: 'text-amber-500',
-            bg: 'bg-amber-500/10',
-            border: 'border-amber-500/20',
-            tab: 'leaderboard',
-        },
-        {
-            title: 'Új útvonalak',
-            value: stats.pending_community_routes,
-            subtitle: 'moderációra vár',
-            icon: Route,
-            color: 'text-blue-500',
-            bg: 'bg-blue-500/10',
-            border: 'border-blue-500/20',
-            tab: 'community_routes',
-        },
-        {
-            title: 'Teljesítések 7 nap',
-            value: stats.completions_last_7d,
-            subtitle: `${stats.total_challenge_completions} minden időben`,
-            icon: CheckCircle2,
-            color: 'text-green-500',
-            bg: 'bg-green-500/10',
-            border: 'border-green-500/20',
-            tab: 'leaderboard',
-        },
-        {
-            title: 'Új felhasználók 7 nap',
-            value: stats.new_users_last_7d,
-            subtitle: 'regisztráció',
-            icon: UserPlus,
-            color: 'text-purple-400',
-            bg: 'bg-purple-500/10',
-            border: 'border-purple-500/20',
-            tab: 'users',
-        },
-    ];
-
     return (
-        <div className="mt-4">
-            <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3 px-1">Tartalom áttekintés</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                {cards.map(c => {
-                    const Icon = c.icon;
-                    const clickable = !!onNavigate;
+        <section className="mt-4">
+            <div className="mb-3 flex items-center justify-between px-1">
+                <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-zinc-400">
+                    <UsersRound className="h-4 w-4" />
+                    Elmúlt 7 nap
+                </h2>
+                <span className="text-xs text-zinc-600">app aktivitás</span>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                {cards.map((card) => {
+                    const Icon = card.icon;
+                    const palette = palettes[card.color];
+                    const clickable = card.title === 'Új userek' && !!onNavigate;
+
                     return (
                         <Card
-                            key={c.title}
-                            onClick={clickable ? () => onNavigate(c.tab) : undefined}
-                            className={`bg-card border-border ${clickable ? 'cursor-pointer transition-colors hover:border-primary/40 hover:bg-card/80' : ''}`}
+                            key={card.title}
+                            onClick={clickable ? () => onNavigate('users') : undefined}
+                            className={`border-white/10 bg-[#101010] py-0 shadow-none ${clickable ? 'cursor-pointer transition-colors hover:border-white/20 hover:bg-[#151515]' : ''}`}
                         >
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground">{c.title}</CardTitle>
-                                <div className={`w-9 h-9 rounded-lg ${c.bg} ${c.border} border flex items-center justify-center`}>
-                                    <Icon className={`w-4 h-4 ${c.color}`} />
+                            <CardContent className="p-4">
+                                <div className="mb-5 flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <p className="truncate text-sm font-medium text-zinc-400">{card.title}</p>
+                                        <p className="mt-1 text-xs text-zinc-600">{card.subtitle}</p>
+                                    </div>
+                                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${palette.bg} ${palette.border}`}>
+                                        <Icon className={`h-4 w-4 ${palette.text}`} />
+                                    </div>
                                 </div>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold text-foreground">{c.value}</div>
-                                <p className="text-xs text-muted-foreground mt-1">{c.subtitle}</p>
+                                <div className="text-3xl font-bold tracking-tight text-white">{card.value}</div>
                             </CardContent>
                         </Card>
                     );
                 })}
             </div>
-        </div>
+        </section>
     );
 }
+
+const palettes: Record<string, { text: string; bg: string; border: string }> = {
+    emerald: {
+        text: 'text-emerald-400',
+        bg: 'bg-emerald-500/10',
+        border: 'border-emerald-500/20',
+    },
+    blue: {
+        text: 'text-blue-400',
+        bg: 'bg-blue-500/10',
+        border: 'border-blue-500/20',
+    },
+    green: {
+        text: 'text-green-400',
+        bg: 'bg-green-500/10',
+        border: 'border-green-500/20',
+    },
+    amber: {
+        text: 'text-amber-400',
+        bg: 'bg-amber-500/10',
+        border: 'border-amber-500/20',
+    },
+    purple: {
+        text: 'text-purple-400',
+        bg: 'bg-purple-500/10',
+        border: 'border-purple-500/20',
+    },
+};
