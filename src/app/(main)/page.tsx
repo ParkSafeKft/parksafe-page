@@ -44,8 +44,6 @@ export default function HomePage() {
             <section className="relative min-h-[900px] overflow-hidden border-b border-[#101512]/10 bg-[#f2f6f1] pt-28 lg:pt-32">
                 <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(16,21,18,0.055)_1px,transparent_1px),linear-gradient(to_bottom,rgba(16,21,18,0.055)_1px,transparent_1px)] bg-[size:64px_64px]" />
                 <div className="pointer-events-none absolute -right-24 top-10 h-[720px] w-[720px] rounded-full border-[90px] border-[#34aa56]/10" />
-                <div className="pointer-events-none absolute left-[8%] top-[48%] hidden h-px w-[38%] -rotate-6 bg-[#34aa56]/50 lg:block" />
-
                 <div className="relative mx-auto grid min-h-[710px] w-full max-w-[1440px] grid-cols-1 items-center gap-8 px-5 pb-14 sm:px-8 lg:grid-cols-12 lg:px-12">
                     <motion.div
                         initial={{ opacity: 0, y: 24 }}
@@ -53,7 +51,7 @@ export default function HomePage() {
                         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
                         className="relative z-20 pt-10 lg:col-span-7 lg:pt-0"
                     >
-                        <h1 className="max-w-[930px] text-[clamp(3.6rem,8.1vw,8.6rem)] font-black leading-[0.82] tracking-[-0.075em] text-[#101512]">
+                        <h1 className="max-w-[930px] text-[clamp(3.6rem,8.1vw,8.6rem)] font-black leading-[0.92] tracking-[-0.045em] text-[#101512] text-balance">
                             {t('home.hero.title')}
                             <span className="mt-2 block text-[#34aa56]">{t('home.hero.subtitle')}</span>
                         </h1>
