@@ -1,7 +1,7 @@
 'use client';
 
+import { Award, Globe2, Lightbulb, Rocket, TrendingUp, Trophy } from "lucide-react";
 import { motion } from "framer-motion";
-import { Trophy, Award, Rocket, Lightbulb, TrendingUp } from "lucide-react";
 import Image from "next/image";
 import { useLanguage } from "../contexts/LanguageContext";
 
@@ -55,124 +55,117 @@ export function AboutTimeline() {
             badge: t('about.page.timeline.milestone5.badge'),
             title: t('about.page.timeline.milestone5.title'),
             desc: t('about.page.timeline.milestone5.desc'),
-            icon: TrendingUp,
+            achievement: t('about.page.timeline.milestone5.achievement'),
+            icon: Trophy,
             imageAlt: t('about.page.timeline.milestone5.imageAlt'),
+            image: null,
+        },
+        {
+            year: t('about.page.timeline.milestone6.year'),
+            badge: t('about.page.timeline.milestone6.badge'),
+            title: t('about.page.timeline.milestone6.title'),
+            desc: t('about.page.timeline.milestone6.desc'),
+            achievement: t('about.page.timeline.milestone6.achievement'),
+            icon: Globe2,
+            imageAlt: t('about.page.timeline.milestone6.imageAlt'),
+            image: null,
+        },
+        {
+            year: t('about.page.timeline.milestone7.year'),
+            badge: t('about.page.timeline.milestone7.badge'),
+            title: t('about.page.timeline.milestone7.title'),
+            desc: t('about.page.timeline.milestone7.desc'),
+            icon: TrendingUp,
+            imageAlt: t('about.page.timeline.milestone7.imageAlt'),
             image: null,
         },
     ];
 
     return (
-        <section className="py-24 bg-zinc-50">
-            <div className="container mx-auto px-4 max-w-6xl">
-                {/* Section Header */}
-                <div className="text-center mb-20">
+        <section className="bg-white py-24 lg:py-32">
+            <div className="mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-12">
+                <div className="grid gap-8 border-b border-[#101512]/20 pb-12 lg:grid-cols-12 lg:items-end">
                     <motion.h2
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 18 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
-                        viewport={{ once: true }}
-                        className="text-4xl md:text-5xl font-extrabold tracking-tight text-zinc-900 mb-4"
+                        viewport={{ once: true, amount: 0.4 }}
+                        className="text-4xl font-black leading-[0.95] tracking-[-0.05em] text-[#101512] text-balance sm:text-6xl lg:col-span-8 lg:text-7xl"
                     >
                         {t('about.page.timeline.title')}
                     </motion.h2>
                     <motion.p
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 18 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.1 }}
-                        viewport={{ once: true }}
-                        className="text-lg text-zinc-600 max-w-2xl mx-auto"
+                        transition={{ duration: 0.6, delay: 0.06 }}
+                        viewport={{ once: true, amount: 0.4 }}
+                        className="max-w-lg text-lg leading-8 text-[#626e66] text-pretty lg:col-span-4"
                     >
                         {t('about.page.timeline.subtitle')}
                     </motion.p>
                 </div>
 
-                {/* Timeline */}
-                <div className="relative">
-                    {/* Center Line - Hidden on mobile, visible on md+ */}
-                    <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-[#34aa56] via-emerald-400 to-zinc-300 transform -translate-x-1/2" />
+                <div>
+                    {milestones.map((milestone, index) => (
+                        <motion.article
+                            key={milestone.title}
+                            initial={{ opacity: 0, y: 24 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.55 }}
+                            viewport={{ once: true, amount: 0.2 }}
+                            className="grid gap-8 border-b border-[#101512]/15 py-12 last:border-b-0 lg:grid-cols-12 lg:gap-10 lg:py-16"
+                        >
+                            <div className="flex items-start justify-between lg:col-span-2 lg:block">
+                                <span className="text-5xl font-black leading-none tracking-[-0.07em] text-[#101512]/12">
+                                    0{index + 1}
+                                </span>
+                                <p className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-[#258642] lg:mt-8">
+                                    {milestone.year}
+                                </p>
+                            </div>
 
-                    {/* Milestones */}
-                    <div className="space-y-12 md:space-y-24">
-                        {milestones.map((milestone, index) => {
-                            const Icon = milestone.icon;
-                            const isLeft = index % 2 === 0;
+                            <div className={milestone.image ? "lg:col-span-6" : "lg:col-span-8"}>
+                                <div className="mb-7 flex items-center gap-3">
+                                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#eaf7ee] text-[#258642]">
+                                        <milestone.icon className="h-5 w-5" />
+                                    </span>
+                                    <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#667169]">
+                                        {milestone.badge}
+                                    </span>
+                                </div>
 
-                            return (
-                                <motion.div
-                                    key={index}
-                                    initial={{ opacity: 0, x: isLeft ? -50 : 50 }}
-                                    whileInView={{ opacity: 1, x: 0 }}
-                                    transition={{ duration: 0.6, delay: index * 0.15 }}
-                                    viewport={{ once: true }}
-                                    className={`relative flex flex-col md:flex-row items-center gap-8 ${
-                                        isLeft ? 'md:flex-row-reverse' : ''
-                                    }`}
-                                >
-                                    {/* Timeline Dot - Center point */}
-                                    <div className="hidden md:flex absolute left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full bg-white border-4 border-[#34aa56] shadow-lg items-center justify-center z-10">
-                                        <Icon className="w-7 h-7 text-[#34aa56]" />
+                                <h3 className="max-w-3xl text-3xl font-black leading-[1.02] tracking-[-0.04em] text-[#101512] text-balance sm:text-4xl">
+                                    {milestone.title}
+                                </h3>
+                                <p className="mt-5 max-w-3xl text-base leading-8 text-[#5c6860] text-pretty">
+                                    {milestone.desc}
+                                </p>
+
+                                {milestone.achievement && (
+                                    <div className="mt-7 flex max-w-2xl items-center gap-3 border-t border-[#101512]/15 pt-5 text-sm font-bold text-[#245d35]">
+                                        <Trophy className="h-4 w-4 shrink-0 text-[#34aa56]" />
+                                        <span>{milestone.achievement.replace('🏆 ', '')}</span>
                                     </div>
+                                )}
+                            </div>
 
-                                    {/* Content Card */}
-                                    <div className={`w-full md:w-[calc(50%-4rem)] ${isLeft ? 'md:text-right' : 'md:text-left'}`}>
-                                        <div className="bg-white rounded-[2rem] p-8 shadow-xl border border-zinc-100 hover:shadow-2xl transition-shadow">
-                                            {/* Year Badge */}
-                                            <div className={`inline-flex items-center gap-2 mb-4 ${isLeft ? 'md:flex-row-reverse' : ''}`}>
-                                                <span className="px-4 py-1.5 bg-[#34aa56] text-white text-sm font-bold rounded-full">
-                                                    {milestone.year}
-                                                </span>
-                                                <span className="px-4 py-1.5 bg-zinc-100 text-zinc-700 text-sm font-semibold rounded-full">
-                                                    {milestone.badge}
-                                                </span>
-                                            </div>
-
-                                            {/* Icon for mobile */}
-                                            <div className="md:hidden flex justify-center mb-6">
-                                                <div className="w-16 h-16 rounded-full bg-emerald-50 border-4 border-[#34aa56] flex items-center justify-center">
-                                                    <Icon className="w-7 h-7 text-[#34aa56]" />
-                                                </div>
-                                            </div>
-
-                                            {/* Title */}
-                                            <h3 className="text-2xl font-bold text-zinc-900 mb-3">
-                                                {milestone.title}
-                                            </h3>
-
-                                            {/* Description */}
-                                            <p className="text-zinc-600 leading-relaxed mb-6">
-                                                {milestone.desc}
-                                            </p>
-
-                                            {/* Achievement Badge (for milestones 3 & 4) */}
-                                            {milestone.achievement && (
-                                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl mb-6">
-                                                    <span className="text-amber-600 font-semibold text-sm">
-                                                        {milestone.achievement}
-                                                    </span>
-                                                </div>
-                                            )}
-
-                                            {/* Image */}
-                                            {milestone.image && (
-                                                <div className={`relative w-full ${milestone.imageOrientation === 'portrait' ? 'aspect-[3/4]' : 'aspect-video'} rounded-2xl overflow-hidden shadow-lg`}>
-                                                    <Image
-                                                        src={milestone.image}
-                                                        alt={milestone.imageAlt}
-                                                        fill
-                                                        className="object-cover"
-                                                        sizes="(max-width: 768px) 100vw, 50vw"
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>
+                            {milestone.image && (
+                                <div className="lg:col-span-4">
+                                    <div className={`relative w-full overflow-hidden rounded-[1.5rem] bg-[#edf1ed] ${
+                                        milestone.imageOrientation === 'portrait' ? 'aspect-[4/5]' : 'aspect-[16/10]'
+                                    }`}>
+                                        <Image
+                                            src={milestone.image}
+                                            alt={milestone.imageAlt}
+                                            fill
+                                            className="object-cover"
+                                            sizes="(max-width: 1024px) 100vw, 34vw"
+                                        />
                                     </div>
-
-                                    {/* Spacer for the other side (desktop only) */}
-                                    <div className="hidden md:block w-[calc(50%-4rem)]" />
-                                </motion.div>
-                            );
-                        })}
-                    </div>
+                                </div>
+                            )}
+                        </motion.article>
+                    ))}
                 </div>
             </div>
         </section>

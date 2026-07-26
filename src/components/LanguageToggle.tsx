@@ -13,11 +13,11 @@ export function LanguageToggle() {
     return (
         <button
             onClick={toggleLanguage}
-            className="p-2 rounded-full hover:bg-slate-100 transition-colors flex items-center gap-2 group cursor-pointer"
+            className="group flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-[#59645d] transition-colors hover:bg-white hover:text-[#101512]"
             aria-label="Toggle language"
         >
-            <Globe className="w-5 h-5 text-slate-600 group-hover:text-slate-900 transition-colors" />
-            <span className="text-sm font-semibold text-slate-600 group-hover:text-slate-900 transition-colors uppercase">
+            <Globe className="h-4 w-4" />
+            <span className="text-xs font-bold uppercase tracking-[0.08em]">
                 {language}
             </span>
         </button>

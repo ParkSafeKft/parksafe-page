@@ -1,6 +1,6 @@
 'use client';
 
-import { History, ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AboutTimeline } from "@/components/AboutTimeline";
 import Link from "next/link";
@@ -10,57 +10,59 @@ export default function AboutPage() {
     const { t } = useLanguage();
 
     return (
-        <div className="min-h-screen bg-zinc-50 pt-32 pb-24 font-sans text-zinc-900 selection:bg-[#34aa56] selection:text-white">
-            <div className="container mx-auto px-4 max-w-6xl">
-
-                {/* Header */}
-                <div className="text-center mb-16 space-y-4">
-                    <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-emerald-50 mb-4 shadow-sm border border-emerald-100">
-                        <History className="text-[#34aa56] w-8 h-8" />
-                    </div>
-                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-zinc-900">
+        <div className="min-h-screen bg-[#f7f9f6] text-[#101512] selection:bg-[#34aa56] selection:text-white">
+            <section className="relative overflow-hidden border-b border-[#101512]/10 bg-[#f2f6f1] pb-20 pt-36 lg:pb-28 lg:pt-44">
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(16,21,18,0.055)_1px,transparent_1px),linear-gradient(to_bottom,rgba(16,21,18,0.055)_1px,transparent_1px)] bg-[size:64px_64px]" />
+                <div className="relative mx-auto grid w-full max-w-[1440px] gap-10 px-5 sm:px-8 lg:grid-cols-12 lg:items-end lg:px-12">
+                    <motion.h1
+                        initial={{ opacity: 0, y: 22 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                        className="text-[clamp(4.8rem,13vw,12rem)] font-black leading-[0.76] tracking-[-0.085em] lg:col-span-8"
+                    >
                         {t('about.page.title')}
-                    </h1>
-                    <p className="text-xl text-zinc-600 max-w-3xl mx-auto font-medium leading-relaxed">
+                    </motion.h1>
+                    <motion.p
+                        initial={{ opacity: 0, y: 18 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.65, delay: 0.08 }}
+                        className="max-w-lg border-t border-[#101512]/20 pt-6 text-lg font-medium leading-8 text-[#526058] text-pretty lg:col-span-4"
+                    >
                         {t('about.page.subtitle')}
-                    </p>
+                    </motion.p>
                 </div>
+            </section>
 
-            </div>
-
-            {/* Timeline Section */}
             <AboutTimeline />
 
-            {/* CTA Section */}
-            <div className="container mx-auto px-4 max-w-4xl mt-24">
+            <section className="relative overflow-hidden bg-[#34aa56] py-24 lg:py-32">
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(16,21,18,0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(16,21,18,0.12)_1px,transparent_1px)] bg-[size:64px_64px]" />
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 24 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    viewport={{ once: true }}
-                    className="bg-gradient-to-br from-[#34aa56] to-emerald-600 rounded-[2rem] p-12 md:p-16 text-center shadow-2xl relative overflow-hidden"
+                    transition={{ duration: 0.65 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    className="relative mx-auto grid w-full max-w-[1440px] gap-10 px-5 sm:px-8 lg:grid-cols-12 lg:items-end lg:px-12"
                 >
-                    {/* Decorative elements */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
-                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -ml-32 -mb-32 pointer-events-none" />
-
-                    <div className="relative z-10">
-                        <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">
+                    <div className="lg:col-span-8">
+                        <h2 className="max-w-5xl text-5xl font-black leading-[0.88] tracking-[-0.06em] text-[#101512] text-balance sm:text-7xl lg:text-[7rem]">
                             {t('about.page.cta.title')}
                         </h2>
-                        <p className="text-emerald-50 text-lg mb-8 max-w-2xl mx-auto">
+                    </div>
+                    <div className="lg:col-span-4">
+                        <p className="mb-8 max-w-lg text-lg font-medium leading-8 text-[#183a21] text-pretty">
                             {t('about.page.cta.desc')}
                         </p>
                         <Link
                             href="/contact"
-                            className="inline-flex items-center gap-2 px-8 py-4 bg-white text-[#34aa56] font-bold rounded-full hover:bg-zinc-50 hover:scale-105 active:scale-95 transition-all shadow-xl"
+                            className="inline-flex min-h-14 items-center justify-center gap-3 rounded-xl bg-[#101512] px-7 py-4 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 hover:bg-[#1c241f] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
                         >
                             {t('about.page.cta.button')}
-                            <ArrowRight className="w-5 h-5" />
+                            <ArrowUpRight className="h-4 w-4" />
                         </Link>
                     </div>
                 </motion.div>
-            </div>
+            </section>
         </div>
     );
 }

@@ -138,7 +138,7 @@ export const translations = {
             googleButton: "Google-lal folytatás",
             changeEmail: "Módosítás",
             backToHome: "Vissza a főoldalra",
-            checking: "Ellenőrzés...",
+            checking: "Ellenőrzés…",
             errorGeneric: "Hiba történt. Kérjük, próbálja újra.",
             errorNoAccount: "Nincs regisztrált fiók ezzel az email címmel.",
         },
@@ -161,6 +161,8 @@ export const translations = {
             errorGeneric: "Hiba történt a jelszó frissítése közben.",
             errorMismatch: "A jelszavak nem egyeznek.",
             errorLength: "A jelszónak legalább 8 karakter hosszúnak kell lennie.",
+            errorInvalidLink: "A visszaállító link hiányzik vagy lejárt. Kérj egy új linket.",
+            verifying: "A visszaállító link ellenőrzése…",
         },
         profile: {
             greeting: "Szia",
@@ -182,10 +184,13 @@ export const translations = {
             deleteModalConfirm: "Biztosan folytatni szeretnéd? Kérjük erősítsd meg szándékod.",
             cancel: "Mégsem",
             verify: "Igen, törlöm",
-            deleting: "Törlés...",
+            deleting: "Törlés…",
             sendResetLink: "Jelszó Visszaállítása",
             resetLinkDescription: "Küldünk egy jelszó-visszaállító linket az email címedre. Kattints a linkre a jelszavad megváltoztatásához.",
             resetLinkSent: "A jelszó-visszaállító link elküldve az email címedre!",
+            deleteProfileData: "Profilinformációk végleges törlése",
+            deleteLoginData: "Bejelentkezési adatok eltávolítása",
+            deleteSettings: "Elmentett beállítások elvesztése",
         },
         about: {
             nav: "Rólunk",
@@ -195,8 +200,8 @@ export const translations = {
                 cta: "Teljes Történet",
                 card1: {
                     badge: "Nemzeti Program",
-                    title: "Top 25 Országosan",
-                    desc: "Bekerültünk a Magyar Nemzeti Tehetség Program legjobb 25 induló vállalkozása közé."
+                    title: "Top 10 Országosan",
+                    desc: "Bekerültünk a Magyar Nemzeti Tehetség Program tíz legjobb startupkezdeményezése közé."
                 },
                 card2: {
                     badge: "Egyetemi Elismerés",
@@ -211,10 +216,10 @@ export const translations = {
             },
             page: {
                 title: "Rólunk",
-                subtitle: "A ParkSafe története: innováció, kitartás és elismerés.",
+                subtitle: "A ParkSafe története: az első szegedi térképtől a San Franciscó-i világdöntőig.",
                 timeline: {
                     title: "Utunk",
-                    subtitle: "Egy startup fejlődése a kezdetektől a nemzeti elismerésig.",
+                    subtitle: "Egy kerékpáros ötlet útja Szegedtől a nemzetközi színpadig.",
                     milestone1: {
                         year: "2025 Eleje",
                         badge: "Alapítás",
@@ -223,33 +228,49 @@ export const translations = {
                         imageAlt: "ParkSafe alapítási pillanat"
                     },
                     milestone2: {
-                        year: "2025 Közép",
+                        year: "2025 Vége",
                         badge: "Első Verzió",
                         title: "Mobil Applikáció Indítása",
                         desc: "Elindítottuk az első mobilalkalmazást interaktív térképpel, amely lehetővé tette a felhasználók számára, hogy megtalálják és értékeljék a kerékpár-tárolóhelyeket Szegeden.",
                         imageAlt: "Első mobil app bemutató"
                     },
                     milestone3: {
-                        year: "2025 Vége",
+                        year: "2025–2026",
                         badge: "Nemzeti Elismerés",
-                        title: "Top 25 a Nemzeti Tehetség Programban",
-                        desc: "Büszkén jelentjük be, hogy bekerültünk a Magyar Nemzeti Tehetség Program legjobb 25 induló vállalkozása közé – egy jelentős elismerés országos szinten.",
-                        achievement: "🏆 Nemzeti Tehetség Program • Top 25 Országosan",
+                        title: "Top 10 és ECC Dobogó",
+                        desc: "A Nemzeti Tehetség Programban az ország tíz legjobb startupkezdeményezése közé kerültünk, majd az Entrepreneurship Club of Corvinus versenyén harmadik helyezést értünk el.",
+                        achievement: "🏆 Nemzeti Tehetség Program • Top 10 · ECC • 3. hely",
                         imageAlt: "Nemzeti Tehetség Program díj"
                     },
                     milestone4: {
                         year: "2026 Eleje",
                         badge: "Egyetemi Siker",
-                        title: "Top 14 a 144 Ötletből",
-                        desc: "A Szegedi Tudományegyetem innovációs programjában 144 pályázó közül a legjobb 14 közé kerültünk – ez igazolja projektünk potenciálját és megvalósíthatóságát.",
-                        achievement: "🏆 Szegedi Tudományegyetem • Top 14 / 144 Ötlet",
+                        title: "Egyetemi és Régiós Elismerés",
+                        desc: "A Szegedi Tudományegyetem innovációs programjában 144 pályázó közül a legjobb 14 közé, a magyar, cseh, lengyel és szlovák startupokat összekötő V4 Startup versenyen pedig a legjobb négy közé kerültünk.",
+                        achievement: "🏆 Szegedi Tudományegyetem • Top 14 / 144 · V4 Startup • Top 4",
                         imageAlt: "Egyetemi elismerés ceremónia"
                     },
                     milestone5: {
+                        year: "2026. Május",
+                        badge: "Országos Győzelem",
+                        title: "Red Bull Basement Magyar Győztes",
+                        desc: "Az 1260 beküldött ötlet közül bejutottunk a tízcsapatos magyar döntőbe Debrecenben. Perjési Szabolcs és Kordás Patrik két percben mutatta be a ParkSafe-et, a zsűri pedig a csapatot választotta Magyarország győztesének.",
+                        achievement: "🏆 Red Bull Basement 2026 • Magyar győztes",
+                        imageAlt: "A ParkSafe csapata a Red Bull Basement magyar döntőjén"
+                    },
+                    milestone6: {
+                        year: "2026. Június",
+                        badge: "Világdöntő",
+                        title: "Magyarország Képviselete San Franciscóban",
+                        desc: "A magyar győzelem után Perjési Szabolcs és Kordás Patrik a ParkSafe-fel képviselte Magyarországot a Red Bull Basement világdöntőjén San Franciscóban, több mint 40 ország innovátorai között.",
+                        achievement: "🏆 Red Bull Basement World Final • San Francisco",
+                        imageAlt: "A ParkSafe csapata San Franciscóban"
+                    },
+                    milestone7: {
                         year: "Ma",
                         badge: "Jelen",
-                        title: "B2B/B2G Platform Fejlesztés",
-                        desc: "Továbblépünk az egyszerű mobil applikációtól: jelenleg egy skálázható B2B és B2G platformon dolgozunk, amely önkormányzatoknak és vállalkozásoknak kínál adatvezérelt városi mobilitási megoldásokat.",
+                        title: "Európai Lefedettség és Platformfejlesztés",
+                        desc: "A ParkSafe több mint 2000 regisztrált felhasználót és 4000 letöltést ért el, miközben lefedettsége Európa egészére bővült. Most a kaliforniai jelenléten, valamint egy önkormányzatoknak és vállalkozásoknak szánt B2B/B2G platformon dolgozunk.",
                         imageAlt: "Platform bemutató prezentáció"
                     }
                 },
@@ -396,7 +417,7 @@ export const translations = {
             googleButton: "Continue with Google",
             changeEmail: "Change",
             backToHome: "Back to Home",
-            checking: "Checking...",
+            checking: "Checking…",
             errorGeneric: "An error occurred. Please try again.",
             errorNoAccount: "No account found with this email address.",
         },
@@ -419,6 +440,8 @@ export const translations = {
             errorGeneric: "An error occurred while updating the password.",
             errorMismatch: "Passwords do not match.",
             errorLength: "Password must be at least 8 characters long.",
+            errorInvalidLink: "The reset link is missing or has expired. Request a new link.",
+            verifying: "Checking the reset link…",
         },
         profile: {
             greeting: "Hi",
@@ -440,10 +463,13 @@ export const translations = {
             deleteModalConfirm: "Are you sure you want to continue? Please confirm your intention.",
             cancel: "Cancel",
             verify: "Yes, delete it",
-            deleting: "Deleting...",
+            deleting: "Deleting…",
             sendResetLink: "Reset Password",
             resetLinkDescription: "We'll send a password reset link to your email address. Click the link to change your password.",
             resetLinkSent: "Password reset link has been sent to your email!",
+            deleteProfileData: "Permanently delete profile information",
+            deleteLoginData: "Remove login credentials",
+            deleteSettings: "Lose saved settings",
         },
         about: {
             nav: "About Us",
@@ -453,8 +479,8 @@ export const translations = {
                 cta: "Full Story",
                 card1: {
                     badge: "National Program",
-                    title: "Top 25 Nationally",
-                    desc: "Selected among the top 25 startups in the Hungarian National Talent Program."
+                    title: "Top 10 Nationally",
+                    desc: "Selected among the ten leading startup initiatives in Hungary's National Talent Program."
                 },
                 card2: {
                     badge: "University Recognition",
@@ -469,10 +495,10 @@ export const translations = {
             },
             page: {
                 title: "About Us",
-                subtitle: "The ParkSafe story: innovation, persistence, and recognition.",
+                subtitle: "The ParkSafe story: from our first map in Szeged to the world final in San Francisco.",
                 timeline: {
                     title: "Our Journey",
-                    subtitle: "A startup's evolution from inception to national recognition.",
+                    subtitle: "A cycling idea's journey from Szeged to the international stage.",
                     milestone1: {
                         year: "Early 2025",
                         badge: "Foundation",
@@ -481,33 +507,49 @@ export const translations = {
                         imageAlt: "ParkSafe founding moment"
                     },
                     milestone2: {
-                        year: "Mid 2025",
+                        year: "End of 2025",
                         badge: "First Version",
                         title: "Mobile Application Launch",
                         desc: "We launched the first mobile application with an interactive map, enabling users to find and rate bicycle parking spots in Szeged.",
                         imageAlt: "First mobile app presentation"
                     },
                     milestone3: {
-                        year: "End of 2025",
+                        year: "2025–2026",
                         badge: "National Recognition",
-                        title: "Top 25 in National Talent Program",
-                        desc: "We are proud to announce our selection among the top 25 startups in the Hungarian National Talent Program – a significant recognition at the national level.",
-                        achievement: "🏆 National Talent Program • Top 25 Nationally",
+                        title: "National Top 10 and an ECC Podium",
+                        desc: "We were selected among the ten leading startup initiatives in Hungary's National Talent Program, then placed third in the Entrepreneurship Club of Corvinus competition.",
+                        achievement: "🏆 National Talent Program • Top 10 · ECC • 3rd place",
                         imageAlt: "National Talent Program award"
                     },
                     milestone4: {
                         year: "Early 2026",
                         badge: "University Success",
-                        title: "Top 14 of 144 Ideas",
-                        desc: "Out of 144 applicants in the University of Szeged's innovation program, we ranked in the top 14 – validating our project's potential and feasibility.",
-                        achievement: "🏆 University of Szeged • Top 14 / 144 Ideas",
+                        title: "University and Regional Recognition",
+                        desc: "We reached the top 14 from 144 applicants in the University of Szeged's innovation program, then finished among the top four in the V4 Startup competition for Hungarian, Czech, Polish, and Slovak teams.",
+                        achievement: "🏆 University of Szeged • Top 14 / 144 · V4 Startup • Top 4",
                         imageAlt: "University recognition ceremony"
                     },
                     milestone5: {
+                        year: "May 2026",
+                        badge: "National Winner",
+                        title: "Red Bull Basement Hungary Winner",
+                        desc: "From 1,260 submitted ideas, we reached the ten-team Hungarian final in Debrecen. Perjési Szabolcs and Kordás Patrik presented ParkSafe in a two-minute pitch, and the jury selected the team as Hungary's winner.",
+                        achievement: "🏆 Red Bull Basement 2026 • Hungary winner",
+                        imageAlt: "The ParkSafe team at the Red Bull Basement Hungarian final"
+                    },
+                    milestone6: {
+                        year: "June 2026",
+                        badge: "World Final",
+                        title: "Representing Hungary in San Francisco",
+                        desc: "Following the national win, Perjési Szabolcs and Kordás Patrik represented Hungary with ParkSafe at the Red Bull Basement World Final in San Francisco, alongside innovators from more than 40 countries.",
+                        achievement: "🏆 Red Bull Basement World Final • San Francisco",
+                        imageAlt: "The ParkSafe team in San Francisco"
+                    },
+                    milestone7: {
                         year: "Today",
                         badge: "Present",
-                        title: "B2B/B2G Platform Development",
-                        desc: "We're moving beyond a simple mobile app: currently developing a scalable B2B and B2G platform offering data-driven urban mobility solutions for municipalities and enterprises.",
+                        title: "European Coverage and Platform Development",
+                        desc: "ParkSafe has grown beyond 2,000 registered users and 4,000 downloads while expanding its coverage across Europe. We are now working on a California presence and a B2B/B2G platform for municipalities and businesses.",
                         imageAlt: "Platform presentation demo"
                     }
                 },

@@ -1,104 +1,97 @@
 'use client';
 
-import { Mail, User, Phone, Clock, ChevronRight } from "lucide-react";
+import { ArrowUpRight, Clock, Mail, Phone } from "lucide-react";
+import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ContactPage() {
     const { t } = useLanguage();
 
     return (
-        <div className="min-h-screen bg-slate-50 pt-32 pb-24 font-sans text-slate-900 selection:bg-[#34aa56] selection:text-white">
-            <div className="container mx-auto px-4 max-w-5xl">
-
-                {/* Header */}
-                <div className="text-center mb-16 space-y-4">
-                    <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-emerald-50 mb-4 shadow-sm">
-                        <Mail className="text-[#34aa56] w-8 h-8" />
-                    </div>
-                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900">
+        <div className="min-h-screen bg-white text-[#101512] selection:bg-[#34aa56] selection:text-white">
+            <section className="relative overflow-hidden border-b border-[#101512]/10 bg-[#f2f6f1] pb-20 pt-36 lg:pb-28 lg:pt-44">
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(16,21,18,0.055)_1px,transparent_1px),linear-gradient(to_bottom,rgba(16,21,18,0.055)_1px,transparent_1px)] bg-[size:64px_64px]" />
+                <div className="relative mx-auto grid w-full max-w-[1440px] gap-10 px-5 sm:px-8 lg:grid-cols-12 lg:items-end lg:px-12">
+                    <h1 className="text-[clamp(4.2rem,12vw,11rem)] font-black leading-[0.78] tracking-[-0.08em] lg:col-span-8">
                         {t('contact.title')}
                     </h1>
-                    <p className="text-xl text-slate-500 max-w-2xl mx-auto font-medium leading-relaxed">
+                    <p className="max-w-lg border-t border-[#101512]/20 pt-6 text-lg font-medium leading-8 text-[#526058] text-pretty lg:col-span-4">
                         {t('contact.subtitle')}
                     </p>
                 </div>
+            </section>
 
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
-
-                    {/* Main Contact Card */}
-                    <div className="md:col-span-3 bg-white rounded-[2rem] p-8 md:p-12 shadow-xl shadow-slate-200/50 border border-slate-200 relative overflow-hidden group">
-                        {/* Decorative background element */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-
-                        <div className="relative z-10">
-                            <div className="flex items-center gap-6 mb-10">
-                                <div className="w-20 h-20 rounded-2xl shadow-inner border border-slate-200 shrink-0 overflow-hidden">
-                                    <img
-                                        src="/psz.png"
-                                        alt="Perjési Szabolcs"
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                                <div>
-                                    <h2 className="text-2xl font-bold text-slate-900">Perjési Szabolcs</h2>
-                                    <p className="text-[#34aa56] font-bold text-sm uppercase tracking-wider mt-1">{t('contact.role')}</p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-6">
-                                <a href="mailto:info@parksafe.hu" className="group/item flex items-center gap-6 p-4 rounded-2xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all duration-200">
-                                    <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0 group-hover/item:scale-110 transition-transform">
-                                        <Mail size={20} className="text-[#34aa56]" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Email</h3>
-                                        <p className="text-lg font-semibold text-slate-900 group-hover/item:text-[#34aa56] transition-colors">info@parksafe.hu</p>
-                                    </div>
-                                    <ChevronRight className="ml-auto text-slate-300 opacity-0 group-hover/item:opacity-100 transition-opacity" />
-                                </a>
-
-                                <a href="tel:+36307212524" className="group/item flex items-center gap-6 p-4 rounded-2xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all duration-200">
-                                    <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center shrink-0 group-hover/item:scale-110 transition-transform">
-                                        <Phone size={20} className="text-blue-600" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Telefon</h3>
-                                        <p className="text-lg font-semibold text-slate-900 group-hover/item:text-blue-600 transition-colors">+36 30 721 2524</p>
-                                    </div>
-                                    <ChevronRight className="ml-auto text-slate-300 opacity-0 group-hover/item:opacity-100 transition-opacity" />
-                                </a>
-                            </div>
+            <section className="py-24 lg:py-32">
+                <div className="mx-auto grid w-full max-w-[1440px] gap-12 px-5 sm:px-8 lg:grid-cols-12 lg:gap-16 lg:px-12">
+                    <div className="lg:col-span-5">
+                        <div className="relative aspect-[4/5] overflow-hidden rounded-[1.75rem] bg-[#edf1ed]">
+                            <Image
+                                src="/psz.png"
+                                alt="Perjési Szabolcs"
+                                fill
+                                priority
+                                className="object-cover"
+                                sizes="(max-width: 1024px) 100vw, 42vw"
+                            />
                         </div>
                     </div>
 
-                    {/* Secondary Info Cards */}
-                    <div className="md:col-span-2">
+                    <div className="flex flex-col lg:col-span-7">
+                        <div className="border-b border-[#101512]/20 pb-10">
+                            <h2 className="text-4xl font-black leading-[0.95] tracking-[-0.045em] sm:text-5xl">
+                                Perjési Szabolcs
+                            </h2>
+                            <p className="mt-4 text-xs font-bold uppercase tracking-[0.16em] text-[#258642]">
+                                {t('contact.role')}
+                            </p>
+                        </div>
 
-                        <div className="bg-slate-900 rounded-[2rem] p-8 shadow-xl shadow-slate-900/20 text-white relative overflow-hidden h-full flex flex-col justify-center min-h-[320px]">
-                            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+                        <div>
+                            <a
+                                href="mailto:info@parksafe.hu"
+                                className="group grid grid-cols-[48px_1fr] items-center gap-4 border-b border-[#101512]/15 py-8 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#34aa56] sm:grid-cols-[56px_1fr_auto]"
+                            >
+                                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#eaf7ee] text-[#258642]">
+                                    <Mail className="h-5 w-5" />
+                                </span>
+                                <span>
+                                    <span className="block text-[11px] font-bold uppercase tracking-[0.15em] text-[#7a857d]">Email</span>
+                                    <span className="mt-1 block text-xl font-black tracking-[-0.025em] sm:text-2xl">info@parksafe.hu</span>
+                                </span>
+                                <ArrowUpRight className="hidden h-5 w-5 text-[#101512]/25 transition-all group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-[#34aa56] sm:block" />
+                            </a>
 
-                            <div className="relative z-10 flex flex-col items-center text-center">
-                                <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-6 backdrop-blur-sm">
-                                    <Clock size={32} className="text-emerald-400" />
-                                </div>
-                                <h3 className="text-xl font-bold mb-2">{t('contact.responseTimeTitle')}</h3>
-                                <p className="text-slate-400 font-medium">
-                                    {t('contact.responseTimeDesc')}
-                                </p>
+                            <a
+                                href="tel:+36307212524"
+                                className="group grid grid-cols-[48px_1fr] items-center gap-4 border-b border-[#101512]/15 py-8 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#34aa56] sm:grid-cols-[56px_1fr_auto]"
+                            >
+                                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#eaf7ee] text-[#258642]">
+                                    <Phone className="h-5 w-5" />
+                                </span>
+                                <span>
+                                    <span className="block text-[11px] font-bold uppercase tracking-[0.15em] text-[#7a857d]">Telefon</span>
+                                    <span className="mt-1 block text-xl font-black tracking-[-0.025em] sm:text-2xl">+36 30 721 2524</span>
+                                </span>
+                                <ArrowUpRight className="hidden h-5 w-5 text-[#101512]/25 transition-all group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-[#34aa56] sm:block" />
+                            </a>
+                        </div>
+
+                        <div className="mt-10 grid gap-6 rounded-[1.5rem] bg-[#101512] p-7 text-white sm:grid-cols-[56px_1fr] sm:items-start sm:p-9">
+                            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/8 text-[#58ce79]">
+                                <Clock className="h-5 w-5" />
+                            </span>
+                            <div>
+                                <h3 className="text-xl font-black tracking-[-0.025em]">{t('contact.responseTimeTitle')}</h3>
+                                <p className="mt-2 max-w-lg leading-7 text-white/55">{t('contact.responseTimeDesc')}</p>
                             </div>
                         </div>
 
+                        <p className="mt-auto border-t border-[#101512]/15 pt-8 text-base leading-8 text-[#667169] text-pretty lg:mt-10">
+                            {t('contact.footerNote')}
+                        </p>
                     </div>
                 </div>
-
-                {/* Footer Note */}
-                <div className="mt-16 text-center">
-                    <p className="text-slate-400 max-w-2xl mx-auto border-t border-slate-200 pt-8">
-                        {t('contact.footerNote')}
-                    </p>
-                </div>
-
-            </div>
+            </section>
         </div>
     );
 }
