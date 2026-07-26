@@ -1,5 +1,6 @@
 'use client';
 
+import Link from "next/link";
 import { FileText, Mail, MapPin, Phone } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -227,75 +228,103 @@ export default function TermsPage() {
     const c = content[language] ?? content.hu;
 
     return (
-        <div className="min-h-screen bg-zinc-50 pt-32 pb-24 font-sans text-zinc-900 selection:bg-[#34aa56] selection:text-white">
-            <div className="container mx-auto px-4 max-w-4xl">
-
-                {/* Header */}
-                <div className="text-center mb-16">
-                    <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-emerald-50 mb-6 shadow-sm border border-emerald-100">
-                        <FileText className="text-[#34aa56] w-8 h-8" />
+        <div className="min-h-screen bg-white pb-28 pt-36 font-sans text-[#101512] selection:bg-[#34aa56] selection:text-white">
+            <div className="mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-12">
+                <header className="grid gap-8 border-b border-[#101512]/20 pb-12 lg:grid-cols-12 lg:items-end lg:pb-16">
+                    <div className="lg:col-span-8">
+                        <p className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.18em] text-[#258642]">
+                            <FileText className="h-5 w-5" />
+                            ParkSafe / Legal
+                        </p>
+                        <h1 className="mt-6 max-w-5xl text-5xl font-black leading-[0.92] tracking-[-0.055em] text-balance sm:text-6xl lg:text-7xl">
+                            {c.title}
+                        </h1>
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-zinc-900 mb-4">
-                        {c.title}
-                    </h1>
-                    <p className="text-zinc-500 font-medium">{c.lastUpdated}</p>
-                </div>
+                    <div className="lg:col-span-4">
+                        <p className="text-sm font-semibold text-[#667169]">{c.lastUpdated}</p>
+                        <nav aria-label="Legal documents" className="mt-5 flex gap-5 text-sm font-bold">
+                            <span className="text-[#258642]">{language === 'en' ? 'Terms' : 'ÁSZF'}</span>
+                            <Link href="/privacy" className="border-b border-[#101512]/25 pb-1 hover:border-[#34aa56] hover:text-[#258642]">
+                                {language === 'en' ? 'Privacy' : 'Adatvédelem'}
+                            </Link>
+                        </nav>
+                    </div>
+                </header>
 
-                {/* Content Card */}
-                <div className="bg-white rounded-[2rem] p-8 md:p-12 shadow-xl shadow-zinc-200/50 border border-zinc-100">
-                    <div className="prose prose-zinc max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-[#34aa56] hover:prose-a:text-emerald-700">
+                <div className="grid gap-12 py-14 lg:grid-cols-12 lg:py-20">
+                    <aside className="hidden lg:col-span-3 lg:block">
+                        <nav aria-label={language === 'en' ? 'Terms sections' : 'ÁSZF fejezetek'} className="sticky top-32 border-t border-[#101512]/20">
+                            {c.sections.map((section) => (
+                                <a
+                                    key={section.num}
+                                    href={`#section-${section.num.replace('.', '')}`}
+                                    className="grid grid-cols-[2rem_1fr] gap-3 border-b border-[#101512]/10 py-3 text-sm text-[#5f6a62] transition-colors hover:text-[#258642]"
+                                >
+                                    <span className="font-bold text-[#258642]">{section.num}</span>
+                                    <span>{section.heading}</span>
+                                </a>
+                            ))}
+                        </nav>
+                    </aside>
 
+                    <article className="lg:col-span-8 lg:col-start-5">
                         {c.sections.map((section) => (
-                            <section key={section.num} className="mb-12">
-                                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                                    <span className="text-[#34aa56]">{section.num}</span> {section.heading}
+                            <section
+                                id={`section-${section.num.replace('.', '')}`}
+                                key={section.num}
+                                className="scroll-mt-32 border-t border-[#101512]/20 py-10 first:pt-0 lg:py-12"
+                            >
+                                <h2 className="grid gap-3 text-2xl font-black tracking-[-0.035em] sm:grid-cols-[3rem_1fr] sm:text-3xl">
+                                    <span className="text-[#258642]">{section.num}</span>
+                                    <span>{section.heading}</span>
                                 </h2>
-                                {"intro" in section && section.intro && (
-                                    <p className="text-zinc-600 leading-relaxed mb-4">{section.intro}</p>
-                                )}
-                                {"list" in section && section.list && (
-                                    <ul className="space-y-2 text-zinc-600 list-disc pl-5 marker:text-[#34aa56]">
-                                        {section.list.map((item, i) => (
-                                            <li key={i}>{item}</li>
-                                        ))}
-                                    </ul>
-                                )}
-                                {"paragraphs" in section && section.paragraphs && section.paragraphs.map((p, i) => (
-                                    <p key={i} className="text-zinc-600 leading-relaxed mt-4">{p}</p>
-                                ))}
+                                <div className="mt-6 max-w-[70ch] pl-0 sm:pl-12">
+                                    {"intro" in section && section.intro && (
+                                        <p className="mb-4 leading-8 text-[#5f6a62] text-pretty">{section.intro}</p>
+                                    )}
+                                    {"list" in section && section.list && (
+                                        <ul className="list-disc space-y-2 pl-5 leading-7 text-[#5f6a62] marker:text-[#34aa56]">
+                                            {section.list.map((item) => <li key={item}>{item}</li>)}
+                                        </ul>
+                                    )}
+                                    {"paragraphs" in section && section.paragraphs && section.paragraphs.map((paragraph) => (
+                                        <p key={paragraph} className="mt-4 leading-8 text-[#5f6a62] text-pretty">{paragraph}</p>
+                                    ))}
+                                </div>
                             </section>
                         ))}
 
-                        {/* Contact */}
-                        <section>
-                            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                                <span className="text-[#34aa56]">12.</span> {c.contactHeading}
+                        <section className="border-t border-[#101512]/20 py-10 lg:py-12">
+                            <h2 className="grid gap-3 text-2xl font-black tracking-[-0.035em] sm:grid-cols-[3rem_1fr] sm:text-3xl">
+                                <span className="text-[#258642]">12.</span>
+                                <span>{c.contactHeading}</span>
                             </h2>
-                            <p className="text-zinc-600 leading-relaxed mb-4">{c.contactIntro}</p>
-                            <ul className="space-y-3">
-                                <li className="flex items-center gap-3 text-zinc-600 bg-zinc-50 p-3 rounded-lg border border-zinc-100">
-                                    <Mail className="w-5 h-5 text-[#34aa56]" />
-                                    <span><strong>{c.emailLabel}:</strong> info@parksafe.hu</span>
-                                </li>
-                                <li className="flex items-center gap-3 text-zinc-600 bg-zinc-50 p-3 rounded-lg border border-zinc-100">
-                                    <MapPin className="w-5 h-5 text-[#34aa56]" />
-                                    <span><strong>{c.addressLabel}:</strong> 6792 Zsombó, Dózsa d. 55.</span>
-                                </li>
-                                <li className="flex items-center gap-3 text-zinc-600 bg-zinc-50 p-3 rounded-lg border border-zinc-100">
-                                    <Phone className="w-5 h-5 text-[#34aa56]" />
-                                    <span><strong>{c.phoneLabel}:</strong> +36 30 721 2524</span>
-                                </li>
-                            </ul>
+                            <div className="mt-6 max-w-[70ch] sm:pl-12">
+                                <p className="mb-6 leading-8 text-[#5f6a62]">{c.contactIntro}</p>
+                                <ul className="border-t border-[#101512]/15">
+                                    <li className="flex items-center gap-3 border-b border-[#101512]/15 py-4 text-[#5f6a62]">
+                                        <Mail className="h-5 w-5 text-[#258642]" />
+                                        <span><strong className="text-[#101512]">{c.emailLabel}:</strong> info@parksafe.hu</span>
+                                    </li>
+                                    <li className="flex items-center gap-3 border-b border-[#101512]/15 py-4 text-[#5f6a62]">
+                                        <MapPin className="h-5 w-5 text-[#258642]" />
+                                        <span><strong className="text-[#101512]">{c.addressLabel}:</strong> 6792 Zsombó, Dózsa d. 55.</span>
+                                    </li>
+                                    <li className="flex items-center gap-3 border-b border-[#101512]/15 py-4 text-[#5f6a62]">
+                                        <Phone className="h-5 w-5 text-[#258642]" />
+                                        <span><strong className="text-[#101512]">{c.phoneLabel}:</strong> +36 30 721 2524</span>
+                                    </li>
+                                </ul>
+                            </div>
                         </section>
-                    </div>
+                    </article>
                 </div>
 
-                {/* Footer info */}
-                <div className="mt-12 text-center border-t border-zinc-200 pt-8">
-                    <p className="text-zinc-400 text-sm leading-relaxed">
-                        <strong className="text-zinc-600">{c.footerEffective}</strong> {c.footerDate}
+                <div className="border-t border-[#101512]/20 pt-8">
+                    <p className="text-sm leading-7 text-[#667169]">
+                        <strong className="text-[#101512]">{c.footerEffective}</strong> {c.footerDate}
                         <br />
-                        <span className="opacity-75">Premiumtex Kft. • Zsombó, Dózsa d. 55. • info@parksafe.hu</span>
+                        Premiumtex Kft. • Zsombó, Dózsa d. 55. • info@parksafe.hu
                     </p>
                 </div>
             </div>

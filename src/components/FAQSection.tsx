@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, ChevronDown } from "lucide-react";
 import {
     Collapsible,
     CollapsibleContent,
@@ -14,86 +15,78 @@ interface FAQItem {
     answer: string;
 }
 
-function FAQSection() {
-    const { t } = useLanguage();
+export default function FAQSection() {
+    const { t, language } = useLanguage();
     const [openItems, setOpenItems] = useState<number[]>([]);
 
-    const faqData: FAQItem[] = [
-        {
-            question: t('faq.q1'),
-            answer: t('faq.a1'),
-        },
-        {
-            question: t('faq.q2'),
-            answer: t('faq.a2'),
-        },
-        {
-            question: t('faq.q3'),
-            answer: t('faq.a3'),
-        },
-        {
-            question: t('faq.q4'),
-            answer: t('faq.a4'),
-        },
-        {
-            question: t('faq.q5'),
-            answer: t('faq.a5'),
-        },
-        {
-            question: t('faq.q6'),
-            answer: t('faq.a6'),
-        },
-        {
-            question: t('faq.q7'),
-            answer: t('faq.a7'),
-        },
-    ];
+    const faqData: FAQItem[] = Array.from({ length: 7 }, (_, index) => ({
+        question: t(`faq.q${index + 1}`),
+        answer: t(`faq.a${index + 1}`),
+    }));
 
     const toggleItem = (index: number) => {
-        setOpenItems((prev) =>
-            prev.includes(index)
-                ? prev.filter((i) => i !== index)
-                : [...prev, index]
+        setOpenItems((current) =>
+            current.includes(index)
+                ? current.filter((item) => item !== index)
+                : [...current, index]
         );
     };
 
     return (
-        <section className="py-24 bg-white">
-            <div className="container px-4 md:px-6 mx-auto max-w-4xl">
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">{t('faq.title')}</h2>
-                    <p className="text-lg text-zinc-500">
-                        {t('faq.subtitle')}
-                    </p>
+        <section className="bg-[#f7f9f6] py-24 lg:py-32">
+            <div className="mx-auto grid w-full max-w-[1440px] gap-14 px-5 sm:px-8 lg:grid-cols-12 lg:px-12">
+                <div className="lg:col-span-5">
+                    <div className="lg:sticky lg:top-32">
+                        <p className="mb-5 text-xs font-bold uppercase tracking-[0.18em] text-[#258642]">ParkSafe / 06</p>
+                        <h2 className="max-w-xl text-4xl font-black leading-[0.95] tracking-[-0.05em] text-[#101512] text-balance sm:text-6xl">
+                            {t('faq.title')}
+                        </h2>
+                        <p className="mt-7 max-w-md text-lg leading-8 text-[#626e66] text-pretty">{t('faq.subtitle')}</p>
+                        <Link
+                            href="/contact"
+                            className="mt-8 inline-flex items-center gap-2 border-b border-[#101512]/25 pb-1 text-sm font-bold text-[#101512] transition-colors hover:border-[#34aa56] hover:text-[#258642] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#34aa56]"
+                        >
+                            {language === 'en' ? 'Still need help? Contact us' : 'Maradt kérdésed? Írj nekünk'}
+                            <ArrowUpRight className="h-4 w-4" />
+                        </Link>
+                    </div>
                 </div>
 
-                <div className="space-y-4">
-                    {faqData.map((item, index) => (
-                        <Collapsible
-                            key={index}
-                            open={openItems.includes(index)}
-                            onOpenChange={() => toggleItem(index)}
-                            className="bg-zinc-50 rounded-2xl border border-zinc-100 overflow-hidden"
-                        >
-                            <CollapsibleTrigger className="flex items-center justify-between w-full p-6 text-left hover:bg-zinc-100/50 transition-colors cursor-pointer">
-                                <h3 className="text-lg font-semibold text-zinc-900 pr-8">{item.question}</h3>
-                                <ChevronDown
-                                    size={20}
-                                    className={`text-zinc-400 transition-transform duration-300 ${openItems.includes(index) ? "rotate-180" : ""
-                                        }`}
-                                />
-                            </CollapsibleTrigger>
-                            <CollapsibleContent>
-                                <div className="px-6 pb-6 text-zinc-600 leading-relaxed">
-                                    <p>{item.answer}</p>
-                                </div>
-                            </CollapsibleContent>
-                        </Collapsible>
-                    ))}
+                <div className="border-t border-[#101512]/20 lg:col-span-7">
+                    {faqData.map((item, index) => {
+                        const isOpen = openItems.includes(index);
+
+                        return (
+                            <Collapsible
+                                key={item.question}
+                                open={isOpen}
+                                onOpenChange={() => toggleItem(index)}
+                                className="border-b border-[#101512]/20"
+                            >
+                                <CollapsibleTrigger className="group flex w-full cursor-pointer items-start justify-between gap-8 py-7 text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#34aa56] sm:py-8">
+                                    <span className="flex gap-5 sm:gap-8">
+                                        <span className="pt-1 text-[11px] font-bold tracking-[0.14em] text-[#258642]">0{index + 1}</span>
+                                        <span className="text-lg font-black tracking-[-0.02em] text-[#101512] sm:text-xl">
+                                            {item.question}
+                                        </span>
+                                    </span>
+                                    <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors ${isOpen ? "border-[#34aa56] bg-[#34aa56] text-white" : "border-[#101512]/20 text-[#101512] group-hover:border-[#34aa56]"}`}>
+                                        <ChevronDown
+                                            size={17}
+                                            className={`transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+                                        />
+                                    </span>
+                                </CollapsibleTrigger>
+                                <CollapsibleContent>
+                                    <div className="pb-8 pl-10 pr-14 text-base leading-8 text-[#58645c] sm:pl-[4.6rem]">
+                                        <p className="max-w-2xl text-pretty">{item.answer}</p>
+                                    </div>
+                                </CollapsibleContent>
+                            </Collapsible>
+                        );
+                    })}
                 </div>
             </div>
         </section>
     );
 }
-
-export default FAQSection;

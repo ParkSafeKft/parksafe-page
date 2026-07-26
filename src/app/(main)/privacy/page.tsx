@@ -1,35 +1,71 @@
 'use client';
 
+import Link from "next/link";
 import { ShieldCheck, Mail, MapPin } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function PrivacyPage() {
     const { language } = useLanguage();
     const isEn = language === 'en';
+    const navItems = [
+        { id: "data-controller", label: isEn ? "Overview" : "Áttekintés" },
+        { id: "collected-data", label: isEn ? "Data Collected" : "Gyűjtött adatok" },
+        { id: "location-data", label: isEn ? "Location Data" : "Helyadatok" },
+        { id: "cookies", label: isEn ? "Cookies" : "Sütik" },
+        { id: "security", label: isEn ? "Data Security" : "Adatbiztonság" },
+        { id: "processors", label: isEn ? "Data Sharing" : "Adatmegosztás" },
+        { id: "retention", label: isEn ? "Retention" : "Adatmegőrzés" },
+        { id: "rights", label: isEn ? "Your Rights" : "Az Ön jogai" },
+        { id: "complaints", label: isEn ? "Complaints" : "Panaszkezelés" },
+        { id: "amendments", label: isEn ? "Amendments" : "Módosítások" },
+    ];
 
     return (
-        <div className="min-h-screen bg-zinc-50 pt-32 pb-24 font-sans text-zinc-900 selection:bg-[#34aa56] selection:text-white">
-            <div className="container mx-auto px-4 max-w-4xl">
-
-                {/* Header */}
-                <div className="text-center mb-16">
-                    <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-emerald-50 mb-6 shadow-sm border border-emerald-100">
-                        <ShieldCheck className="text-[#34aa56] w-8 h-8" />
-                    </div>
-                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-zinc-900 mb-4">
+        <div className="min-h-screen bg-white pb-28 pt-36 font-sans text-[#101512] selection:bg-[#34aa56] selection:text-white">
+            <div className="mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-12">
+                <header className="grid gap-8 border-b border-[#101512]/20 pb-12 lg:grid-cols-12 lg:items-end lg:pb-16">
+                    <div className="lg:col-span-8">
+                        <p className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.18em] text-[#258642]">
+                            <ShieldCheck className="h-5 w-5" />
+                            ParkSafe / Legal
+                        </p>
+                        <h1 className="mt-6 max-w-5xl text-5xl font-black leading-[0.92] tracking-[-0.055em] text-balance sm:text-6xl lg:text-7xl">
                         {isEn ? "Privacy Policy" : "Adatvédelmi Szabályzat"}
-                    </h1>
-                    <p className="text-zinc-500 font-medium">
-                        {isEn ? "Last updated: March 17, 2026" : "Utolsó frissítés: 2026. március 17."}
-                    </p>
-                </div>
+                        </h1>
+                    </div>
+                    <div className="lg:col-span-4">
+                        <p className="text-sm font-semibold text-[#667169]">
+                            {isEn ? "Last updated: March 17, 2026" : "Utolsó frissítés: 2026. március 17."}
+                        </p>
+                        <nav aria-label="Legal documents" className="mt-5 flex gap-5 text-sm font-bold">
+                            <Link href="/terms" className="border-b border-[#101512]/25 pb-1 hover:border-[#34aa56] hover:text-[#258642]">
+                                {isEn ? "Terms" : "ÁSZF"}
+                            </Link>
+                            <span className="text-[#258642]">{isEn ? "Privacy" : "Adatvédelem"}</span>
+                        </nav>
+                    </div>
+                </header>
 
-                {/* Content Card */}
-                <div className="bg-white rounded-[2rem] p-8 md:p-12 shadow-xl shadow-zinc-200/50 border border-zinc-100">
-                    <div className="prose prose-zinc max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-[#34aa56] hover:prose-a:text-emerald-700">
+                <div className="grid gap-12 py-14 lg:grid-cols-12 lg:py-20">
+                    <aside className="hidden lg:col-span-3 lg:block">
+                        <nav aria-label={isEn ? "Privacy sections" : "Adatvédelmi fejezetek"} className="sticky top-32 border-t border-[#101512]/20">
+                            {navItems.map((item, index) => (
+                                <a
+                                    key={item.id}
+                                    href={`#${item.id}`}
+                                    className="grid grid-cols-[2rem_1fr] gap-3 border-b border-[#101512]/10 py-3 text-sm text-[#5f6a62] transition-colors hover:text-[#258642]"
+                                >
+                                    <span className="font-bold text-[#258642]">{String(index).padStart(2, "0")}</span>
+                                    <span>{item.label}</span>
+                                </a>
+                            ))}
+                        </nav>
+                    </aside>
+
+                    <article className="prose prose-zinc max-w-none prose-headings:font-black prose-headings:tracking-[-0.03em] prose-a:text-[#258642] lg:col-span-8 lg:col-start-5">
 
                         {/* Data Controller */}
-                        <section className="mb-12">
+                        <section id="data-controller" className="scroll-mt-32 border-t border-[#101512]/20 pb-12 pt-0">
                             <div className="bg-zinc-50 rounded-xl p-6 border border-zinc-100 space-y-2 text-zinc-600 mb-6">
                                 <p><strong className="text-zinc-900">{isEn ? "Data Controller:" : "Adatkezelő:"}</strong> Premiumtex Kft.</p>
                                 <p><strong className="text-zinc-900">{isEn ? "Registered address:" : "Székhely:"}</strong> 6792 Zsombó, Dózsa dűlő 55.</p>
@@ -75,7 +111,7 @@ export default function PrivacyPage() {
                         </section>
 
                         {/* 1. Collected Data */}
-                        <section className="mb-12">
+                        <section id="collected-data" className="scroll-mt-32 border-t border-[#101512]/20 py-12">
                             <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
                                 <span className="text-[#34aa56]">1.</span>{" "}
                                 {isEn ? "Data Collected and Processing Purposes" : "Gyűjtött adatok és adatkezelési célok"}
@@ -381,7 +417,7 @@ export default function PrivacyPage() {
                         </section>
 
                         {/* 2. Location data */}
-                        <section className="mb-12">
+                        <section id="location-data" className="scroll-mt-32 border-t border-[#101512]/20 py-12">
                             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
                                 <span className="text-[#34aa56]">2.</span>{" "}
                                 {isEn ? "Processing of Location Data" : "Helyadatok kezelése"}
@@ -443,7 +479,7 @@ export default function PrivacyPage() {
                         </section>
 
                         {/* 3. Cookies */}
-                        <section className="mb-12">
+                        <section id="cookies" className="scroll-mt-32 border-t border-[#101512]/20 py-12">
                             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
                                 <span className="text-[#34aa56]">3.</span>{" "}
                                 {isEn ? "Cookies and Tracking" : "Sütik és nyomkövetés"}
@@ -482,7 +518,7 @@ export default function PrivacyPage() {
                         </section>
 
                         {/* 4. Data security */}
-                        <section className="mb-12">
+                        <section id="security" className="scroll-mt-32 border-t border-[#101512]/20 py-12">
                             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
                                 <span className="text-[#34aa56]">4.</span>{" "}
                                 {isEn ? "Data Security" : "Adatbiztonság"}
@@ -518,7 +554,7 @@ export default function PrivacyPage() {
                         </section>
 
                         {/* 5. Data processors */}
-                        <section className="mb-12">
+                        <section id="processors" className="scroll-mt-32 border-t border-[#101512]/20 py-12">
                             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
                                 <span className="text-[#34aa56]">5.</span>{" "}
                                 {isEn ? "Data Processors and Data Sharing" : "Adatfeldolgozók és adatmegosztás"}
@@ -566,7 +602,7 @@ export default function PrivacyPage() {
                         </section>
 
                         {/* 6. Retention */}
-                        <section className="mb-12">
+                        <section id="retention" className="scroll-mt-32 border-t border-[#101512]/20 py-12">
                             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
                                 <span className="text-[#34aa56]">6.</span>{" "}
                                 {isEn ? "Data Retention Periods" : "Adatmegőrzési idők"}
@@ -603,7 +639,7 @@ export default function PrivacyPage() {
                         </section>
 
                         {/* 7. Rights */}
-                        <section className="mb-12">
+                        <section id="rights" className="scroll-mt-32 border-t border-[#101512]/20 py-12">
                             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
                                 <span className="text-[#34aa56]">7.</span>{" "}
                                 {isEn ? "Data Subject Rights" : "Érintetti jogok"}
@@ -645,7 +681,7 @@ export default function PrivacyPage() {
                         </section>
 
                         {/* 8. Contact */}
-                        <section className="mb-12">
+                        <section id="complaints" className="scroll-mt-32 border-t border-[#101512]/20 py-12">
                             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
                                 <span className="text-[#34aa56]">8.</span>{" "}
                                 {isEn ? "Contact, Complaints, Supervisory Authority" : "Kapcsolat, panaszkezelés, felügyeleti hatóság"}
@@ -686,7 +722,7 @@ export default function PrivacyPage() {
                         </section>
 
                         {/* 9. Amendments */}
-                        <section>
+                        <section id="amendments" className="scroll-mt-32 border-t border-[#101512]/20 pt-12">
                             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
                                 <span className="text-[#34aa56]">9.</span>{" "}
                                 {isEn ? "Amendment of the Privacy Policy" : "Az adatkezelési tájékoztató módosítása"}
@@ -717,16 +753,16 @@ export default function PrivacyPage() {
                                     : "A módosításokról az alkalmazásban vagy a kapcsolódó weboldalon keresztül adunk tájékoztatást. Amennyiben a változtatások lényegesen érintik az Ön jogait, külön is jelezhetjük (pl. in-app értesítéssel) és adott esetben új hozzájárulást kérünk."}
                             </p>
                         </section>
-                    </div>
+                    </article>
                 </div>
 
                 {/* Footer info */}
-                <div className="mt-12 text-center border-t border-zinc-200 pt-8">
-                    <p className="text-zinc-400 text-sm leading-relaxed">
-                        <strong className="text-zinc-600">{isEn ? "Effective from:" : "Hatályos:"}</strong>{" "}
+                <div className="border-t border-[#101512]/20 pt-8">
+                    <p className="text-sm leading-7 text-[#667169]">
+                        <strong className="text-[#101512]">{isEn ? "Effective from:" : "Hatályos:"}</strong>{" "}
                         {isEn ? "March 17, 2026" : "2026. március 17-től"}
                         <br />
-                        <span className="opacity-75">Premiumtex Kft. • 6792 Zsombó, Dózsa dűlő 55. • info@parksafe.hu</span>
+                        Premiumtex Kft. • 6792 Zsombó, Dózsa dűlő 55. • info@parksafe.hu
                     </p>
                 </div>
             </div>

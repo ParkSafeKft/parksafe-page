@@ -1,22 +1,19 @@
 'use client';
 
-import { useState, useEffect, Suspense, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
-import { Lock, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { createClient, type EmailOtpType } from '@supabase/supabase-js';
+import { AlertCircle, ArrowRight, CheckCircle, Lock } from 'lucide-react';
+import { AccountAccessLayout } from '@/components/AccountAccessLayout';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const isDev = process.env.NODE_ENV === 'development';
-
-// Create a local Supabase client that doesn't persist sessions.
-// This prevents the password reset flow from logging the user in on other tabs.
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-
 const secureClient = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
-        persistSession: false, // Don't save session to localStorage
+        persistSession: false,
         autoRefreshToken: false,
         detectSessionInUrl: false,
     },
@@ -27,49 +24,39 @@ function ResetPasswordContent() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
+    const [tokenError, setTokenError] = useState('');
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const [verifying, setVerifying] = useState(true);
     const router = useRouter();
     const searchParams = useSearchParams();
-
-    // We don't need useAuth here because we're using a local client
-    // const { updatePassword, signOut } = useAuth(); 
-
-    const successRef = useRef(false);
-
-    const token_hash = searchParams.get('token_hash');
-    const type = searchParams.get('type') as any || 'recovery';
+    const tokenHash = searchParams.get('token_hash');
+    const type = (searchParams.get('type') as EmailOtpType | null) ?? 'recovery';
 
     useEffect(() => {
         const verifyToken = async () => {
-            if (!token_hash) {
+            if (!tokenHash) {
                 setVerifying(false);
-                setError('Missing token');
+                setTokenError(t('resetPassword.errorInvalidLink'));
                 return;
             }
 
             try {
-                // Verify against the secure, local client
-                const { error } = await secureClient.auth.verifyOtp({ token_hash, type });
-                if (error) {
-                    setError(error.message);
-                }
-            } catch (err) {
-                if (isDev) console.error(err);
-                setError(t('resetPassword.errorGeneric'));
+                const { error } = await secureClient.auth.verifyOtp({ token_hash: tokenHash, type });
+                if (error) setTokenError(error.message);
+            } catch (error) {
+                if (isDev) console.error(error);
+                setTokenError(t('resetPassword.errorInvalidLink'));
             } finally {
                 setVerifying(false);
             }
         };
 
         verifyToken();
+    }, [tokenHash, type, t]);
 
-        // No cleanup needed for signOut because session is not persisted!
-    }, [token_hash, type, t]);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
         setError('');
         setMessage('');
 
@@ -86,26 +73,15 @@ function ResetPasswordContent() {
         setLoading(true);
 
         try {
-            // Update user using the secure client (which has the session in memory)
-            const { error } = await secureClient.auth.updateUser({
-                password: password,
-            });
-
-            if (error) {
-                setError(error.message);
-            } else {
+            const { error } = await secureClient.auth.updateUser({ password });
+            if (error) setError(error.message);
+            else {
                 setMessage(t('resetPassword.successMessage'));
-                successRef.current = true;
-
-                // We don't need to sign out locally, but it's good practice to clear the in-memory session
                 await secureClient.auth.signOut();
-
-                setTimeout(() => {
-                    router.push('/login');
-                }, 2000);
+                setTimeout(() => router.push('/login'), 2000);
             }
-        } catch (err) {
-            if (isDev) console.error(err);
+        } catch (error) {
+            if (isDev) console.error(error);
             setError(t('resetPassword.errorGeneric'));
         } finally {
             setLoading(false);
@@ -114,100 +90,121 @@ function ResetPasswordContent() {
 
     if (verifying) {
         return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
-                <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-200">
-                    <p className="text-slate-500 font-medium">Verifying token...</p>
+            <AccountAccessLayout
+                backHref="/login"
+                backLabel={t('forgotPassword.backToLogin')}
+                eyebrow={`ParkSafe / ${t('profile.sendResetLink')}`}
+                title={t('resetPassword.title')}
+                subtitle={t('resetPassword.verifying')}
+            >
+                <div role="status" className="flex items-center gap-4 border-t border-[#101512]/20 py-6 text-sm font-semibold text-[#5f6a62]">
+                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#101512]/15 border-t-[#34aa56]" />
+                    {t('resetPassword.verifying')}
                 </div>
-            </div>
+            </AccountAccessLayout>
         );
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center pt-20 pb-12 px-4 font-sans selection:bg-[#34aa56] selection:text-white">
-
-            <div className="w-full max-w-md">
-
-                <div className="bg-white rounded-[2rem] p-8 md:p-10 shadow-xl shadow-slate-200/50 border border-slate-200">
-
-                    <div className="text-center mb-10">
-                        <h1 className="text-3xl font-extrabold text-slate-900 mb-2 tracking-tight">{t('resetPassword.title')}</h1>
-                        <p className="text-slate-500">{t('resetPassword.subtitle')}</p>
+        <AccountAccessLayout
+            backHref="/login"
+            backLabel={t('forgotPassword.backToLogin')}
+            eyebrow={`ParkSafe / ${t('profile.sendResetLink')}`}
+            title={t('resetPassword.title')}
+            subtitle={t('resetPassword.subtitle')}
+        >
+            <div aria-live="polite">
+                {(error || tokenError) && (
+                    <div role="alert" className="mb-8 flex items-start gap-3 border border-red-200 bg-red-50 p-4 text-red-800">
+                        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+                        <p className="text-sm font-medium leading-6">{tokenError || error}</p>
                     </div>
+                )}
 
-                    {error && (
-                        <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-100 flex items-start gap-3">
-                            <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
-                            <p className="text-sm font-medium text-red-700">{error}</p>
-                        </div>
-                    )}
+                {message && (
+                    <div role="status" className="mb-8 flex items-start gap-3 border border-[#34aa56]/30 bg-[#eaf7ee] p-4 text-[#245d35]">
+                        <CheckCircle className="mt-0.5 h-5 w-5 shrink-0" />
+                        <p className="text-sm font-medium leading-6">{message}</p>
+                    </div>
+                )}
+            </div>
 
-                    {message && (
-                        <div className="mb-6 p-4 rounded-xl bg-green-50 border border-green-100 flex items-start gap-3">
-                            <CheckCircle className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-                            <p className="text-sm font-medium text-green-700">{message}</p>
-                        </div>
-                    )}
+            {!message && !tokenError && (
+                <form onSubmit={handleSubmit} className="space-y-7">
+                    <PasswordField
+                        id="password"
+                        label={t('resetPassword.passwordLabel')}
+                        value={password}
+                        onChange={setPassword}
+                        autoComplete="new-password"
+                        disabled={loading}
+                    />
+                    <PasswordField
+                        id="confirmPassword"
+                        label={t('resetPassword.confirmPasswordLabel')}
+                        value={confirmPassword}
+                        onChange={setConfirmPassword}
+                        autoComplete="new-password"
+                        disabled={loading}
+                    />
 
-                    {!message && !error && (
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="space-y-2">
-                                <label htmlFor="password" className="block text-sm font-bold text-slate-700">{t('resetPassword.passwordLabel')}</label>
-                                <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <Lock className="h-5 w-5 text-slate-400 group-focus-within:text-[#34aa56] transition-colors" />
-                                    </div>
-                                    <input
-                                        type="password"
-                                        id="password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="••••••••"
-                                        required
-                                        disabled={loading}
-                                        className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#34aa56]/20 focus:border-[#34aa56] transition-all font-medium"
-                                    />
-                                </div>
-                            </div>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-[#34aa56] px-5 font-bold text-white transition-colors hover:bg-[#2d964b] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#258642] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                        {loading ? `${t('resetPassword.submitButton')}…` : t('resetPassword.submitButton')}
+                        {!loading && <ArrowRight className="h-4 w-4" />}
+                    </button>
+                </form>
+            )}
 
-                            <div className="space-y-2">
-                                <label htmlFor="confirmPassword" className="block text-sm font-bold text-slate-700">{t('resetPassword.confirmPasswordLabel')}</label>
-                                <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <Lock className="h-5 w-5 text-slate-400 group-focus-within:text-[#34aa56] transition-colors" />
-                                    </div>
-                                    <input
-                                        type="password"
-                                        id="confirmPassword"
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                        placeholder="••••••••"
-                                        required
-                                        disabled={loading}
-                                        className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#34aa56]/20 focus:border-[#34aa56] transition-all font-medium"
-                                    />
-                                </div>
-                            </div>
+            {tokenError && (
+                <Link
+                    href="/forgot-password"
+                    className="flex h-14 w-full items-center justify-center rounded-xl border border-[#101512]/20 px-5 font-bold text-[#101512] transition-colors hover:border-[#34aa56] hover:bg-[#f7f9f6] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#34aa56]"
+                >
+                    {t('forgotPassword.title')}
+                </Link>
+            )}
+        </AccountAccessLayout>
+    );
+}
 
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 px-4 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100 shadow-lg shadow-slate-900/10"
-                            >
-                                {loading ? '...' : t('resetPassword.submitButton')}
-                                {!loading && <ArrowRight className="w-4 h-4" />}
-                            </button>
-                        </form>
-                    )}
-
-                    {error && (
-                        <div className="text-center mt-6">
-                            <Link href="/forgot-password" className="inline-flex items-center justify-center w-full px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors">
-                                {t('forgotPassword.title')}
-                            </Link>
-                        </div>
-                    )}
-
-                </div>
+function PasswordField({
+    id,
+    label,
+    value,
+    onChange,
+    autoComplete,
+    disabled,
+}: {
+    id: string;
+    label: string;
+    value: string;
+    onChange: (value: string) => void;
+    autoComplete: string;
+    disabled: boolean;
+}) {
+    return (
+        <div className="space-y-3">
+            <label htmlFor={id} className="block text-sm font-bold text-[#101512]">
+                {label}
+            </label>
+            <div className="group relative">
+                <Lock className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7a847c] transition-colors group-focus-within:text-[#258642]" />
+                <input
+                    type="password"
+                    id={id}
+                    name={id}
+                    value={value}
+                    onChange={(event) => onChange(event.target.value)}
+                    placeholder="••••••••"
+                    autoComplete={autoComplete}
+                    required
+                    disabled={disabled}
+                    className="block h-14 w-full rounded-xl border border-[#101512]/20 bg-[#f7f9f6] pl-12 pr-4 font-medium text-[#101512] placeholder:text-[#8b958e] focus:border-[#34aa56] focus:outline-none focus:ring-4 focus:ring-[#34aa56]/12 disabled:cursor-not-allowed disabled:opacity-60"
+                />
             </div>
         </div>
     );
@@ -215,13 +212,13 @@ function ResetPasswordContent() {
 
 export default function ResetPasswordPage() {
     return (
-        <Suspense fallback={
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
-                <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-200">
-                    <p className="text-slate-500 font-medium">Loading...</p>
+        <Suspense
+            fallback={
+                <div className="flex min-h-screen items-center justify-center bg-white">
+                    <span className="h-6 w-6 animate-spin rounded-full border-2 border-[#101512]/15 border-t-[#34aa56]" />
                 </div>
-            </div>
-        }>
+            }
+        >
             <ResetPasswordContent />
         </Suspense>
     );

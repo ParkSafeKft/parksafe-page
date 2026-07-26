@@ -1,136 +1,88 @@
 'use client';
 
 import { motion } from "framer-motion";
-import { Trophy, Award, Rocket, ArrowRight } from "lucide-react";
+import { ArrowUpRight, Award, Rocket, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useLanguage } from "../contexts/LanguageContext";
 
 export function AboutHighlight() {
     const { t } = useLanguage();
 
-    const cards = [
+    const achievements = [
         {
             icon: Trophy,
             badge: t('about.highlight.card1.badge'),
             title: t('about.highlight.card1.title'),
             desc: t('about.highlight.card1.desc'),
-            color: 'amber',
         },
         {
             icon: Award,
             badge: t('about.highlight.card2.badge'),
             title: t('about.highlight.card2.title'),
             desc: t('about.highlight.card2.desc'),
-            color: 'blue',
         },
         {
             icon: Rocket,
             badge: t('about.highlight.card3.badge'),
             title: t('about.highlight.card3.title'),
             desc: t('about.highlight.card3.desc'),
-            color: 'emerald',
         },
     ];
 
     return (
-        <section className="py-24 bg-white">
-            <div className="container mx-auto px-4 max-w-6xl">
-                {/* Section Header */}
-                <div className="text-center mb-16">
-                    <motion.h2
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        viewport={{ once: true }}
-                        className="text-4xl md:text-5xl font-extrabold tracking-tight text-zinc-900 mb-4"
-                    >
-                        {t('about.highlight.title')}
-                    </motion.h2>
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.1 }}
-                        viewport={{ once: true }}
-                        className="text-lg text-zinc-600 max-w-2xl mx-auto"
-                    >
-                        {t('about.highlight.subtitle')}
-                    </motion.p>
+        <section className="bg-[#101512] py-24 text-white lg:py-32">
+            <div className="mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-12">
+                <div className="grid gap-10 border-b border-white/15 pb-14 lg:grid-cols-12 lg:items-end">
+                    <div className="lg:col-span-8">
+                        <p className="mb-6 text-xs font-bold uppercase tracking-[0.18em] text-[#58ce79]">ParkSafe / 02</p>
+                        <motion.h2
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6 }}
+                            viewport={{ once: true, amount: 0.3 }}
+                            className="max-w-4xl text-4xl font-black leading-[0.95] tracking-[-0.05em] text-balance sm:text-6xl lg:text-7xl"
+                        >
+                            {t('about.highlight.title')}
+                        </motion.h2>
+                    </div>
+                    <div className="lg:col-span-4">
+                        <p className="mb-7 max-w-md text-lg leading-8 text-white/60 text-pretty">
+                            {t('about.highlight.subtitle')}
+                        </p>
+                        <Link
+                            href="/about"
+                            className="inline-flex items-center gap-3 rounded-xl bg-[#34aa56] px-6 py-4 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 hover:bg-[#3dbd61] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#58ce79]"
+                        >
+                            {t('about.highlight.cta')}
+                            <ArrowUpRight className="h-4 w-4" />
+                        </Link>
+                    </div>
                 </div>
 
-                {/* Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-                    {cards.map((card, index) => {
-                        const Icon = card.icon;
-                        const colorClasses = {
-                            amber: {
-                                bg: 'bg-amber-50',
-                                border: 'border-amber-200',
-                                icon: 'text-amber-600',
-                                badge: 'bg-amber-100 text-amber-700',
-                            },
-                            blue: {
-                                bg: 'bg-blue-50',
-                                border: 'border-blue-200',
-                                icon: 'text-blue-600',
-                                badge: 'bg-blue-100 text-blue-700',
-                            },
-                            emerald: {
-                                bg: 'bg-emerald-50',
-                                border: 'border-emerald-200',
-                                icon: 'text-emerald-600',
-                                badge: 'bg-emerald-100 text-emerald-700',
-                            },
-                        }[card.color as 'amber' | 'blue' | 'emerald'];
-
-                        return (
-                            <motion.div
-                                key={index}
-                                initial={{ opacity: 0, y: 30 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: index * 0.1 }}
-                                viewport={{ once: true }}
-                                className="group bg-white rounded-[2rem] p-8 border border-zinc-200 hover:border-zinc-300 shadow-lg hover:shadow-xl transition-all"
-                            >
-                                {/* Icon */}
-                                <div className={`w-16 h-16 ${colorClasses.bg} rounded-2xl flex items-center justify-center mb-6 border ${colorClasses.border} group-hover:scale-110 transition-transform`}>
-                                    <Icon className={`w-8 h-8 ${colorClasses.icon}`} />
-                                </div>
-
-                                {/* Badge */}
-                                <div className={`inline-block px-3 py-1 ${colorClasses.badge} rounded-full text-xs font-bold uppercase tracking-wider mb-4`}>
-                                    {card.badge}
-                                </div>
-
-                                {/* Title */}
-                                <h3 className="text-xl font-bold text-zinc-900 mb-3">
-                                    {card.title}
-                                </h3>
-
-                                {/* Description */}
-                                <p className="text-zinc-600 leading-relaxed">
-                                    {card.desc}
-                                </p>
-                            </motion.div>
-                        );
-                    })}
+                <div className="grid md:grid-cols-3">
+                    {achievements.map((achievement, index) => (
+                        <motion.article
+                            key={achievement.title}
+                            initial={{ opacity: 0, y: 24 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: index * 0.08 }}
+                            viewport={{ once: true, amount: 0.35 }}
+                            className="group border-b border-white/15 py-10 md:border-b-0 md:border-r md:px-8 md:first:pl-0 md:last:border-r-0 md:last:pr-0 lg:py-14"
+                        >
+                            <div className="mb-16 flex items-start justify-between">
+                                <achievement.icon className="h-7 w-7 text-[#58ce79]" />
+                                <span className="text-5xl font-black tracking-[-0.06em] text-white/10 transition-colors group-hover:text-[#34aa56]/30">
+                                    0{index + 1}
+                                </span>
+                            </div>
+                            <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.16em] text-[#58ce79]">
+                                {achievement.badge}
+                            </p>
+                            <h3 className="text-2xl font-black tracking-[-0.025em]">{achievement.title}</h3>
+                            <p className="mt-4 max-w-sm leading-7 text-white/55">{achievement.desc}</p>
+                        </motion.article>
+                    ))}
                 </div>
-
-                {/* CTA Button */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.3 }}
-                    viewport={{ once: true }}
-                    className="text-center"
-                >
-                    <Link
-                        href="/about"
-                        className="inline-flex items-center gap-2 px-8 py-4 bg-zinc-900 text-white font-semibold rounded-full hover:bg-zinc-800 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-zinc-900/20"
-                    >
-                        {t('about.highlight.cta')}
-                        <ArrowRight className="w-5 h-5" />
-                    </Link>
-                </motion.div>
             </div>
         </section>
     );

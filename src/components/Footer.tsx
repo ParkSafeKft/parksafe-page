@@ -37,24 +37,27 @@ function Footer() {
     const { t } = useLanguage();
 
     return (
-        <footer className="bg-slate-900 border-t border-slate-800 text-slate-300 py-12 md:py-16">
-            <div className="container mx-auto px-4">
+        <footer className="border-t border-white/10 bg-[#101512] py-14 text-white md:py-20">
+            <div className="mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-12">
+                <div className="border-b border-white/15 pb-12">
+                    <div className="flex items-end gap-3 overflow-hidden">
+                        <span className="text-[clamp(4.7rem,13vw,12rem)] font-black leading-[0.75] tracking-[-0.085em]">ParkSafe</span>
+                        <span className="mb-1 h-5 w-5 shrink-0 rounded-full bg-[#34aa56] sm:mb-3 sm:h-8 sm:w-8" />
+                    </div>
+                </div>
 
-                {/* Top Section: Logo, social icons & main links */}
-                <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
-
-                    {/* Logo / Brand + Social icons */}
-                    <div className="flex flex-col items-center md:items-start gap-4">
+                <div className="grid gap-12 border-b border-white/15 py-12 md:grid-cols-[1fr_auto] md:items-start">
+                    <div className="flex flex-col items-start gap-6">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#34aa56]">
                                 <picture>
                                     <source srcSet="/logo_64.webp" type="image/webp" />
-                                    <img src="/logo_64.png" alt="P" className="w-6 h-6 brightness-110" />
+                                    <img src="/logo_64.png" alt="" className="h-7 w-7 brightness-110" />
                                 </picture>
                             </div>
-                            <span className="text-xl font-bold text-white tracking-tight">ParkSafe</span>
+                            <span className="text-xl font-black tracking-[-0.035em]">ParkSafe</span>
                         </div>
-                        {/* Social icons */}
+
                         <div className="flex items-center gap-3">
                             {socialLinks.map((social) => (
                                 <a
@@ -63,7 +66,7 @@ function Footer() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label={social.name}
-                                    className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all"
+                                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 text-white/50 transition-colors hover:border-[#34aa56] hover:bg-[#34aa56] hover:text-white"
                                 >
                                     {social.icon}
                                 </a>
@@ -71,31 +74,29 @@ function Footer() {
                         </div>
                     </div>
 
-                    {/* Links */}
-                    <div className="flex flex-wrap justify-center gap-8 text-sm font-medium">
-                        <a href="https://apps.apple.com/app/id6752813986" className="hover:text-white transition-colors">
+                    <div className="grid grid-cols-2 gap-x-10 gap-y-5 text-sm font-bold sm:grid-cols-3 md:text-right">
+                        <a href="https://apps.apple.com/app/id6752813986" className="text-white/55 transition-colors hover:text-[#58ce79]">
                             {t('footer.appStore')}
                         </a>
-                        <a href="https://play.google.com/store/apps/details?id=com.parksafe.app" className="hover:text-white transition-colors">
+                        <a href="https://play.google.com/store/apps/details?id=com.parksafe.app" className="text-white/55 transition-colors hover:text-[#58ce79]">
                             {t('footer.googlePlay')}
                         </a>
-                        <Link href="/contact" className="hover:text-white transition-colors" aria-label="Contact ParkSafe Support">
+                        <Link href="/contact" className="text-white/55 transition-colors hover:text-[#58ce79]" aria-label="Contact ParkSafe Support">
                             {t('nav.contact')}
                         </Link>
-                        <Link href="/terms" className="hover:text-white transition-colors" aria-label="Read Terms of Service">
+                        <Link href="/terms" className="text-white/55 transition-colors hover:text-[#58ce79]" aria-label="Read Terms of Service">
                             {t('footer.terms')}
                         </Link>
-                        <Link href="/privacy" className="hover:text-white transition-colors" aria-label="Read Privacy Policy">
+                        <Link href="/privacy" className="text-white/55 transition-colors hover:text-[#58ce79]" aria-label="Read Privacy Policy">
                             {t('footer.privacy')}
                         </Link>
                     </div>
                 </div>
 
-                {/* Bottom Section: Copyright */}
-                <div className="border-t border-slate-800 pt-8 flex justify-center text-xs font-medium opacity-60">
+                <div className="flex items-center justify-between gap-5 pt-8 text-xs font-bold uppercase tracking-[0.12em] text-white/35">
                     <p>{t('footer.rights')}</p>
+                    <p className="hidden sm:block">ParkSafe / 2026</p>
                 </div>
-
             </div>
         </footer>
     );
