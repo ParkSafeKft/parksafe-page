@@ -355,7 +355,7 @@ export default function AdminPage() {
                         .from('parking_image_submissions')
                         .select(`
                             *,
-                            parkingSpots!parking_image_submissions_parking_spot_id_fkey (name, city, coordinate)
+                            parkingSpots!parking_image_submissions_parking_spot_id_fkey (name, city, coordinate, osm_id, osm_type)
                         `);
                     countQuery = supabase.from('parking_image_submissions').select('*', { count: 'exact', head: true });
                     if (parkingImageStatusFilter) {
@@ -634,6 +634,8 @@ export default function AdminPage() {
                         parking_name: row.parkingSpots?.name || null,
                         parking_city: row.parkingSpots?.city || null,
                         parking_coordinate: row.parkingSpots?.coordinate || null,
+                        parking_osm_id: row.parkingSpots?.osm_id ?? null,
+                        parking_osm_type: row.parkingSpots?.osm_type || null,
                         reporter_username: prof?.username || null,
                         reporter_full_name: prof?.full_name || null,
                         reporter_avatar_url: prof?.avatar_url || null,
@@ -665,14 +667,14 @@ export default function AdminPage() {
                 const userIds = Array.from(new Set(
                     rows.map((r: { user_id?: string | null }) => r.user_id).filter((v): v is string => !!v)
                 ));
-                let profilesMap: Record<string, { username?: string | null; full_name?: string | null }> = {};
+                let profilesMap: Record<string, { username?: string | null; full_name?: string | null; avatar_url?: string | null; email?: string | null }> = {};
                 if (userIds.length > 0) {
                     const { data: profs } = await supabase
                         .from('profiles')
-                        .select('id, username, full_name')
+                        .select('id, username, full_name, avatar_url, email')
                         .in('id', userIds);
                     profilesMap = Object.fromEntries(
-                        (profs || []).map((p: { id: string; username?: string | null; full_name?: string | null }) => [p.id, p])
+                        (profs || []).map((p: { id: string; username?: string | null; full_name?: string | null; avatar_url?: string | null; email?: string | null }) => [p.id, p])
                     );
                 }
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1770,6 +1772,7 @@ export default function AdminPage() {
                                         <CommunityRoutesTable
                                             data={communityRoutes}
                                             onRowClick={(item) => setRouteReviewModal({ show: true, item })}
+                                            onOpenUser={handleOpenUserProfile}
                                             onDelete={(id) => handleDeleteClick(id)}
                                             onStatusChange={handleCommunityRouteStatusChange}
                                             toggleLoading={toggleLoading}
@@ -1963,6 +1966,10 @@ export default function AdminPage() {
                     onClose={() => setRouteReviewModal({ show: false, item: null })}
                     route={routeReviewModal.item}
                     adminId={adminId}
+                    onOpenUser={(userId) => {
+                        setRouteReviewModal({ show: false, item: null });
+                        handleOpenUserProfile(userId);
+                    }}
                     onSuccess={() => {
                         setRouteReviewModal({ show: false, item: null });
                         fetchData();

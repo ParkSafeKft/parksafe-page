@@ -19,6 +19,8 @@ import {
     AdminModalContent,
     AdminModalFrame,
     AdminModalHeader,
+    AdminModalRelations,
+    AdminRelationCard,
 } from './AdminModal';
 import { toast } from 'sonner';
 import {
@@ -37,7 +39,6 @@ import {
     Edit,
     MessageSquare,
     ChevronDown,
-    ChevronRight,
     AlertCircle,
     Check,
     Flag,
@@ -483,6 +484,9 @@ export default function DetailModal({
 
     if (type === 'parking_image') {
         const submissionCoords = parseWKBPoint(item.parking_coordinate);
+        const parkingOsmEditUrl = submissionCoords
+            ? `https://www.openstreetmap.org/edit?#map=19/${submissionCoords.lat}/${submissionCoords.lon}`
+            : null;
 
         const submissionStatuses = [
             { value: 'pending', label: 'Függőben', color: 'bg-yellow-500' },
@@ -548,92 +552,33 @@ export default function DetailModal({
                                         </div>
                                     )}
 
-                                    {/* Uploader card — clickable */}
-                                    <div>
-                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
-                                            <User className="h-4 w-4" />
-                                            Feltöltő
-                                        </h3>
-                                        {onOpenUser && item.user_id ? (
-                                            <button
-                                                type="button"
-                                                onClick={() => onOpenUser(item.user_id)}
-                                                className="w-full p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-colors flex items-center gap-4 group text-left"
-                                            >
-                                                <Avatar className="h-12 w-12 ring-2 ring-border flex-shrink-0">
+                                    <AdminModalRelations>
+                                        <AdminRelationCard
+                                            label="Feltöltő"
+                                            title={uploaderDisplayName}
+                                            description={item.reporter_email || item.user_id || 'Nincs kapcsolt profil'}
+                                            icon={(
+                                                <Avatar>
                                                     <AvatarImage src={item.reporter_avatar_url} alt={uploaderDisplayName} />
-                                                    <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
-                                                        {uploaderInitial}
-                                                    </AvatarFallback>
+                                                    <AvatarFallback>{uploaderInitial}</AvatarFallback>
                                                 </Avatar>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-semibold text-white truncate">
-                                                        {uploaderDisplayName}
-                                                    </p>
-                                                    {item.reporter_email && (
-                                                        <p className="text-xs text-muted-foreground truncate mt-0.5">
-                                                            {item.reporter_email}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                                <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-white transition-colors flex-shrink-0" />
-                                            </button>
-                                        ) : (
-                                            <div className="p-4 rounded-lg bg-white/5 border border-white/10 flex items-center gap-4">
-                                                <Avatar className="h-12 w-12 ring-2 ring-border flex-shrink-0">
-                                                    <AvatarImage src={item.reporter_avatar_url} alt={uploaderDisplayName} />
-                                                    <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
-                                                        {uploaderInitial}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-semibold text-white truncate">{uploaderDisplayName}</p>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Parking-spot card — clickable */}
-                                    <div>
-                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
-                                            <MapPin className="h-4 w-4" />
-                                            Érintett parkoló
-                                        </h3>
-                                        {onOpenParkingSpot && item.parking_spot_id ? (
-                                            <button
-                                                type="button"
-                                                onClick={() => onOpenParkingSpot(item.parking_spot_id)}
-                                                className="w-full p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-colors flex items-center gap-4 group text-left"
-                                            >
-                                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-600/20 border border-green-500/30 flex items-center justify-center flex-shrink-0">
-                                                    <MapPin className="h-5 w-5 text-green-400" />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-semibold text-white truncate">
-                                                        {item.parking_name || 'Ismeretlen parkoló'}
-                                                    </p>
-                                                    <p className="text-xs text-muted-foreground truncate mt-0.5">
-                                                        {item.parking_city || 'Nincs város megadva'}
-                                                    </p>
-                                                </div>
-                                                <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-white transition-colors flex-shrink-0" />
-                                            </button>
-                                        ) : (
-                                            <div className="p-4 rounded-lg bg-white/5 border border-white/10 flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-600/20 border border-green-500/30 flex items-center justify-center flex-shrink-0">
-                                                    <MapPin className="h-5 w-5 text-green-400" />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-semibold text-white truncate">
-                                                        {item.parking_name || 'Ismeretlen parkoló'}
-                                                    </p>
-                                                    <p className="text-xs text-muted-foreground truncate mt-0.5">
-                                                        {item.parking_city || 'Nincs város megadva'}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
+                                            )}
+                                            onClick={onOpenUser && item.user_id ? () => onOpenUser(item.user_id) : undefined}
+                                        />
+                                        <AdminRelationCard
+                                            label="Érintett parkoló"
+                                            title={item.parking_name || 'Ismeretlen parkoló'}
+                                            description={item.parking_osm_id ? `${item.parking_city || 'Nincs város'} · OSM ${item.parking_osm_id}` : (item.parking_city || 'Nincs város megadva')}
+                                            icon={<MapPin />}
+                                            onClick={onOpenParkingSpot && item.parking_spot_id ? () => onOpenParkingSpot(item.parking_spot_id) : undefined}
+                                            action={parkingOsmEditUrl ? (
+                                                <a href={parkingOsmEditUrl} target="_blank" rel="noopener noreferrer" title="Parkoló megnyitása az OSM szerkesztőben">
+                                                    <Edit />
+                                                    <span>OSM szerkesztő</span>
+                                                </a>
+                                            ) : undefined}
+                                        />
+                                    </AdminModalRelations>
 
                                     {/* Map — only when we have coordinates */}
                                     {submissionCoords && (
@@ -820,90 +765,27 @@ export default function DetailModal({
                         />
 
                         <AdminModalBody className="space-y-6">
-                                {/* POI card — clickable, opens POI in this same modal */}
-                                <div>
-                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
-                                        <MapPin className="h-4 w-4" />
-                                        Érintett POI
-                                    </h3>
-                                    {onOpenPoiDetail && item.poi_id && item.poi_type ? (
-                                        <button
-                                            type="button"
-                                            onClick={() => onOpenPoiDetail(item.poi_id, item.poi_type)}
-                                            className="w-full p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-colors flex items-center gap-4 group text-left"
-                                        >
-                                            <div className="w-10 h-10 rounded-lg bg-zinc-900 flex items-center justify-center border border-white/10 flex-shrink-0">
-                                                {getPoiTypeIcon(item.poi_type)}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-semibold text-white truncate">{poiName}</p>
-                                                <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                                                    {getPoiTypeLabel(item.poi_type)} · <span className="font-mono">ID: {item.poi_id?.substring(0, 8)}…</span>
-                                                </p>
-                                            </div>
-                                            <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-white transition-colors flex-shrink-0" />
-                                        </button>
-                                    ) : (
-                                        <div className="p-4 rounded-lg bg-white/5 border border-white/10 flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-lg bg-zinc-900 flex items-center justify-center border border-white/10 flex-shrink-0">
-                                                {getPoiTypeIcon(item.poi_type)}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-semibold text-white truncate">{poiName}</p>
-                                                <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                                                    {getPoiTypeLabel(item.poi_type)} · <span className="font-mono">ID: {item.poi_id?.substring(0, 8)}…</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Reporter card — clickable, matches parking_image uploader */}
-                                <div>
-                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
-                                        <User className="h-4 w-4" />
-                                        Bejelentő
-                                    </h3>
-                                    {onOpenUser && item.user_id ? (
-                                        <button
-                                            type="button"
-                                            onClick={() => onOpenUser(item.user_id)}
-                                            className="w-full p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-colors flex items-center gap-4 group text-left"
-                                        >
-                                            <Avatar className="h-12 w-12 ring-2 ring-border flex-shrink-0">
+                                <AdminModalRelations>
+                                    <AdminRelationCard
+                                        label="Érintett POI"
+                                        title={poiName}
+                                        description={`${getPoiTypeLabel(item.poi_type)} · ${item.poi_id || 'Nincs azonosító'}`}
+                                        icon={getPoiTypeIcon(item.poi_type)}
+                                        onClick={onOpenPoiDetail && item.poi_id && item.poi_type ? () => onOpenPoiDetail(item.poi_id, item.poi_type) : undefined}
+                                    />
+                                    <AdminRelationCard
+                                        label="Bejelentő"
+                                        title={reporterDisplayName}
+                                        description={item.reporter_email || item.user_id || 'Nincs kapcsolt profil'}
+                                        icon={(
+                                            <Avatar>
                                                 <AvatarImage src={item.reporter_avatar_url} alt={reporterDisplayName} />
-                                                <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
-                                                    {reporterInitial}
-                                                </AvatarFallback>
+                                                <AvatarFallback>{reporterInitial}</AvatarFallback>
                                             </Avatar>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-semibold text-white truncate">{reporterDisplayName}</p>
-                                                <p className="text-xs text-muted-foreground mt-0.5">
-                                                    Bejelentve: {new Date(item.created_at).toLocaleDateString('hu-HU', {
-                                                        year: 'numeric',
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit'
-                                                    })}
-                                                </p>
-                                            </div>
-                                            <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-white transition-colors flex-shrink-0" />
-                                        </button>
-                                    ) : (
-                                        <div className="p-4 rounded-lg bg-white/5 border border-white/10 flex items-center gap-4">
-                                            <Avatar className="h-12 w-12 ring-2 ring-border flex-shrink-0">
-                                                <AvatarImage src={item.reporter_avatar_url} alt={reporterDisplayName} />
-                                                <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
-                                                    {reporterInitial}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-semibold text-white truncate">{reporterDisplayName}</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
+                                        )}
+                                        onClick={onOpenUser && item.user_id ? () => onOpenUser(item.user_id) : undefined}
+                                    />
+                                </AdminModalRelations>
 
                                 {/* Reason + comment */}
                                 <div>
@@ -1210,50 +1092,24 @@ export default function DetailModal({
 
                             <Separator className="bg-border" />
 
-                            {/* Contact info */}
-                            <div>
-                                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                                    Kapcsolat
-                                </h3>
-                                <div className="grid gap-2 sm:grid-cols-2">
-                                    {item.contact_email ? (
-                                        <a
-                                            href={`mailto:${item.contact_email}?subject=${encodeURIComponent(`ParkSafe: ${item.title || 'visszajelzés'}`)}`}
-                                            className="group flex min-w-0 items-center gap-3 rounded-lg border border-white/10 bg-white/5 p-3 text-white hover:border-primary/35 hover:bg-primary/5"
-                                        >
-                                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-primary/15">
-                                                <Mail className="h-4 w-4 text-primary" />
-                                            </div>
-                                            <div className="min-w-0 flex-1">
-                                                <span className="block text-xs text-muted-foreground">Email írása</span>
-                                                <span className="block truncate text-sm font-medium">{item.contact_email}</span>
-                                            </div>
-                                            <ExternalLink className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary" />
-                                        </a>
-                                    ) : (
-                                        <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 p-3 text-zinc-500">
-                                            <XCircle className="h-4 w-4" />
-                                            Nincs megadva elérhetőség
-                                        </div>
-                                    )}
-                                    {item.user_id && onOpenUser ? (
-                                        <button
-                                            type="button"
-                                            onClick={() => onOpenUser(item.user_id)}
-                                            className="group flex min-w-0 items-center gap-3 rounded-lg border border-white/10 bg-white/5 p-3 text-left text-white hover:border-primary/35 hover:bg-primary/5"
-                                        >
-                                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-primary/15">
-                                                <User className="h-4 w-4 text-primary" />
-                                            </div>
-                                            <div className="min-w-0 flex-1">
-                                                <span className="block text-xs text-muted-foreground">Beküldő profilja</span>
-                                                <span className="block truncate font-mono text-xs">{item.user_id}</span>
-                                            </div>
-                                            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary" />
-                                        </button>
-                                    ) : null}
-                                </div>
-                            </div>
+                            <AdminModalRelations>
+                                <AdminRelationCard
+                                    label="Email írása"
+                                    title={item.contact_email || 'Nincs megadva elérhetőség'}
+                                    description={item.contact_email ? 'Közvetlen válasz a levelezőben' : undefined}
+                                    icon={item.contact_email ? <Mail /> : <XCircle />}
+                                    href={item.contact_email ? `mailto:${item.contact_email}?subject=${encodeURIComponent(`ParkSafe: ${item.title || 'visszajelzés'}`)}` : undefined}
+                                />
+                                {item.user_id ? (
+                                    <AdminRelationCard
+                                        label="Beküldő profilja"
+                                        title={item.reporter_username || item.reporter_full_name || 'Felhasználói profil'}
+                                        description={item.user_id}
+                                        icon={<User />}
+                                        onClick={onOpenUser ? () => onOpenUser(item.user_id) : undefined}
+                                    />
+                                ) : null}
+                            </AdminModalRelations>
                             {/* Admin Notes */}
                             {item.admin_notes && (
                                 <div className="mt-4">

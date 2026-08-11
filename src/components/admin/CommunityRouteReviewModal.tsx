@@ -21,7 +21,15 @@ import {
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { AdminModalBody, AdminModalContent, AdminModalFooter, AdminModalFrame, AdminModalHeader } from './AdminModal';
+import {
+    AdminModalBody,
+    AdminModalContent,
+    AdminModalFooter,
+    AdminModalFrame,
+    AdminModalHeader,
+    AdminModalRelations,
+    AdminRelationCard,
+} from './AdminModal';
 import InteractiveRouteMap from './InteractiveRouteMap';
 import { writeAuditLog, type AuditAction } from '@/lib/adminAuditLog';
 
@@ -92,6 +100,7 @@ interface CommunityRouteReviewModalProps {
     route: any | null;
     onSuccess: () => void;
     adminId?: string | null;
+    onOpenUser?: (userId: string) => void;
 }
 
 const REJECT_REASONS = [
@@ -112,7 +121,7 @@ const statusMeta: Record<string, { label: string; className: string; icon: typeo
 
 type Status = 'pending' | 'in_review' | 'accepted' | 'rejected';
 
-export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSuccess, adminId }: CommunityRouteReviewModalProps) {
+export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSuccess, adminId, onOpenUser }: CommunityRouteReviewModalProps) {
     const [adminNotes, setAdminNotes] = useState('');
     const [selectedStatus, setSelectedStatus] = useState<Status>('pending');
     const [saving, setSaving] = useState(false);
@@ -241,6 +250,22 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
                                 )}
                             </div>
 
+                            <AdminModalRelations>
+                                <AdminRelationCard
+                                    label="Beküldő"
+                                    title={submitterName}
+                                    description={route.profiles?.email || route.user_id || 'Nincs kapcsolt profil'}
+                                    icon={<User />}
+                                    onClick={route.user_id && onOpenUser ? () => onOpenUser(route.user_id) : undefined}
+                                />
+                                <AdminRelationCard
+                                    label="Beküldés ideje"
+                                    title={submittedAt}
+                                    description={route.surface_type || 'Felület nincs megadva'}
+                                    icon={<Calendar />}
+                                />
+                            </AdminModalRelations>
+
                             {route.description && (
                                 <div className="space-y-1.5">
                                     <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Leírás</label>
@@ -250,18 +275,6 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
 
                             {/* Metadata grid */}
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                <div className="p-3 rounded-xl bg-zinc-900/30 border border-white/5">
-                                    <div className="flex items-center gap-2 text-[11px] text-zinc-500 uppercase tracking-widest font-bold">
-                                        <User className="w-3 h-3" /> Beküldő
-                                    </div>
-                                    <p className="mt-1 text-sm text-zinc-200">{submitterName}</p>
-                                </div>
-                                <div className="p-3 rounded-xl bg-zinc-900/30 border border-white/5">
-                                    <div className="flex items-center gap-2 text-[11px] text-zinc-500 uppercase tracking-widest font-bold">
-                                        <Calendar className="w-3 h-3" /> Beküldve
-                                    </div>
-                                    <p className="mt-1 text-sm text-zinc-200">{submittedAt}</p>
-                                </div>
                                 <div className="p-3 rounded-xl bg-zinc-900/30 border border-white/5">
                                     <div className="text-[11px] text-zinc-500 uppercase tracking-widest font-bold">Felület</div>
                                     <p className="mt-1 text-sm text-zinc-200">{route.surface_type || '-'}</p>

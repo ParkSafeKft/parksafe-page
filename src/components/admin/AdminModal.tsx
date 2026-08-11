@@ -1,5 +1,5 @@
 import type { ComponentProps, ReactNode } from 'react';
-import { ArrowLeft, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, ChevronRight, ExternalLink, type LucideIcon } from 'lucide-react';
 import { DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
@@ -140,5 +140,88 @@ export function AdminModalSection({
             ) : null}
             {children}
         </section>
+    );
+}
+
+interface AdminModalRelationsProps extends Omit<ComponentProps<'section'>, 'title'> {
+    title?: ReactNode;
+    description?: ReactNode;
+}
+
+export function AdminModalRelations({
+    title = 'Kapcsolatok',
+    description,
+    className,
+    children,
+    ...props
+}: AdminModalRelationsProps) {
+    return (
+        <AdminModalSection
+            title={title}
+            description={description}
+            className={cn('admin-modal-relations', className)}
+            {...props}
+        >
+            <div className="admin-modal-relations-grid">{children}</div>
+        </AdminModalSection>
+    );
+}
+
+interface AdminRelationCardProps {
+    label: ReactNode;
+    title: ReactNode;
+    description?: ReactNode;
+    icon: ReactNode;
+    onClick?: () => void;
+    href?: string;
+    external?: boolean;
+    action?: ReactNode;
+    className?: string;
+}
+
+export function AdminRelationCard({
+    label,
+    title,
+    description,
+    icon,
+    onClick,
+    href,
+    external = false,
+    action,
+    className,
+}: AdminRelationCardProps) {
+    const content = (
+        <>
+            <span className="admin-relation-icon" aria-hidden="true">{icon}</span>
+            <span className="admin-relation-copy">
+                <span className="admin-relation-label">{label}</span>
+                <span className="admin-relation-title">{title}</span>
+                {description ? <span className="admin-relation-description">{description}</span> : null}
+            </span>
+        </>
+    );
+
+    return (
+        <div className={cn('admin-relation-card', className)} data-interactive={Boolean(onClick || href)}>
+            {onClick ? (
+                <button type="button" className="admin-relation-main" onClick={onClick}>
+                    {content}
+                    {!action ? <ChevronRight className="admin-relation-chevron" aria-hidden="true" /> : null}
+                </button>
+            ) : href ? (
+                <a
+                    className="admin-relation-main"
+                    href={href}
+                    target={external ? '_blank' : undefined}
+                    rel={external ? 'noopener noreferrer' : undefined}
+                >
+                    {content}
+                    {!action ? external ? <ExternalLink className="admin-relation-chevron" aria-hidden="true" /> : <ChevronRight className="admin-relation-chevron" aria-hidden="true" /> : null}
+                </a>
+            ) : (
+                <div className="admin-relation-main">{content}</div>
+            )}
+            {action ? <div className="admin-relation-action">{action}</div> : null}
+        </div>
     );
 }

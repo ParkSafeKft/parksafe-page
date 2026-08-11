@@ -8,6 +8,7 @@ import {
     XCircle,
     Clock,
     Search,
+    UserRound,
 } from 'lucide-react';
 import {
     DropdownMenu,
@@ -24,6 +25,7 @@ interface CommunityRoutesTableProps {
     data: any[];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onRowClick: (item: any) => void;
+    onOpenUser?: (userId: string) => void;
     onDelete: (id: string) => void;
     onStatusChange: (id: string, newStatus: string) => void;
     toggleLoading: string | null;
@@ -51,6 +53,7 @@ const statusMeta: Record<string, { label: string; className: string; icon: typeo
 export default function CommunityRoutesTable({
     data,
     onRowClick,
+    onOpenUser,
     onDelete,
     onStatusChange,
     toggleLoading,
@@ -145,9 +148,26 @@ export default function CommunityRoutesTable({
                                             </div>
                                         </td>
                                         <td className="p-4">
-                                            <span className="text-sm text-zinc-400">
-                                                {item.profiles?.username || item.profiles?.full_name || (item.user_id ? String(item.user_id).slice(0, 8) : '-')}
-                                            </span>
+                                            {item.user_id && onOpenUser ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={(event) => {
+                                                        event.stopPropagation();
+                                                        onOpenUser(item.user_id);
+                                                    }}
+                                                    className="group/user inline-flex max-w-[14rem] items-center gap-2 text-left text-sm text-zinc-400 hover:text-green-400"
+                                                    title="Beküldő profiljának megnyitása"
+                                                >
+                                                    <UserRound className="h-3.5 w-3.5 flex-none" />
+                                                    <span className="truncate underline-offset-4 group-hover/user:underline">
+                                                        {item.profiles?.username || item.profiles?.full_name || String(item.user_id).slice(0, 8)}
+                                                    </span>
+                                                </button>
+                                            ) : (
+                                                <span className="text-sm text-zinc-400">
+                                                    {item.profiles?.username || item.profiles?.full_name || (item.user_id ? String(item.user_id).slice(0, 8) : '-')}
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="p-4">
                                             <span className="text-xs text-zinc-500">{item.surface_type || '-'}</span>
