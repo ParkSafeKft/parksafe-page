@@ -21,6 +21,7 @@ import {
     AdminModalHeader,
     AdminModalRelations,
     AdminRelationCard,
+    AdminModalSection,
 } from './AdminModal';
 import { toast } from 'sonner';
 import {
@@ -1129,373 +1130,207 @@ export default function DetailModal({
     }
 
     if (type === 'user') {
+        const profileName = item.username || item.full_name || 'Nincs megadva';
+        const profileInitial = (item.username || item.full_name || item.email || 'U').charAt(0).toUpperCase();
+        const registeredAt = item.created_at
+            ? new Date(item.created_at).toLocaleDateString('hu-HU', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            })
+            : 'Ismeretlen';
+        const xpVal = activityProgress?.xp ?? 0;
+        const currentStreak = activityProgress?.current_streak ?? 0;
+        const longestStreak = activityProgress?.longest_streak ?? 0;
+        const challengeCompletions = activityProgress?.challenge_completions ?? 0;
+        const challengeCities = activityProgress?.challenge_cities ?? 0;
+        const unlockedBadges = activityProgress
+            ? ACTIVITY_BADGE_KEYS.filter(k => Number(activityProgress[k] ?? 0) > 0)
+            : [];
+        const stats = activityStats;
+        const hasAnyActivity = (stats?.totalRides ?? 0) > 0 || challengeCompletions > 0 || xpVal > 0;
+
         return (
             <Dialog open={isOpen} onOpenChange={onClose}>
                 <AdminModalContent variant="inspector">
                     <AdminModalFrame>
                         <AdminModalHeader
-                            eyebrow="Felhasználó"
-                            title={item.username || item.full_name || 'Felhasználói profil'}
-                            subtitle={item.email || 'Profil és fiókadatok'}
+                            eyebrow="Felhasználói profil"
+                            title={profileName}
+                            subtitle={item.full_name && item.full_name !== profileName ? item.full_name : (item.email || 'Profil és aktivitás')}
                             icon={Users}
                             onBack={onBack}
                             backLabel="Vissza az előző rekordhoz"
-                            meta={item.id ? (
+                            meta={(
                                 <>
-                                    <code>#{String(item.id).substring(0, 8)}</code>
-                                    <button type="button" className="admin-modal-meta-action" onClick={() => copyId(item.id)} aria-label="ID másolása" title="ID másolása">
-                                        <Copy />
-                                    </button>
+                                    <span className="admin-modal-state" data-tone={item.role === 'admin' ? 'info' : 'neutral'}>
+                                        <i />
+                                        {item.role === 'admin' ? 'Adminisztrátor' : 'Felhasználó'}
+                                    </span>
+                                    {item.id ? <code>#{String(item.id).substring(0, 8)}</code> : null}
+                                    {item.id ? (
+                                        <button type="button" className="admin-modal-meta-action" onClick={() => copyId(item.id)} aria-label="ID másolása" title="ID másolása">
+                                            <Copy />
+                                        </button>
+                                    ) : null}
                                 </>
-                            ) : undefined}
+                            )}
                         />
 
-                        {/* Scrollable Content */}
-                        <AdminModalBody>
-                                <div className="space-y-6">
-                                    {/* User Profile Section */}
-                                    <div>
-                                        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2 mb-4">
-                                            <Shield className="h-4 w-4 flex-shrink-0" />
-                                            <span>Felhasználói adatok</span>
-                                        </h3>
-                                        <div className="space-y-6">
-                                            {/* Profile Section */}
-                                            <div className="flex items-start gap-6">
-                                                <Avatar className="h-20 w-20 ring-2 ring-border flex-shrink-0">
-                                                    <AvatarImage src={item.avatar_url} alt={item.username || item.full_name || 'User'} />
-                                                    <AvatarFallback className="bg-primary text-primary-foreground font-semibold text-2xl">
-                                                        {(item.username || item.full_name || item.email || 'U').charAt(0).toUpperCase()}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div className="flex-1 min-w-0 space-y-3">
-                                                    <div>
-                                                        <h3 className="font-semibold text-foreground text-2xl">{item.username || item.full_name || 'Nincs megadva'}</h3>
-                                                        <p className="text-muted-foreground text-base truncate">{item.email}</p>
-                                                    </div>
-                                                    <Badge
-                                                        variant={item.role === 'admin' ? 'default' : 'secondary'}
-                                                        className={`text-sm px-3 py-1 ${item.role === 'admin' ? 'bg-primary hover:bg-primary/80 text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}
-                                                    >
-                                                        {item.role === 'admin' ? 'Adminisztrátor' : 'Felhasználó'}
-                                                    </Badge>
-                                                    {item.id && (
-                                                        <div className="flex items-center gap-2 mt-2">
-                                                            <span className="text-xs font-mono text-muted-foreground">ID: {item.id.substring(0, 8)}...</span>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => copyId(item.id)}
-                                                                className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-white transition-colors"
-                                                                title="ID másolása"
-                                                            >
-                                                                <Copy className="w-3.5 h-3.5" />
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
+                        <AdminModalBody className="admin-user-profile">
+                            <section className="admin-profile-identity" aria-label="Profil összefoglaló">
+                                <Avatar className="admin-profile-avatar">
+                                    <AvatarImage src={item.avatar_url} alt={profileName} />
+                                    <AvatarFallback>{profileInitial}</AvatarFallback>
+                                </Avatar>
+                                <div className="admin-profile-identity-copy">
+                                    <p className="admin-profile-kicker">ParkSafe tag</p>
+                                    <h2>{profileName}</h2>
+                                    <p>{item.email || 'Nincs email cím megadva'}</p>
+                                    <div className="admin-profile-tags">
+                                        {activityHomeCity ? <span><MapPin />{activityHomeCity}</span> : null}
+                                        {activitySupporter?.is_supporter ? (
+                                            <span data-tone="supporter">
+                                                <Star />Támogató
+                                                {activitySupporter.supporter_since ? ` · ${new Date(activitySupporter.supporter_since).toLocaleDateString('hu-HU', { year: 'numeric', month: 'short' })}` : ''}
+                                            </span>
+                                        ) : null}
+                                        {xpVal > 0 ? <span data-tone="xp"><Zap />{xpVal.toLocaleString('hu-HU')} XP</span> : null}
+                                    </div>
+                                </div>
+                                <div className="admin-profile-identity-actions">
+                                    {item.email ? (
+                                        <a href={`mailto:${item.email}`}>
+                                            <Mail />
+                                            Email írása
+                                        </a>
+                                    ) : null}
+                                    {item.id ? (
+                                        <button type="button" onClick={() => copyId(item.id)}>
+                                            <Copy />
+                                            UUID másolása
+                                        </button>
+                                    ) : null}
+                                </div>
+                            </section>
 
-                                            <Separator className="bg-border" />
+                            <div className="admin-profile-facts">
+                                <div>
+                                    <Mail />
+                                    <span>Email cím</span>
+                                    {item.email ? <a href={`mailto:${item.email}`}>{item.email}</a> : <strong>Nincs megadva</strong>}
+                                </div>
+                                <div>
+                                    <Phone />
+                                    <span>Telefonszám</span>
+                                    {item.phone ? <a href={`tel:${item.phone}`}>{item.phone}</a> : <strong>Nincs megadva</strong>}
+                                </div>
+                                <div>
+                                    <Calendar />
+                                    <span>Regisztráció</span>
+                                    <strong>{registeredAt}</strong>
+                                </div>
+                            </div>
 
-                                            {/* Contact Information */}
-                                            <div className="flex flex-col gap-6">
-                                                <div className="flex items-start gap-4">
-                                                    <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                                                        <Mail className="h-5 w-5 text-muted-foreground" />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-base font-medium text-foreground">Email cím</p>
-                                                        <p className="text-sm text-muted-foreground truncate mt-1">{item.email || 'Nincs megadva'}</p>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-start gap-4">
-                                                    <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                                                        <Phone className="h-5 w-5 text-muted-foreground" />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-base font-medium text-foreground">Telefonszám</p>
-                                                        <p className="text-sm text-muted-foreground mt-1">{item.phone || 'Nincs megadva'}</p>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-start gap-4">
-                                                    <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                                                        <Calendar className="h-5 w-5 text-muted-foreground" />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-base font-medium text-foreground">Regisztráció dátuma</p>
-                                                        <p className="text-sm text-muted-foreground mt-1">
-                                                            {item.created_at
-                                                                ? new Date(item.created_at).toLocaleDateString('hu-HU', {
-                                                                    year: 'numeric',
-                                                                    month: 'long',
-                                                                    day: 'numeric',
-                                                                    hour: '2-digit',
-                                                                    minute: '2-digit'
-                                                                })
-                                                                : 'Ismeretlen'}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
+                            <AdminModalSection title="Aktivitás" icon={Activity} description={activityHomeCity || undefined}>
+                                {activityLoading ? (
+                                    <div className="admin-profile-empty" role="status">
+                                        <Loader2 className="animate-spin" />
+                                        <span>Aktivitás betöltése…</span>
+                                    </div>
+                                ) : !hasAnyActivity ? (
+                                    <div className="admin-profile-empty">
+                                        <Bike />
+                                        <div>
+                                            <strong>Még nincs rögzített aktivitás</strong>
+                                            <span>A felhasználó első túrája után itt jelennek meg az adatok.</span>
                                         </div>
                                     </div>
+                                ) : (
+                                    <>
+                                        <div className="admin-profile-stat-strip">
+                                            <div><Bike /><span>Túrák</span><strong>{(stats?.totalRides ?? 0).toLocaleString('hu-HU')}</strong></div>
+                                            <div><RouteIcon /><span>Össztáv</span><strong>{(stats?.totalDistanceKm ?? 0).toFixed(1)} <small>km</small></strong></div>
+                                            <div><Gauge /><span>Átlagsebesség</span><strong>{(stats?.avgSpeedKmh ?? 0).toFixed(1)} <small>km/h</small></strong></div>
+                                            <div><Zap /><span>XP</span><strong>{xpVal.toLocaleString('hu-HU')}</strong></div>
+                                        </div>
 
-                                    {/* User Activity */}
-                                    {(() => {
-                                        const xpVal = activityProgress?.xp ?? 0;
-                                        const currentStreak = activityProgress?.current_streak ?? 0;
-                                        const longestStreak = activityProgress?.longest_streak ?? 0;
-                                        const challengeCompletions = activityProgress?.challenge_completions ?? 0;
-                                        const challengeCities = activityProgress?.challenge_cities ?? 0;
-                                        const unlockedBadges = activityProgress
-                                            ? ACTIVITY_BADGE_KEYS.filter(k => Number(activityProgress[k] ?? 0) > 0)
-                                            : [];
-                                        const stats = activityStats;
-                                        const hasAny = (stats?.totalRides ?? 0) > 0 || challengeCompletions > 0 || xpVal > 0;
+                                        <div className="admin-profile-columns">
+                                            <section className="admin-profile-data-section">
+                                                <header><Bike /><h3>Kerékpározás</h3></header>
+                                                <dl>
+                                                    <div><dt><Gauge />Max. sebesség</dt><dd>{(stats?.maxSpeedKmh ?? 0).toFixed(1)} km/h</dd></div>
+                                                    <div><dt><Timer />Összes idő</dt><dd>{formatActivityDuration(stats?.totalDurationSec ?? 0)}</dd></div>
+                                                    <div><dt><RouteIcon />Leghosszabb túra</dt><dd>{(stats?.longestRideKm ?? 0).toFixed(2)} km</dd></div>
+                                                    <div><dt><Mountain />Szintemelkedés</dt><dd>{Math.round(stats?.totalElevationM ?? 0).toLocaleString('hu-HU')} m</dd></div>
+                                                </dl>
+                                            </section>
+                                            <section className="admin-profile-data-section">
+                                                <header><Trophy /><h3>Kihívások &amp; sorozatok</h3></header>
+                                                <dl>
+                                                    <div><dt><Trophy />Teljesítések</dt><dd>{challengeCompletions.toLocaleString('hu-HU')}</dd></div>
+                                                    <div><dt><MapPin />Városok</dt><dd>{challengeCities.toLocaleString('hu-HU')}</dd></div>
+                                                    <div><dt><Timer />Legjobb idő</dt><dd>{formatActivityShort(stats?.fastestAttemptSec)}</dd></div>
+                                                    <div><dt><Flame />Sorozat</dt><dd>{currentStreak} / {longestStreak} nap</dd></div>
+                                                </dl>
+                                            </section>
+                                        </div>
+                                    </>
+                                )}
+                            </AdminModalSection>
 
-                                        return (
-                                            <div>
-                                                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2 mb-4">
-                                                    <Activity className="h-4 w-4 flex-shrink-0" />
-                                                    <span>Aktivitás</span>
-                                                </h3>
+                            {!activityLoading && hasAnyActivity ? (
+                                <AdminModalSection
+                                    title="Jelvények"
+                                    icon={Award}
+                                    description={`${unlockedBadges.length} / ${ACTIVITY_BADGE_KEYS.length} megszerezve`}
+                                >
+                                    {unlockedBadges.length === 0 ? (
+                                        <p className="admin-profile-muted">Nincs megszerzett jelvény.</p>
+                                    ) : (
+                                        <div className="admin-profile-badges" role="list">
+                                            {unlockedBadges.map(k => (
+                                                <span key={k} role="listitem" title={`${BADGE_LABELS[k] || k} — szint ${activityProgress?.[k] ?? 0}`}>
+                                                    <Award />
+                                                    {BADGE_LABELS[k] || k}
+                                                    {Number(activityProgress?.[k] ?? 0) > 1 ? <b>×{activityProgress?.[k]}</b> : null}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+                                </AdminModalSection>
+                            ) : null}
 
-                                                {/* Header chips */}
-                                                {(activityHomeCity || activitySupporter?.is_supporter || xpVal > 0) && (
-                                                    <div className="flex flex-wrap items-center gap-2 mb-4">
-                                                        {activityHomeCity && (
-                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-zinc-900 border border-zinc-800 text-zinc-200">
-                                                                <MapPin size={12} className="text-green-400" />
-                                                                {activityHomeCity}
-                                                            </span>
-                                                        )}
-                                                        {activitySupporter?.is_supporter && (
-                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                                                                <Star size={12} className="fill-amber-400" />
-                                                                Támogató
-                                                                {activitySupporter.supporter_since && (
-                                                                    <span className="text-[10px] text-amber-300/70 ml-1">
-                                                                        ({new Date(activitySupporter.supporter_since).toLocaleDateString('hu-HU', { year: 'numeric', month: 'short' })})
-                                                                    </span>
-                                                                )}
-                                                            </span>
-                                                        )}
-                                                        {xpVal > 0 && (
-                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-500/10 border border-green-500/20 text-green-400">
-                                                                <Zap size={12} />
-                                                                {xpVal.toLocaleString('hu-HU')} XP
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                )}
-
-                                                {activityLoading ? (
-                                                    <div className="flex items-center justify-center py-12 border border-dashed border-border rounded-xl bg-background/30">
-                                                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                                                    </div>
-                                                ) : !hasAny ? (
-                                                    <div className="text-center py-8 border border-dashed border-border rounded-xl bg-background/30">
-                                                        <Bike className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-                                                        <p className="text-muted-foreground text-sm">Még nincs rögzített aktivitás ennél a felhasználónál.</p>
-                                                    </div>
-                                                ) : (
-                                                    <div className="space-y-4">
-                                                        {/* Key Stats Grid */}
-                                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                                            <div className="rounded-xl border border-white/5 bg-background/50 p-4">
-                                                                <div className="flex items-center justify-between mb-2">
-                                                                    <Bike className="w-4 h-4 text-green-400" />
-                                                                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Túrák</span>
-                                                                </div>
-                                                                <div className="text-2xl font-extrabold text-foreground">
-                                                                    {(stats?.totalRides ?? 0).toLocaleString('hu-HU')}
-                                                                </div>
-                                                            </div>
-                                                            <div className="rounded-xl border border-white/5 bg-background/50 p-4">
-                                                                <div className="flex items-center justify-between mb-2">
-                                                                    <RouteIcon className="w-4 h-4 text-blue-400" />
-                                                                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Össztáv</span>
-                                                                </div>
-                                                                <div className="text-2xl font-extrabold text-foreground">
-                                                                    {(stats?.totalDistanceKm ?? 0).toFixed(1)}
-                                                                    <span className="text-sm font-bold text-muted-foreground ml-1">km</span>
-                                                                </div>
-                                                            </div>
-                                                            <div className="rounded-xl border border-white/5 bg-background/50 p-4">
-                                                                <div className="flex items-center justify-between mb-2">
-                                                                    <Gauge className="w-4 h-4 text-purple-400" />
-                                                                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Átlag seb.</span>
-                                                                </div>
-                                                                <div className="text-2xl font-extrabold text-foreground">
-                                                                    {(stats?.avgSpeedKmh ?? 0).toFixed(1)}
-                                                                    <span className="text-sm font-bold text-muted-foreground ml-1">km/h</span>
-                                                                </div>
-                                                            </div>
-                                                            <div className="rounded-xl border border-white/5 bg-background/50 p-4">
-                                                                <div className="flex items-center justify-between mb-2">
-                                                                    <Trophy className="w-4 h-4 text-amber-400" />
-                                                                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">XP</span>
-                                                                </div>
-                                                                <div className="text-2xl font-extrabold text-foreground">
-                                                                    {xpVal.toLocaleString('hu-HU')}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Riding + Challenges side by side */}
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                            <div className="rounded-xl border border-white/5 bg-background/50 p-4">
-                                                                <div className="flex items-center gap-2 mb-3">
-                                                                    <Bike className="w-4 h-4 text-zinc-400" />
-                                                                    <h4 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Kerékpározás</h4>
-                                                                </div>
-                                                                <div className="grid grid-cols-2 gap-2">
-                                                                    <div className="rounded-lg bg-zinc-900/60 border border-white/5 p-2.5">
-                                                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase mb-1">
-                                                                            <Gauge size={11} /> Max seb.
-                                                                        </div>
-                                                                        <div className="text-sm font-mono font-bold text-foreground">{(stats?.maxSpeedKmh ?? 0).toFixed(1)} km/h</div>
-                                                                    </div>
-                                                                    <div className="rounded-lg bg-zinc-900/60 border border-white/5 p-2.5">
-                                                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase mb-1">
-                                                                            <Timer size={11} /> Össz idő
-                                                                        </div>
-                                                                        <div className="text-sm font-mono font-bold text-foreground">{formatActivityDuration(stats?.totalDurationSec ?? 0)}</div>
-                                                                    </div>
-                                                                    <div className="rounded-lg bg-zinc-900/60 border border-white/5 p-2.5">
-                                                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase mb-1">
-                                                                            <RouteIcon size={11} /> Leghosszabb
-                                                                        </div>
-                                                                        <div className="text-sm font-mono font-bold text-foreground">{(stats?.longestRideKm ?? 0).toFixed(2)} km</div>
-                                                                    </div>
-                                                                    <div className="rounded-lg bg-zinc-900/60 border border-white/5 p-2.5">
-                                                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase mb-1">
-                                                                            <Mountain size={11} /> Szintemelk.
-                                                                        </div>
-                                                                        <div className="text-sm font-mono font-bold text-foreground">{Math.round(stats?.totalElevationM ?? 0).toLocaleString('hu-HU')} m</div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <div className="rounded-xl border border-white/5 bg-background/50 p-4">
-                                                                <div className="flex items-center gap-2 mb-3">
-                                                                    <Trophy className="w-4 h-4 text-amber-400" />
-                                                                    <h4 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Kihívások &amp; sorozatok</h4>
-                                                                </div>
-                                                                <div className="grid grid-cols-2 gap-2">
-                                                                    <div className="rounded-lg bg-zinc-900/60 border border-white/5 p-2.5">
-                                                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase mb-1">
-                                                                            <Trophy size={11} /> Teljesítések
-                                                                        </div>
-                                                                        <div className="text-sm font-mono font-bold text-foreground">{challengeCompletions.toLocaleString('hu-HU')}</div>
-                                                                    </div>
-                                                                    <div className="rounded-lg bg-zinc-900/60 border border-white/5 p-2.5">
-                                                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase mb-1">
-                                                                            <MapPin size={11} /> Városok
-                                                                        </div>
-                                                                        <div className="text-sm font-mono font-bold text-foreground">{challengeCities.toLocaleString('hu-HU')}</div>
-                                                                    </div>
-                                                                    <div className="rounded-lg bg-zinc-900/60 border border-white/5 p-2.5">
-                                                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase mb-1">
-                                                                            <Timer size={11} /> Legjobb idő
-                                                                        </div>
-                                                                        <div className="text-sm font-mono font-bold text-foreground">{formatActivityShort(stats?.fastestAttemptSec)}</div>
-                                                                    </div>
-                                                                    <div className="rounded-lg bg-zinc-900/60 border border-white/5 p-2.5">
-                                                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase mb-1">
-                                                                            <Flame size={11} /> Sorozat (most/leghosszabb)
-                                                                        </div>
-                                                                        <div className="text-sm font-mono font-bold text-foreground">
-                                                                            {currentStreak} <span className="text-zinc-500">/</span> {longestStreak} <span className="text-[10px] text-zinc-500">nap</span>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Badges */}
-                                                        <div className="rounded-xl border border-white/5 bg-background/50 p-4">
-                                                            <div className="flex items-center justify-between mb-3">
-                                                                <div className="flex items-center gap-2">
-                                                                    <Award className="w-4 h-4 text-purple-400" />
-                                                                    <h4 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Jelvények</h4>
-                                                                </div>
-                                                                <span className="text-xs font-mono text-zinc-400">{unlockedBadges.length} / {ACTIVITY_BADGE_KEYS.length}</span>
-                                                            </div>
-                                                            {unlockedBadges.length === 0 ? (
-                                                                <p className="text-xs text-muted-foreground italic">Nincs megszerzett jelvény.</p>
-                                                            ) : (
-                                                                <div className="flex flex-wrap gap-1.5">
-                                                                    {unlockedBadges.map(k => (
-                                                                        <span
-                                                                            key={k}
-                                                                            title={`${BADGE_LABELS[k] || k} — szint ${activityProgress?.[k] ?? 0}`}
-                                                                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-purple-500/10 border border-purple-500/20 text-purple-200"
-                                                                        >
-                                                                            <Award className="w-3 h-3 text-purple-400" />
-                                                                            {BADGE_LABELS[k] || k}
-                                                                            {Number(activityProgress?.[k] ?? 0) > 1 && (
-                                                                                <span className="text-purple-400 font-mono">×{activityProgress?.[k]}</span>
-                                                                            )}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-                                                            )}
-                                                        </div>
-
-                                                        {/* Recent rides */}
-                                                        {activityRecent.length > 0 && (
-                                                            <div className="rounded-xl border border-white/5 bg-background/50 p-4">
-                                                                <div className="flex items-center gap-2 mb-3">
-                                                                    <Clock className="w-4 h-4 text-zinc-400" />
-                                                                    <h4 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Legutóbbi túrák</h4>
-                                                                </div>
-                                                                <div className="space-y-1.5">
-                                                                    {activityRecent.map(r => {
-                                                                        const km = ((r.distance_meters ?? 0) / 1000).toFixed(1);
-                                                                        const date = r.started_at
-                                                                            ? new Date(r.started_at).toLocaleDateString('hu-HU', { year: '2-digit', month: 'short', day: 'numeric' })
-                                                                            : '—';
-                                                                        const avg = Number(r.average_speed_kmh ?? 0).toFixed(1);
-                                                                        return (
-                                                                            <div key={r.id} className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-zinc-900/60 border border-white/5 text-xs">
-                                                                                <div className="flex items-center gap-2 min-w-0">
-                                                                                    {r.challenge_completed ? (
-                                                                                        <Trophy className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-                                                                                    ) : (
-                                                                                        <Bike className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
-                                                                                    )}
-                                                                                    <span className="font-semibold text-zinc-200 truncate">
-                                                                                        {r.favorite_name || date}
-                                                                                    </span>
-                                                                                    {r.favorite_name && (
-                                                                                        <span className="text-[10px] text-zinc-500">{date}</span>
-                                                                                    )}
-                                                                                </div>
-                                                                                <div className="flex items-center gap-3 font-mono text-zinc-400 flex-shrink-0">
-                                                                                    <span>{km} km</span>
-                                                                                    <span>{formatActivityShort(r.duration_seconds)}</span>
-                                                                                    <span className="text-zinc-500">{avg} km/h</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        );
-                                                                    })}
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })()}
-                                </div>
+                            {activityRecent.length > 0 ? (
+                                <AdminModalSection title="Legutóbbi túrák" icon={Clock} description={`${activityRecent.length} legutóbbi rekord`}>
+                                    <div className="admin-profile-rides" role="list">
+                                        {activityRecent.map(r => {
+                                            const km = ((r.distance_meters ?? 0) / 1000).toFixed(1);
+                                            const date = r.started_at
+                                                ? new Date(r.started_at).toLocaleDateString('hu-HU', { year: '2-digit', month: 'short', day: 'numeric' })
+                                                : '—';
+                                            const avg = Number(r.average_speed_kmh ?? 0).toFixed(1);
+                                            return (
+                                                <article key={r.id} role="listitem">
+                                                    <span className="admin-profile-ride-icon">{r.challenge_completed ? <Trophy /> : <Bike />}</span>
+                                                    <div><strong>{r.favorite_name || date}</strong>{r.favorite_name ? <span>{date}</span> : null}</div>
+                                                    <dl>
+                                                        <div><dt>Táv</dt><dd>{km} km</dd></div>
+                                                        <div><dt>Idő</dt><dd>{formatActivityShort(r.duration_seconds)}</dd></div>
+                                                        <div><dt>Átlag</dt><dd>{avg} km/h</dd></div>
+                                                    </dl>
+                                                </article>
+                                            );
+                                        })}
+                                    </div>
+                                </AdminModalSection>
+                            ) : null}
                         </AdminModalBody>
-
                     </AdminModalFrame>
                 </AdminModalContent>
-            </Dialog >
+            </Dialog>
         );
     }
 
