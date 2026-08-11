@@ -5,6 +5,7 @@ import {
     Ban,
     UserCheck,
     Eye,
+    Star,
 } from 'lucide-react';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import {
@@ -29,6 +30,7 @@ interface UsersTableProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onRowClick: (item: any) => void;
     onToggleBan?: (id: string, currentlyBanned: boolean) => void;
+    onToggleSupporter?: (id: string, currentlySupporter: boolean) => void;
     toggleLoading?: string | null;
     searchTerm?: string;
     currentPage: number;
@@ -47,6 +49,7 @@ export default function UsersTable({
     // sortConfig,
     onRowClick,
     onToggleBan,
+    onToggleSupporter,
     toggleLoading,
     searchTerm,
     // selectAll,
@@ -84,6 +87,7 @@ export default function UsersTable({
                             <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Felhasználónév</th>
                             <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Email</th>
                             <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Szerepkör</th>
+                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Támogató</th>
                             <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Állapot</th>
                             <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Létrehozva</th>
                             <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider text-right">Műveletek</th>
@@ -118,6 +122,20 @@ export default function UsersTable({
                                         }`}>
                                         {user.role}
                                     </span>
+                                </td>
+                                <td className="p-4">
+                                    {user.is_supporter ? (
+                                        <span
+                                            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border bg-amber-500/10 text-amber-400 border-amber-500/20"
+                                            title={user.supporter_since
+                                                ? `Támogató ${new Date(user.supporter_since).toLocaleDateString('hu-HU')} óta`
+                                                : 'Támogató'}
+                                        >
+                                            <Star className="w-3 h-3 fill-current" /> Igen
+                                        </span>
+                                    ) : (
+                                        <span className="text-sm text-zinc-600">—</span>
+                                    )}
                                 </td>
                                 <td className="p-4">
                                     {user.banned_at ? (
@@ -155,6 +173,20 @@ export default function UsersTable({
                                                 <DropdownMenuItem onClick={() => onRowClick(user)} className="hover:bg-white/5 hover:text-white cursor-pointer focus:bg-white/5 focus:text-white">
                                                     <Eye className="mr-2 h-4 w-4" /> Részletek
                                                 </DropdownMenuItem>
+                                                {onToggleSupporter && (
+                                                    <>
+                                                        <DropdownMenuSeparator className="bg-white/10" />
+                                                        <DropdownMenuItem
+                                                            onClick={() => onToggleSupporter(user.id, !!user.is_supporter)}
+                                                            className={user.is_supporter
+                                                                ? 'text-zinc-400 hover:bg-white/5 hover:text-white cursor-pointer focus:bg-white/5 focus:text-white'
+                                                                : 'text-amber-400 hover:bg-amber-500/10 hover:text-amber-300 cursor-pointer focus:bg-amber-500/10 focus:text-amber-300'}
+                                                        >
+                                                            <Star className={`mr-2 h-4 w-4 ${user.is_supporter ? '' : 'fill-current'}`} />
+                                                            {user.is_supporter ? 'Támogatói jelvény visszavonása' : 'Támogatói jelvény megadása'}
+                                                        </DropdownMenuItem>
+                                                    </>
+                                                )}
                                                 {onToggleBan && (
                                                     <>
                                                         <DropdownMenuSeparator className="bg-white/10" />

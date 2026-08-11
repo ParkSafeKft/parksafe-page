@@ -5,6 +5,8 @@ export type AuditAction =
     | 'show_on_leaderboard'
     | 'ban_user'
     | 'unban_user'
+    | 'grant_supporter'
+    | 'revoke_supporter'
     | 'toggle_city_active'
     | 'toggle_challenge_active'
     | 'delete_challenge'

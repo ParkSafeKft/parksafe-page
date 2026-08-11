@@ -18,6 +18,7 @@ interface AuditLogTableProps {
 const ACTION_OPTIONS = [
     'hide_from_leaderboard', 'show_on_leaderboard',
     'ban_user', 'unban_user',
+    'grant_supporter', 'revoke_supporter',
     'toggle_city_active', 'toggle_challenge_active', 'delete_challenge', 'delete_city',
     'community_route_status', 'delete_community_route',
     'create_city', 'update_city',
@@ -25,8 +26,8 @@ const ACTION_OPTIONS = [
 const TARGET_OPTIONS = ['challenge_attempt', 'user', 'daily_challenge', 'city', 'community_bike_lane'];
 
 const actionBadge = (a: string) => {
-    if (a.startsWith('approve') || a === 'unban_user' || a === 'show_on_leaderboard') return 'bg-green-500/10 text-green-400 border-green-500/20';
-    if (a.startsWith('reject') || a === 'ban_user' || a === 'hide_from_leaderboard' || a.startsWith('delete')) return 'bg-red-500/10 text-red-400 border-red-500/20';
+    if (a.startsWith('approve') || a === 'unban_user' || a === 'show_on_leaderboard' || a === 'grant_supporter') return 'bg-green-500/10 text-green-400 border-green-500/20';
+    if (a.startsWith('reject') || a === 'ban_user' || a === 'hide_from_leaderboard' || a === 'revoke_supporter' || a.startsWith('delete')) return 'bg-red-500/10 text-red-400 border-red-500/20';
     return 'bg-zinc-800 text-zinc-300 border-zinc-700';
 };
 

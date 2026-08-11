@@ -66,6 +66,8 @@ import {
     Zap,
     Route as RouteIcon,
     Loader2,
+    Ban,
+    UserCheck,
 } from 'lucide-react';
 
 interface DetailModalProps {
@@ -82,6 +84,9 @@ interface DetailModalProps {
     /** Open another record in this same detail modal — enables cross-navigation between linked entities */
     onOpenUser?: (userId: string) => void;
     onOpenParkingSpot?: (spotId: string) => void;
+    onToggleUserBan?: (id: string, currentlyBanned: boolean) => Promise<boolean>;
+    onToggleUserSupporter?: (id: string, currentlySupporter: boolean) => Promise<boolean>;
+    userActionLoading?: string | null;
     /** Parking-image submissions only: hard delete the submission + image */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onDeleteSubmission?: (submission: any) => void;
@@ -215,6 +220,9 @@ export default function DetailModal({
     onOpenPoiDetail,
     onOpenUser,
     onOpenParkingSpot,
+    onToggleUserBan,
+    onToggleUserSupporter,
+    userActionLoading,
     onDeleteSubmission,
     onBack,
 }: DetailModalProps) {
@@ -230,12 +238,44 @@ export default function DetailModal({
     const [activityRecent, setActivityRecent] = useState<UserActivityRide[]>([]);
     const [activityHomeCity, setActivityHomeCity] = useState<string | null>(null);
     const [activitySupporter, setActivitySupporter] = useState<{ is_supporter: boolean; supporter_since: string | null } | null>(null);
+    const [userBannedAt, setUserBannedAt] = useState<string | null>(item?.banned_at ?? null);
+    const [pendingUserAction, setPendingUserAction] = useState<'ban' | 'supporter' | null>(null);
 
     useEffect(() => {
         if (item?.status) {
             setCurrentStatus(item.status);
         }
+        setUserBannedAt(item?.banned_at ?? null);
     }, [item]);
+
+    const handleUserBanToggle = async () => {
+        if (!item?.id || !onToggleUserBan) return;
+        const currentlyBanned = !!userBannedAt;
+        setPendingUserAction('ban');
+        try {
+            const success = await onToggleUserBan(item.id, currentlyBanned);
+            if (success) setUserBannedAt(currentlyBanned ? null : new Date().toISOString());
+        } finally {
+            setPendingUserAction(null);
+        }
+    };
+
+    const handleUserSupporterToggle = async () => {
+        if (!item?.id || !onToggleUserSupporter) return;
+        const currentlySupporter = !!activitySupporter?.is_supporter;
+        setPendingUserAction('supporter');
+        try {
+            const success = await onToggleUserSupporter(item.id, currentlySupporter);
+            if (success) {
+                setActivitySupporter({
+                    is_supporter: !currentlySupporter,
+                    supporter_since: currentlySupporter ? null : new Date().toISOString(),
+                });
+            }
+        } finally {
+            setPendingUserAction(null);
+        }
+    };
 
     const fetchPoiCoords = useCallback(async () => {
         if (type !== 'poi_flags' || !item?.poi_id || !item?.poi_type) {
@@ -1212,6 +1252,32 @@ export default function DetailModal({
                                             <Copy />
                                             UUID másolása
                                         </button>
+                                    ) : null}
+                                    {onToggleUserSupporter ? (
+                                        <Button
+                                            type="button"
+                                            size="sm"
+                                            variant={activitySupporter?.is_supporter ? 'outline' : 'default'}
+                                            onClick={handleUserSupporterToggle}
+                                            disabled={userActionLoading === item.id || activityLoading || pendingUserAction !== null}
+                                        >
+                                            {pendingUserAction === 'supporter' ? <Loader2 className="animate-spin" /> : <Star />}
+                                            {activitySupporter?.is_supporter ? 'Jelvény visszavonása' : 'Támogatói jelvény'}
+                                        </Button>
+                                    ) : null}
+                                    {onToggleUserBan ? (
+                                        <Button
+                                            type="button"
+                                            size="sm"
+                                            variant={userBannedAt ? 'outline' : 'destructive'}
+                                            onClick={handleUserBanToggle}
+                                            disabled={userActionLoading === item.id || pendingUserAction !== null}
+                                        >
+                                            {pendingUserAction === 'ban'
+                                                ? <Loader2 className="animate-spin" />
+                                                : userBannedAt ? <UserCheck /> : <Ban />}
+                                            {userBannedAt ? 'Tiltás feloldása' : 'Felhasználó tiltása'}
+                                        </Button>
                                     ) : null}
                                 </div>
                             </section>

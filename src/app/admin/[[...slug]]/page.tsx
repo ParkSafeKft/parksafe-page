@@ -1188,7 +1188,7 @@ export default function AdminPage() {
 
     const adminId = (profile as { id?: string } | null)?.id ?? null;
 
-    const handleUserToggleBan = async (id: string, currentlyBanned: boolean) => {
+    const handleUserToggleBan = async (id: string, currentlyBanned: boolean): Promise<boolean> => {
         setToggleLoading(id);
         try {
             const { error } = await supabase.from('profiles')
@@ -1202,10 +1202,38 @@ export default function AdminPage() {
                 targetId: id,
             });
             toast.success(currentlyBanned ? 'Tiltás feloldva' : 'Felhasználó tiltva');
-            fetchData();
+            await fetchData();
+            return true;
         } catch (err) {
             if (isDev) console.error(err);
             toast.error('Hiba a tiltás módosítása során');
+            return false;
+        } finally {
+            setToggleLoading(null);
+        }
+    };
+
+    const handleUserToggleSupporter = async (id: string, currentlySupporter: boolean): Promise<boolean> => {
+        setToggleLoading(id);
+        try {
+            const { error } = await supabase.rpc('set_supporter_status', {
+                p_user_id: id,
+                p_is_supporter: !currentlySupporter,
+            });
+            if (error) throw error;
+            await writeAuditLog({
+                adminId,
+                action: currentlySupporter ? 'revoke_supporter' : 'grant_supporter',
+                targetType: 'user',
+                targetId: id,
+            });
+            toast.success(currentlySupporter ? 'Támogatói jelvény visszavonva' : 'Támogatói jelvény megadva');
+            await fetchData();
+            return true;
+        } catch (err) {
+            if (isDev) console.error(err);
+            toast.error('Hiba a támogatói jelvény módosítása során');
+            return false;
         } finally {
             setToggleLoading(null);
         }
@@ -1586,6 +1614,7 @@ export default function AdminPage() {
                                             sortConfig={sortConfig}
                                             onRowClick={(item) => openFreshDetail(item, 'user')}
                                             onToggleBan={handleUserToggleBan}
+                                            onToggleSupporter={handleUserToggleSupporter}
                                             toggleLoading={toggleLoading}
                                             searchTerm={searchTerm}
                                             currentPage={currentPage}
@@ -1927,6 +1956,9 @@ export default function AdminPage() {
                     onOpenPoiDetail={detailModal.type === 'poi_flags' ? handleOpenPoiDetail : undefined}
                     onOpenUser={handleOpenUserProfile}
                     onOpenParkingSpot={handleOpenParkingSpotDetail}
+                    onToggleUserBan={detailModal.type === 'user' ? handleUserToggleBan : undefined}
+                    onToggleUserSupporter={detailModal.type === 'user' ? handleUserToggleSupporter : undefined}
+                    userActionLoading={toggleLoading}
                     onDeleteSubmission={detailModal.type === 'parking_image' ? handleDeleteParkingImageSubmission : undefined}
                 />
 
