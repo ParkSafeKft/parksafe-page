@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { Building2, Save, Loader2, X } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Building2, Save, Loader2 } from 'lucide-react';
+import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { AdminModalBody, AdminModalContent, AdminModalFooter, AdminModalFrame, AdminModalHeader } from './AdminModal';
 
 interface CityFormModalProps {
     isOpen: boolean;
@@ -116,21 +116,16 @@ export default function CityFormModal({ isOpen, onClose, city, onSuccess }: City
 
     return (
         <Dialog open={isOpen} onOpenChange={(o) => !o && onClose()}>
-            <DialogContent className="bg-[#0a0a0a] border-white/10 text-white max-w-2xl p-0 gap-0 overflow-hidden">
-                <div className="flex items-center justify-between p-5 border-b border-white/5">
-                    <DialogTitle className="flex items-center gap-3 text-lg font-bold text-white">
-                        <div className="w-9 h-9 rounded-lg bg-green-500/10 border border-green-500/20 flex items-center justify-center">
-                            <Building2 className="w-5 h-5 text-green-500" />
-                        </div>
-                        {isEdit ? 'Város szerkesztése' : 'Új város hozzáadása'}
-                    </DialogTitle>
-                    <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0 text-zinc-500 hover:text-white hover:bg-white/10">
-                        <X className="w-4 h-4" />
-                    </Button>
-                </div>
-
-                <ScrollArea className="max-h-[70vh]">
-                    <div className="p-5 space-y-5">
+            <AdminModalContent variant="form">
+                <AdminModalFrame>
+                    <AdminModalHeader
+                        eyebrow={isEdit ? 'Város szerkesztése' : 'Új város'}
+                        title={isEdit ? (city?.name || 'Város szerkesztése') : 'Új város hozzáadása'}
+                        subtitle="Terület, koordináták és elérhetőség"
+                        icon={Building2}
+                        meta={isEdit && city?.id ? <code title={city.id}>#{String(city.id).slice(0, 8)}</code> : undefined}
+                    />
+                    <AdminModalBody className="space-y-5">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className={labelCls}>Név (magyar) *</label>
@@ -203,10 +198,9 @@ export default function CityFormModal({ isOpen, onClose, city, onSuccess }: City
                                 </label>
                             </div>
                         </div>
-                    </div>
-                </ScrollArea>
+                    </AdminModalBody>
 
-                <div className="flex items-center justify-end gap-2 p-4 border-t border-white/5 bg-[#0a0a0a]">
+                <AdminModalFooter>
                     <Button variant="outline" onClick={onClose} disabled={saving} className="border-white/10 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white">
                         Mégse
                     </Button>
@@ -214,8 +208,9 @@ export default function CityFormModal({ isOpen, onClose, city, onSuccess }: City
                         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                         {isEdit ? 'Mentés' : 'Létrehozás'}
                     </Button>
-                </div>
-            </DialogContent>
+                </AdminModalFooter>
+                </AdminModalFrame>
+            </AdminModalContent>
         </Dialog>
     );
 }

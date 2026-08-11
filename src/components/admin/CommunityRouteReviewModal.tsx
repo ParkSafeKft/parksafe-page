@@ -18,10 +18,11 @@ import {
     ChevronDown,
     Copy,
 } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { AdminModalContent, AdminModalFooter, AdminModalFrame } from './AdminModal';
 import InteractiveRouteMap from './InteractiveRouteMap';
 import { writeAuditLog, type AuditAction } from '@/lib/adminAuditLog';
 
@@ -208,10 +209,10 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && !saving && onClose()}>
-            <DialogContent className="admin-dark admin-inspector max-w-4xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
-                <div className="flex flex-col h-[85vh]">
+            <AdminModalContent variant="inspector">
+                <AdminModalFrame>
                     {/* Header — same pattern as EditLocationModal */}
-                    <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
+                    <div className="admin-modal-header admin-modal-header--legacy">
                         <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
                             <div className="flex items-center gap-4 min-w-0 pr-8">
                                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-500/10 border border-green-500/20 flex items-center justify-center flex-shrink-0 shadow-inner">
@@ -243,8 +244,8 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
                     </div>
 
                     {/* Scrollable body */}
-                    <ScrollArea className="flex-1 min-h-0">
-                        <div className="p-6 space-y-6">
+                    <ScrollArea className="admin-modal-body">
+                        <div className="admin-modal-body-inner space-y-6">
                             {/* Status badge + length summary */}
                             <div className="flex items-center justify-between flex-wrap gap-3">
                                 <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${currentMeta.className}`}>
@@ -394,7 +395,7 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
                     </ScrollArea>
 
                     {/* Footer — same pattern as EditLocationModal */}
-                    <div className="p-6 border-t border-border flex justify-end gap-2 flex-shrink-0">
+                    <AdminModalFooter>
                         <Button type="button" variant="outline" onClick={onClose} disabled={saving}>
                             Mégse
                         </Button>
@@ -411,9 +412,9 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
                                 </>
                             )}
                         </Button>
-                    </div>
-                </div>
-            </DialogContent>
+                    </AdminModalFooter>
+                </AdminModalFrame>
+            </AdminModalContent>
         </Dialog>
     );
 }

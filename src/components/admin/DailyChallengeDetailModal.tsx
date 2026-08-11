@@ -2,13 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { Trophy, X, MapPin, Flag, Calendar, Mountain, Gauge, Building2, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
+import { Trophy, MapPin, Flag, Calendar, Mountain, Gauge, Building2, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Dialog } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import InteractiveRouteMap from './InteractiveRouteMap';
 import { writeAuditLog } from '@/lib/adminAuditLog';
+import { AdminModalBody, AdminModalContent, AdminModalFrame, AdminModalHeader } from './AdminModal';
 
 interface DailyChallengeDetailModalProps {
     isOpen: boolean;
@@ -130,30 +129,18 @@ export default function DailyChallengeDetailModal({ isOpen, onClose, challenge, 
 
     return (
         <Dialog open={isOpen} onOpenChange={(o) => !o && onClose()}>
-            <DialogContent className="admin-dark admin-inspector bg-[#0a0a0a] border-white/10 text-white max-w-3xl p-0 gap-0 overflow-hidden">
-                <div className="flex items-center justify-between p-5 border-b border-white/5">
-                    <DialogTitle className="flex items-center gap-3 text-lg font-bold text-white">
-                        <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-                            <Trophy className="w-5 h-5 text-amber-500" />
-                        </div>
-                        Napi kihívás részletei
-                    </DialogTitle>
-                    <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0 text-zinc-500 hover:text-white hover:bg-white/10">
-                        <X className="w-4 h-4" />
-                    </Button>
-                </div>
-
-                <ScrollArea className="max-h-[75vh]">
-                    <div className="p-5 space-y-5">
-                        <div>
-                            <h2 className="text-xl font-bold text-white">
-                                {challenge.challenge_date
-                                    ? new Date(challenge.challenge_date).toLocaleDateString('hu-HU', { year: 'numeric', month: 'long', day: 'numeric' })
-                                    : 'Ismeretlen dátum'}
-                            </h2>
-                            <p className="text-sm text-zinc-500 mt-1">{cityName} · Forrás: <span className="uppercase text-zinc-300">{source}</span></p>
-                        </div>
-
+            <AdminModalContent variant="inspector">
+                <AdminModalFrame>
+                    <AdminModalHeader
+                        eyebrow="Napi kihívás"
+                        title={challenge.challenge_date
+                            ? new Date(challenge.challenge_date).toLocaleDateString('hu-HU', { year: 'numeric', month: 'long', day: 'numeric' })
+                            : 'Ismeretlen dátum'}
+                        subtitle={`${cityName} · ${source.toUpperCase()} forrás`}
+                        icon={Trophy}
+                        meta={<code title={challenge.id}>#{String(challenge.id).slice(0, 8)}</code>}
+                    />
+                    <AdminModalBody className="space-y-5">
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             <div className="p-3 rounded-lg bg-white/[0.02] border border-white/5">
                                 <div className="flex items-center gap-2 text-[11px] text-zinc-500 uppercase tracking-wider font-bold">
@@ -284,15 +271,9 @@ export default function DailyChallengeDetailModal({ isOpen, onClose, challenge, 
                         <div className="text-[11px] text-zinc-600">
                             ID: <span className="font-mono">{challenge.id}</span>
                         </div>
-                    </div>
-                </ScrollArea>
-
-                <div className="flex items-center justify-end gap-2 p-4 border-t border-white/5 bg-[#0a0a0a]">
-                    <Button variant="outline" onClick={onClose} className="border-white/10 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white">
-                        Bezár
-                    </Button>
-                </div>
-            </DialogContent>
+                    </AdminModalBody>
+                </AdminModalFrame>
+            </AdminModalContent>
         </Dialog>
     );
 }

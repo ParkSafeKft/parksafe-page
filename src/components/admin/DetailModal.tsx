@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import {
     Dialog,
-    DialogContent,
     DialogTitle,
 } from '@/components/ui/dialog';
 import {
@@ -17,6 +16,12 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ImagePreview from './ImagePreview';
+import {
+    AdminModalBody,
+    AdminModalContent,
+    AdminModalFrame,
+    AdminModalHeader,
+} from './AdminModal';
 import { toast } from 'sonner';
 import {
     Users,
@@ -494,10 +499,10 @@ export default function DetailModal({
         return (
             <>
                 <Dialog open={isOpen} onOpenChange={onClose}>
-                    <DialogContent className="admin-dark admin-inspector max-w-3xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
-                        <div className="flex flex-col h-[85vh]">
+                    <AdminModalContent variant="inspector">
+                        <AdminModalFrame>
                             {/* Header */}
-                            <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
+                            <div className="admin-modal-header admin-modal-header--legacy">
                                 <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
                                     <div className="flex items-center gap-4 min-w-0 pr-8">
                                     {onBack && (
@@ -545,8 +550,8 @@ export default function DetailModal({
                                 </DialogTitle>
                             </div>
 
-                            <ScrollArea className="flex-1 min-h-0">
-                                <div className="p-6 space-y-6">
+                            <ScrollArea className="admin-modal-body">
+                                <div className="admin-modal-body-inner space-y-6">
                                     {/* Image — click to enlarge */}
                                     {item.image_url && (
                                         <div>
@@ -724,7 +729,7 @@ export default function DetailModal({
                             </ScrollArea>
 
                             {/* Footer — full action bar so admin doesn't have to exit and reopen the dropdown */}
-                            <div className="p-6 border-t border-border flex justify-between gap-2 flex-wrap">
+                            <div className="admin-modal-footer justify-between flex-wrap">
                                 <div className="flex gap-2">
                                     {onDeleteSubmission && (
                                         <Button
@@ -742,7 +747,6 @@ export default function DetailModal({
                                     )}
                                 </div>
                                 <div className="flex gap-2 flex-wrap">
-                                    <Button onClick={onClose} variant="outline" size="sm">Bezárás</Button>
                                     {onStatusChange && currentStatus !== 'rejected' && (
                                         <Button
                                             size="sm"
@@ -766,8 +770,8 @@ export default function DetailModal({
                                     )}
                                 </div>
                             </div>
-                        </div>
-                    </DialogContent>
+                        </AdminModalFrame>
+                    </AdminModalContent>
                 </Dialog>
                 {imagePreviewUrl && (
                     <ImagePreview src={imagePreviewUrl} alt="Parkoló kép" onClose={() => setImagePreviewUrl(null)} />
@@ -823,10 +827,10 @@ export default function DetailModal({
 
         return (
             <Dialog open={isOpen} onOpenChange={onClose}>
-                <DialogContent className="admin-dark admin-inspector max-w-3xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
-                    <div className="flex flex-col h-[85vh]">
+                <AdminModalContent variant="inspector">
+                    <AdminModalFrame>
                         {/* Header — same shape as parking_image */}
-                        <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
+                        <div className="admin-modal-header admin-modal-header--legacy">
                             <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
                                 <div className="flex items-center gap-4 min-w-0 pr-8">
                                     {onBack && (
@@ -875,8 +879,8 @@ export default function DetailModal({
                             </DialogTitle>
                         </div>
 
-                        <ScrollArea className="flex-1 min-h-0">
-                            <div className="p-6 space-y-6">
+                        <ScrollArea className="admin-modal-body">
+                            <div className="admin-modal-body-inner space-y-6">
                                 {/* POI card — clickable, opens POI in this same modal */}
                                 <div>
                                     <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
@@ -1070,8 +1074,7 @@ export default function DetailModal({
                         </ScrollArea>
 
                         {/* Footer — quick status actions, same shape as parking_image accept/reject */}
-                        <div className="p-6 border-t border-border flex justify-end gap-2 flex-wrap">
-                            <Button onClick={onClose} variant="outline" size="sm">Bezárás</Button>
+                        <div className="admin-modal-footer flex-wrap">
                             {onStatusChange && currentStatus !== 'dismissed' && (
                                 <Button
                                     size="sm"
@@ -1105,8 +1108,8 @@ export default function DetailModal({
                                 </Button>
                             )}
                         </div>
-                    </div>
-                </DialogContent>
+                    </AdminModalFrame>
+                </AdminModalContent>
             </Dialog>
         );
     }
@@ -1114,52 +1117,34 @@ export default function DetailModal({
     if (type === 'feedback') {
         return (
             <Dialog open={isOpen} onOpenChange={onClose}>
-                <DialogContent className="admin-dark admin-inspector max-w-2xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
-                    <div className="flex flex-col h-[85vh]">
-                        {/* Header */}
-                        <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
-                            <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
-                                <div className="flex items-center gap-4 min-w-0 pr-8">
-                                    {onBack && (
-                                        <button
-                                            type="button"
-                                            onClick={onBack}
-                                            className="p-2 rounded-lg text-muted-foreground hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
-                                            title="Vissza az előző modálra"
-                                        >
-                                            <ArrowLeft className="h-5 w-5" />
-                                        </button>
-                                    )}
-                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-600/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0 shadow-inner">
-                                        <MessageSquare className="h-6 w-6 text-purple-400" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h1 className="text-lg font-bold text-foreground truncate leading-tight">
-                                            Visszajelzés részletei
-                                        </h1>
-                                        <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                            <span className="text-xs font-mono text-muted-foreground truncate opacity-70">
-                                                ID: {item.id.substring(0, 8)}...
-                                            </span>
-                                            <button
-                                                type="button"
-                                                onClick={() => copyId(item.id)}
-                                                className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-white transition-colors"
-                                                title="ID másolása"
-                                            >
-                                                <Copy className="w-3.5 h-3.5" />
-                                            </button>
-                                            <Badge variant="outline" className="text-[10px] h-5 px-1.5 border-white/10 bg-white/5">
-                                                {new Date(item.created_at).toLocaleDateString()}
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                </div>
-                            </DialogTitle>
-                        </div>
+                <AdminModalContent variant="inspector">
+                    <AdminModalFrame>
+                        <AdminModalHeader
+                            eyebrow="Visszajelzés"
+                            title={item.title || 'Visszajelzés részletei'}
+                            subtitle="Bejelentés áttekintése és feldolgozása"
+                            icon={MessageSquare}
+                            onBack={onBack}
+                            backLabel="Vissza az előző rekordhoz"
+                            meta={(
+                                <>
+                                    <code title={item.id}>#{item.id.substring(0, 8)}</code>
+                                    <button
+                                        type="button"
+                                        onClick={() => copyId(item.id)}
+                                        className="ops-icon-action"
+                                        title="ID másolása"
+                                        aria-label="ID másolása"
+                                    >
+                                        <Copy />
+                                    </button>
+                                    <span>·</span>
+                                    <span>{new Date(item.created_at).toLocaleDateString('hu-HU')}</span>
+                                </>
+                            )}
+                        />
 
-                        <ScrollArea className="flex-1 min-h-0">
-                            <div className="p-6 space-y-6">
+                        <AdminModalBody className="space-y-6">
                                 {/* Title & Description */}
                                 <div>
                                     <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
@@ -1284,7 +1269,6 @@ export default function DetailModal({
                                         )}
                                     </div>
                                 </div>
-                            </div>
 
                             <Separator className="bg-border" />
 
@@ -1343,13 +1327,9 @@ export default function DetailModal({
                                     </div>
                                 </div>
                             )}
-                        </ScrollArea>
-
-                        <div className="p-6 border-t border-border flex justify-end">
-                            <Button onClick={onClose} variant="outline">Bezárás</Button>
-                        </div>
-                    </div>
-                </DialogContent >
+                        </AdminModalBody>
+                    </AdminModalFrame>
+                </AdminModalContent>
             </Dialog >
         );
     }
@@ -1357,10 +1337,10 @@ export default function DetailModal({
     if (type === 'user') {
         return (
             <Dialog open={isOpen} onOpenChange={onClose}>
-                <DialogContent className="admin-dark admin-inspector max-w-2xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
-                    <div className="flex flex-col h-[85vh]">
+                <AdminModalContent variant="inspector">
+                    <AdminModalFrame>
                         {/* Header */}
-                        <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
+                        <div className="admin-modal-header admin-modal-header--legacy">
                             <DialogTitle className="text-foreground flex items-center gap-4 text-xl font-bold">
                                 <div className="flex items-center gap-4 min-w-0 pr-8">
                                     {onBack && (
@@ -1389,8 +1369,8 @@ export default function DetailModal({
                         </div>
 
                         {/* Scrollable Content */}
-                        <ScrollArea className="flex-1 min-h-0">
-                            <div className="p-6">
+                        <ScrollArea className="admin-modal-body">
+                            <div className="admin-modal-body-inner">
                                 <div className="space-y-6">
                                     {/* User Profile Section */}
                                     <div>
@@ -1734,20 +1714,8 @@ export default function DetailModal({
 
                         </ScrollArea>
 
-                        {/* Action Buttons */}
-                        <div className="p-6 border-t border-border flex-shrink-0">
-                            <div className="flex justify-end">
-                                <Button
-                                    variant="outline"
-                                    onClick={onClose}
-                                    className="px-8"
-                                >
-                                    Bezárás
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </DialogContent >
+                    </AdminModalFrame>
+                </AdminModalContent>
             </Dialog >
         );
     }
@@ -1767,10 +1735,10 @@ export default function DetailModal({
     return (
         <>
             <Dialog open={isOpen} onOpenChange={onClose}>
-                <DialogContent className="admin-dark admin-inspector max-w-4xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
-                    <div className="flex flex-col h-[85vh]">
+                <AdminModalContent variant="inspector">
+                    <AdminModalFrame>
                         {/* Header - same pattern as POI / Feedback */}
-                        <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
+                        <div className="admin-modal-header admin-modal-header--legacy">
                             <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
                                 <div className="flex items-center gap-4 min-w-0 pr-8">
                                     {onBack && (
@@ -1827,8 +1795,8 @@ export default function DetailModal({
                         </div>
 
                         {/* Scrollable Content */}
-                        <ScrollArea className="flex-1 min-h-0">
-                            <div className="p-6 space-y-6">
+                        <ScrollArea className="admin-modal-body">
+                            <div className="admin-modal-body-inner space-y-6">
                                 {/* Image Gallery */}
                                 {item.picture_url && item.picture_url.length > 0 && (
                                     <div>
@@ -2191,10 +2159,7 @@ export default function DetailModal({
                         </ScrollArea>
 
                         {/* Footer - same as other modals */}
-                        <div className="p-6 border-t border-border flex justify-end gap-2 flex-shrink-0">
-                            <Button variant="outline" onClick={onClose}>
-                                Bezárás
-                            </Button>
+                        <div className="admin-modal-footer">
                             <Button
                                 onClick={() => {
                                     onEdit(item, type);
@@ -2205,8 +2170,8 @@ export default function DetailModal({
                                 Szerkesztés
                             </Button>
                         </div>
-                    </div>
-                </DialogContent>
+                    </AdminModalFrame>
+                </AdminModalContent>
             </Dialog>
             {imagePreviewUrl && (
                 <ImagePreview src={imagePreviewUrl} alt="Előnézet" onClose={() => setImagePreviewUrl(null)} />

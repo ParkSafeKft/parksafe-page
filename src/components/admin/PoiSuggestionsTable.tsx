@@ -30,7 +30,6 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
-    DialogContent,
     DialogTitle,
 } from '@/components/ui/dialog';
 import {
@@ -43,6 +42,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { AdminModalContent, AdminModalFooter, AdminModalFrame } from './AdminModal';
 
 export type CapacityLevel = 'small' | 'medium' | 'large';
 
@@ -437,9 +437,9 @@ function EditSuggestionModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="admin-dark admin-inspector max-w-3xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
-                <div className="flex flex-col h-[85vh]">
-                    <div className="p-6 border-b border-border bg-background/50 flex-shrink-0">
+            <AdminModalContent variant="inspector">
+                <AdminModalFrame>
+                    <div className="admin-modal-header admin-modal-header--legacy">
                         <DialogTitle className="text-foreground flex items-center gap-4 text-xl font-bold">
                             <div className="w-12 h-12 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center shrink-0">
                                 <Lightbulb className="h-6 w-6 text-green-400" />
@@ -464,7 +464,7 @@ function EditSuggestionModal({
                         </DialogTitle>
                     </div>
 
-                    <div className="flex-1 overflow-auto p-6 space-y-6">
+                    <div className="admin-modal-body admin-modal-body-inner overflow-auto space-y-6">
                         <div>
                             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
                                 <User className="h-4 w-4" />
@@ -729,8 +729,7 @@ function EditSuggestionModal({
                         )}
                     </div>
 
-                    <div className="p-6 border-t border-border flex justify-end gap-2 flex-wrap">
-                        <Button variant="outline" size="sm" onClick={onClose}>Bezárás</Button>
+                    <AdminModalFooter className="flex-wrap">
                         {status !== 'rejected' && (
                             <Button
                                 size="sm"
@@ -767,9 +766,9 @@ function EditSuggestionModal({
                             <Edit className="w-4 h-4" />
                             Mentés
                         </Button>
-                    </div>
-                </div>
-            </DialogContent>
+                    </AdminModalFooter>
+                </AdminModalFrame>
+            </AdminModalContent>
         </Dialog>
     );
 }
