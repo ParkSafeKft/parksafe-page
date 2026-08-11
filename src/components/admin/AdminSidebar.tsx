@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowUpRight, Home, LogOut, ShieldCheck } from 'lucide-react';
+import { ArrowUpRight, Home, LogOut, PanelLeftClose, PanelLeftOpen, ShieldCheck } from 'lucide-react';
 import { useSidebar } from '@/components/ui/sidebar';
 import { ADMIN_NAVIGATION, ADMIN_SECTIONS } from './adminNavigation';
 
@@ -24,7 +24,8 @@ export default function AdminSidebar({
     profile,
     onHomeConfig,
 }: AdminSidebarProps) {
-    const { openMobile, setOpenMobile, isMobile } = useSidebar();
+    const { openMobile, setOpenMobile, isMobile, state, toggleSidebar } = useSidebar();
+    const isExpanded = isMobile || state === 'expanded';
 
     const navigate = (id: string) => {
         if (isMobile) setOpenMobile(false);
@@ -44,21 +45,47 @@ export default function AdminSidebar({
 
             <aside
                 className={`ops-rail ${isMobile ? (openMobile ? 'is-open' : '') : ''}`}
+                id="ops-admin-navigation"
+                data-expanded={isExpanded}
                 aria-label="Admin navigáció"
             >
-                <button
-                    type="button"
-                    className="ops-rail-brand"
-                    onClick={() => navigate('dashboard')}
-                    aria-label="ParkSafe vezérlőpult"
-                    data-tooltip="ParkSafe Control"
-                >
-                    <ShieldCheck aria-hidden="true" />
-                </button>
+                <div className="ops-rail-head">
+                    <button
+                        type="button"
+                        className="ops-rail-brand"
+                        onClick={() => isExpanded ? navigate('dashboard') : toggleSidebar()}
+                        aria-controls={!isExpanded ? 'ops-admin-navigation' : undefined}
+                        aria-expanded={!isExpanded ? false : undefined}
+                        aria-label={isExpanded ? 'ParkSafe vezérlőpult' : 'Oldalsáv kinyitása'}
+                        data-tooltip={isExpanded ? 'ParkSafe Control' : 'Oldalsáv kinyitása'}
+                    >
+                        {isExpanded ? <ShieldCheck aria-hidden="true" /> : <PanelLeftOpen aria-hidden="true" />}
+                        <span className="ops-rail-brand-label">ParkSafe Control</span>
+                    </button>
+
+                    {!isMobile ? (
+                        <button
+                            type="button"
+                            className="ops-rail-toggle"
+                            data-visible={isExpanded}
+                            onClick={toggleSidebar}
+                            disabled={!isExpanded}
+                            tabIndex={isExpanded ? 0 : -1}
+                            aria-controls="ops-admin-navigation"
+                            aria-expanded={isExpanded}
+                            aria-hidden={!isExpanded}
+                            aria-label="Oldalsáv összecsukása"
+                            title="Oldalsáv összecsukása (Ctrl+B)"
+                        >
+                            <PanelLeftClose aria-hidden="true" />
+                        </button>
+                    ) : null}
+                </div>
 
                 <nav className="ops-rail-nav">
                     {ADMIN_SECTIONS.map((section) => (
                         <div className="ops-rail-group" key={section} aria-label={section}>
+                            <span className="ops-rail-section-label">{section}</span>
                             {ADMIN_NAVIGATION.filter((item) => item.section === section).map((item) => {
                                 const Icon = item.icon;
                                 const active = item.id === activeTab;
