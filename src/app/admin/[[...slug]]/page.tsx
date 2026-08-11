@@ -234,6 +234,7 @@ export default function AdminPage() {
 
     const [dataLoading, setDataLoading] = useState(false);
     const [toggleLoading, setToggleLoading] = useState<string | null>(null);
+    const [batchActionLoading, setBatchActionLoading] = useState(false);
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -732,6 +733,11 @@ export default function AdminPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeTab, currentPage, sortConfig, searchTerm, profile, pageSize, challengeCityFilter, challengeDateFrom, challengeDateTo, challengeActiveFilter, routeStatusFilter, routeDateFrom, routeDateTo, auditActionFilter, auditTargetTypeFilter, feedbackStatusFilter, feedbackPriorityFilter, feedbackCategoryFilter, poiFlagStatusFilter, poiFlagReasonFilter, poiSuggestionStatusFilter, poiSuggestionTypeFilter, parkingImageStatusFilter]);
 
+    useEffect(() => {
+        setSelectedRows(new Set());
+        setSelectAll(false);
+    }, [currentPage, pageSize, feedbackStatusFilter, feedbackPriorityFilter, feedbackCategoryFilter, poiFlagStatusFilter, poiFlagReasonFilter]);
+
     // Load cities for filter dropdowns when those tabs open
     useEffect(() => {
         if (activeTab !== 'daily_challenges' && activeTab !== 'leaderboard') return;
@@ -817,6 +823,31 @@ export default function AdminPage() {
             toast.error('Hiba történt a státusz frissítésekor');
         } finally {
             setToggleLoading(null);
+        }
+    };
+
+    const handleFeedbackBatchStatusChange = async (ids: string[], newStatus: string) => {
+        const allowedStatuses = new Set(['open', 'in_progress', 'resolved', 'closed', 'duplicate']);
+        const uniqueIds = Array.from(new Set(ids));
+        if (uniqueIds.length === 0 || !allowedStatuses.has(newStatus)) return;
+
+        setBatchActionLoading(true);
+        try {
+            const { error } = await supabase
+                .from('feedback')
+                .update({ status: newStatus })
+                .in('id', uniqueIds);
+
+            if (error) throw error;
+
+            toast.success(`${uniqueIds.length} visszajelzés státusza frissítve`);
+            handleSelectAll(false);
+            await fetchData();
+        } catch (error) {
+            if (isDev) console.error('Error updating feedback statuses:', error);
+            toast.error('Hiba történt a kijelölt visszajelzések frissítésekor');
+        } finally {
+            setBatchActionLoading(false);
         }
     };
 
@@ -976,6 +1007,31 @@ export default function AdminPage() {
             toast.error('Hiba történt a státusz frissítésekor');
         } finally {
             setToggleLoading(null);
+        }
+    };
+
+    const handlePoiFlagBatchStatusChange = async (ids: string[], newStatus: string) => {
+        const allowedStatuses = new Set(['pending', 'reviewed', 'resolved', 'dismissed']);
+        const uniqueIds = Array.from(new Set(ids));
+        if (uniqueIds.length === 0 || !allowedStatuses.has(newStatus)) return;
+
+        setBatchActionLoading(true);
+        try {
+            const { error } = await supabase
+                .from('poi_flags')
+                .update({ status: newStatus, reviewed_at: new Date().toISOString() })
+                .in('id', uniqueIds);
+
+            if (error) throw error;
+
+            toast.success(`${uniqueIds.length} POI bejelentés státusza frissítve`);
+            handleSelectAll(false);
+            await fetchData();
+        } catch (error) {
+            if (isDev) console.error('Error updating POI flag statuses:', error);
+            toast.error('Hiba történt a kijelölt POI bejelentések frissítésekor');
+        } finally {
+            setBatchActionLoading(false);
         }
     };
 
@@ -1637,6 +1693,8 @@ export default function AdminPage() {
                                             sortConfig={sortConfig}
                                             onRowClick={(item) => openFreshDetail(item, 'feedback')}
                                             onStatusChange={handleFeedbackStatusChange}
+                                            onBatchStatusChange={handleFeedbackBatchStatusChange}
+                                            batchActionLoading={batchActionLoading}
                                             searchTerm={searchTerm}
                                             statusFilter={feedbackStatusFilter}
                                             onStatusFilterChange={setFeedbackStatusFilter}
@@ -1747,6 +1805,8 @@ export default function AdminPage() {
                                             sortConfig={sortConfig}
                                             onRowClick={(item) => openFreshDetail(item, 'poi_flags')}
                                             onStatusChange={handlePoiFlagStatusChange}
+                                            onBatchStatusChange={handlePoiFlagBatchStatusChange}
+                                            batchActionLoading={batchActionLoading}
                                             onDelete={(id) => handleDeleteClick(id)}
                                             searchTerm={searchTerm}
                                             statusFilter={poiFlagStatusFilter}

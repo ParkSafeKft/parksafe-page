@@ -4,13 +4,13 @@ import {
     MoreHorizontal,
     MessageSquare,
     AlertCircle,
-    CheckCircle2,
-    Clock,
-    XCircle,
     HelpCircle,
     ChevronDown,
     Mail
 } from 'lucide-react';
+import type { SVGProps } from 'react';
+import BatchStatusActions from './BatchStatusActions';
+import { Checkbox } from '@/components/ui/checkbox';
 
 
 interface Feedback {
@@ -36,6 +36,8 @@ interface FeedbackTableProps {
     sortConfig: { key: string; direction: string };
     onRowClick: (item: Feedback) => void;
     onStatusChange: (id: string, newStatus: string) => void;
+    onBatchStatusChange: (ids: string[], newStatus: string) => Promise<void>;
+    batchActionLoading: boolean;
     searchTerm?: string;
     statusFilter: string;
     onStatusFilterChange: (value: string) => void;
@@ -123,13 +125,13 @@ const Filters = ({
 
 export default function FeedbackTable({
     data,
-    // selectedRows,
-    // onSelectAll,
-    // onSelectRow,
+    selectedRows,
+    onSelectAll,
+    onSelectRow,
     onSort,
-    sortConfig,
     onRowClick,
-    onStatusChange,
+    onBatchStatusChange,
+    batchActionLoading,
     searchTerm,
     statusFilter,
     onStatusFilterChange,
@@ -246,6 +248,10 @@ export default function FeedbackTable({
         );
     };
 
+    const allVisibleSelected = data.every((item) => selectedRows.has(item.id));
+    const someVisibleSelected = data.some((item) => selectedRows.has(item.id));
+    const selectAllState = allVisibleSelected ? true : someVisibleSelected ? 'indeterminate' : false;
+
     return (
         <div className="flex flex-col gap-4 h-full">
             <Filters
@@ -256,10 +262,31 @@ export default function FeedbackTable({
                 categoryValue={categoryFilter}
                 onCategoryChange={onCategoryFilterChange}
             />
+            <BatchStatusActions
+                selectedCount={selectedRows.size}
+                isLoading={batchActionLoading}
+                options={[
+                    { value: 'open', label: 'Nyitott' },
+                    { value: 'in_progress', label: 'Folyamatban' },
+                    { value: 'resolved', label: 'Megoldva' },
+                    { value: 'closed', label: 'Lezárt' },
+                    { value: 'duplicate', label: 'Duplikált' },
+                ]}
+                onApply={(status) => onBatchStatusChange(Array.from(selectedRows), status)}
+                onClear={() => onSelectAll(false)}
+            />
             <div className="flex-1 overflow-auto min-h-0 rounded-xl border border-white/5 bg-[#111111]">
                 <table className="w-full text-left border-collapse">
                     <thead className="sticky top-0 z-10 bg-[#111111]">
                         <tr className="border-b border-white/5 bg-white/[0.02]">
+                            <th className="p-4 w-12">
+                                <Checkbox
+                                    checked={selectAllState}
+                                    onCheckedChange={(checked) => onSelectAll(checked === true)}
+                                    aria-label="Az oldalon látható összes visszajelzés kijelölése"
+                                    className="border-zinc-600 data-[state=checked]:border-green-500 data-[state=checked]:bg-green-500 data-[state=checked]:text-black"
+                                />
+                            </th>
                             <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider w-12">
                                 {/* Type Icon */}
                             </th>
@@ -303,9 +330,17 @@ export default function FeedbackTable({
                         {data.map((item) => (
                             <tr
                                 key={item.id}
-                                className="hover:bg-white/[0.02] transition-colors group cursor-pointer"
+                                className={`transition-colors group cursor-pointer ${selectedRows.has(item.id) ? 'bg-green-500/[0.06] hover:bg-green-500/[0.09]' : 'hover:bg-white/[0.02]'}`}
                                 onClick={() => onRowClick(item)}
                             >
+                                <td className="p-4" onClick={(event) => event.stopPropagation()}>
+                                    <Checkbox
+                                        checked={selectedRows.has(item.id)}
+                                        onCheckedChange={(checked) => onSelectRow(item.id, checked === true)}
+                                        aria-label={`${item.title} kijelölése`}
+                                        className="border-zinc-600 data-[state=checked]:border-green-500 data-[state=checked]:bg-green-500 data-[state=checked]:text-black"
+                                    />
+                                </td>
                                 <td className="p-4">
                                     <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center border border-white/10">
                                         {getTypeIcon(item.type)}
@@ -422,7 +457,7 @@ export default function FeedbackTable({
 }
 
 // Missing icon component
-function TrendingUpIcon(props: any) {
+function TrendingUpIcon(props: SVGProps<SVGSVGElement>) {
     return (
         <svg
             {...props}
