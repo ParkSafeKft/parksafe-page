@@ -1,10 +1,9 @@
 'use client';
 
-import { Plus, Search, X } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { Command, Plus, Search, X } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { getAdminNavigationItem } from './adminNavigation';
+import { ADMIN_NAVIGATION, getAdminNavigationItem } from './adminNavigation';
 
 type AdminPageHeaderProps = {
     activeTab: string;
@@ -12,6 +11,7 @@ type AdminPageHeaderProps = {
     isRealtimeConnected: boolean;
     searchTerm: string;
     onSearchChange: (value: string) => void;
+    onNavigate: (tab: string) => void;
     onCreate?: () => void;
 };
 
@@ -21,45 +21,41 @@ export default function AdminPageHeader({
     isRealtimeConnected,
     searchTerm,
     onSearchChange,
+    onNavigate,
     onCreate,
 }: AdminPageHeaderProps) {
     const item = getAdminNavigationItem(activeTab);
-    const Icon = item.icon;
+    const searchRef = useRef<HTMLInputElement>(null);
     const showCount = !['dashboard', 'app_config', 'route_heatmap', 'leaderboard'].includes(activeTab);
+    const peers = ADMIN_NAVIGATION.filter((candidate) => candidate.section === item.section);
+
+    useEffect(() => {
+        const handleShortcut = (event: KeyboardEvent) => {
+            if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k' && item.searchable) {
+                event.preventDefault();
+                searchRef.current?.focus();
+            }
+        };
+        window.addEventListener('keydown', handleShortcut);
+        return () => window.removeEventListener('keydown', handleShortcut);
+    }, [item.searchable]);
 
     return (
-        <header className="admin-page-header">
-            <div className="admin-page-heading">
-                <SidebarTrigger className="admin-sidebar-trigger" aria-label="Navigáció megnyitása" />
-                <div className="admin-page-icon" aria-hidden="true">
-                    <Icon />
-                </div>
-                <div className="min-w-0">
-                    <div className="admin-breadcrumb">
-                        <span>{item.section}</span>
-                        <span aria-hidden="true">/</span>
-                        <span aria-current="page">{item.shortLabel}</span>
-                    </div>
-                    <div className="admin-title-line">
-                        <h1>{item.label}</h1>
-                        {showCount ? <span className="admin-count">{totalCount.toLocaleString('hu-HU')}</span> : null}
-                        {showCount ? (
-                            <span className="admin-live-status" data-connected={isRealtimeConnected}>
-                                <span aria-hidden="true" />
-                                {isRealtimeConnected ? 'Élő' : 'Kapcsolódás'}
-                            </span>
-                        ) : null}
-                    </div>
-                    <p>{item.description}</p>
-                </div>
-            </div>
+        <header className="ops-header">
+            <div className="ops-commandbar">
+                <SidebarTrigger className="ops-mobile-trigger" aria-label="Navigáció megnyitása" />
 
-            <div className="admin-page-actions">
+                <div className="ops-page-identity">
+                    <span>{item.section}</span>
+                    <strong>{item.label}</strong>
+                    {showCount ? <b>{totalCount.toLocaleString('hu-HU')}</b> : null}
+                </div>
+
                 {item.searchable ? (
-                    <label className="admin-search">
-                        <span className="sr-only">Keresés ezen az oldalon</span>
+                    <label className="ops-command-search">
                         <Search aria-hidden="true" />
-                        <Input
+                        <input
+                            ref={searchRef}
                             type="search"
                             value={searchTerm}
                             onChange={(event) => onSearchChange(event.target.value)}
@@ -68,20 +64,47 @@ export default function AdminPageHeader({
                         />
                         {searchTerm ? (
                             <button type="button" onClick={() => onSearchChange('')} aria-label="Keresés törlése">
-                                <X />
+                                <X aria-hidden="true" />
                             </button>
                         ) : (
-                            <kbd>⌘ K</kbd>
+                            <kbd><Command aria-hidden="true" />K</kbd>
                         )}
                     </label>
-                ) : null}
+                ) : (
+                    <div className="ops-command-search is-placeholder" aria-hidden="true">
+                        <span>{item.description}</span>
+                    </div>
+                )}
 
-                {item.createLabel && onCreate ? (
-                    <Button onClick={onCreate} className="admin-primary-action">
-                        <Plus aria-hidden="true" />
-                        <span>{item.createLabel}</span>
-                    </Button>
-                ) : null}
+                <div className="ops-header-actions">
+                    <span className="ops-connection" data-connected={isRealtimeConnected}>
+                        <i aria-hidden="true" />
+                        {isRealtimeConnected ? 'Élő adatok' : 'Újracsatlakozás'}
+                    </span>
+                    {item.createLabel && onCreate ? (
+                        <button type="button" className="ops-create" onClick={onCreate}>
+                            <Plus aria-hidden="true" />
+                            <span>{item.createLabel}</span>
+                        </button>
+                    ) : null}
+                </div>
+            </div>
+
+            <div className="ops-scopebar">
+                <div className="ops-scope-tabs" role="navigation" aria-label={`${item.section} nézetek`}>
+                    {peers.map((peer) => (
+                        <button
+                            key={peer.id}
+                            type="button"
+                            data-active={peer.id === activeTab}
+                            aria-current={peer.id === activeTab ? 'page' : undefined}
+                            onClick={() => onNavigate(peer.id)}
+                        >
+                            {peer.label}
+                        </button>
+                    ))}
+                </div>
+                <p>{item.description}</p>
             </div>
         </header>
     );

@@ -1320,6 +1320,7 @@ export default function AdminPage() {
                             isRealtimeConnected={isRealtimeConnected}
                             searchTerm={searchTerm}
                             onSearchChange={setSearchTerm}
+                            onNavigate={setActiveTab}
                             onCreate={() => {
                                 if (activeTab === 'cities') {
                                     setCityFormModal({ show: true, item: null });

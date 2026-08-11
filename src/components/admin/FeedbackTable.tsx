@@ -1,18 +1,8 @@
 'use client';
 
-import {
-    MoreHorizontal,
-    MessageSquare,
-    AlertCircle,
-    HelpCircle,
-    ChevronDown,
-    Mail,
-    UserRound,
-} from 'lucide-react';
-import type { SVGProps } from 'react';
+import { AlertCircle, ChevronRight, HelpCircle, Mail, MessageSquare, SearchX, TrendingUp, UserRound } from 'lucide-react';
 import BatchStatusActions from './BatchStatusActions';
 import { Checkbox } from '@/components/ui/checkbox';
-
 
 interface Feedback {
     id: string;
@@ -54,76 +44,29 @@ interface FeedbackTableProps {
     onPageSizeChange: (size: number) => void;
 }
 
-const Filters = ({
-    statusValue,
-    onStatusChange,
-    priorityValue,
-    onPriorityChange,
-    categoryValue,
-    onCategoryChange,
-}: {
-    statusValue: string;
-    onStatusChange: (v: string) => void;
-    priorityValue: string;
-    onPriorityChange: (v: string) => void;
-    categoryValue: string;
-    onCategoryChange: (v: string) => void;
-}) => (
-    <div className="flex flex-wrap items-center gap-3 px-2">
-        <div className="flex items-center gap-2">
-            <span className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Státusz:</span>
-            <div className="relative">
-                <select
-                    value={statusValue}
-                    onChange={(e) => onStatusChange(e.target.value)}
-                    className="appearance-none bg-[#111111] border border-white/10 text-zinc-300 text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:border-green-500/50 cursor-pointer hover:border-white/20 transition-colors"
-                >
-                    <option value="">Mind</option>
-                    <option value="open">Nyitott</option>
-                    <option value="in_progress">Folyamatban</option>
-                    <option value="resolved">Megoldva</option>
-                    <option value="closed">Lezárt</option>
-                    <option value="duplicate">Duplikált</option>
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-500 pointer-events-none" />
-            </div>
-        </div>
-        <div className="flex items-center gap-2">
-            <span className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Prioritás:</span>
-            <div className="relative">
-                <select
-                    value={priorityValue}
-                    onChange={(e) => onPriorityChange(e.target.value)}
-                    className="appearance-none bg-[#111111] border border-white/10 text-zinc-300 text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:border-green-500/50 cursor-pointer hover:border-white/20 transition-colors"
-                >
-                    <option value="">Mind</option>
-                    <option value="high">Magas</option>
-                    <option value="medium">Közepes</option>
-                    <option value="low">Alacsony</option>
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-500 pointer-events-none" />
-            </div>
-        </div>
-        <div className="flex items-center gap-2">
-            <span className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Kategória:</span>
-            <div className="relative">
-                <select
-                    value={categoryValue}
-                    onChange={(e) => onCategoryChange(e.target.value)}
-                    className="appearance-none bg-[#111111] border border-white/10 text-zinc-300 text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:border-green-500/50 cursor-pointer hover:border-white/20 transition-colors"
-                >
-                    <option value="">Mind</option>
-                    <option value="bug">Hiba</option>
-                    <option value="feature">Funkció</option>
-                    <option value="ui_ux">UI / UX</option>
-                    <option value="content">Tartalom</option>
-                    <option value="other">Egyéb</option>
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-500 pointer-events-none" />
-            </div>
-        </div>
-    </div>
-);
+const statusLabels: Record<string, string> = {
+    open: 'Nyitott',
+    in_progress: 'Folyamatban',
+    resolved: 'Megoldva',
+    closed: 'Lezárt',
+    duplicate: 'Duplikált',
+};
+
+const priorityLabels: Record<string, string> = { high: 'Magas', medium: 'Közepes', low: 'Alacsony' };
+const categoryLabels: Record<string, string> = { bug: 'Hiba', feature: 'Funkció', ui_ux: 'UI / UX', content: 'Tartalom', other: 'Egyéb' };
+
+function TypeIcon({ type }: { type: string }) {
+    const Icon = type === 'bug' ? AlertCircle : type === 'feature' ? TrendingUp : type === 'question' ? HelpCircle : MessageSquare;
+    return <Icon aria-hidden="true" />;
+}
+
+function statusTone(status: string) {
+    if (status === 'resolved') return 'success';
+    if (status === 'open') return 'warning';
+    if (status === 'in_progress') return 'info';
+    if (status === 'duplicate') return 'danger';
+    return 'neutral';
+}
 
 export default function FeedbackTable({
     data,
@@ -133,6 +76,7 @@ export default function FeedbackTable({
     onSort,
     onRowClick,
     onOpenUser,
+    onStatusChange,
     onBatchStatusChange,
     batchActionLoading,
     searchTerm,
@@ -148,350 +92,85 @@ export default function FeedbackTable({
     pageSize,
     onPageSizeChange,
 }: FeedbackTableProps) {
-    if (data.length === 0) {
-        return (
-            <div className="flex flex-col gap-4 h-full">
-                <Filters
-                    statusValue={statusFilter}
-                    onStatusChange={onStatusFilterChange}
-                    priorityValue={priorityFilter}
-                    onPriorityChange={onPriorityFilterChange}
-                    categoryValue={categoryFilter}
-                    onCategoryChange={onCategoryFilterChange}
-                />
-                <div className="flex flex-col items-center justify-center py-32 border-2 border-dashed border-zinc-800 rounded-3xl bg-zinc-900/20">
-                    <div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center mb-4">
-                        <MessageSquare className="w-8 h-8 text-zinc-700" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-white">
-                        {searchTerm || statusFilter || priorityFilter || categoryFilter ? 'Nincs találat' : 'Nincs visszajelzés'}
-                    </h3>
-                    <p className="text-zinc-500 max-w-xs text-center mt-2">
-                        {searchTerm || statusFilter || priorityFilter || categoryFilter
-                            ? 'Próbálj más szűrési feltételt.'
-                            : 'Még nem érkezett visszajelzés.'}
-                    </p>
-                </div>
-            </div>
-        );
-    }
-
-    const getTypeIcon = (type: string) => {
-        switch (type) {
-            case 'bug': return <AlertCircle className="w-4 h-4 text-red-500" />;
-            case 'feature': return <HelpCircle className="w-4 h-4 text-purple-500" />; // Bulb icon would be better but HelpCircle is ok
-            case 'improvement': return <TrendingUpIcon className="w-4 h-4 text-blue-500" />;
-            default: return <MessageSquare className="w-4 h-4 text-zinc-500" />;
-        }
-    };
-
-    const getStatusBadge = (status: string) => {
-        const styles = {
-            open: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
-            in_progress: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-            resolved: 'bg-green-500/10 text-green-500 border-green-500/20',
-            closed: 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20',
-            duplicate: 'bg-red-500/10 text-red-500 border-red-500/20'
-        };
-
-        const labels = {
-            open: 'Nyitott',
-            in_progress: 'Folyamatban',
-            resolved: 'Megoldva',
-            closed: 'Lezárt',
-            duplicate: 'Duplikált'
-        };
-
-        return (
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${styles[status as keyof typeof styles] || styles.closed}`}>
-                {labels[status as keyof typeof labels] || status}
-            </span>
-        );
-    };
-
-    const getPriorityBadge = (priority: string) => {
-        const styles = {
-            high: 'text-red-500',
-            medium: 'text-yellow-500',
-            low: 'text-blue-500'
-        };
-        const labels = {
-            high: 'Magas',
-            medium: 'Közepes',
-            low: 'Alacsony'
-        };
-
-        return (
-            <span className={`text-xs font-medium ${styles[priority as keyof typeof styles] || 'text-zinc-500'}`}>
-                {labels[priority as keyof typeof labels] || priority}
-            </span>
-        );
-    };
-
-    const getCategoryBadge = (category: string) => {
-        const styles: Record<string, string> = {
-            bug: 'text-red-500',
-            feature: 'text-purple-500',
-            ui_ux: 'text-blue-500',
-            content: 'text-emerald-500',
-            other: 'text-zinc-400',
-        };
-        const labels: Record<string, string> = {
-            bug: 'Hiba',
-            feature: 'Funkció',
-            ui_ux: 'UI / UX',
-            content: 'Tartalom',
-            other: 'Egyéb',
-        };
-
-        return (
-            <span className={`text-xs font-medium ${styles[category] || 'text-zinc-500'}`}>
-                {labels[category] || category}
-            </span>
-        );
-    };
-
-    const allVisibleSelected = data.every((item) => selectedRows.has(item.id));
+    const allVisibleSelected = data.length > 0 && data.every((item) => selectedRows.has(item.id));
     const someVisibleSelected = data.some((item) => selectedRows.has(item.id));
-    const selectAllState = allVisibleSelected ? true : someVisibleSelected ? 'indeterminate' : false;
 
     return (
-        <div className="flex flex-col gap-4 h-full">
-            <Filters
-                statusValue={statusFilter}
-                onStatusChange={onStatusFilterChange}
-                priorityValue={priorityFilter}
-                onPriorityChange={onPriorityFilterChange}
-                categoryValue={categoryFilter}
-                onCategoryChange={onCategoryFilterChange}
-            />
-            <BatchStatusActions
-                selectedCount={selectedRows.size}
-                isLoading={batchActionLoading}
-                options={[
-                    { value: 'open', label: 'Nyitott' },
-                    { value: 'in_progress', label: 'Folyamatban' },
-                    { value: 'resolved', label: 'Megoldva' },
-                    { value: 'closed', label: 'Lezárt' },
-                    { value: 'duplicate', label: 'Duplikált' },
-                ]}
-                onApply={(status) => onBatchStatusChange(Array.from(selectedRows), status)}
-                onClear={() => onSelectAll(false)}
-            />
-            <div className="flex-1 overflow-auto min-h-0 rounded-xl border border-white/5 bg-[#111111]">
-                <table className="w-full text-left border-collapse">
-                    <thead className="sticky top-0 z-10 bg-[#111111]">
-                        <tr className="border-b border-white/5 bg-white/[0.02]">
-                            <th className="p-4 w-12">
-                                <Checkbox
-                                    checked={selectAllState}
-                                    onCheckedChange={(checked) => onSelectAll(checked === true)}
-                                    aria-label="Az oldalon látható összes visszajelzés kijelölése"
-                                    className="border-zinc-600 data-[state=checked]:border-green-500 data-[state=checked]:bg-green-500 data-[state=checked]:text-black"
-                                />
-                            </th>
-                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider w-12">
-                                {/* Type Icon */}
-                            </th>
-                            <th
-                                className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider cursor-pointer hover:text-zinc-300 transition-colors"
-                                onClick={() => onSort('title')}
-                            >
-                                Tárgy
-                            </th>
-                            <th
-                                className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider cursor-pointer hover:text-zinc-300 transition-colors"
-                                onClick={() => onSort('status')}
-                            >
-                                Státusz
-                            </th>
-                            <th
-                                className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider cursor-pointer hover:text-zinc-300 transition-colors"
-                                onClick={() => onSort('priority')}
-                            >
-                                Prioritás
-                            </th>
-                            <th
-                                className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider cursor-pointer hover:text-zinc-300 transition-colors"
-                                onClick={() => onSort('category')}
-                            >
-                                Kategória
-                            </th>
-                            <th
-                                className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider cursor-pointer hover:text-zinc-300 transition-colors"
-                                onClick={() => onSort('created_at')}
-                            >
-                                Dátum
-                            </th>
-                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">
-                                Kapcsolat
-                            </th>
-                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase tracking-wider text-right">Műveletek</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                        {data.map((item) => (
-                            <tr
-                                key={item.id}
-                                className={`transition-colors group cursor-pointer ${selectedRows.has(item.id) ? 'bg-green-500/[0.06] hover:bg-green-500/[0.09]' : 'hover:bg-white/[0.02]'}`}
-                                onClick={() => onRowClick(item)}
-                            >
-                                <td className="p-4" onClick={(event) => event.stopPropagation()}>
-                                    <Checkbox
-                                        checked={selectedRows.has(item.id)}
-                                        onCheckedChange={(checked) => onSelectRow(item.id, checked === true)}
-                                        aria-label={`${item.title} kijelölése`}
-                                        className="border-zinc-600 data-[state=checked]:border-green-500 data-[state=checked]:bg-green-500 data-[state=checked]:text-black"
-                                    />
-                                </td>
-                                <td className="p-4">
-                                    <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center border border-white/10">
-                                        {getTypeIcon(item.type)}
-                                    </div>
-                                </td>
-                                <td className="p-4">
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-semibold text-white max-w-[200px] truncate" title={item.title}>
-                                            {item.title}
-                                        </span>
-                                        <span className="text-xs text-zinc-500 max-w-[200px] truncate" title={item.description}>
-                                            {item.description}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td className="p-4">
-                                    {getStatusBadge(item.status)}
-                                </td>
-                                <td className="p-4">
-                                    {getPriorityBadge(item.priority)}
-                                </td>
-                                <td className="p-4">
-                                    {getCategoryBadge(item.category)}
-                                </td>
-                                <td className="p-4">
-                                    <span className="text-sm text-zinc-500">
-                                        {new Date(item.created_at).toLocaleDateString('hu-HU', {
-                                            year: 'numeric',
-                                            month: 'short',
-                                            day: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
-                                    </span>
-                                </td>
-                                <td className="p-4">
-                                    <div className="flex max-w-[180px] items-center gap-1.5" onClick={(event) => event.stopPropagation()}>
-                                        {item.contact_email ? (
-                                            <a
-                                                href={`mailto:${item.contact_email}?subject=${encodeURIComponent(`ParkSafe: ${item.title}`)}`}
-                                                className="inline-flex min-w-0 items-center gap-1.5 rounded px-1.5 py-1 text-zinc-400 hover:bg-primary/10 hover:text-primary"
-                                                title={`Email írása: ${item.contact_email}`}
-                                            >
-                                                <Mail className="h-3.5 w-3.5 shrink-0" />
-                                                <span className="truncate text-xs">{item.contact_email}</span>
-                                            </a>
-                                        ) : null}
-                                        {item.user_id && onOpenUser ? (
-                                            <button
-                                                type="button"
-                                                onClick={() => onOpenUser(item.user_id!)}
-                                                className="inline-grid h-7 w-7 shrink-0 place-items-center rounded text-zinc-500 hover:bg-primary/10 hover:text-primary"
-                                                title="Beküldő profiljának megnyitása"
-                                                aria-label="Beküldő profiljának megnyitása"
-                                            >
-                                                <UserRound className="h-3.5 w-3.5" />
-                                            </button>
-                                        ) : null}
-                                        {!item.contact_email && !item.user_id ? <span className="text-xs text-zinc-600">—</span> : null}
-                                    </div>
-                                </td>
-                                <td className="p-4 text-right">
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onRowClick(item);
-                                        }}
-                                        className="p-2 rounded-lg text-zinc-500 hover:text-white hover:bg-white/10 transition-all"
-                                    >
-                                        <MoreHorizontal className="w-5 h-5" />
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+        <section className="ops-collection" aria-label="Visszajelzések">
+            <div className="ops-filterbar">
+                <label className="ops-filter"><strong>Státusz</strong><select value={statusFilter} onChange={(event) => onStatusFilterChange(event.target.value)}><option value="">Mind</option>{Object.entries(statusLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label>
+                <label className="ops-filter"><strong>Prioritás</strong><select value={priorityFilter} onChange={(event) => onPriorityFilterChange(event.target.value)}><option value="">Mind</option>{Object.entries(priorityLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label>
+                <label className="ops-filter"><strong>Kategória</strong><select value={categoryFilter} onChange={(event) => onCategoryFilterChange(event.target.value)}><option value="">Mind</option>{Object.entries(categoryLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label>
+                <BatchStatusActions
+                    selectedCount={selectedRows.size}
+                    isLoading={batchActionLoading}
+                    options={Object.entries(statusLabels).map(([value, label]) => ({ value, label }))}
+                    onApply={(status) => onBatchStatusChange(Array.from(selectedRows), status)}
+                    onClear={() => onSelectAll(false)}
+                />
             </div>
 
-            <div className="flex-shrink-0">
-                {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-2">
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs text-zinc-500">Sorok:</span>
-                            <div className="relative">
-                                <select
-                                    value={pageSize}
-                                    onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                                    className="appearance-none bg-[#111111] border border-white/10 text-zinc-300 text-xs rounded-lg pl-2 pr-6 py-1 focus:outline-none focus:border-green-500/50 cursor-pointer hover:border-white/20 transition-colors"
-                                >
-                                    <option value={5}>5</option>
-                                    <option value={10}>10</option>
-                                    <option value={20}>20</option>
-                                    <option value={50}>50</option>
-                                    <option value={100}>100</option>
-                                </select>
-                                <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-500 pointer-events-none" />
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                            <span className="text-xs text-zinc-500">{currentPage} / {totalPages} oldal</span>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-                                    disabled={currentPage === 1}
-                                    className={`px-4 py-2 text-xs font-medium border rounded-lg transition-colors ${currentPage === 1
-                                        ? 'text-zinc-600 bg-zinc-900 border-zinc-800 opacity-50 cursor-not-allowed'
-                                        : 'text-zinc-400 bg-zinc-900 border-zinc-800 hover:bg-zinc-800 hover:text-white'
-                                        }`}
-                                >
-                                    Előző
-                                </button>
-                                <button
-                                    onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-                                    disabled={currentPage === totalPages}
-                                    className={`px-4 py-2 text-xs font-medium border rounded-lg transition-colors ${currentPage === totalPages
-                                        ? 'text-zinc-600 bg-zinc-900 border-zinc-800 opacity-50 cursor-not-allowed'
-                                        : 'text-white bg-zinc-800 border-zinc-700 hover:bg-zinc-700'
-                                        }`}
-                                >
-                                    Következő
-                                </button>
-                            </div>
-                        </div>
+            {data.length === 0 ? (
+                <div className="ops-empty"><div><SearchX aria-hidden="true" /><strong>{searchTerm || statusFilter || priorityFilter || categoryFilter ? 'Nincs találat' : 'Nincs visszajelzés'}</strong><span>Próbálj más keresést vagy szűrést.</span></div></div>
+            ) : (
+                <>
+                    <div className="ops-list-header ops-feedback-grid">
+                        <Checkbox
+                            checked={allVisibleSelected ? true : someVisibleSelected ? 'indeterminate' : false}
+                            onCheckedChange={(checked) => onSelectAll(checked === true)}
+                            aria-label="Az oldalon látható összes visszajelzés kijelölése"
+                        />
+                        <button type="button" onClick={() => onSort('title')}>Visszajelzés</button>
+                        <button type="button" onClick={() => onSort('status')}>Állapot</button>
+                        <button type="button" onClick={() => onSort('priority')}>Prioritás</button>
+                        <button type="button" onClick={() => onSort('created_at')}>Beküldő / dátum</button>
+                        <span>Műveletek</span>
                     </div>
-                )}
-            </div>
-        </div>
-    );
-}
 
-// Missing icon component
-function TrendingUpIcon(props: SVGProps<SVGSVGElement>) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-            <polyline points="17 6 23 6 23 12" />
-        </svg>
-    )
+                    <div role="list">
+                        {data.map((item) => (
+                            <div className="ops-list-row ops-feedback-grid" role="listitem" key={item.id}>
+                                <div onClick={(event) => event.stopPropagation()}>
+                                    <Checkbox checked={selectedRows.has(item.id)} onCheckedChange={(checked) => onSelectRow(item.id, checked === true)} aria-label={`${item.title} kijelölése`} />
+                                </div>
+
+                                <button type="button" className="ops-feedback-subject" onClick={() => onRowClick(item)}>
+                                    <span className="ops-feedback-icon"><TypeIcon type={item.type} /></span>
+                                    <span className="ops-list-row-title">
+                                        <strong>{item.title}</strong>
+                                        <span>{item.description}</span>
+                                    </span>
+                                </button>
+
+                                <label className="ops-row-select" onClick={(event) => event.stopPropagation()}>
+                                    <span className="ops-status" data-tone={statusTone(item.status)}>{statusLabels[item.status] || item.status}</span>
+                                    <select value={item.status} onChange={(event) => onStatusChange(item.id, event.target.value)} aria-label={`${item.title} állapota`}>
+                                        {Object.entries(statusLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
+                                    </select>
+                                </label>
+
+                                <span className="ops-priority" data-priority={item.priority}>{priorityLabels[item.priority] || item.priority}<small>{categoryLabels[item.category] || item.category}</small></span>
+
+                                <div className="ops-feedback-contact">
+                                    <span>{new Intl.DateTimeFormat('hu-HU', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(item.created_at))}</span>
+                                    <small>{item.contact_email || item.user_id || 'Nincs kapcsolat'}</small>
+                                </div>
+
+                                <div className="ops-inline-actions" onClick={(event) => event.stopPropagation()}>
+                                    {item.contact_email ? <a className="ops-icon-action" href={`mailto:${item.contact_email}?subject=${encodeURIComponent(`ParkSafe: ${item.title}`)}`} title="Email írása" aria-label="Email írása"><Mail aria-hidden="true" /></a> : null}
+                                    {item.user_id && onOpenUser ? <button type="button" className="ops-icon-action" onClick={() => onOpenUser(item.user_id!)} title="Beküldő profilja" aria-label="Beküldő profilja"><UserRound aria-hidden="true" /></button> : null}
+                                    <button type="button" className="ops-icon-action" onClick={() => onRowClick(item)} title="Részletek" aria-label="Részletek"><ChevronRight aria-hidden="true" /></button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </>
+            )}
+
+            <footer className="ops-pager">
+                <label>Sorok&nbsp;<select value={pageSize} onChange={(event) => onPageSizeChange(Number(event.target.value))}>{[5, 10, 20, 50, 100].map((size) => <option value={size} key={size}>{size}</option>)}</select></label>
+                <div className="ops-pager-controls"><span>{currentPage} / {Math.max(totalPages, 1)} oldal</span><button type="button" onClick={() => onPageChange(currentPage - 1)} disabled={currentPage <= 1}>Előző</button><button type="button" onClick={() => onPageChange(currentPage + 1)} disabled={currentPage >= totalPages}>Következő</button></div>
+            </footer>
+        </section>
+    );
 }
