@@ -34,6 +34,7 @@ import {
     Edit,
     MessageSquare,
     ChevronDown,
+    ChevronRight,
     AlertCircle,
     Check,
     Flag,
@@ -493,7 +494,7 @@ export default function DetailModal({
         return (
             <>
                 <Dialog open={isOpen} onOpenChange={onClose}>
-                    <DialogContent className="admin-dark max-w-3xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
+                    <DialogContent className="admin-dark admin-inspector max-w-3xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
                         <div className="flex flex-col h-[85vh]">
                             {/* Header */}
                             <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
@@ -822,7 +823,7 @@ export default function DetailModal({
 
         return (
             <Dialog open={isOpen} onOpenChange={onClose}>
-                <DialogContent className="admin-dark max-w-3xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
+                <DialogContent className="admin-dark admin-inspector max-w-3xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
                     <div className="flex flex-col h-[85vh]">
                         {/* Header — same shape as parking_image */}
                         <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
@@ -1113,7 +1114,7 @@ export default function DetailModal({
     if (type === 'feedback') {
         return (
             <Dialog open={isOpen} onOpenChange={onClose}>
-                <DialogContent className="admin-dark max-w-2xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
+                <DialogContent className="admin-dark admin-inspector max-w-2xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
                     <div className="flex flex-col h-[85vh]">
                         {/* Header */}
                         <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
@@ -1292,23 +1293,43 @@ export default function DetailModal({
                                 <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
                                     Kapcsolat
                                 </h3>
-                                <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                                <div className="grid gap-2 sm:grid-cols-2">
                                     {item.contact_email ? (
-                                        <div className="flex items-center gap-3 text-white">
-                                            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                                                <Mail className="w-4 h-4 text-primary" />
+                                        <a
+                                            href={`mailto:${item.contact_email}?subject=${encodeURIComponent(`ParkSafe: ${item.title || 'visszajelzés'}`)}`}
+                                            className="group flex min-w-0 items-center gap-3 rounded-lg border border-white/10 bg-white/5 p-3 text-white hover:border-primary/35 hover:bg-primary/5"
+                                        >
+                                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-primary/15">
+                                                <Mail className="h-4 w-4 text-primary" />
                                             </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-xs text-muted-foreground">Email cím</span>
-                                                <span className="font-medium break-all">{item.contact_email}</span>
+                                            <div className="min-w-0 flex-1">
+                                                <span className="block text-xs text-muted-foreground">Email írása</span>
+                                                <span className="block truncate text-sm font-medium">{item.contact_email}</span>
                                             </div>
-                                        </div>
+                                            <ExternalLink className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary" />
+                                        </a>
                                     ) : (
-                                        <p className="text-zinc-500 flex items-center gap-2">
-                                            <XCircle className="w-4 h-4" />
+                                        <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 p-3 text-zinc-500">
+                                            <XCircle className="h-4 w-4" />
                                             Nincs megadva elérhetőség
-                                        </p>
+                                        </div>
                                     )}
+                                    {item.user_id && onOpenUser ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => onOpenUser(item.user_id)}
+                                            className="group flex min-w-0 items-center gap-3 rounded-lg border border-white/10 bg-white/5 p-3 text-left text-white hover:border-primary/35 hover:bg-primary/5"
+                                        >
+                                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-primary/15">
+                                                <User className="h-4 w-4 text-primary" />
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <span className="block text-xs text-muted-foreground">Beküldő profilja</span>
+                                                <span className="block truncate font-mono text-xs">{item.user_id}</span>
+                                            </div>
+                                            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary" />
+                                        </button>
+                                    ) : null}
                                 </div>
                             </div>
                             {/* Admin Notes */}
@@ -1336,7 +1357,7 @@ export default function DetailModal({
     if (type === 'user') {
         return (
             <Dialog open={isOpen} onOpenChange={onClose}>
-                <DialogContent className="admin-dark max-w-2xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
+                <DialogContent className="admin-dark admin-inspector max-w-2xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
                     <div className="flex flex-col h-[85vh]">
                         {/* Header */}
                         <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">
@@ -1746,7 +1767,7 @@ export default function DetailModal({
     return (
         <>
             <Dialog open={isOpen} onOpenChange={onClose}>
-                <DialogContent className="admin-dark max-w-4xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
+                <DialogContent className="admin-dark admin-inspector max-w-4xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
                     <div className="flex flex-col h-[85vh]">
                         {/* Header - same pattern as POI / Feedback */}
                         <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">

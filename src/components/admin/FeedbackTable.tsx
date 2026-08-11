@@ -6,7 +6,8 @@ import {
     AlertCircle,
     HelpCircle,
     ChevronDown,
-    Mail
+    Mail,
+    UserRound,
 } from 'lucide-react';
 import type { SVGProps } from 'react';
 import BatchStatusActions from './BatchStatusActions';
@@ -35,6 +36,7 @@ interface FeedbackTableProps {
     onSort: (key: string) => void;
     sortConfig: { key: string; direction: string };
     onRowClick: (item: Feedback) => void;
+    onOpenUser?: (userId: string) => void;
     onStatusChange: (id: string, newStatus: string) => void;
     onBatchStatusChange: (ids: string[], newStatus: string) => Promise<void>;
     batchActionLoading: boolean;
@@ -130,6 +132,7 @@ export default function FeedbackTable({
     onSelectRow,
     onSort,
     onRowClick,
+    onOpenUser,
     onBatchStatusChange,
     batchActionLoading,
     searchTerm,
@@ -377,14 +380,30 @@ export default function FeedbackTable({
                                     </span>
                                 </td>
                                 <td className="p-4">
-                                    {item.contact_email ? (
-                                        <div className="flex items-center gap-2 text-zinc-400" title={item.contact_email}>
-                                            <Mail className="w-4 h-4" />
-                                            <span className="text-xs max-w-[100px] truncate">{item.contact_email}</span>
-                                        </div>
-                                    ) : (
-                                        <span className="text-xs text-zinc-600">-</span>
-                                    )}
+                                    <div className="flex max-w-[180px] items-center gap-1.5" onClick={(event) => event.stopPropagation()}>
+                                        {item.contact_email ? (
+                                            <a
+                                                href={`mailto:${item.contact_email}?subject=${encodeURIComponent(`ParkSafe: ${item.title}`)}`}
+                                                className="inline-flex min-w-0 items-center gap-1.5 rounded px-1.5 py-1 text-zinc-400 hover:bg-primary/10 hover:text-primary"
+                                                title={`Email írása: ${item.contact_email}`}
+                                            >
+                                                <Mail className="h-3.5 w-3.5 shrink-0" />
+                                                <span className="truncate text-xs">{item.contact_email}</span>
+                                            </a>
+                                        ) : null}
+                                        {item.user_id && onOpenUser ? (
+                                            <button
+                                                type="button"
+                                                onClick={() => onOpenUser(item.user_id!)}
+                                                className="inline-grid h-7 w-7 shrink-0 place-items-center rounded text-zinc-500 hover:bg-primary/10 hover:text-primary"
+                                                title="Beküldő profiljának megnyitása"
+                                                aria-label="Beküldő profiljának megnyitása"
+                                            >
+                                                <UserRound className="h-3.5 w-3.5" />
+                                            </button>
+                                        ) : null}
+                                        {!item.contact_email && !item.user_id ? <span className="text-xs text-zinc-600">—</span> : null}
+                                    </div>
                                 </td>
                                 <td className="p-4 text-right">
                                     <button

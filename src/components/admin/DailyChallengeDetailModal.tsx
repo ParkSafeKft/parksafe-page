@@ -130,7 +130,7 @@ export default function DailyChallengeDetailModal({ isOpen, onClose, challenge, 
 
     return (
         <Dialog open={isOpen} onOpenChange={(o) => !o && onClose()}>
-            <DialogContent className="bg-[#0a0a0a] border-white/10 text-white max-w-3xl p-0 gap-0 overflow-hidden">
+            <DialogContent className="admin-dark admin-inspector bg-[#0a0a0a] border-white/10 text-white max-w-3xl p-0 gap-0 overflow-hidden">
                 <div className="flex items-center justify-between p-5 border-b border-white/5">
                     <DialogTitle className="flex items-center gap-3 text-lg font-bold text-white">
                         <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">

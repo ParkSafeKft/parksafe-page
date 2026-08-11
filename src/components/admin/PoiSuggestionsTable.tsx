@@ -437,7 +437,7 @@ function EditSuggestionModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="admin-dark max-w-3xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
+            <DialogContent className="admin-dark admin-inspector max-w-3xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
                 <div className="flex flex-col h-[85vh]">
                     <div className="p-6 border-b border-border bg-background/50 flex-shrink-0">
                         <DialogTitle className="text-foreground flex items-center gap-4 text-xl font-bold">
@@ -548,6 +548,19 @@ function EditSuggestionModal({
                                 <Input value={longitude} onChange={(event) => setLongitude(event.target.value)} placeholder="19.040235" />
                             </label>
                         </div>
+
+                        {Number.isFinite(latNumber) && Number.isFinite(lonNumber) ? (
+                            <a
+                                href={`https://www.openstreetmap.org/edit?#map=19/${latNumber}/${lonNumber}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 rounded-md border border-primary/25 bg-primary/10 px-3 py-2 text-sm font-medium text-primary hover:border-primary/45 hover:bg-primary/15"
+                            >
+                                <MapPin className="h-4 w-4" />
+                                Hely megnyitása az OSM szerkesztőben
+                                <ExternalLink className="h-3.5 w-3.5" />
+                            </a>
+                        ) : null}
 
                         <label className="block space-y-2">
                             <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Komment</span>
@@ -900,9 +913,17 @@ export default function PoiSuggestionsTable({
                                     </td>
                                     <td className="p-4">
                                         {hasCoords ? (
-                                            <span className="text-xs font-mono text-zinc-400">
+                                            <a
+                                                href={`https://www.openstreetmap.org/edit?#map=19/${item.latitude}/${item.longitude}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                onClick={(event) => event.stopPropagation()}
+                                                className="inline-flex items-center gap-1.5 rounded px-1.5 py-1 font-mono text-xs text-zinc-400 hover:bg-primary/10 hover:text-primary"
+                                                title="Megnyitás az OSM szerkesztőben"
+                                            >
                                                 {item.latitude!.toFixed(5)}, {item.longitude!.toFixed(5)}
-                                            </span>
+                                                <ExternalLink className="h-3 w-3" />
+                                            </a>
                                         ) : (
                                             <span className="text-xs text-zinc-600">-</span>
                                         )}
@@ -913,10 +934,25 @@ export default function PoiSuggestionsTable({
                                         </span>
                                     </td>
                                     <td className="p-4">
-                                        <div className="flex items-center gap-2 text-zinc-400">
-                                            <User className="w-3.5 h-3.5" />
-                                            <span className="text-xs">{reporterName}</span>
-                                        </div>
+                                        {item.user_id && onOpenUser ? (
+                                            <button
+                                                type="button"
+                                                onClick={(event) => {
+                                                    event.stopPropagation();
+                                                    onOpenUser(item.user_id!);
+                                                }}
+                                                className="flex max-w-[150px] items-center gap-2 rounded px-1.5 py-1 text-zinc-400 hover:bg-primary/10 hover:text-primary"
+                                                title="Beküldő profiljának megnyitása"
+                                            >
+                                                <User className="h-3.5 w-3.5 shrink-0" />
+                                                <span className="truncate text-xs">{reporterName}</span>
+                                            </button>
+                                        ) : (
+                                            <div className="flex items-center gap-2 text-zinc-400">
+                                                <User className="h-3.5 w-3.5" />
+                                                <span className="text-xs">{reporterName}</span>
+                                            </div>
+                                        )}
                                     </td>
                                     <td className="p-4">
                                         <span className="text-sm text-zinc-500">

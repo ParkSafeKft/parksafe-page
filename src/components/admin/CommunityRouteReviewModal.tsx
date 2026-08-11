@@ -208,7 +208,7 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && !saving && onClose()}>
-            <DialogContent className="admin-dark max-w-4xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
+            <DialogContent className="admin-dark admin-inspector max-w-4xl w-[90vw] max-h-[90vh] overflow-hidden bg-card border-border p-0">
                 <div className="flex flex-col h-[85vh]">
                     {/* Header — same pattern as EditLocationModal */}
                     <div className="p-6 border-b border-border flex-shrink-0 bg-background/50 backdrop-blur-sm">

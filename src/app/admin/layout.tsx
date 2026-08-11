@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabaseServer';
+import './admin.css';
 
 /**
  * Server Layout Guard for admin routes.

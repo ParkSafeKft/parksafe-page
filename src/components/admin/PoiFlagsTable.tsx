@@ -39,6 +39,8 @@ interface PoiFlagsTableProps {
     onSort: (key: string) => void;
     sortConfig: { key: string; direction: string };
     onRowClick: (item: PoiFlag) => void;
+    onOpenPoi?: (poiId: string, poiType: string) => void;
+    onOpenUser?: (userId: string) => void;
     onStatusChange: (id: string, newStatus: string) => void;
     onBatchStatusChange: (ids: string[], newStatus: string) => Promise<void>;
     batchActionLoading: boolean;
@@ -112,6 +114,8 @@ export default function PoiFlagsTable({
     onSelectRow,
     onSort,
     onRowClick,
+    onOpenPoi,
+    onOpenUser,
     onBatchStatusChange,
     batchActionLoading,
     searchTerm,
@@ -306,9 +310,21 @@ export default function PoiFlagsTable({
                                     </div>
                                 </td>
                                 <td className="p-4">
-                                    <span className="text-sm font-medium text-white">
-                                        {getPoiTypeLabel(item.poi_type)}
-                                    </span>
+                                    {onOpenPoi ? (
+                                        <button
+                                            type="button"
+                                            onClick={(event) => {
+                                                event.stopPropagation();
+                                                onOpenPoi(item.poi_id, item.poi_type);
+                                            }}
+                                            className="rounded px-1.5 py-1 text-sm font-medium text-white hover:bg-primary/10 hover:text-primary"
+                                            title="Érintett POI megnyitása"
+                                        >
+                                            {getPoiTypeLabel(item.poi_type)}
+                                        </button>
+                                    ) : (
+                                        <span className="text-sm font-medium text-white">{getPoiTypeLabel(item.poi_type)}</span>
+                                    )}
                                 </td>
                                 <td className="p-4">
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getReasonStyle(item.reason)}`}>
@@ -324,10 +340,25 @@ export default function PoiFlagsTable({
                                     {getStatusBadge(item.status)}
                                 </td>
                                 <td className="p-4">
-                                    <div className="flex items-center gap-2 text-zinc-400">
-                                        <User className="w-3.5 h-3.5" />
-                                        <span className="text-xs">{item.reporter_username || item.reporter_full_name || 'Ismeretlen'}</span>
-                                    </div>
+                                    {onOpenUser && item.user_id ? (
+                                        <button
+                                            type="button"
+                                            onClick={(event) => {
+                                                event.stopPropagation();
+                                                onOpenUser(item.user_id);
+                                            }}
+                                            className="flex max-w-[150px] items-center gap-2 rounded px-1.5 py-1 text-zinc-400 hover:bg-primary/10 hover:text-primary"
+                                            title="Bejelentő profiljának megnyitása"
+                                        >
+                                            <User className="h-3.5 w-3.5 shrink-0" />
+                                            <span className="truncate text-xs">{item.reporter_username || item.reporter_full_name || 'Ismeretlen'}</span>
+                                        </button>
+                                    ) : (
+                                        <div className="flex items-center gap-2 text-zinc-400">
+                                            <User className="h-3.5 w-3.5" />
+                                            <span className="text-xs">{item.reporter_username || item.reporter_full_name || 'Ismeretlen'}</span>
+                                        </div>
+                                    )}
                                 </td>
                                 <td className="p-4">
                                     <span className="text-sm text-zinc-500">

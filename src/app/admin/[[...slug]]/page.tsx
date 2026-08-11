@@ -65,6 +65,7 @@ import AuditLogTable from '@/components/admin/AuditLogTable';
 import AppConfigTab from '@/components/admin/AppConfigTab';
 import { writeAuditLog } from '@/lib/adminAuditLog';
 import ContentStatsOverview from '@/components/admin/ContentStatsOverview';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 
 /**
  * Sanitize a search term to prevent PostgREST filter injection.
@@ -1311,9 +1312,23 @@ export default function AdminPage() {
                     onHomeConfig={() => router.push('/')}
                 />
 
-                <SidebarInset className="flex flex-col flex-1 h-screen overflow-hidden">
-                    <header className="flex-shrink-0 p-3 sm:p-4 xl:p-6 pb-2">
-                        <Card className="bg-card border-border shadow-lg">
+                <SidebarInset className="flex flex-col flex-1 h-screen overflow-hidden bg-background">
+                    <header className="contents">
+                        <AdminPageHeader
+                            activeTab={activeTab}
+                            totalCount={totalCount}
+                            isRealtimeConnected={isRealtimeConnected}
+                            searchTerm={searchTerm}
+                            onSearchChange={setSearchTerm}
+                            onCreate={() => {
+                                if (activeTab === 'cities') {
+                                    setCityFormModal({ show: true, item: null });
+                                    return;
+                                }
+                                setAddLocationModal(true);
+                            }}
+                        />
+                        <Card className="hidden">
                             <CardContent className="p-3 xl:p-4">
                                 <div className="hidden xl:flex items-center justify-between">
                                     {/* Left Section */}
@@ -1543,7 +1558,7 @@ export default function AdminPage() {
                         </Card>
                     </header>
 
-                    <main className="flex-1 overflow-hidden p-3 sm:p-4 xl:p-6 pt-2">
+                    <main className="admin-workspace">
                         {dataLoading ? (
                             <Card className="bg-card border-border shadow-lg h-full flex items-center justify-center">
                                 <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -1692,6 +1707,7 @@ export default function AdminPage() {
                                             onSort={handleSort}
                                             sortConfig={sortConfig}
                                             onRowClick={(item) => openFreshDetail(item, 'feedback')}
+                                            onOpenUser={handleOpenUserProfile}
                                             onStatusChange={handleFeedbackStatusChange}
                                             onBatchStatusChange={handleFeedbackBatchStatusChange}
                                             batchActionLoading={batchActionLoading}
@@ -1804,6 +1820,8 @@ export default function AdminPage() {
                                             onSort={handleSort}
                                             sortConfig={sortConfig}
                                             onRowClick={(item) => openFreshDetail(item, 'poi_flags')}
+                                            onOpenPoi={handleOpenPoiDetail}
+                                            onOpenUser={handleOpenUserProfile}
                                             onStatusChange={handlePoiFlagStatusChange}
                                             onBatchStatusChange={handlePoiFlagBatchStatusChange}
                                             batchActionLoading={batchActionLoading}
