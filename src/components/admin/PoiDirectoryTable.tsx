@@ -126,12 +126,13 @@ export default function PoiDirectoryTable({
                 {data.map((item) => {
                     const coordinate = parseCoordinate(item);
                     return (
-                        <div className="ops-list-row ops-poi-grid" role="listitem" key={item.id}>
-                            <button type="button" className="ops-row-pin" onClick={() => onRowClick(item)} aria-label={`${item.name || labels.fallback} megnyitása`}>
+                        <div className="ops-list-row ops-poi-grid" role="listitem" data-clickable="true" key={item.id}>
+                            <button type="button" className="ops-row-open-hit" onClick={() => onRowClick(item)} aria-label={`${item.name || labels.fallback} részleteinek megnyitása`} />
+                            <button type="button" className="ops-row-pin" onClick={(event) => { event.stopPropagation(); onRowClick(item); }} aria-label={`${item.name || labels.fallback} megnyitása`}>
                                 <MapPin aria-hidden="true" />
                             </button>
 
-                            <button type="button" className="ops-list-row-title" onClick={() => onRowClick(item)}>
+                            <button type="button" className="ops-list-row-title" onClick={(event) => { event.stopPropagation(); onRowClick(item); }}>
                                 <strong>{item.name || labels.fallback}</strong>
                                 <span>{item.city || 'Nincs város megadva'} · {item.id}</span>
                             </button>
@@ -146,6 +147,7 @@ export default function PoiDirectoryTable({
                                     href={`https://www.openstreetmap.org/edit?#map=19/${coordinate.lat}/${coordinate.lon}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    onClick={(event) => event.stopPropagation()}
                                     title="Megnyitás az OSM szerkesztőben"
                                 >
                                     {coordinate.lat.toFixed(5)}, {coordinate.lon.toFixed(5)}
@@ -157,7 +159,7 @@ export default function PoiDirectoryTable({
 
                             <span className="ops-list-meta">{getAttributes(item, kind)}</span>
 
-                            <div className="ops-inline-actions">
+                            <div className="ops-inline-actions" onClick={(event) => event.stopPropagation()}>
                                 <button type="button" className="ops-icon-action" onClick={() => onRowClick(item)} title="Részletek" aria-label="Részletek">
                                     <Eye aria-hidden="true" />
                                 </button>

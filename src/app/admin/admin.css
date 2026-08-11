@@ -256,6 +256,23 @@ body:has(.admin-dark) [data-slot="dialog-content"] a:focus-visible {
 .ops-list-row { display: grid; align-items: center; gap: 0.75rem; padding-right: 1rem; padding-left: 1rem; }
 .ops-list-header { min-height: 2.4rem; border-bottom: 1px solid var(--ops-border); background: #0b0e0c; color: var(--ops-text-3); font-size: 0.62rem; font-weight: 600; letter-spacing: 0.075em; text-transform: uppercase; }
 .ops-list-row { position: relative; min-height: 4.4rem; border: 0; border-bottom: 1px solid var(--ops-border); background: transparent; color: inherit; text-align: left; }
+.ops-list-row[data-clickable="true"] { cursor: pointer; }
+.ops-list-row[data-clickable="true"] > * { position: relative; z-index: 0; }
+.ops-list-row[data-clickable="true"] > .ops-row-open-hit {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+.ops-list-row[data-clickable="true"] > :is(a, button:not(.ops-row-open-hit), label, .ops-inline-actions, div:has(> [data-slot="checkbox"])) { z-index: 2; }
+.ops-list-row[data-clickable="true"] > .ops-row-open-hit:focus-visible { outline: 2px solid rgb(82 223 120 / 55%); outline-offset: -2px; }
+.ops-list-row[data-clickable="true"]:hover .ops-list-row-title strong { color: var(--ops-green); }
+.ops-list-row[data-clickable="true"]:active { background: var(--ops-selected); }
+.ops-list-row[data-clickable="true"]:focus-within { box-shadow: 0 0 0 1px rgb(82 223 120 / 30%) inset; }
 .ops-poi-grid { grid-template-columns: 2.2rem minmax(14rem, 1.7fr) minmax(7rem, 0.7fr) minmax(11rem, 1fr) minmax(8rem, 0.75fr) 7rem; }
 .ops-feedback-grid { grid-template-columns: 1.5rem minmax(18rem, 2fr) minmax(8rem, 0.75fr) minmax(7rem, 0.65fr) minmax(12rem, 1fr) 7rem; }
 .ops-flag-grid { grid-template-columns: 1.5rem minmax(16rem, 1.7fr) minmax(12rem, 1fr) minmax(8rem, 0.7fr) minmax(11rem, 0.9fr) 7rem; }
@@ -524,8 +541,8 @@ body:has(.admin-dark) .admin-inspector [class*="bg-violet"] { border-color: rgb(
 
 /* Unified admin modal system: contextual inspectors, focused forms, confirmations, media. */
 body:has(.admin-modal) [data-slot="dialog-overlay"] {
-    background: rgb(0 0 0 / 56%) !important;
-    backdrop-filter: blur(3px) saturate(80%);
+    background: rgb(1 3 2 / 72%) !important;
+    backdrop-filter: none;
 }
 
 .admin-modal-frame {
@@ -539,55 +556,68 @@ body:has(.admin-modal) [data-slot="dialog-overlay"] {
 
 .admin-modal-header {
     display: flex;
-    min-height: 5.25rem;
+    min-height: 6rem;
     flex: none;
-    align-items: flex-start;
-    gap: 0.8rem;
-    padding: 1rem 3.6rem 0.95rem 1.15rem;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 4.5rem 1.05rem 1.5rem;
     border-bottom: 1px solid var(--ops-border);
-    background: #0b0e0c;
+    background: #0c0f0d;
 }
 
 .admin-modal-mark,
 .admin-modal-back {
     display: grid;
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 2.65rem;
+    height: 2.65rem;
     flex: none;
     place-items: center;
     border: 1px solid var(--ops-border-strong);
-    border-radius: 0.4rem;
-    background: var(--ops-panel-raised);
+    border-radius: 0.55rem;
+    background: rgb(82 223 120 / 8%);
     color: var(--ops-green);
 }
 
 .admin-modal-mark svg,
-.admin-modal-back svg { width: 1rem; height: 1rem; }
+.admin-modal-back svg { width: 1.1rem; height: 1.1rem; }
 .admin-modal-back { color: var(--ops-text-3); cursor: pointer; }
 .admin-modal-back:hover { border-color: var(--ops-border-focus); color: var(--ops-text); }
-.admin-modal-heading { min-width: 0; flex: 1; padding-top: 0.05rem; }
-.admin-modal-eyebrow { margin: 0 0 0.2rem; color: var(--ops-green); font-size: 0.59rem; font-weight: 650; letter-spacing: 0.09em; text-transform: uppercase; }
-.admin-modal-title { overflow: hidden; color: var(--ops-text); font-size: 0.95rem; font-weight: 630; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
-.admin-modal-subtitle { margin-top: 0.25rem; overflow: hidden; color: var(--ops-text-3); font-size: 0.7rem; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
-.admin-modal-meta { display: flex; min-width: 0; flex-wrap: wrap; align-items: center; gap: 0.35rem; margin-top: 0.35rem; color: var(--ops-text-3); font-size: 0.64rem; }
-.admin-modal-meta code { overflow: hidden; max-width: 16rem; font-family: var(--font-geist-mono), ui-monospace, monospace; text-overflow: ellipsis; white-space: nowrap; }
+.admin-modal-heading { min-width: 0; flex: 1; }
+.admin-modal-eyebrow { margin: 0 0 0.22rem; color: var(--ops-green); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; }
+.admin-modal-title { overflow: hidden; color: var(--ops-text); font-size: 1.18rem; font-weight: 650; letter-spacing: -0.02em; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+.admin-modal-subtitle { margin-top: 0.22rem; overflow: hidden; color: var(--ops-text-3); font-size: 0.76rem; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+.admin-modal-meta { display: flex; min-width: 0; flex-wrap: wrap; align-items: center; gap: 0.45rem; margin-top: 0.45rem; color: var(--ops-text-3); font-size: 0.68rem; }
+.admin-modal-meta code { overflow: hidden; max-width: 18rem; font-family: var(--font-geist-mono), ui-monospace, monospace; text-overflow: ellipsis; white-space: nowrap; }
+.admin-modal-meta-action { display: inline-grid; width: 1.45rem; height: 1.45rem; place-items: center; border: 0; border-radius: 0.3rem; background: transparent; color: var(--ops-text-3); }
+.admin-modal-meta-action:hover { background: var(--ops-hover); color: var(--ops-text); }
+.admin-modal-meta-action svg { width: 0.75rem; height: 0.75rem; }
+.admin-modal-state { display: inline-flex; align-items: center; gap: 0.35rem; color: var(--ops-text-2); font-weight: 550; }
+.admin-modal-state i { width: 0.42rem; height: 0.42rem; border-radius: 999px; background: var(--ops-text-3); }
+.admin-modal-state[data-tone="success"] i { background: var(--ops-green); }
+.admin-modal-state[data-tone="warning"] i { background: var(--ops-amber); }
+.admin-modal-state[data-tone="danger"] i { background: var(--ops-red); }
+.admin-modal-state[data-tone="info"] i { background: var(--ops-blue); }
 
-.admin-modal-body { min-height: 0; flex: 1; overscroll-behavior: contain; }
-.admin-modal-body-inner { width: 100%; padding: 1.25rem 1.4rem 1.6rem; }
+.admin-modal-body { min-height: 0; flex: 1; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; touch-action: pan-y; background: #0f1210; }
+.admin-modal-body::-webkit-scrollbar { width: 0.65rem; }
+.admin-modal-body::-webkit-scrollbar-track { background: transparent; }
+.admin-modal-body::-webkit-scrollbar-thumb { border: 0.18rem solid transparent; border-radius: 999px; background: #384039; background-clip: padding-box; }
+.admin-modal-body::-webkit-scrollbar-thumb:hover { background: #4a554c; background-clip: padding-box; }
+.admin-modal-body-inner { width: 100%; padding: 1.6rem 1.8rem 2rem; }
 .admin-modal-body-inner > :first-child { margin-top: 0; }
 .admin-modal-body-inner > :last-child { margin-bottom: 0; }
 .admin-modal-body-inner.space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.25rem; }
 
 .admin-modal-footer {
     display: flex;
-    min-height: 3.75rem;
+    min-height: 4.25rem;
     flex: none;
     align-items: center;
     justify-content: flex-end;
     gap: 0.5rem;
-    padding: 0.7rem 1.1rem;
+    padding: 0.85rem 1.35rem;
     border-top: 1px solid var(--ops-border);
-    background: #0b0e0c;
+    background: #0c0f0d;
 }
 
 .admin-modal-footer > :first-child:not(:last-child) { margin-right: auto; }
@@ -602,28 +632,37 @@ body:has(.admin-modal) [data-slot="dialog-overlay"] {
         gap: 0 !important;
         padding: 0 !important;
         overflow: hidden !important;
-        border: 1px solid var(--ops-border-strong) !important;
-        border-radius: 0.55rem !important;
-        background: #0d100e !important;
+        border: 1px solid #343b35 !important;
+        border-radius: 0.75rem !important;
+        background: #0f1210 !important;
         color: var(--ops-text) !important;
-        box-shadow: 0 24px 90px rgb(0 0 0 / 64%) !important;
+        box-shadow: 0 28px 100px rgb(0 0 0 / 70%), 0 0 0 1px rgb(255 255 255 / 2%) inset !important;
     }
 
     body:has(.admin-modal) [data-slot="dialog-content"].admin-modal--inspector {
-        top: 0.65rem !important;
-        right: 0.65rem !important;
-        bottom: 0.65rem !important;
-        left: auto !important;
-        width: min(46rem, calc(100vw - 5rem)) !important;
+        top: 50% !important;
+        right: auto !important;
+        bottom: auto !important;
+        left: 50% !important;
+        width: min(68rem, calc(100vw - 2.5rem)) !important;
         max-width: none !important;
-        height: calc(100dvh - 1.3rem) !important;
-        max-height: none !important;
+        height: auto !important;
+        max-height: calc(100dvh - 2.5rem) !important;
         transform: none !important;
         --tw-translate-x: 0px !important;
         --tw-translate-y: 0px !important;
-        translate: 0px !important;
-        border-radius: 0.55rem !important;
-        box-shadow: -20px 0 80px rgb(0 0 0 / 48%) !important;
+        translate: -50% -50% !important;
+        border-radius: 0.75rem !important;
+    }
+
+    body:has(.admin-modal) [data-slot="dialog-content"].admin-modal--inspector .admin-modal-frame {
+        height: auto;
+        max-height: calc(100dvh - 2.5rem);
+    }
+
+    body:has(.admin-modal) [data-slot="dialog-content"].admin-modal--inspector .admin-modal-body {
+        max-height: calc(100dvh - 12.5rem);
+        flex: 0 1 auto;
     }
 
     body:has(.admin-modal) [data-slot="dialog-content"].admin-modal--form {
@@ -741,11 +780,21 @@ body:has(.admin-modal) [data-slot="dialog-overlay"] {
             inset: 0 !important;
             width: 100vw !important;
             height: 100dvh !important;
+            max-height: none !important;
             border: 0 !important;
             border-radius: 0 !important;
+            transform: none !important;
             --tw-translate-x: 0px !important;
             --tw-translate-y: 0px !important;
-            translate: 0px !important;
+            translate: none !important;
+        }
+        body:has(.admin-modal) [data-slot="dialog-content"].admin-modal--inspector .admin-modal-frame {
+            height: 100%;
+            max-height: none;
+        }
+        body:has(.admin-modal) [data-slot="dialog-content"].admin-modal--inspector .admin-modal-body {
+            max-height: none;
+            flex: 1;
         }
     }
 }

@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import {
     Dialog,
-    DialogTitle,
 } from '@/components/ui/dialog';
 import {
     DropdownMenu,
@@ -13,7 +12,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ImagePreview from './ImagePreview';
 import {
@@ -49,7 +47,6 @@ import {
     Copy,
     ExternalLink,
     Droplet,
-    ArrowLeft,
     Globe,
     DollarSign,
     Database,
@@ -501,57 +498,29 @@ export default function DetailModal({
                 <Dialog open={isOpen} onOpenChange={onClose}>
                     <AdminModalContent variant="inspector">
                         <AdminModalFrame>
-                            {/* Header */}
-                            <div className="admin-modal-header admin-modal-header--legacy">
-                                <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
-                                    <div className="flex items-center gap-4 min-w-0 pr-8">
-                                    {onBack && (
-                                        <button
-                                            type="button"
-                                            onClick={onBack}
-                                            className="p-2 rounded-lg text-muted-foreground hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
-                                            title="Vissza az előző modálra"
-                                        >
-                                            <ArrowLeft className="h-5 w-5" />
+                            <AdminModalHeader
+                                eyebrow="Képmoderáció"
+                                title="Parkolókép ellenőrzése"
+                                subtitle={item.parking_name || 'Felhasználó által beküldött kép'}
+                                icon={Camera}
+                                onBack={onBack}
+                                backLabel="Vissza az előző rekordhoz"
+                                meta={(
+                                    <>
+                                        <code>#{item.id?.substring(0, 8)}</code>
+                                        <button type="button" className="admin-modal-meta-action" onClick={() => copyId(item.id)} aria-label="ID másolása" title="ID másolása">
+                                            <Copy />
                                         </button>
-                                    )}
-                                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-600/20 border border-green-500/30 flex items-center justify-center flex-shrink-0 shadow-inner">
-                                            <Camera className="h-6 w-6 text-green-400" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h1 className="text-lg font-bold text-foreground truncate leading-tight">
-                                                Parkoló kép kérelem
-                                            </h1>
-                                            <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                                <span className="text-xs font-mono text-muted-foreground truncate opacity-70">
-                                                    ID: {item.id?.substring(0, 8)}…
-                                                </span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => copyId(item.id)}
-                                                    className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-white transition-colors"
-                                                    title="ID másolása"
-                                                >
-                                                    <Copy className="w-3.5 h-3.5" />
-                                                </button>
-                                                <Badge variant="outline" className="text-[10px] h-5 px-1.5 border-white/10 bg-white/5">
-                                                    {new Date(item.created_at).toLocaleDateString()}
-                                                </Badge>
-                                                <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${currentStatus === 'approved' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                                                    currentStatus === 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                                                        'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
-                                                    }`}>
-                                                    <span className={`w-1.5 h-1.5 rounded-full ${currentSubmissionStatus.color}`} />
-                                                    {currentSubmissionStatus.label}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </DialogTitle>
-                            </div>
+                                        <span>{new Date(item.created_at).toLocaleDateString('hu-HU')}</span>
+                                        <span className="admin-modal-state" data-tone={currentStatus === 'approved' ? 'success' : currentStatus === 'rejected' ? 'danger' : 'warning'}>
+                                            <i className={currentSubmissionStatus.color} />
+                                            {currentSubmissionStatus.label}
+                                        </span>
+                                    </>
+                                )}
+                            />
 
-                            <ScrollArea className="admin-modal-body">
-                                <div className="admin-modal-body-inner space-y-6">
+                            <AdminModalBody className="space-y-6">
                                     {/* Image — click to enlarge */}
                                     {item.image_url && (
                                         <div>
@@ -725,8 +694,7 @@ export default function DetailModal({
                                             </div>
                                         </>
                                     )}
-                                </div>
-                            </ScrollArea>
+                            </AdminModalBody>
 
                             {/* Footer — full action bar so admin doesn't have to exit and reopen the dropdown */}
                             <div className="admin-modal-footer justify-between flex-wrap">
@@ -829,58 +797,29 @@ export default function DetailModal({
             <Dialog open={isOpen} onOpenChange={onClose}>
                 <AdminModalContent variant="inspector">
                     <AdminModalFrame>
-                        {/* Header — same shape as parking_image */}
-                        <div className="admin-modal-header admin-modal-header--legacy">
-                            <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
-                                <div className="flex items-center gap-4 min-w-0 pr-8">
-                                    {onBack && (
-                                        <button
-                                            type="button"
-                                            onClick={onBack}
-                                            className="p-2 rounded-lg text-muted-foreground hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
-                                            title="Vissza az előző modálra"
-                                        >
-                                            <ArrowLeft className="h-5 w-5" />
-                                        </button>
-                                    )}
-                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500/20 to-red-600/20 border border-orange-500/30 flex items-center justify-center flex-shrink-0 shadow-inner">
-                                        <Flag className="h-6 w-6 text-orange-400" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h1 className="text-lg font-bold text-foreground truncate leading-tight">
-                                            POI Bejelentés
-                                        </h1>
-                                        <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                            <span className="text-xs font-mono text-muted-foreground truncate opacity-70">
-                                                ID: {item.id.substring(0, 8)}…
-                                            </span>
-                                            <button
-                                                type="button"
-                                                onClick={() => copyId(item.id)}
-                                                className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-white transition-colors"
-                                                title="ID másolása"
-                                            >
-                                                <Copy className="w-3.5 h-3.5" />
-                                            </button>
-                                            <Badge variant="outline" className="text-[10px] h-5 px-1.5 border-white/10 bg-white/5">
-                                                {new Date(item.created_at).toLocaleDateString()}
-                                            </Badge>
-                                            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${currentStatus === 'resolved' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                                                currentStatus === 'dismissed' ? 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' :
-                                                    currentStatus === 'reviewed' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                                        'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
-                                                }`}>
-                                                <span className={`w-1.5 h-1.5 rounded-full ${currentStatusObj.color}`} />
-                                                {currentStatusObj.label}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </DialogTitle>
-                        </div>
+                        <AdminModalHeader
+                            eyebrow="POI moderáció"
+                            title={getReasonLabel(item.reason)}
+                            subtitle={poiName}
+                            icon={Flag}
+                            onBack={onBack}
+                            backLabel="Vissza az előző rekordhoz"
+                            meta={(
+                                <>
+                                    <code>#{item.id.substring(0, 8)}</code>
+                                    <button type="button" className="admin-modal-meta-action" onClick={() => copyId(item.id)} aria-label="ID másolása" title="ID másolása">
+                                        <Copy />
+                                    </button>
+                                    <span>{new Date(item.created_at).toLocaleDateString('hu-HU')}</span>
+                                    <span className="admin-modal-state" data-tone={currentStatus === 'resolved' ? 'success' : currentStatus === 'dismissed' ? 'neutral' : currentStatus === 'reviewed' ? 'info' : 'warning'}>
+                                        <i className={currentStatusObj.color} />
+                                        {currentStatusObj.label}
+                                    </span>
+                                </>
+                            )}
+                        />
 
-                        <ScrollArea className="admin-modal-body">
-                            <div className="admin-modal-body-inner space-y-6">
+                        <AdminModalBody className="space-y-6">
                                 {/* POI card — clickable, opens POI in this same modal */}
                                 <div>
                                     <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
@@ -1070,8 +1009,7 @@ export default function DetailModal({
                                         </div>
                                     </>
                                 )}
-                            </div>
-                        </ScrollArea>
+                        </AdminModalBody>
 
                         {/* Footer — quick status actions, same shape as parking_image accept/reject */}
                         <div className="admin-modal-footer flex-wrap">
@@ -1339,38 +1277,25 @@ export default function DetailModal({
             <Dialog open={isOpen} onOpenChange={onClose}>
                 <AdminModalContent variant="inspector">
                     <AdminModalFrame>
-                        {/* Header */}
-                        <div className="admin-modal-header admin-modal-header--legacy">
-                            <DialogTitle className="text-foreground flex items-center gap-4 text-xl font-bold">
-                                <div className="flex items-center gap-4 min-w-0 pr-8">
-                                    {onBack && (
-                                        <button
-                                            type="button"
-                                            onClick={onBack}
-                                            className="p-2 rounded-lg text-muted-foreground hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
-                                            title="Vissza az előző modálra"
-                                        >
-                                            <ArrowLeft className="h-5 w-5" />
-                                        </button>
-                                    )}
-                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center flex-shrink-0">
-                                        <Users className="h-5 w-5 text-primary-foreground" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h1 className="text-xl font-bold text-foreground truncate">
-                                            {item.username || item.full_name || 'Felhasználó'}
-                                        </h1>
-                                        <p className="text-muted-foreground text-sm mt-1 truncate">
-                                            Felhasználói profil és beállítások
-                                        </p>
-                                    </div>
-                                </div>
-                            </DialogTitle>
-                        </div>
+                        <AdminModalHeader
+                            eyebrow="Felhasználó"
+                            title={item.username || item.full_name || 'Felhasználói profil'}
+                            subtitle={item.email || 'Profil és fiókadatok'}
+                            icon={Users}
+                            onBack={onBack}
+                            backLabel="Vissza az előző rekordhoz"
+                            meta={item.id ? (
+                                <>
+                                    <code>#{String(item.id).substring(0, 8)}</code>
+                                    <button type="button" className="admin-modal-meta-action" onClick={() => copyId(item.id)} aria-label="ID másolása" title="ID másolása">
+                                        <Copy />
+                                    </button>
+                                </>
+                            ) : undefined}
+                        />
 
                         {/* Scrollable Content */}
-                        <ScrollArea className="admin-modal-body">
-                            <div className="admin-modal-body-inner">
+                        <AdminModalBody>
                                 <div className="space-y-6">
                                     {/* User Profile Section */}
                                     <div>
@@ -1710,9 +1635,7 @@ export default function DetailModal({
                                         );
                                     })()}
                                 </div>
-                            </div>
-
-                        </ScrollArea>
+                        </AdminModalBody>
 
                     </AdminModalFrame>
                 </AdminModalContent>
@@ -1723,80 +1646,36 @@ export default function DetailModal({
     // Location Details (Parking, Service, Repair, Drinking Fountain)
     const locationIcon = type === 'parking' ? MapPin : type === 'service' ? Store : type === 'drinking_fountain' ? Droplet : Wrench;
     const LocationIcon = locationIcon;
-    const locationGradient = type === 'parking'
-        ? 'from-green-500/20 to-green-600/20 border-green-500/30'
-        : type === 'service'
-            ? 'from-blue-500/20 to-blue-600/20 border-blue-500/30'
-            : type === 'drinking_fountain'
-                ? 'from-cyan-500/20 to-cyan-600/20 border-cyan-500/30'
-                : 'from-orange-500/20 to-orange-600/20 border-orange-500/30';
-    const locationIconColor = type === 'parking' ? 'text-green-400' : type === 'service' ? 'text-blue-400' : type === 'drinking_fountain' ? 'text-cyan-400' : 'text-orange-400';
+    const locationTypeLabel = type === 'parking' ? 'Bicikliparkoló' : type === 'service' ? 'Szerviz vagy bolt' : type === 'drinking_fountain' ? 'Ivókút' : 'Javítóállomás';
 
     return (
         <>
             <Dialog open={isOpen} onOpenChange={onClose}>
                 <AdminModalContent variant="inspector">
                     <AdminModalFrame>
-                        {/* Header - same pattern as POI / Feedback */}
-                        <div className="admin-modal-header admin-modal-header--legacy">
-                            <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
-                                <div className="flex items-center gap-4 min-w-0 pr-8">
-                                    {onBack && (
-                                        <button
-                                            type="button"
-                                            onClick={onBack}
-                                            className="p-2 rounded-lg text-muted-foreground hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
-                                            title="Vissza az előző modálra"
-                                        >
-                                            <ArrowLeft className="h-5 w-5" />
-                                        </button>
-                                    )}
-                                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${locationGradient} border flex items-center justify-center flex-shrink-0 shadow-inner`}>
-                                        <LocationIcon className={`h-6 w-6 ${locationIconColor}`} />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h1 className="text-lg font-bold text-foreground truncate leading-tight">
-                                            {item.name || 'Helyszín'}
-                                        </h1>
-                                        <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                            <Badge variant={item.available ? 'default' : 'destructive'} className="flex items-center gap-1 text-xs w-fit">
-                                                {item.available ? (
-                                                    <>
-                                                        <CheckCircle className="h-3 w-3" />
-                                                        Aktív
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <XCircle className="h-3 w-3" />
-                                                        Inaktív
-                                                    </>
-                                                )}
-                                            </Badge>
-                                            {item.city && (
-                                                <span className="text-xs text-muted-foreground">· {item.city}</span>
-                                            )}
-                                        </div>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <span className="text-[11px] font-mono text-muted-foreground opacity-80 break-all">
-                                                ID: {item.id}
-                                            </span>
-                                            <button
-                                                type="button"
-                                                onClick={() => copyId(item.id)}
-                                                className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-white transition-colors shrink-0"
-                                                title="ID másolása"
-                                            >
-                                                <Copy className="w-3.5 h-3.5" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </DialogTitle>
-                        </div>
+                        <AdminModalHeader
+                            eyebrow={locationTypeLabel}
+                            title={item.name || 'Névtelen helyszín'}
+                            subtitle={item.city || 'Nincs város megadva'}
+                            icon={LocationIcon}
+                            onBack={onBack}
+                            backLabel="Vissza az előző rekordhoz"
+                            meta={(
+                                <>
+                                    <span className="admin-modal-state" data-tone={item.available ? 'success' : 'danger'}>
+                                        <i />
+                                        {item.available ? 'Aktív' : 'Inaktív'}
+                                    </span>
+                                    <code>#{String(item.id).substring(0, 8)}</code>
+                                    <button type="button" className="admin-modal-meta-action" onClick={() => copyId(item.id)} aria-label="ID másolása" title="ID másolása">
+                                        <Copy />
+                                    </button>
+                                </>
+                            )}
+                        />
 
                         {/* Scrollable Content */}
-                        <ScrollArea className="admin-modal-body">
-                            <div className="admin-modal-body-inner space-y-6">
+                        <AdminModalBody className="space-y-6">
                                 {/* Image Gallery */}
                                 {item.picture_url && item.picture_url.length > 0 && (
                                     <div>
@@ -2155,8 +2034,7 @@ export default function DetailModal({
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </ScrollArea>
+                        </AdminModalBody>
 
                         {/* Footer - same as other modals */}
                         <div className="admin-modal-footer">

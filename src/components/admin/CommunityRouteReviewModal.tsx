@@ -18,11 +18,10 @@ import {
     ChevronDown,
     Copy,
 } from 'lucide-react';
-import { Dialog, DialogTitle } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { AdminModalContent, AdminModalFooter, AdminModalFrame } from './AdminModal';
+import { AdminModalBody, AdminModalContent, AdminModalFooter, AdminModalFrame, AdminModalHeader } from './AdminModal';
 import InteractiveRouteMap from './InteractiveRouteMap';
 import { writeAuditLog, type AuditAction } from '@/lib/adminAuditLog';
 
@@ -211,41 +210,23 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
         <Dialog open={isOpen} onOpenChange={(open) => !open && !saving && onClose()}>
             <AdminModalContent variant="inspector">
                 <AdminModalFrame>
-                    {/* Header — same pattern as EditLocationModal */}
-                    <div className="admin-modal-header admin-modal-header--legacy">
-                        <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
-                            <div className="flex items-center gap-4 min-w-0 pr-8">
-                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-500/10 border border-green-500/20 flex items-center justify-center flex-shrink-0 shadow-inner">
-                                    <Route className="h-6 w-6 text-green-400" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <h1 className="text-lg font-bold text-foreground truncate leading-tight">
-                                        {route.name || 'Névtelen útvonal'}
-                                    </h1>
-                                    <div className="flex flex-col mt-1 gap-0.5">
-                                        <span className="text-xs text-muted-foreground truncate">Közösségi útvonal moderálás</span>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-[11px] font-mono text-muted-foreground opacity-80 break-all">
-                                                ID: {route.id}
-                                            </span>
-                                            <button
-                                                type="button"
-                                                onClick={() => copyId(route.id)}
-                                                className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-white transition-colors shrink-0"
-                                                title="ID másolása"
-                                            >
-                                                <Copy className="w-3.5 h-3.5" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </DialogTitle>
-                    </div>
+                    <AdminModalHeader
+                        eyebrow="Útvonal-moderáció"
+                        title={route.name || 'Névtelen útvonal'}
+                        subtitle="Beküldött közösségi útvonal ellenőrzése"
+                        icon={Route}
+                        meta={(
+                            <>
+                                <code>#{String(route.id).substring(0, 8)}</code>
+                                <button type="button" className="admin-modal-meta-action" onClick={() => copyId(route.id)} aria-label="ID másolása" title="ID másolása">
+                                    <Copy />
+                                </button>
+                            </>
+                        )}
+                    />
 
                     {/* Scrollable body */}
-                    <ScrollArea className="admin-modal-body">
-                        <div className="admin-modal-body-inner space-y-6">
+                    <AdminModalBody className="space-y-6">
                             {/* Status badge + length summary */}
                             <div className="flex items-center justify-between flex-wrap gap-3">
                                 <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${currentMeta.className}`}>
@@ -391,8 +372,7 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
                                     </div>
                                 )}
                             </div>
-                        </div>
-                    </ScrollArea>
+                    </AdminModalBody>
 
                     {/* Footer — same pattern as EditLocationModal */}
                     <AdminModalFooter>

@@ -1,7 +1,6 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { ArrowLeft, type LucideIcon } from 'lucide-react';
 import { DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
 type AdminModalVariant = 'inspector' | 'form' | 'confirm' | 'media';
@@ -86,11 +85,25 @@ interface AdminModalBodyProps extends ComponentProps<'div'> {
 
 export function AdminModalBody({ className, scrollClassName, children, ...props }: AdminModalBodyProps) {
     return (
-        <ScrollArea className={cn('admin-modal-body', scrollClassName)}>
+        <div
+            className={cn('admin-modal-body', scrollClassName)}
+            onWheel={(event) => {
+                const container = event.currentTarget;
+                const maxScroll = container.scrollHeight - container.clientHeight;
+                if (maxScroll <= 0) return;
+
+                const nextScroll = Math.max(0, Math.min(maxScroll, container.scrollTop + event.deltaY));
+                if (nextScroll === container.scrollTop) return;
+
+                container.scrollTop = nextScroll;
+                event.preventDefault();
+                event.stopPropagation();
+            }}
+        >
             <div className={cn('admin-modal-body-inner', className)} {...props}>
                 {children}
             </div>
-        </ScrollArea>
+        </div>
     );
 }
 

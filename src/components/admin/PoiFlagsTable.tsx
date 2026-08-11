@@ -116,19 +116,22 @@ export default function PoiFlagsTable({
                             const reporter = item.reporter_username || item.reporter_full_name || item.user_id || 'Ismeretlen';
                             const hasCoords = Number.isFinite(item.reported_latitude) && Number.isFinite(item.reported_longitude);
                             return (
-                                <div className="ops-list-row ops-flag-grid" role="listitem" key={item.id}>
-                                    <Checkbox checked={selectedRows.has(item.id)} onCheckedChange={(checked) => onSelectRow(item.id, checked === true)} aria-label={`${reasons[item.reason] || item.reason} kijelölése`} />
-                                    <button type="button" className="ops-feedback-subject" onClick={() => onRowClick(item)}>
+                                <div className="ops-list-row ops-flag-grid" role="listitem" data-clickable="true" key={item.id}>
+                                    <button type="button" className="ops-row-open-hit" onClick={() => onRowClick(item)} aria-label={`${reasons[item.reason] || item.reason} részleteinek megnyitása`} />
+                                    <div onClick={(event) => event.stopPropagation()}>
+                                        <Checkbox checked={selectedRows.has(item.id)} onCheckedChange={(checked) => onSelectRow(item.id, checked === true)} aria-label={`${reasons[item.reason] || item.reason} kijelölése`} />
+                                    </div>
+                                    <button type="button" className="ops-feedback-subject" onClick={(event) => { event.stopPropagation(); onRowClick(item); }}>
                                         <span className="ops-feedback-icon"><Flag aria-hidden="true" /></span>
                                         <span className="ops-list-row-title"><strong>{reasons[item.reason] || item.reason}</strong><span>{item.comment || 'A bejelentő nem adott meg megjegyzést.'}</span></span>
                                     </button>
-                                    <button type="button" className="ops-entity-link" onClick={() => onOpenPoi?.(item.poi_id, item.poi_type)} disabled={!onOpenPoi}>
+                                    <button type="button" className="ops-entity-link" onClick={(event) => { event.stopPropagation(); onOpenPoi?.(item.poi_id, item.poi_type); }} disabled={!onOpenPoi}>
                                         <span className="ops-feedback-icon"><PoiIcon type={item.poi_type} /></span>
                                         <span><strong>{poiTypes[item.poi_type] || item.poi_type}</strong><small>{item.poi_id}</small></span>
                                     </button>
-                                    <label className="ops-row-select"><span className="ops-status" data-tone={statusTone(item.status)}>{statuses[item.status] || item.status}</span><select value={item.status} onChange={(event) => onStatusChange(item.id, event.target.value)} aria-label="Bejelentés állapota">{Object.entries(statuses).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label>
+                                    <label className="ops-row-select" onClick={(event) => event.stopPropagation()}><span className="ops-status" data-tone={statusTone(item.status)}>{statuses[item.status] || item.status}</span><select value={item.status} onChange={(event) => onStatusChange(item.id, event.target.value)} aria-label="Bejelentés állapota">{Object.entries(statuses).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label>
                                     <div className="ops-feedback-contact"><span>{new Intl.DateTimeFormat('hu-HU', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(item.created_at))}</span><small>{reporter}</small></div>
-                                    <div className="ops-inline-actions">
+                                    <div className="ops-inline-actions" onClick={(event) => event.stopPropagation()}>
                                         {hasCoords ? <a className="ops-icon-action" href={`https://www.openstreetmap.org/edit?#map=19/${item.reported_latitude}/${item.reported_longitude}`} target="_blank" rel="noopener noreferrer" title="Bejelentett hely az OSM-en" aria-label="Bejelentett hely az OSM-en"><ExternalLink aria-hidden="true" /></a> : null}
                                         {item.user_id && onOpenUser ? <button type="button" className="ops-icon-action" onClick={() => onOpenUser(item.user_id)} title="Bejelentő profilja" aria-label="Bejelentő profilja"><UserRound aria-hidden="true" /></button> : null}
                                         <button type="button" className="ops-icon-action" onClick={() => onRowClick(item)} title="Részletek" aria-label="Részletek"><ChevronRight aria-hidden="true" /></button>

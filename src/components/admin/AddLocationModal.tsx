@@ -22,10 +22,9 @@ import {
     Plus,
     Droplet
 } from 'lucide-react';
-import { Dialog, DialogTitle } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { AdminModalContent, AdminModalFooter, AdminModalFrame } from './AdminModal';
+import { AdminModalBody, AdminModalContent, AdminModalFooter, AdminModalFrame, AdminModalHeader } from './AdminModal';
 
 interface AddLocationModalProps {
     isOpen: boolean;
@@ -211,38 +210,18 @@ export default function AddLocationModal({ isOpen, onClose, locationType, onSucc
     };
 
     const Icon = locationType === 'parking' ? MapPin : locationType === 'services' ? Building2 : locationType === 'drinking_fountain' ? Droplet : Wrench;
-    const iconGradient = locationType === 'parking'
-        ? 'from-green-500/20 to-green-600/20 border-green-500/30 text-green-400'
-        : locationType === 'services'
-            ? 'from-blue-500/20 to-blue-600/20 border-blue-500/30 text-blue-400'
-            : locationType === 'drinking_fountain'
-                ? 'from-cyan-500/20 to-cyan-600/20 border-cyan-500/30 text-cyan-400'
-                : 'from-orange-500/20 to-orange-600/20 border-orange-500/30 text-orange-400';
-
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && !isLoading && onClose()}>
             <AdminModalContent variant="form">
                 <AdminModalFrame>
-                    {/* Header - same as POI / DetailModal */}
-                    <div className="admin-modal-header admin-modal-header--legacy">
-                        <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
-                            <div className="flex items-center gap-4 min-w-0 pr-8">
-                                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${iconGradient} border flex items-center justify-center flex-shrink-0 shadow-inner`}>
-                                    <Icon className="h-6 w-6" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <h1 className="text-lg font-bold text-foreground truncate leading-tight">
-                                        {getTitle()}
-                                    </h1>
-                                    <p className="text-xs text-muted-foreground mt-1">Töltsd ki az alábbi mezőket. A *-gal jelölt mezők kötelezőek.</p>
-                                </div>
-                            </div>
-                        </DialogTitle>
-                    </div>
+                    <AdminModalHeader
+                        eyebrow="Új rekord"
+                        title={getTitle()}
+                        subtitle="A csillaggal jelölt mezők kitöltése kötelező."
+                        icon={Icon}
+                    />
 
-                    {/* Scrollable Form - same ScrollArea pattern as POI modal */}
-                    <ScrollArea className="admin-modal-body">
-                        <div className="admin-modal-body-inner space-y-6">
+                    <AdminModalBody className="space-y-6">
                             {/* Basic Info */}
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-1.5">
@@ -502,8 +481,7 @@ export default function AddLocationModal({ isOpen, onClose, locationType, onSucc
                                     <span>Helyszín sikeresen létrehozva!</span>
                                 </div>
                             )}
-                        </div>
-                    </ScrollArea>
+                    </AdminModalBody>
 
                     {/* Footer - same as other modals */}
                     <AdminModalFooter>

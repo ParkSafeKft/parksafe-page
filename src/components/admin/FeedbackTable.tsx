@@ -129,12 +129,13 @@ export default function FeedbackTable({
 
                     <div role="list">
                         {data.map((item) => (
-                            <div className="ops-list-row ops-feedback-grid" role="listitem" key={item.id}>
+                            <div className="ops-list-row ops-feedback-grid" role="listitem" data-clickable="true" key={item.id}>
+                                <button type="button" className="ops-row-open-hit" onClick={() => onRowClick(item)} aria-label={`${item.title} részleteinek megnyitása`} />
                                 <div onClick={(event) => event.stopPropagation()}>
                                     <Checkbox checked={selectedRows.has(item.id)} onCheckedChange={(checked) => onSelectRow(item.id, checked === true)} aria-label={`${item.title} kijelölése`} />
                                 </div>
 
-                                <button type="button" className="ops-feedback-subject" onClick={() => onRowClick(item)}>
+                                <button type="button" className="ops-feedback-subject" onClick={(event) => { event.stopPropagation(); onRowClick(item); }}>
                                     <span className="ops-feedback-icon"><TypeIcon type={item.type} /></span>
                                     <span className="ops-list-row-title">
                                         <strong>{item.title}</strong>

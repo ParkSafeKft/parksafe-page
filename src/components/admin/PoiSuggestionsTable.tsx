@@ -28,10 +28,7 @@ import {
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog } from '@/components/ui/dialog';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -42,7 +39,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { AdminModalContent, AdminModalFooter, AdminModalFrame } from './AdminModal';
+import { AdminModalBody, AdminModalContent, AdminModalFooter, AdminModalFrame, AdminModalHeader } from './AdminModal';
 
 export type CapacityLevel = 'small' | 'medium' | 'large';
 
@@ -439,32 +436,26 @@ function EditSuggestionModal({
         <Dialog open={isOpen} onOpenChange={onClose}>
             <AdminModalContent variant="inspector">
                 <AdminModalFrame>
-                    <div className="admin-modal-header admin-modal-header--legacy">
-                        <DialogTitle className="text-foreground flex items-center gap-4 text-xl font-bold">
-                            <div className="w-12 h-12 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center shrink-0">
-                                <Lightbulb className="h-6 w-6 text-green-400" />
-                            </div>
-                            <div className="min-w-0">
-                                <h1 className="text-lg font-bold text-foreground truncate">POI javaslat moderálása</h1>
-                                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                    <span className="text-xs font-mono text-muted-foreground">ID: {item.id.slice(0, 8)}...</span>
-                                    <button
-                                        type="button"
-                                        onClick={() => copyId(item.id)}
-                                        className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-white transition-colors"
-                                        title="ID másolása"
-                                    >
-                                        <Copy className="w-3.5 h-3.5" />
-                                    </button>
-                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border ${getStatusStyle(status)}`}>
-                                        {getStatusLabel(status)}
-                                    </span>
-                                </div>
-                            </div>
-                        </DialogTitle>
-                    </div>
+                    <AdminModalHeader
+                        eyebrow="POI javaslat"
+                        title={item.name || getTypeLabel(item.suggested_type)}
+                        subtitle={`${getTypeLabel(item.suggested_type)} moderálása`}
+                        icon={Lightbulb}
+                        meta={(
+                            <>
+                                <code>#{item.id.slice(0, 8)}</code>
+                                <button type="button" className="admin-modal-meta-action" onClick={() => copyId(item.id)} aria-label="ID másolása" title="ID másolása">
+                                    <Copy />
+                                </button>
+                                <span className="admin-modal-state" data-tone={status === 'approved' ? 'success' : status === 'rejected' ? 'danger' : 'warning'}>
+                                    <i />
+                                    {getStatusLabel(status)}
+                                </span>
+                            </>
+                        )}
+                    />
 
-                    <div className="admin-modal-body admin-modal-body-inner overflow-auto space-y-6">
+                    <AdminModalBody className="space-y-6">
                         <div>
                             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
                                 <User className="h-4 w-4" />
@@ -727,7 +718,7 @@ function EditSuggestionModal({
                                 </Button>
                             </div>
                         )}
-                    </div>
+                    </AdminModalBody>
 
                     <AdminModalFooter className="flex-wrap">
                         {status !== 'rejected' && (

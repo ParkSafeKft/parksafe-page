@@ -25,11 +25,10 @@ import {
     Trash2
 } from 'lucide-react';
 import { Location, ParkingLocation, RepairStation, BicycleService, DrinkingFountain } from '@/types';
-import { Dialog, DialogTitle } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { AdminModalContent, AdminModalFooter, AdminModalFrame } from './AdminModal';
+import { AdminModalBody, AdminModalContent, AdminModalFooter, AdminModalFrame, AdminModalHeader } from './AdminModal';
 
 interface EditLocationModalProps {
     isOpen: boolean;
@@ -267,53 +266,26 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
     };
 
     const Icon = locationType === 'parking' ? MapPin : locationType === 'services' ? Building2 : locationType === 'drinking_fountain' ? Droplet : Wrench;
-    const iconGradient = locationType === 'parking'
-        ? 'from-green-500/20 to-green-600/20 border-green-500/30 text-green-400'
-        : locationType === 'services'
-            ? 'from-blue-500/20 to-blue-600/20 border-blue-500/30 text-blue-400'
-            : locationType === 'drinking_fountain'
-                ? 'from-cyan-500/20 to-cyan-600/20 border-cyan-500/30 text-cyan-400'
-                : 'from-orange-500/20 to-orange-600/20 border-orange-500/30 text-orange-400';
-
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && !isLoading && onClose()}>
             <AdminModalContent variant="form">
                 <AdminModalFrame>
-                    {/* Header - same as POI / DetailModal */}
-                    <div className="admin-modal-header admin-modal-header--legacy">
-                        <DialogTitle className="text-foreground flex items-center justify-between text-xl font-bold">
-                            <div className="flex items-center gap-4 min-w-0 pr-8">
-                                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${iconGradient} border flex items-center justify-center flex-shrink-0 shadow-inner`}>
-                                    <Icon className="h-6 w-6" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <h1 className="text-lg font-bold text-foreground truncate leading-tight">
-                                        {getTitle()}
-                                    </h1>
-                                    <div className="flex flex-col mt-1 gap-0.5">
-                                        <span className="text-xs text-muted-foreground truncate">{item.name || 'Helyszín'}</span>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-[11px] font-mono text-muted-foreground opacity-80 break-all">
-                                                ID: {item.id}
-                                            </span>
-                                            <button
-                                                type="button"
-                                                onClick={() => copyId(item.id)}
-                                                className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-white transition-colors shrink-0"
-                                                title="ID másolása"
-                                            >
-                                                <Copy className="w-3.5 h-3.5" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </DialogTitle>
-                    </div>
+                    <AdminModalHeader
+                        eyebrow="Rekord szerkesztése"
+                        title={getTitle()}
+                        subtitle={item.name || 'Helyszín'}
+                        icon={Icon}
+                        meta={(
+                            <>
+                                <code>#{String(item.id).substring(0, 8)}</code>
+                                <button type="button" className="admin-modal-meta-action" onClick={() => copyId(item.id)} aria-label="ID másolása" title="ID másolása">
+                                    <Copy />
+                                </button>
+                            </>
+                        )}
+                    />
 
-                    {/* Scrollable Form - same ScrollArea pattern as POI modal */}
-                    <ScrollArea className="admin-modal-body">
-                        <div className="admin-modal-body-inner space-y-6">
+                    <AdminModalBody className="space-y-6">
                             {/* Basic Info */}
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-1.5">
@@ -581,8 +553,7 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
                                     <span>Helyszín sikeresen frissítve!</span>
                                 </div>
                             )}
-                        </div>
-                    </ScrollArea>
+                    </AdminModalBody>
 
                     {/* Footer - same as other modals */}
                     <AdminModalFooter className="justify-between">
