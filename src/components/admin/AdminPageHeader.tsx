@@ -8,6 +8,7 @@ import { ADMIN_NAVIGATION, getAdminNavigationItem } from './adminNavigation';
 type AdminPageHeaderProps = {
     activeTab: string;
     totalCount: number;
+    hasRealtime: boolean;
     isRealtimeConnected: boolean;
     searchTerm: string;
     onSearchChange: (value: string) => void;
@@ -18,6 +19,7 @@ type AdminPageHeaderProps = {
 export default function AdminPageHeader({
     activeTab,
     totalCount,
+    hasRealtime,
     isRealtimeConnected,
     searchTerm,
     onSearchChange,
@@ -77,10 +79,12 @@ export default function AdminPageHeader({
                 )}
 
                 <div className="ops-header-actions">
-                    <span className="ops-connection" data-connected={isRealtimeConnected}>
-                        <i aria-hidden="true" />
-                        {isRealtimeConnected ? 'Élő adatok' : 'Újracsatlakozás'}
-                    </span>
+                    {hasRealtime ? (
+                        <span className="ops-connection" data-connected={isRealtimeConnected}>
+                            <i aria-hidden="true" />
+                            {isRealtimeConnected ? 'Élő adatok' : 'Újracsatlakozás'}
+                        </span>
+                    ) : null}
                     {item.createLabel && onCreate ? (
                         <button type="button" className="ops-create" onClick={onCreate}>
                             <Plus aria-hidden="true" />

@@ -68,7 +68,8 @@ export function AboutTimeline() {
             achievement: t('about.page.timeline.milestone6.achievement'),
             icon: Globe2,
             imageAlt: t('about.page.timeline.milestone6.imageAlt'),
-            image: null,
+            image: '/parksafe-world-final-showcase.jpg',
+            imageOrientation: 'landscape' as const,
         },
         {
             year: t('about.page.timeline.milestone7.year'),
@@ -77,7 +78,8 @@ export function AboutTimeline() {
             desc: t('about.page.timeline.milestone7.desc'),
             icon: TrendingUp,
             imageAlt: t('about.page.timeline.milestone7.imageAlt'),
-            image: null,
+            image: '/parksafe-world-final-team.jpg',
+            imageOrientation: 'landscape' as const,
         },
     ];
 

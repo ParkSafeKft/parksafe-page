@@ -73,12 +73,12 @@ export const translations = {
                 desc: "Elérhető iOS és Android platformokon. Regisztrálj másodpercek alatt."
             },
             step2: {
-                title: "Fedezd fel a Várost",
-                desc: "Interaktív hőtérkép mutatja a biztonságos zónákat és parkolókat."
+                title: "Keress Tárolóhelyet",
+                desc: "A térképen egyszerűen megtalálhatod a közeledben lévő kerékpártárolókat."
             },
             step3: {
-                title: "Közösségi Validáció",
-                desc: "Valós visszajelzések és értékelések segítik a legjobb döntést."
+                title: "Válassz Úti Célt",
+                desc: "Nézd meg a tároló adatait, majd válaszd ki a számodra megfelelő helyet."
             },
             step4: {
                 title: "Parkolj Biztonságban",
@@ -107,6 +107,9 @@ export const translations = {
             title: "Partnerek és Előnyök",
             subtitle: "Mert a közösség ereje kifizetődő.",
             comingSoon: "Hamarosan érkezik!",
+            partnerInvite: "Kerékpáros márkát, üzletet vagy szervizt képviselsz?",
+            partnerHeading: "Építsük együtt a ParkSafe partnerhálózatát.",
+            partnerCta: "Partnerként kapcsolatba lépek",
             benefit1: {
                 title: "Exkluzív Kedvezmények",
                 desc: "Prémium ajánlatok a legnagyobb kerékpáros márkáktól és boltoktól."
@@ -254,7 +257,7 @@ export const translations = {
                         year: "2026. Május",
                         badge: "Országos Győzelem",
                         title: "Red Bull Basement Magyar Győztes",
-                        desc: "Az 1260 beküldött ötlet közül bejutottunk a tízcsapatos magyar döntőbe Debrecenben. Perjési Szabolcs és Kordás Patrik két percben mutatta be a ParkSafe-et, a zsűri pedig a csapatot választotta Magyarország győztesének.",
+                        desc: "Az 1260 beküldött ötlet közül bejutottunk a tízcsapatos magyar döntőbe Debrecenben. Két percünk volt bemutatni a ParkSafe-et, a zsűri pedig minket választott Magyarország győztesének.",
                         achievement: "🏆 Red Bull Basement 2026 • Magyar győztes",
                         imageAlt: "A ParkSafe csapata a Red Bull Basement magyar döntőjén"
                     },
@@ -262,16 +265,16 @@ export const translations = {
                         year: "2026. Június",
                         badge: "Világdöntő",
                         title: "Magyarország Képviselete San Franciscóban",
-                        desc: "A magyar győzelem után Perjési Szabolcs és Kordás Patrik a ParkSafe-fel képviselte Magyarországot a Red Bull Basement világdöntőjén San Franciscóban, több mint 40 ország innovátorai között.",
+                        desc: "A 14 órás út végén a világ 48 országának legjobb csapatai között mutattuk be a ParkSafe-et. A háromnapos program workshopjain az AMD, a Microsoft és a Plug and Play Ventures szakembereitől kaptunk közvetlen visszajelzést. Ezek a beszélgetések megerősítettek bennünket abban, hogy a ParkSafe által megoldott probléma más városokban is valós, és konkrét irányokat adtak a folytatáshoz.",
                         achievement: "🏆 Red Bull Basement World Final • San Francisco",
-                        imageAlt: "A ParkSafe csapata San Franciscóban"
+                        imageAlt: "A ParkSafe csapata az alkalmazást mutatja be a San Franciscó-i világdöntőn"
                     },
                     milestone7: {
-                        year: "Ma",
-                        badge: "Jelen",
-                        title: "Európai Lefedettség és Platformfejlesztés",
-                        desc: "A ParkSafe több mint 2000 regisztrált felhasználót és 4000 letöltést ért el, miközben lefedettsége Európa egészére bővült. Most a kaliforniai jelenléten, valamint egy önkormányzatoknak és vállalkozásoknak szánt B2B/B2G platformon dolgozunk.",
-                        imageAlt: "Platform bemutató prezentáció"
+                        year: "2026. Nyár – Ma",
+                        badge: "Következő Fejezet",
+                        title: "A Világdöntőtől az Új Funkciókig",
+                        desc: "San Francisco megmutatta, hogy városonként más jelenti a jó kerékpáros útvonalat: Európában a biztonság, a dombos városokban az emelkedők elkerülése is kulcsfontosságú. Ezekből a visszajelzésekből építjük a következő nagy frissítést: kevésbé megterhelő útvonalak, közösségi kihívások, valamint sportos és turisztikai Balaton-kör helyi látnivalókkal. A ParkSafe közössége mára több mint 2000 regisztrált felhasználóra és 4000 letöltésre nőtt, az alkalmazás pedig már egész Európában elérhető.",
+                        imageAlt: "A ParkSafe csapata a Red Bull Basement világdöntő helyszínén"
                     }
                 },
                 cta: {
@@ -352,12 +355,12 @@ export const translations = {
                 desc: "Available on iOS and Android. Register in seconds."
             },
             step2: {
-                title: "Explore the City",
-                desc: "Interactive heatmap shows safe zones and parking spots."
+                title: "Find a Parking Spot",
+                desc: "Use the map to find bicycle parking near you."
             },
             step3: {
-                title: "Community Validation",
-                desc: "Real feedback and ratings help you make the best choice."
+                title: "Choose Your Destination",
+                desc: "Check the parking details and choose the place that suits you."
             },
             step4: {
                 title: "Park Safely",
@@ -386,6 +389,9 @@ export const translations = {
             title: "Partners & Benefits",
             subtitle: "Because community power pays off.",
             comingSoon: "Coming Soon!",
+            partnerInvite: "Representing a cycling brand, shop, or service center?",
+            partnerHeading: "Let’s build the ParkSafe partner network together.",
+            partnerCta: "Contact Us as a Partner",
             benefit1: {
                 title: "Exclusive Discounts",
                 desc: "Premium offers from top cycling brands and shops."
@@ -533,7 +539,7 @@ export const translations = {
                         year: "May 2026",
                         badge: "National Winner",
                         title: "Red Bull Basement Hungary Winner",
-                        desc: "From 1,260 submitted ideas, we reached the ten-team Hungarian final in Debrecen. Perjési Szabolcs and Kordás Patrik presented ParkSafe in a two-minute pitch, and the jury selected the team as Hungary's winner.",
+                        desc: "From 1,260 submitted ideas, we reached the ten-team Hungarian final in Debrecen. We had two minutes to present ParkSafe, and the jury selected us as Hungary's winner.",
                         achievement: "🏆 Red Bull Basement 2026 • Hungary winner",
                         imageAlt: "The ParkSafe team at the Red Bull Basement Hungarian final"
                     },
@@ -541,16 +547,16 @@ export const translations = {
                         year: "June 2026",
                         badge: "World Final",
                         title: "Representing Hungary in San Francisco",
-                        desc: "Following the national win, Perjési Szabolcs and Kordás Patrik represented Hungary with ParkSafe at the Red Bull Basement World Final in San Francisco, alongside innovators from more than 40 countries.",
+                        desc: "After a 14-hour journey, we presented ParkSafe alongside the best teams from 48 countries. During the three-day program, we received direct feedback from experts at AMD, Microsoft and Plug and Play Ventures. Those conversations confirmed that the problem ParkSafe solves is real in cities far beyond our own and gave us concrete directions for what to build next.",
                         achievement: "🏆 Red Bull Basement World Final • San Francisco",
-                        imageAlt: "The ParkSafe team in San Francisco"
+                        imageAlt: "The ParkSafe team presenting the app at the World Final in San Francisco"
                     },
                     milestone7: {
-                        year: "Today",
-                        badge: "Present",
-                        title: "European Coverage and Platform Development",
-                        desc: "ParkSafe has grown beyond 2,000 registered users and 4,000 downloads while expanding its coverage across Europe. We are now working on a California presence and a B2B/B2G platform for municipalities and businesses.",
-                        imageAlt: "Platform presentation demo"
+                        year: "Summer 2026 – Today",
+                        badge: "Next Chapter",
+                        title: "From the World Final to New Features",
+                        desc: "San Francisco showed us that a good cycling route means something different in every city: safety matters across Europe, while avoiding steep climbs is just as important in hilly places. We are turning that feedback into our next major update with less demanding routes, community challenges, and both sporty and sightseeing loops around Lake Balaton with local landmarks. The ParkSafe community has now grown beyond 2,000 registered users and 4,000 downloads, and the app is available across Europe.",
+                        imageAlt: "The ParkSafe team at the Red Bull Basement World Final venue"
                     }
                 },
                 cta: {

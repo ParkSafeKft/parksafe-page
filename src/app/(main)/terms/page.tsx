@@ -7,7 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const content = {
     hu: {
         title: "Általános Szerződési Feltételek",
-        lastUpdated: "Utolsó frissítés: 2025. január 5.",
+        lastUpdated: "Utolsó frissítés: 2026. augusztus 12.",
         sections: [
             {
                 num: "1.",
@@ -42,10 +42,9 @@ const content = {
             },
             {
                 num: "4.",
-                heading: "Díjak és fizetés",
+                heading: "Támogatás",
                 paragraphs: [
-                    "Az alkalmazás alapfunkciói ingyenesen használhatók. A prémium szolgáltatásokért havonta 990 Ft díjat számítunk fel. A díjfizetés automatikus megújítással történik, amelyet a felhasználó bármikor lemondhat.",
-                    "Az első hónapban a prémium szolgáltatások ingyenesen kipróbálhatók. A lemondás elmulasztása esetén automatikusan megújul a prémium előfizetés.",
+                    "A felhasználók önkéntes támogatással járulhatnak hozzá az alkalmazás fejlesztéséhez és működtetéséhez.",
                 ],
             },
             {
@@ -111,11 +110,11 @@ const content = {
         addressLabel: "Postai cím",
         phoneLabel: "Telefonos ügyfélszolgálat",
         footerEffective: "Hatályos:",
-        footerDate: "2025. január 5-től",
+        footerDate: "2026. augusztus 12-től",
     },
     en: {
         title: "Terms and Conditions",
-        lastUpdated: "Last updated: January 5, 2025",
+        lastUpdated: "Last updated: August 12, 2026",
         sections: [
             {
                 num: "1.",
@@ -150,10 +149,9 @@ const content = {
             },
             {
                 num: "4.",
-                heading: "Fees and Payment",
+                heading: "Support",
                 paragraphs: [
-                    "The basic features of the application are free to use. A monthly fee of 990 HUF is charged for premium services. Payment is made with automatic renewal, which the user may cancel at any time.",
-                    "During the first month, premium services can be tried for free. If not cancelled, the premium subscription will automatically renew.",
+                    "Users may voluntarily support the development and operation of the application.",
                 ],
             },
             {
@@ -219,7 +217,7 @@ const content = {
         addressLabel: "Postal address",
         phoneLabel: "Customer service phone",
         footerEffective: "Effective from:",
-        footerDate: "January 5, 2025",
+        footerDate: "August 12, 2026",
     },
 };
 

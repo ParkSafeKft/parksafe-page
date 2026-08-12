@@ -1,3 +1,22 @@
+# Primary search crawlers and AI crawlers share the same access policy.
 User-agent: *
+User-agent: Googlebot
+User-agent: Bingbot
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: PerplexityBot
 Allow: /
+Disallow: /admin
+Disallow: /api/admin
+Disallow: /api/private
+Disallow: /login
+Disallow: /profile
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /cart
+Disallow: /checkout
+
 Sitemap: https://parksafe.hu/sitemap.xml
+LLMs-txt: https://parksafe.hu/llms.txt

@@ -17,8 +17,8 @@ const FLAG_KEY_RE = /^[a-z][a-z0-9_]{2,39}$/;
 
 // Flags we always want to surface in the UI even if missing from `data`,
 // so the admin sees them as togglable rows from day one.
-const KNOWN_FLAGS: Array<{ key: string; description: string }> = [
-    { key: 'supporter_cta', description: 'BumeaCafé támogatói CTA megjelenítése a mobil app-ban' },
+const KNOWN_FLAGS: Array<{ key: string }> = [
+    { key: 'supporter_cta' },
 ];
 
 interface ConfigRow {
@@ -461,9 +461,6 @@ export default function AppConfigTab() {
                                     >
                                         <div className="flex-1 min-w-0">
                                             <p className="font-mono text-sm text-foreground truncate">{flagKey}</p>
-                                            <p className="text-xs text-muted-foreground">
-                                                {meta?.description ?? 'Egyedi feature kapcsoló'}
-                                            </p>
                                         </div>
                                         <div className="flex items-center gap-2 shrink-0">
                                             <Switch

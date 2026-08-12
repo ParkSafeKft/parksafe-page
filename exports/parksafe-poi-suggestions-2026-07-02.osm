@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="parksafe-poi-suggestion-export">
+  <node id="-1" action="modify" visible="true" lat="46.243308" lon="20.14843">
+    <tag k="amenity" v="bicycle_parking"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="9c57efaf-cc10-472a-ac47-2d2219d0c39c"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-2" action="modify" visible="true" lat="46.9360154479775" lon="16.4806175594663">
+    <tag k="amenity" v="drinking_water"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="26175da7-6022-4416-b5f6-779c72895968"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-3" action="modify" visible="true" lat="46.8388070824564" lon="16.4211007817522">
+    <tag k="amenity" v="drinking_water"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="dbdb7a5d-9a06-41a8-9e38-254970130886"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-4" action="modify" visible="true" lat="46.8388070824564" lon="16.4211007817522">
+    <tag k="amenity" v="bicycle_parking"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="1adc2d58-bbae-4531-bf42-b9d842e16f29"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-5" action="modify" visible="true" lat="46.8221122163619" lon="16.3213119805235">
+    <tag k="amenity" v="drinking_water"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="f15eb0e3-078d-416d-9219-f6e4e9a2ac5a"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-6" action="modify" visible="true" lat="47.7922062870028" lon="19.9383660246654">
+    <tag k="shop" v="bicycle"/>
+    <tag k="service:bicycle:repair" v="yes"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="f5c3e645-db11-4a47-b936-99bce378d829"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-7" action="modify" visible="true" lat="46.8360162626625" lon="16.8285396170802">
+    <tag k="shop" v="bicycle"/>
+    <tag k="service:bicycle:repair" v="yes"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="4a7bc975-ff64-4835-8a76-aa5951276e0b"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-8" action="modify" visible="true" lat="46.3615477862263" lon="17.774652549137">
+    <tag k="amenity" v="bicycle_repair_station"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="fed83a19-ef82-4033-bfaa-69d11b34e320"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-9" action="modify" visible="true" lat="46.8752547541831" lon="16.7457575642897">
+    <tag k="amenity" v="bicycle_parking"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="fbeaf8e4-e169-45f8-be03-f70b7db0499c"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-10" action="modify" visible="true" lat="46.8698380951139" lon="16.7015811120673">
+    <tag k="amenity" v="bicycle_parking"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="b3c5bc8b-e091-47ca-9763-2979d6555653"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-11" action="modify" visible="true" lat="46.867116462478" lon="16.6956168189553">
+    <tag k="amenity" v="drinking_water"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="5aa36a56-4ac4-4cb1-8939-f9c5a1def8d2"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-12" action="modify" visible="true" lat="47.9501296579941" lon="21.7208335856344">
+    <tag k="shop" v="bicycle"/>
+    <tag k="service:bicycle:repair" v="yes"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="d4d6d6f8-719f-46ec-9e7f-5ec37288a330"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-13" action="modify" visible="true" lat="47.2090233399625" lon="18.6285562743207">
+    <tag k="amenity" v="bicycle_repair_station"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="605ffa78-cdd5-49d0-8e2c-06a6b126e99e"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-14" action="modify" visible="true" lat="46.2545082561243" lon="20.1392484918588">
+    <tag k="amenity" v="bicycle_repair_station"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="4cbd2c09-6032-4c3c-b2c1-621127bf363b"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-15" action="modify" visible="true" lat="51.8810950776646" lon="8.68084547907418">
+    <tag k="amenity" v="bicycle_parking"/>
+    <tag k="note" v="Kerékpáros pihenő"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="6e5fc42f-ec9d-4482-a7dd-e350d21ce35f"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-16" action="modify" visible="true" lat="47.4587851175868" lon="19.0368380308158">
+    <tag k="amenity" v="bicycle_parking"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="97ef7746-f3bf-45f2-90ab-23f1cadfe021"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-17" action="modify" visible="true" lat="47.3769789861901" lon="19.101746624882">
+    <tag k="amenity" v="bicycle_repair_station"/>
+    <tag k="note" v="Ez az E-kerék kerékpárbolt és szervíz, google térképen is rajta van és weboldaluk is van."/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="27ee22c5-dbc0-44c6-948f-b4cad07f174d"/>
+    <tag k="fixme" v="Verify whether this should be shop=bicycle instead"/>
+  </node>
+  <node id="-18" action="modify" visible="true" lat="46.062166989284" lon="20.0550502166331">
+    <tag k="amenity" v="drinking_water"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="07eb4128-4e89-4244-a540-49e5c45b80a2"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-19" action="modify" visible="true" lat="47.4214512498232" lon="9.37423701257435">
+    <tag k="amenity" v="bicycle_parking"/>
+    <tag k="name" v="Einstein Garage"/>
+    <tag k="covered" v="yes"/>
+    <tag k="surveillance" v="yes"/>
+    <tag k="opening_hours" v="24/7"/>
+    <tag k="note" v="Walk your bike in. Riding past the bareer is not allowed"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="1e89cd2e-6f24-4209-9322-22db57968e81"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-20" action="modify" visible="true" lat="47.7369311585149" lon="18.3558136613118">
+    <tag k="amenity" v="drinking_water"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="fdcde496-7e80-4cb6-8511-647843d9cdfb"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-21" action="modify" visible="true" lat="46.3635980173041" lon="17.7825856332466">
+    <tag k="shop" v="bicycle"/>
+    <tag k="service:bicycle:repair" v="yes"/>
+    <tag k="name" v="Donner - Bike Kerékpár üzlet"/>
+    <tag k="opening_hours" v="Mo-Fr 09:00-17:00"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="abce2f12-b4db-4918-8456-3d1fd20a577e"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+  <node id="-22" action="modify" visible="true" lat="46.4583490670563" lon="17.7723379156484">
+    <tag k="amenity" v="drinking_water"/>
+    <tag k="name" v="Szabadság tér"/>
+    <tag k="source" v="ParkSafe user suggestion"/>
+    <tag k="parksafe:suggestion_id" v="8c2d842f-f095-42d6-82a8-860f9baea3ba"/>
+    <tag k="fixme" v="Verify location and tags before upload"/>
+  </node>
+</osm>

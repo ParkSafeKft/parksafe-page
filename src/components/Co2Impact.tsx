@@ -21,6 +21,7 @@ type Co2Stats = {
 
 const KG_CO2_PER_TREE_YEAR = 21;
 const AVG_CAR_TRIP_KM = 5;
+const CAR_MODAL_SHIFT = 0.6;
 
 function AnimatedNumber({
     value,
@@ -92,7 +93,7 @@ export default function Co2Impact() {
     const km = stats ? stats.total_meters / 1000 : 0;
     const rides = stats?.total_rides ?? 0;
     const trees = co2Kg / KG_CO2_PER_TREE_YEAR;
-    const carTrips = km / AVG_CAR_TRIP_KM;
+    const carTrips = (km * CAR_MODAL_SHIFT) / AVG_CAR_TRIP_KM;
     const last30Kg = stats ? stats.co2_grams_30d / 1000 : 0;
     const dateLocale = language === 'hu' ? 'hu-HU' : 'en-GB';
     const computedAt = stats
@@ -128,7 +129,7 @@ export default function Co2Impact() {
     ];
 
     return (
-        <section ref={ref} className="relative overflow-hidden bg-[#edf7ef] py-24 lg:py-32">
+        <section id="impact" ref={ref} className="relative overflow-hidden bg-[#edf7ef] py-24 lg:py-32">
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(16,21,18,0.055)_1px,transparent_1px)] bg-[size:80px_100%]" />
 
             <div className="relative mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-12">

@@ -1,0 +1,28 @@
+# ParkSafe
+
+> ParkSafe is a free urban cycling navigation and parking application for iOS and Android. It helps cyclists across Central Europe plan safety-first routes, find bicycle parking and repair services, and make decisions using community-maintained location data.
+
+ParkSafe combines more than 7,500 bicycle parking locations, more than 800 service points, community ratings and photos, and daily updated ride-impact data in one platform. Core functionality is currently free, with no paid service tier.
+
+## Product and Features
+
+- [ParkSafe Features](https://parksafe.hu/#platform): Overview of safety-first cycle routing, bicycle parking, service locations, live urban data, and community validation.
+- [How ParkSafe Works](https://parksafe.hu/#how-it-works): Four-step guide covering download, city discovery, community validation, and navigation to a selected parking location.
+- [Pricing and Product FAQ](https://parksafe.hu/#faq): Answers about free access, coverage, route planning, parking-location details, and data reliability.
+- [Community Impact](https://parksafe.hu/#impact): Daily updated aggregate ride, distance, and estimated CO2-savings figures with the calculation methodology shown on the page.
+
+## Company and Support
+
+- [About ParkSafe](https://parksafe.hu/about): ParkSafe's origin, mission, milestones, and team story.
+- [Contact ParkSafe](https://parksafe.hu/contact): Support, business enquiries, and partnership contact information.
+
+## Applications
+
+- [ParkSafe on the Apple App Store](https://apps.apple.com/app/id6752813986): Official iOS application download.
+- [ParkSafe on Google Play](https://play.google.com/store/apps/details?id=com.parksafe.app): Official Android application download.
+
+## Optional
+
+- [Privacy Policy](https://parksafe.hu/privacy): How ParkSafe handles personal data.
+- [Terms of Service](https://parksafe.hu/terms): Terms governing use of ParkSafe.
+- [XML Sitemap](https://parksafe.hu/sitemap.xml): Index of canonical public website pages.

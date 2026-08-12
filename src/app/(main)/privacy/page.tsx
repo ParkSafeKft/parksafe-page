@@ -35,7 +35,7 @@ export default function PrivacyPage() {
                     </div>
                     <div className="lg:col-span-4">
                         <p className="text-sm font-semibold text-[#667169]">
-                            {isEn ? "Last updated: March 17, 2026" : "Utolsó frissítés: 2026. március 17."}
+                            {isEn ? "Last updated: August 12, 2026" : "Utolsó frissítés: 2026. augusztus 12."}
                         </p>
                         <nav aria-label="Legal documents" className="mt-5 flex gap-5 text-sm font-bold">
                             <Link href="/terms" className="border-b border-[#101512]/25 pb-1 hover:border-[#34aa56] hover:text-[#258642]">
@@ -573,12 +573,12 @@ export default function PrivacyPage() {
                                 {(isEn ? [
                                     { label: "Infrastructure & database", desc: "e.g. Supabase (authentication, database), hosting providers." },
                                     { label: "Maps & geolocation", desc: "e.g. MapLibre, OpenStreetMap data providers, Google Maps." },
-                                    { label: "Payment providers", desc: "For processing premium subscriptions and other transactions." },
+                                    { label: "Payment providers", desc: "For processing voluntary support payments." },
                                     { label: "Analytics & error tracking", desc: "For analysing application performance and errors." },
                                 ] : [
                                     { label: "Infrastruktúra és adatbázis", desc: "pl. Supabase (hitelesítés, adatbázis), tárhelyszolgáltatók." },
                                     { label: "Térkép- és helymeghatározás", desc: "pl. MapLibre, OpenStreetMap adatszolgáltatók, Google Maps." },
-                                    { label: "Fizetési szolgáltatók", desc: "Prémium előfizetések és egyéb tranzakciók lebonyolítására." },
+                                    { label: "Fizetési szolgáltatók", desc: "Önkéntes támogatások feldolgozására." },
                                     { label: "Analitikai és hibakövető", desc: "Alkalmazás teljesítményének és hibáinak elemzésére." },
                                 ]).map((item, idx) => (
                                     <div key={idx} className="flex items-start gap-3 bg-zinc-50 p-4 rounded-lg border border-zinc-100">
@@ -760,7 +760,7 @@ export default function PrivacyPage() {
                 <div className="border-t border-[#101512]/20 pt-8">
                     <p className="text-sm leading-7 text-[#667169]">
                         <strong className="text-[#101512]">{isEn ? "Effective from:" : "Hatályos:"}</strong>{" "}
-                        {isEn ? "March 17, 2026" : "2026. március 17-től"}
+                        {isEn ? "August 12, 2026" : "2026. augusztus 12-től"}
                         <br />
                         Premiumtex Kft. • 6792 Zsombó, Dózsa dűlő 55. • info@parksafe.hu
                     </p>

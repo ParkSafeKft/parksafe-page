@@ -1347,6 +1347,7 @@ export default function AdminPage() {
                         <AdminPageHeader
                             activeTab={activeTab}
                             totalCount={totalCount}
+                            hasRealtime={!!activeTable}
                             isRealtimeConnected={isRealtimeConnected}
                             searchTerm={searchTerm}
                             onSearchChange={setSearchTerm}
@@ -1600,7 +1601,7 @@ export default function AdminPage() {
                                     {activeTab === 'dashboard' && (
                                         <div className="overflow-y-auto h-full p-1">
                                             <DeviceStatsOverview />
-                                            <ContentStatsOverview onNavigate={setActiveTab} />
+                                            <ContentStatsOverview />
                                         </div>
                                     )}
                                     {activeTab === 'users' && (

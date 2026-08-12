@@ -2,6 +2,7 @@
 
 import { ArrowUpRight, ShoppingBag, Ticket, Wrench } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Benefit {
@@ -34,12 +35,19 @@ export default function PartnerBenefits() {
     return (
         <section className="border-y border-[#101512]/10 bg-[#e9f6ec] py-24 lg:py-32">
             <div className="mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-12">
+                <div className="mb-12 flex items-center gap-4 sm:mb-16 sm:gap-6">
+                    <span className="h-px flex-1 bg-[#258642]/30" aria-hidden="true" />
+                    <div className="inline-flex items-center justify-center gap-3 text-center">
+                        <span className="h-3 w-3 shrink-0 rounded-full bg-[#34aa56]" aria-hidden="true" />
+                        <p className="text-xl font-black uppercase tracking-[0.1em] text-[#101512] sm:text-2xl lg:text-3xl">
+                            {t('partners.comingSoon')}
+                        </p>
+                    </div>
+                    <span className="h-px flex-1 bg-[#258642]/30" aria-hidden="true" />
+                </div>
+
                 <div className="grid gap-9 lg:grid-cols-12 lg:items-end">
                     <div className="lg:col-span-8">
-                        <div className="mb-6 inline-flex items-center gap-2 rounded-lg border border-[#258642]/20 bg-white/55 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.15em] text-[#1f7338]">
-                            <span className="h-2 w-2 rounded-full bg-[#34aa56]" />
-                            {t('partners.comingSoon')}
-                        </div>
                         <h2 className="max-w-4xl text-4xl font-black leading-[0.95] tracking-[-0.05em] text-[#101512] text-balance sm:text-6xl lg:text-7xl">
                             {t('partners.title')}
                         </h2>
@@ -64,6 +72,20 @@ export default function PartnerBenefits() {
                             <p className="mt-4 max-w-sm leading-7 text-[#54685a]">{benefit.description}</p>
                         </article>
                     ))}
+                </div>
+
+                <div className="border-t border-[#101512]/20 pt-12 text-center sm:pt-14">
+                    <p className="text-xs font-black uppercase tracking-[0.16em] text-[#258642]">{t('partners.partnerInvite')}</p>
+                    <h3 className="mx-auto mt-3 max-w-2xl text-2xl font-black tracking-[-0.03em] text-[#101512] text-balance sm:text-3xl">
+                        {t('partners.partnerHeading')}
+                    </h3>
+                    <Link
+                        href="/contact"
+                        className="mt-7 inline-flex min-h-12 items-center gap-2 rounded-xl bg-[#258642] px-6 py-3 text-sm font-black text-white transition-[background-color,transform] hover:-translate-y-0.5 hover:bg-[#1f7338] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#258642] focus-visible:ring-offset-2 focus-visible:ring-offset-[#e9f6ec]"
+                    >
+                        {t('partners.partnerCta')}
+                        <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                    </Link>
                 </div>
             </div>
         </section>

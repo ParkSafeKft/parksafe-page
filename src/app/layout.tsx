@@ -11,7 +11,81 @@ const inter = Inter({
   display: "swap",
 });
 
+const siteUrl = "https://parksafe.hu";
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${siteUrl}/#organization`,
+      name: "ParkSafe",
+      url: siteUrl,
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/logo.png`,
+      },
+      email: "info@parksafe.hu",
+      telephone: "+36 30 721 2524",
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "customer support",
+        email: "info@parksafe.hu",
+        telephone: "+36 30 721 2524",
+        availableLanguage: ["Hungarian", "English"],
+      },
+      sameAs: [
+        "https://www.facebook.com/profile.php?id=61587562615852",
+        "https://www.instagram.com/parksafe.app/",
+        "https://www.linkedin.com/company/parksafe-app/",
+      ],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      name: "ParkSafe",
+      url: `${siteUrl}/`,
+      description:
+        "Városi kerékpáros navigáció, biztonságos kerékpártárolók és szervizpontok egy közösségi alkalmazásban.",
+      inLanguage: ["hu", "en"],
+      publisher: { "@id": `${siteUrl}/#organization` },
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${siteUrl}/#application`,
+      name: "ParkSafe",
+      url: `${siteUrl}/`,
+      description:
+        "A ParkSafe egy ingyenes városi kerékpáros térképalkalmazás biztonságközpontú útvonaltervezéssel, kerékpártárolókkal, szervizpontokkal és közösségi helyadatokkal.",
+      applicationCategory: "NavigationApplication",
+      applicationSubCategory: "Urban cycling navigation and bicycle parking",
+      operatingSystem: ["iOS", "Android"],
+      isAccessibleForFree: true,
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "HUF",
+      },
+      downloadUrl: [
+        "https://apps.apple.com/app/id6752813986",
+        "https://play.google.com/store/apps/details?id=com.parksafe.app",
+      ],
+      screenshot: `${siteUrl}/ios_mapview.png`,
+      featureList: [
+        "Safety-first urban cycling routes",
+        "Bicycle parking discovery",
+        "Repair shop and public pump discovery",
+        "Community ratings, photos, and location reports",
+      ],
+      publisher: { "@id": `${siteUrl}/#organization` },
+      inLanguage: ["hu", "en"],
+    },
+  ],
+};
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  applicationName: "ParkSafe",
   title: "ParkSafe: Kerékpáros Navigáció & Térkép",
   description: "ParkSafe: Városi kerékpáros navigáció és térkép. Biztonságos útvonalak, tárolók és szervizek egy appban. Töltsd le ingyen és tekerj gondtalanul!",
   keywords: ["kerékpár", "kerékpáros útvonal", "bicikli tárolás", "kerékpár szerviz", "város közlekedés", "kerékpáros navigáció", "bike parking", "ParkSafe"],
@@ -66,33 +140,7 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              "name": "ParkSafe",
-              "url": "https://parksafe.hu/",
-              "potentialAction": {
-                "@type": "SearchAction",
-                "target": "https://parksafe.hu/search?q={search_term_string}",
-                "query-input": "required name=search_term_string"
-              }
-            })
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              "name": "ParkSafe",
-              "url": "https://parksafe.hu",
-              "logo": "https://parksafe.hu/logo.png",
-              "sameAs": [
-                "https://www.facebook.com/parksafe",
-                "https://twitter.com/parksafe"
-              ]
-            })
+            __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
           }}
         />
         <GoogleTagManager gtmId="GTM-PN6H8XM3" />

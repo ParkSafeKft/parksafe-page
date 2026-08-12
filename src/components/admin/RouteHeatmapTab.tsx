@@ -13,6 +13,8 @@ import { fetchOsmStreets, topStreets, toCsv, type StreetCount } from './regionEx
 
 type RangeKey = '30d' | '90d' | '365d' | 'all';
 
+const TRACK_PAGE_SIZE = 1000;
+
 const rangeLabels: Record<RangeKey, string> = {
     '30d': '30 nap',
     '90d': '90 nap',
@@ -139,15 +141,29 @@ export default function RouteHeatmapTab() {
         const load = async () => {
             setLoading(true);
             try {
-                const { data, error } = await supabase.rpc('admin_get_route_tracks', {
-                    p_start_at: startForRange(range),
-                    p_end_at: null,
-                    // No ride cap — the RPC trims a 300 m privacy radius off each
-                    // track's start/end, so every ride can safely go into the heatmap.
-                    p_max_points: 300,
-                });
-                if (error) throw error;
-                if (!cancelled) setTracks(asTracks(data));
+                const loadedTracks: Track[] = [];
+
+                for (let from = 0; ; from += TRACK_PAGE_SIZE) {
+                    const { data, error } = await supabase
+                        .rpc('admin_get_route_tracks', {
+                            p_start_at: startForRange(range),
+                            p_end_at: null,
+                            // No ride cap — the RPC trims a 300 m privacy radius off each
+                            // track's start/end, so every ride can safely go into the heatmap.
+                            p_max_points: 300,
+                        })
+                        .range(from, from + TRACK_PAGE_SIZE - 1);
+
+                    if (error) throw error;
+                    if (cancelled) return;
+
+                    const rows = Array.isArray(data) ? data : [];
+                    loadedTracks.push(...asTracks(rows));
+
+                    if (rows.length < TRACK_PAGE_SIZE) break;
+                }
+
+                if (!cancelled) setTracks(loadedTracks);
             } catch (err) {
                 if (process.env.NODE_ENV === 'development') {
                     console.warn(err instanceof Error ? err.message : 'Route tracks RPC failed');

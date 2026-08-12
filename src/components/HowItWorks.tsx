@@ -43,7 +43,7 @@ export default function HowItWorks() {
     ];
 
     return (
-        <section className="bg-white py-24 lg:py-32">
+        <section id="how-it-works" className="bg-white py-24 lg:py-32">
             <div className="mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-12">
                 <div className="grid gap-8 border-b border-[#101512]/15 pb-12 lg:grid-cols-12 lg:items-end">
                     <div className="lg:col-span-8">
