@@ -1,5 +1,9 @@
 // Type definitions for the application
 
+import type { SupabaseClient } from '@supabase/supabase-js';
+
+type SupabaseAuthClient = SupabaseClient['auth'];
+
 export interface User {
     id: string;
     email: string;
@@ -13,13 +17,12 @@ export interface User {
     last_sign_in_at?: string;
     app_metadata?: {
         provider?: string;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        [key: string]: any;
+        [key: string]: unknown;
     };
     user_metadata?: {
         avatar_url?: string;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        [key: string]: any;
+        full_name?: string;
+        [key: string]: unknown;
     };
 }
 
@@ -80,13 +83,11 @@ export interface DrinkingFountain extends Location {
 export interface AuthContextType {
     user: User | null;
     loading: boolean;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    signInWithEmail: (email: string, password: string) => Promise<{ data: any; error: any }>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    signInWithGoogle: () => Promise<{ data: any; error: any }>;
+    signInWithEmail: (email: string, password: string) => ReturnType<SupabaseAuthClient['signInWithPassword']>;
+    signInWithGoogle: () => ReturnType<SupabaseAuthClient['signInWithOAuth']>;
     signOut: () => Promise<void>;
-    requestPasswordReset: (email: string) => Promise<{ data: any; error: any }>;
-    updatePassword: (password: string) => Promise<{ data: any; error: any }>;
+    requestPasswordReset: (email: string) => ReturnType<SupabaseAuthClient['resetPasswordForEmail']>;
+    updatePassword: (password: string) => ReturnType<SupabaseAuthClient['updateUser']>;
 }
 
 export interface FormData {

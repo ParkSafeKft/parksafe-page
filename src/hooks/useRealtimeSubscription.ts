@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import type { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
@@ -37,15 +37,17 @@ export function useRealtimeSubscription({
   } | null>(null);
 
   const stableOnChange = useRef(onchange);
-  stableOnChange.current = onchange;
 
-  const subscribe = useCallback(() => {
+  useEffect(() => {
+    stableOnChange.current = onchange;
+  }, [onchange]);
+
+  useEffect(() => {
     if (!enabled || !table) return;
 
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
-      setIsSubscribed(false);
     }
 
     const channelName = `admin-realtime-${table}-${Date.now()}`;
@@ -74,19 +76,14 @@ export function useRealtimeSubscription({
       });
 
     channelRef.current = channel;
-  }, [enabled, table, schema, event]);
-
-  useEffect(() => {
-    subscribe();
 
     return () => {
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
-        setIsSubscribed(false);
       }
     };
-  }, [subscribe]);
+  }, [enabled, table, schema, event]);
 
   return { isSubscribed, lastEvent };
 }
@@ -117,9 +114,12 @@ export function useMultiTableRealtime({
   } | null>(null);
 
   const stableOnChange = useRef(onchange);
-  stableOnChange.current = onchange;
 
-  const tablesKey = tables.sort().join(',');
+  useEffect(() => {
+    stableOnChange.current = onchange;
+  }, [onchange]);
+
+  const tablesKey = [...tables].sort().join(',');
 
   useEffect(() => {
     if (!enabled || tables.length === 0) return;
@@ -127,7 +127,6 @@ export function useMultiTableRealtime({
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
-      setIsSubscribed(false);
     }
 
     const channelName = `admin-multi-realtime-${Date.now()}`;
@@ -163,7 +162,6 @@ export function useMultiTableRealtime({
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
-        setIsSubscribed(false);
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

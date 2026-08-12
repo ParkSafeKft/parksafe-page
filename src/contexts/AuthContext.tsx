@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { AuthContextType, User } from '../types';
 
@@ -22,7 +23,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const fetchUserProfile = async (session: any) => {
+    const fetchUserProfile = async (session: Session | null) => {
         if (!session?.user) {
             setUser(null);
             setLoading(false);
@@ -56,16 +57,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     useEffect(() => {
         // Get initial session
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        supabase.auth.getSession().then(({ data: { session } }: any) => {
+        supabase.auth.getSession().then(({ data: { session } }) => {
             fetchUserProfile(session);
         });
 
         // Listen for auth changes
         const {
             data: { subscription },
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+        } = supabase.auth.onAuthStateChange((_event, session) => {
             fetchUserProfile(session);
         });
 
@@ -73,11 +72,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }, []);
 
     const signInWithEmail = async (email: string, password: string) => {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        return supabase.auth.signInWithPassword({
             email,
             password,
         });
-        return { data, error };
     };
 
     const signInWithGoogle = async () => {
@@ -86,13 +84,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             ? `${window.location.origin}/profile`
             : undefined;
 
-        const { data, error } = await supabase.auth.signInWithOAuth({
+        return supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
                 redirectTo,
             },
         });
-        return { data, error };
     };
 
     const signOut = async (): Promise<void> => {
@@ -100,17 +97,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     const requestPasswordReset = async (email: string) => {
-        const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        return supabase.auth.resetPasswordForEmail(email, {
             redirectTo: `${window.location.origin}/reset-password`,
         });
-        return { data, error };
     };
 
     const updatePassword = async (password: string) => {
-        const { data, error } = await supabase.auth.updateUser({
+        return supabase.auth.updateUser({
             password: password,
         });
-        return { data, error };
     };
 
     const value: AuthContextType = {

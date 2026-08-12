@@ -4,7 +4,6 @@ import { supabase } from '@/lib/supabaseClient';
 import { Image as ImageIcon, Plus, X, AlertTriangle, Info, Loader2, GripVertical } from 'lucide-react';
 import { ImageUploadProps } from '@/types';
 import { cn } from '@/lib/utils';
-import { Progress } from '@/components/ui/progress';
 
 export interface ImageUploadHandle {
     uploadPending: (withLocationId: string) => Promise<string[]>;

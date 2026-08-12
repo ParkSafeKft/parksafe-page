@@ -1447,6 +1447,8 @@ export default function DetailModal({
                                                     className="relative w-28 h-28 rounded-lg overflow-hidden border border-border cursor-pointer hover:border-primary transition-colors group"
                                                     onClick={() => setImagePreviewUrl(url)}
                                                 >
+                                                    {/* Native img is intentional for user-supplied remote URLs with unknown dimensions. */}
+                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                                     <img
                                                         src={url}
                                                         alt={`${item.name} - ${index + 1}`}

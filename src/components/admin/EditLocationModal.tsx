@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import ImageUpload from './ImageUpload';
 import {
-    XCircle,
     Save,
     MapPin,
     Info,
@@ -24,7 +23,8 @@ import {
     Droplet,
     Trash2
 } from 'lucide-react';
-import { Location, ParkingLocation, RepairStation, BicycleService, DrinkingFountain } from '@/types';
+import type { LucideIcon } from 'lucide-react';
+import { Location, ParkingLocation, RepairStation, BicycleService } from '@/types';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -40,6 +40,27 @@ interface EditLocationModalProps {
     onDelete?: (id: string) => void;
 }
 
+interface EditLocationFormState {
+    name: string;
+    description: string;
+    city: string;
+    lat: string;
+    lon: string;
+    covered: boolean;
+    is_open_24h: boolean;
+    capacity_level: string;
+    has_camera: boolean;
+    phone: string;
+    website: string;
+    opening_hours: string;
+    rating: string;
+    price_range: string;
+    free: boolean;
+    available: boolean;
+}
+
+type EditLocationBooleanField = 'covered' | 'is_open_24h' | 'has_camera' | 'free' | 'available';
+
 function copyId(id: string) {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
         navigator.clipboard.writeText(id).then(
@@ -49,8 +70,7 @@ function copyId(id: string) {
     }
 }
 export default function EditLocationModal({ isOpen, onClose, locationType, item, onSuccess, onDelete }: EditLocationModalProps) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const formDataPayload: any = {
+    const formDataPayload: EditLocationFormState = {
         name: '',
         description: '',
         city: '',
@@ -68,7 +88,7 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
         free: false,
         available: true,
     };
-    const [formData, setFormData] = useState<any>(formDataPayload);
+    const [formData, setFormData] = useState<EditLocationFormState>(formDataPayload);
 
     const [pictureUrls, setPictureUrls] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -155,14 +175,14 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
         // Handle checkbox separately
         const checked = (e.target as HTMLInputElement).checked;
 
-        setFormData((prev: any) => ({
+        setFormData((prev) => ({
             ...prev,
             [name]: type === 'checkbox' ? checked : value
         }));
     };
 
-    const toggleBoolean = (field: string) => {
-        setFormData((prev: any) => ({
+    const toggleBoolean = (field: EditLocationBooleanField) => {
+        setFormData((prev) => ({
             ...prev,
             [field]: !prev[field]
         }));
@@ -606,8 +626,7 @@ export default function EditLocationModal({ isOpen, onClose, locationType, item,
     );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ToggleItem = ({ label, icon: Icon, active, onClick, isLoading }: { label: string, icon: any, active: boolean, onClick?: () => void, isLoading: boolean }) => (
+const ToggleItem = ({ label, icon: Icon, active, onClick, isLoading }: { label: string, icon: LucideIcon, active: boolean, onClick?: () => void, isLoading: boolean }) => (
     <div className="flex items-center justify-between group">
         <div className="flex items-center gap-3">
             <div className={`p-2 rounded-lg transition-colors ${active ? 'bg-green-500/10 text-green-500' : 'bg-white/5 text-zinc-500 group-hover:text-green-500'}`}>

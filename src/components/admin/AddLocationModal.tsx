@@ -4,7 +4,6 @@ import { useState, useRef } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import ImageUpload, { ImageUploadHandle } from './ImageUpload';
 import {
-    Save,
     MapPin,
     Info,
     Camera,
@@ -22,6 +21,7 @@ import {
     Plus,
     Droplet
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AdminModalBody, AdminModalContent, AdminModalFooter, AdminModalFrame, AdminModalHeader } from './AdminModal';
@@ -33,10 +33,29 @@ interface AddLocationModalProps {
     onSuccess: () => void;
 }
 
+interface AddLocationFormState {
+    name: string;
+    description: string;
+    city: string;
+    lat: string;
+    lon: string;
+    covered: boolean;
+    is_open_24h: boolean;
+    capacity_level: string;
+    has_camera: boolean;
+    phone: string;
+    website: string;
+    opening_hours: string;
+    rating: string;
+    price_range: string;
+    free: boolean;
+}
+
+type AddLocationBooleanField = 'covered' | 'is_open_24h' | 'has_camera' | 'free';
+
 export default function AddLocationModal({ isOpen, onClose, locationType, onSuccess }: AddLocationModalProps) {
     const imageUploadRef = useRef<ImageUploadHandle>(null);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [formData, setFormData] = useState<any>({
+    const [formData, setFormData] = useState<AddLocationFormState>({
         name: '',
         description: '',
         city: '',
@@ -67,14 +86,14 @@ export default function AddLocationModal({ isOpen, onClose, locationType, onSucc
         // Handle checkbox separately
         const checked = (e.target as HTMLInputElement).checked;
 
-        setFormData((prev: any) => ({
+        setFormData((prev) => ({
             ...prev,
             [name]: type === 'checkbox' ? checked : value
         }));
     };
 
-    const toggleBoolean = (field: string) => {
-        setFormData((prev: any) => ({
+    const toggleBoolean = (field: AddLocationBooleanField) => {
+        setFormData((prev) => ({
             ...prev,
             [field]: !prev[field]
         }));
@@ -518,8 +537,7 @@ export default function AddLocationModal({ isOpen, onClose, locationType, onSucc
     );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ToggleItem = ({ label, icon: Icon, active, onClick, isLoading }: { label: string, icon: any, active: boolean, onClick?: () => void, isLoading: boolean }) => (
+const ToggleItem = ({ label, icon: Icon, active, onClick, isLoading }: { label: string, icon: LucideIcon, active: boolean, onClick?: () => void, isLoading: boolean }) => (
     <div className="flex items-center justify-between group">
         <div className="flex items-center gap-3">
             <div className={`p-2 rounded-lg transition-colors ${active ? 'bg-green-500/10 text-green-500' : 'bg-white/5 text-zinc-500 group-hover:text-green-500'}`}>
