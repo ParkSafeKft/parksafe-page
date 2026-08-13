@@ -207,6 +207,8 @@ export default function AdminPage() {
     const [auditLog, setAuditLog] = useState<any[]>([]);
 
     // Filters
+    const [userSupporterFilter, setUserSupporterFilter] = useState<'all' | 'supporters' | 'non_supporters'>('all');
+    const [userSortMode, setUserSortMode] = useState<'supporters_first' | 'newest' | 'oldest' | 'name_asc'>('supporters_first');
     const [challengeCityFilter, setChallengeCityFilter] = useState('');
     const [challengeDateFrom, setChallengeDateFrom] = useState('');
     const [challengeDateTo, setChallengeDateTo] = useState('');
@@ -345,6 +347,14 @@ export default function AdminPage() {
                 case 'users':
                     query = supabase.from('profiles').select('*');
                     countQuery = supabase.from('profiles').select('*', { count: 'exact', head: true });
+                    if (userSupporterFilter === 'supporters') {
+                        query = query.eq('is_supporter', true);
+                        countQuery = countQuery.eq('is_supporter', true);
+                    } else if (userSupporterFilter === 'non_supporters') {
+                        // Older profiles may predate the boolean default and contain NULL.
+                        query = query.or('is_supporter.eq.false,is_supporter.is.null');
+                        countQuery = countQuery.or('is_supporter.eq.false,is_supporter.is.null');
+                    }
                     break;
                 case 'parking':
                     query = supabase.from('parkingSpots').select('*');
@@ -551,9 +561,23 @@ export default function AdminPage() {
                 community_routes: ['created_at', 'status', 'name', 'quality_rating'],
                 audit_log: ['created_at', 'action', 'target_type'],
             };
-            const allowed = validSortKeys[activeTab] || ['created_at'];
-            const sortKeyForTab = allowed.includes(sortConfig.key) ? sortConfig.key : allowed[0];
-            query = query.order(sortKeyForTab, { ascending: sortConfig.direction === 'asc' });
+            if (activeTab === 'users') {
+                if (userSortMode === 'supporters_first') {
+                    query = query
+                        .order('is_supporter', { ascending: false, nullsFirst: false })
+                        .order('created_at', { ascending: false });
+                } else if (userSortMode === 'oldest') {
+                    query = query.order('created_at', { ascending: true });
+                } else if (userSortMode === 'name_asc') {
+                    query = query.order('username', { ascending: true, nullsFirst: false });
+                } else {
+                    query = query.order('created_at', { ascending: false });
+                }
+            } else {
+                const allowed = validSortKeys[activeTab] || ['created_at'];
+                const sortKeyForTab = allowed.includes(sortConfig.key) ? sortConfig.key : allowed[0];
+                query = query.order(sortKeyForTab, { ascending: sortConfig.direction === 'asc' });
+            }
             }
 
             // Pagination
@@ -734,12 +758,12 @@ export default function AdminPage() {
     useEffect(() => {
         fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeTab, currentPage, sortConfig, searchTerm, profile, pageSize, challengeCityFilter, challengeDateFrom, challengeDateTo, challengeActiveFilter, routeStatusFilter, routeDateFrom, routeDateTo, auditActionFilter, auditTargetTypeFilter, feedbackStatusFilter, feedbackPriorityFilter, feedbackCategoryFilter, poiFlagStatusFilter, poiFlagReasonFilter, poiSuggestionStatusFilter, poiSuggestionTypeFilter, parkingImageStatusFilter]);
+    }, [activeTab, currentPage, sortConfig, searchTerm, profile, pageSize, userSupporterFilter, userSortMode, challengeCityFilter, challengeDateFrom, challengeDateTo, challengeActiveFilter, routeStatusFilter, routeDateFrom, routeDateTo, auditActionFilter, auditTargetTypeFilter, feedbackStatusFilter, feedbackPriorityFilter, feedbackCategoryFilter, poiFlagStatusFilter, poiFlagReasonFilter, poiSuggestionStatusFilter, poiSuggestionTypeFilter, parkingImageStatusFilter]);
 
     useEffect(() => {
         setSelectedRows(new Set());
         setSelectAll(false);
-    }, [currentPage, pageSize, feedbackStatusFilter, feedbackPriorityFilter, feedbackCategoryFilter, poiFlagStatusFilter, poiFlagReasonFilter]);
+    }, [currentPage, pageSize, userSupporterFilter, userSortMode, feedbackStatusFilter, feedbackPriorityFilter, feedbackCategoryFilter, poiFlagStatusFilter, poiFlagReasonFilter]);
 
     // Load cities for filter dropdowns when those tabs open
     useEffect(() => {
@@ -1611,13 +1635,21 @@ export default function AdminPage() {
                                             selectedRows={selectedRows}
                                             onSelectAll={handleSelectAll}
                                             onSelectRow={handleSelectRow}
-                                            onSort={handleSort}
-                                            sortConfig={sortConfig}
                                             onRowClick={(item) => openFreshDetail(item, 'user')}
                                             onToggleBan={handleUserToggleBan}
                                             onToggleSupporter={handleUserToggleSupporter}
                                             toggleLoading={toggleLoading}
                                             searchTerm={searchTerm}
+                                            supporterFilter={userSupporterFilter}
+                                            onSupporterFilterChange={(value) => {
+                                                setUserSupporterFilter(value);
+                                                setCurrentPage(1);
+                                            }}
+                                            sortMode={userSortMode}
+                                            onSortModeChange={(value) => {
+                                                setUserSortMode(value);
+                                                setCurrentPage(1);
+                                            }}
                                             currentPage={currentPage}
                                             totalPages={totalPages}
                                             onPageChange={setCurrentPage}
