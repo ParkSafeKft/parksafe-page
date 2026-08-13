@@ -25,14 +25,16 @@ interface UsersTableProps {
     selectedRows: Set<string>;
     onSelectAll: (checked: boolean) => void;
     onSelectRow: (id: string, checked: boolean) => void;
-    onSort: (key: string) => void;
-    sortConfig: { key: string; direction: string };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onRowClick: (item: any) => void;
     onToggleBan?: (id: string, currentlyBanned: boolean) => void;
     onToggleSupporter?: (id: string, currentlySupporter: boolean) => void;
     toggleLoading?: string | null;
     searchTerm?: string;
+    supporterFilter: 'all' | 'supporters' | 'non_supporters';
+    onSupporterFilterChange: (value: 'all' | 'supporters' | 'non_supporters') => void;
+    sortMode: 'supporters_first' | 'newest' | 'oldest' | 'name_asc';
+    onSortModeChange: (value: 'supporters_first' | 'newest' | 'oldest' | 'name_asc') => void;
     currentPage: number;
     totalPages: number;
     onPageChange: (page: number) => void;
@@ -45,13 +47,15 @@ export default function UsersTable({
     // selectedRows,
     // onSelectAll,
     // onSelectRow,
-    // onSort,
-    // sortConfig,
     onRowClick,
     onToggleBan,
     onToggleSupporter,
     toggleLoading,
     searchTerm,
+    supporterFilter,
+    onSupporterFilterChange,
+    sortMode,
+    onSortModeChange,
     // selectAll,
     currentPage,
     totalPages,
@@ -59,26 +63,50 @@ export default function UsersTable({
     pageSize,
     onPageSizeChange,
 }: UsersTableProps) {
-    if (users.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center py-32 border-2 border-dashed border-zinc-800 rounded-3xl bg-zinc-900/20">
-                <div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center mb-4">
-                    <Users className="w-8 h-8 text-zinc-700" />
-                </div>
-                <h3 className="text-lg font-semibold text-white">
-                    {searchTerm ? 'Nincs találat' : 'Nincsenek felhasználók'}
-                </h3>
-                <p className="text-zinc-500 max-w-xs text-center mt-2">
-                    {searchTerm
-                        ? 'Próbálj meg más keresési kifejezést használni.'
-                        : 'Még nem regisztrált senki az alkalmazásba.'}
-                </p>
-            </div>
-        );
-    }
-
     return (
-        <div className="flex flex-col gap-4 h-full">
+        <section className="flex h-full min-h-0 flex-col" aria-label="Felhasználók">
+            <div className="ops-filterbar">
+                <label className="ops-filter">
+                    <strong>Támogató</strong>
+                    <select
+                        value={supporterFilter}
+                        onChange={(event) => onSupporterFilterChange(event.target.value as 'all' | 'supporters' | 'non_supporters')}
+                    >
+                        <option value="all">Mind</option>
+                        <option value="supporters">Csak támogatók</option>
+                        <option value="non_supporters">Nem támogatók</option>
+                    </select>
+                </label>
+                <label className="ops-filter">
+                    <strong>Rendezés</strong>
+                    <select
+                        value={sortMode}
+                        onChange={(event) => onSortModeChange(event.target.value as 'supporters_first' | 'newest' | 'oldest' | 'name_asc')}
+                    >
+                        <option value="supporters_first">Támogatók elöl</option>
+                        <option value="newest">Legújabb elöl</option>
+                        <option value="oldest">Legrégebbi elöl</option>
+                        <option value="name_asc">Név szerint A–Z</option>
+                    </select>
+                </label>
+            </div>
+
+            {users.length === 0 ? (
+                <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
+                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-zinc-900">
+                        <Users className="h-8 w-8 text-zinc-700" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">
+                        {searchTerm || supporterFilter !== 'all' ? 'Nincs találat' : 'Nincsenek felhasználók'}
+                    </h3>
+                    <p className="mt-2 max-w-xs text-zinc-500">
+                        {searchTerm || supporterFilter !== 'all'
+                            ? 'Próbálj más keresést vagy támogatói szűrést.'
+                            : 'Még nem regisztrált senki az alkalmazásba.'}
+                    </p>
+                </div>
+            ) : (
+            <div className="flex min-h-0 flex-1 flex-col gap-4 p-4">
             <div className="flex-1 overflow-auto min-h-0 rounded-xl border border-white/5 bg-[#111111]">
                 <table className="w-full text-left border-collapse">
                     <thead className="sticky top-0 z-10 bg-[#111111]">
@@ -262,6 +290,8 @@ export default function UsersTable({
                     </div>
                 )}
             </div>
-        </div>
+            </div>
+            )}
+        </section>
     );
 }
