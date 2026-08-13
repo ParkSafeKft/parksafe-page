@@ -484,8 +484,33 @@ body:has(.weekly-detail-modal) .weekly-detail-toolbar input {
 .ops-feedback-subject { display: flex; min-width: 0; align-items: center; gap: 0.75rem; border: 0; background: transparent; text-align: left; }
 .ops-feedback-icon { display: grid; width: 1.9rem; height: 1.9rem; flex: none; place-items: center; border: 1px solid var(--ops-border); border-radius: 0.35rem; background: var(--ops-panel); color: var(--ops-text-3); }
 .ops-feedback-icon svg { width: 0.85rem; height: 0.85rem; }
-.ops-row-select { position: relative; display: flex; width: fit-content; min-width: 7rem; cursor: pointer; }
-.ops-row-select select { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: pointer; }
+.ops-row-select { display: inline-flex; width: fit-content; min-width: 7rem; align-items: center; justify-content: space-between; gap: 0.45rem; padding: 0.3rem 0.38rem; border: 1px solid transparent; border-radius: 0.32rem; background: transparent; color: var(--ops-text-2); cursor: pointer; text-align: left; }
+.ops-row-select:hover,
+.ops-row-select[data-state="open"] { border-color: var(--ops-border-strong); background: var(--ops-panel-raised); color: var(--ops-text); }
+.ops-row-select-chevron { width: 0.75rem; height: 0.75rem; flex: none; color: var(--ops-text-3); transition: rotate 120ms ease; }
+.ops-row-select[data-state="open"] .ops-row-select-chevron { rotate: 180deg; }
+.ops-status-menu {
+    --ops-panel-raised: #111512;
+    --ops-border: #202620;
+    --ops-border-strong: #303831;
+    --ops-text: #f0f3f0;
+    --ops-text-2: #a8b0aa;
+    --ops-text-3: #69736c;
+    --ops-green: #52df78;
+    --ops-red: #ff6b6b;
+    --ops-amber: #f1b84b;
+    --ops-blue: #67a6ff;
+    min-width: var(--radix-dropdown-menu-trigger-width);
+    padding: 0.25rem;
+    border-color: var(--ops-border-strong);
+    border-radius: 0.38rem;
+    background: var(--ops-panel-raised);
+    color: var(--ops-text-2);
+    box-shadow: 0 12px 32px rgb(0 0 0 / 42%);
+}
+.ops-status-menu-item { min-height: 2rem; justify-content: space-between; border-radius: 0.28rem; padding: 0 0.5rem; color: var(--ops-text-2); cursor: pointer; font-size: 0.68rem; }
+.ops-status-menu-item[data-highlighted] { background: #1a201b; color: var(--ops-text); }
+.ops-status-menu-item > svg { width: 0.75rem !important; height: 0.75rem !important; color: var(--ops-green) !important; }
 .ops-priority { display: flex; flex-direction: column; gap: 0.22rem; color: var(--ops-text-2); font-size: 0.7rem; font-weight: 550; }
 .ops-priority[data-priority="high"] { color: var(--ops-red); }
 .ops-priority[data-priority="medium"] { color: var(--ops-amber); }

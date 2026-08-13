@@ -2,6 +2,7 @@
 
 import { AlertCircle, ChevronRight, HelpCircle, Mail, MessageSquare, SearchX, TrendingUp, UserRound } from 'lucide-react';
 import BatchStatusActions from './BatchStatusActions';
+import InlineStatusMenu from './InlineStatusMenu';
 import { Checkbox } from '@/components/ui/checkbox';
 
 interface Feedback {
@@ -143,12 +144,13 @@ export default function FeedbackTable({
                                     </span>
                                 </button>
 
-                                <label className="ops-row-select" onClick={(event) => event.stopPropagation()}>
-                                    <span className="ops-status" data-tone={statusTone(item.status)}>{statusLabels[item.status] || item.status}</span>
-                                    <select value={item.status} onChange={(event) => onStatusChange(item.id, event.target.value)} aria-label={`${item.title} állapota`}>
-                                        {Object.entries(statusLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
-                                    </select>
-                                </label>
+                                <InlineStatusMenu
+                                    value={item.status}
+                                    options={statusLabels}
+                                    toneFor={statusTone}
+                                    onValueChange={(status) => onStatusChange(item.id, status)}
+                                    ariaLabel={`${item.title} állapota`}
+                                />
 
                                 <span className="ops-priority" data-priority={item.priority}>{priorityLabels[item.priority] || item.priority}<small>{categoryLabels[item.category] || item.category}</small></span>
 

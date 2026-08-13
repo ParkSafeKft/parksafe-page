@@ -2,6 +2,7 @@
 
 import { ChevronRight, ExternalLink, Flag, MapPin, SearchX, Store, UserRound, Wrench } from 'lucide-react';
 import BatchStatusActions from './BatchStatusActions';
+import InlineStatusMenu from './InlineStatusMenu';
 import { Checkbox } from '@/components/ui/checkbox';
 
 interface PoiFlag {
@@ -129,7 +130,7 @@ export default function PoiFlagsTable({
                                         <span className="ops-feedback-icon"><PoiIcon type={item.poi_type} /></span>
                                         <span><strong>{poiTypes[item.poi_type] || item.poi_type}</strong><small>{item.poi_id}</small></span>
                                     </button>
-                                    <label className="ops-row-select" onClick={(event) => event.stopPropagation()}><span className="ops-status" data-tone={statusTone(item.status)}>{statuses[item.status] || item.status}</span><select value={item.status} onChange={(event) => onStatusChange(item.id, event.target.value)} aria-label="Bejelentés állapota">{Object.entries(statuses).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label>
+                                    <InlineStatusMenu value={item.status} options={statuses} toneFor={statusTone} onValueChange={(status) => onStatusChange(item.id, status)} ariaLabel="Bejelentés állapota" />
                                     <div className="ops-feedback-contact"><span>{new Intl.DateTimeFormat('hu-HU', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(item.created_at))}</span><small>{reporter}</small></div>
                                     <div className="ops-inline-actions" onClick={(event) => event.stopPropagation()}>
                                         {hasCoords ? <a className="ops-icon-action" href={`https://www.openstreetmap.org/edit?#map=19/${item.reported_latitude}/${item.reported_longitude}`} target="_blank" rel="noopener noreferrer" title="Bejelentett hely az OSM-en" aria-label="Bejelentett hely az OSM-en"><ExternalLink aria-hidden="true" /></a> : null}
