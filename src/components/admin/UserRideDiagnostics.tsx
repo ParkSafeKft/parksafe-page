@@ -7,6 +7,7 @@ import {
     Bike,
     Bug,
     ChevronDown,
+    Copy,
     Crosshair,
     Database,
     Eye,
@@ -19,6 +20,7 @@ import {
     Smartphone,
     XCircle,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -174,6 +176,14 @@ function rejectionEntries(value: Record<string, unknown> | null): Array<[string,
         .sort((a, b) => b[1] - a[1]);
 }
 
+function copyId(id: string, label: string) {
+    if (typeof navigator === 'undefined' || !navigator.clipboard) return;
+    navigator.clipboard.writeText(id).then(
+        () => toast.success(`${label} vágólapra másolva`),
+        () => toast.error('Másolás sikertelen')
+    );
+}
+
 export default function UserRideDiagnostics({ userId }: { userId: string }) {
     const [isOpen, setIsOpen] = useState(false);
     const [rows, setRows] = useState<RideDiagnostic[]>([]);
@@ -289,6 +299,7 @@ export default function UserRideDiagnostics({ userId }: { userId: string }) {
     };
 
     const visibleRows = useMemo(() => rows, [rows]);
+    const remainingCount = Math.max(totalCount - rows.length, 0);
 
     return (
         <AdminModalSection
@@ -350,7 +361,16 @@ export default function UserRideDiagnostics({ userId }: { userId: string }) {
                     ) : visibleRows.length === 0 ? (
                         <div className="admin-profile-empty"><Bike /><div><strong>Nincs találat</strong><span>A megadott szűrőkkel nem található ride.</span></div></div>
                     ) : (
-                        <div className="ride-diagnostics-list">
+                        <>
+                            <div className="ride-diagnostics-progress">
+                                <span><strong>{rows.length.toLocaleString('hu-HU')}</strong> / {totalCount.toLocaleString('hu-HU')} ride betöltve</span>
+                                {remainingCount > 0 ? (
+                                    <Button type="button" size="sm" variant="outline" onClick={() => void loadDiagnostics({ reset: false })} disabled={loadingMore}>
+                                        {loadingMore ? <Loader2 className="animate-spin" /> : <Database />} Régebbi ride-ok betöltése ({Math.min(PAGE_SIZE, remainingCount)})
+                                    </Button>
+                                ) : null}
+                            </div>
+                            <div className="ride-diagnostics-list">
                             {visibleRows.map(ride => {
                                 const expanded = expandedRideId === ride.ride_id;
                                 const statusKey = ride.refine_status || 'legacy';
@@ -380,8 +400,16 @@ export default function UserRideDiagnostics({ userId }: { userId: string }) {
                                         {expanded ? (
                                             <div className="ride-diagnostic-detail">
                                                 <div className="ride-diagnostic-idline">
-                                                    <code>{ride.ride_id}</code>
-                                                    {ride.client_ride_id ? <span>Kliens: {ride.client_ride_id}</span> : null}
+                                                    <span>
+                                                        <code>Ride: {ride.ride_id}</code>
+                                                        <button type="button" className="admin-modal-meta-action" onClick={() => copyId(ride.ride_id, 'Ride ID')} aria-label="Ride ID másolása" title="Ride ID másolása"><Copy /></button>
+                                                    </span>
+                                                    {ride.client_ride_id ? (
+                                                        <span>
+                                                            <code>Kliens: {ride.client_ride_id}</code>
+                                                            <button type="button" className="admin-modal-meta-action" onClick={() => copyId(ride.client_ride_id!, 'Kliens ID')} aria-label="Kliens ID másolása" title="Kliens ID másolása"><Copy /></button>
+                                                        </span>
+                                                    ) : null}
                                                 </div>
 
                                                 <div className="ride-diagnostic-panels">
@@ -477,12 +505,13 @@ export default function UserRideDiagnostics({ userId }: { userId: string }) {
                                     </article>
                                 );
                             })}
-                        </div>
+                            </div>
+                        </>
                     )}
 
                     {!loading && rows.length < totalCount ? (
                         <Button type="button" size="sm" variant="outline" className="ride-diagnostics-more" onClick={() => void loadDiagnostics({ reset: false })} disabled={loadingMore}>
-                            {loadingMore ? <Loader2 className="animate-spin" /> : <Database />} További ride-ok betöltése
+                            {loadingMore ? <Loader2 className="animate-spin" /> : <Database />} Régebbi ride-ok betöltése ({Math.min(PAGE_SIZE, remainingCount)})
                         </Button>
                     ) : null}
                 </div>

@@ -30,8 +30,8 @@ const TARGET_OPTIONS = ['challenge_attempt', 'user', 'ride', 'daily_challenge', 
 const ACTION_LABELS: Record<string, string> = {
     view_user_ride_metrics: 'Ride metrikák megtekintése',
     view_exact_ride_route: 'Pontos ride-útvonal megtekintése',
-    view_user_ride_diagnostics: 'Ride metrikák megtekintése (korábbi)',
-    view_ride_location: 'Pontos ride-útvonal megtekintése (korábbi)',
+    view_user_ride_diagnostics: 'Ride metrikák megtekintése',
+    view_ride_location: 'Pontos ride-útvonal megtekintése',
 };
 
 const TARGET_LABELS: Record<string, string> = {
