@@ -22,8 +22,39 @@ const ACTION_OPTIONS = [
     'toggle_city_active', 'toggle_challenge_active', 'delete_challenge', 'delete_city',
     'community_route_status', 'delete_community_route',
     'create_city', 'update_city',
+    'view_user_ride_metrics', 'view_exact_ride_route',
+    'view_user_ride_diagnostics', 'view_ride_location',
 ];
-const TARGET_OPTIONS = ['challenge_attempt', 'user', 'daily_challenge', 'city', 'community_bike_lane'];
+const TARGET_OPTIONS = ['challenge_attempt', 'user', 'ride', 'daily_challenge', 'city', 'community_bike_lane'];
+
+const ACTION_LABELS: Record<string, string> = {
+    view_user_ride_metrics: 'Ride metrikák megtekintése',
+    view_exact_ride_route: 'Pontos ride-útvonal megtekintése',
+    view_user_ride_diagnostics: 'Ride metrikák megtekintése (korábbi)',
+    view_ride_location: 'Pontos ride-útvonal megtekintése (korábbi)',
+};
+
+const TARGET_LABELS: Record<string, string> = {
+    challenge_attempt: 'Kihívásteljesítés',
+    user: 'Felhasználó',
+    ride: 'Ride',
+    daily_challenge: 'Napi kihívás',
+    city: 'Város',
+    community_bike_lane: 'Közösségi útvonal',
+};
+
+const actionLabel = (action: string) => ACTION_LABELS[action] || action;
+const targetLabel = (target: string) => TARGET_LABELS[target] || target;
+
+const auditNote = (action: string, notes: string | null | undefined) => {
+    if (action === 'view_user_ride_diagnostics') {
+        return 'Ride-előzmények és GPS/refinement metrikák megtekintve. Pontos útvonal nem lett lekérve.';
+    }
+    if (action === 'view_ride_location') {
+        return `Pontos rögzített és finomított GPS-útvonal megtekintve. Admin indoklása: ${notes || 'nincs megadva'}`;
+    }
+    return notes || '-';
+};
 
 const actionBadge = (a: string) => {
     if (a.startsWith('approve') || a === 'unban_user' || a === 'show_on_leaderboard' || a === 'grant_supporter') return 'bg-green-500/10 text-green-400 border-green-500/20';
@@ -47,7 +78,7 @@ export default function AuditLogTable({
                             className="appearance-none bg-[#111111] border border-white/10 text-zinc-300 text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:border-green-500/50 cursor-pointer hover:border-white/20 transition-colors"
                         >
                             <option value="">Mind</option>
-                            {ACTION_OPTIONS.map(a => <option key={a} value={a}>{a}</option>)}
+                            {ACTION_OPTIONS.map(a => <option key={a} value={a}>{actionLabel(a)}</option>)}
                         </select>
                         <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-500 pointer-events-none" />
                     </div>
@@ -61,7 +92,7 @@ export default function AuditLogTable({
                             className="appearance-none bg-[#111111] border border-white/10 text-zinc-300 text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:border-green-500/50 cursor-pointer hover:border-white/20 transition-colors"
                         >
                             <option value="">Mind</option>
-                            {TARGET_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
+                            {TARGET_OPTIONS.map(t => <option key={t} value={t}>{targetLabel(t)}</option>)}
                         </select>
                         <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-500 pointer-events-none" />
                     </div>
@@ -101,13 +132,13 @@ export default function AuditLogTable({
                                         <td className="p-4 text-sm text-zinc-200">{adminName}</td>
                                         <td className="p-4">
                                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border uppercase tracking-wider font-mono ${actionBadge(item.action)}`}>
-                                                {item.action}
+                                                {actionLabel(item.action)}
                                             </span>
                                         </td>
-                                        <td className="p-4 text-xs text-zinc-400 font-mono">{item.target_type}</td>
+                                        <td className="p-4 text-xs text-zinc-400">{targetLabel(item.target_type)}</td>
                                         <td className="p-4 text-[10px] text-zinc-600 font-mono">{String(item.target_id).slice(0, 8)}…</td>
                                         <td className="p-4 text-xs text-zinc-400 max-w-xs">
-                                            <span className="line-clamp-2">{item.notes || '-'}</span>
+                                            <span className="line-clamp-2">{auditNote(item.action, item.notes)}</span>
                                         </td>
                                     </tr>
                                 );
