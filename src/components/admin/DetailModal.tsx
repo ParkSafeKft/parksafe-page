@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ImagePreview from './ImagePreview';
+import UserRideDiagnostics from './UserRideDiagnostics';
 import {
     AdminModalBody,
     AdminModalContent,
@@ -1393,6 +1394,8 @@ export default function DetailModal({
                                     </div>
                                 </AdminModalSection>
                             ) : null}
+
+                            <UserRideDiagnostics userId={item.id} />
                         </AdminModalBody>
                     </AdminModalFrame>
                 </AdminModalContent>
