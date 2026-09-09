@@ -452,6 +452,9 @@ body:has(.weekly-detail-modal) .weekly-detail-toolbar input {
 /* Shared operation lists */
 .ops-collection { display: flex; min-height: 0; flex: 1; flex-direction: column; overflow: auto; background: var(--ops-canvas); }
 .ops-collection > * { flex-shrink: 0; }
+.ops-collection-contained { overflow: hidden; }
+.ops-collection-contained > .ops-collection-scroll { min-height: 0; flex: 1; overflow: auto; }
+.ops-collection-scroll > .ops-list-header { position: sticky; top: 0; z-index: 5; }
 .ops-filterbar { display: flex; min-height: 3.2rem; flex-wrap: wrap; align-items: center; gap: 0.5rem; padding: 0.55rem 1rem; border-bottom: 1px solid var(--ops-border); background: var(--ops-panel); }
 .ops-filter { display: inline-flex; height: 2rem; align-items: center; gap: 0.4rem; padding: 0 0.25rem 0 0.55rem; border: 1px solid var(--ops-border); border-radius: 0.35rem; background: #0a0d0b; color: var(--ops-text-3); font-size: 0.68rem; }
 .ops-filter strong { color: var(--ops-text-2); font-weight: 500; }
