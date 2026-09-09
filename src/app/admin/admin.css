@@ -450,7 +450,8 @@ body:has(.weekly-detail-modal) .weekly-detail-toolbar input {
 .weekly-detail-empty span { margin-top: 0.2rem; font-size: 0.67rem; }
 
 /* Shared operation lists */
-.ops-collection { display: flex; min-height: 100%; flex-direction: column; background: var(--ops-canvas); }
+.ops-collection { display: flex; min-height: 0; flex: 1; flex-direction: column; overflow: auto; background: var(--ops-canvas); }
+.ops-collection > * { flex-shrink: 0; }
 .ops-filterbar { display: flex; min-height: 3.2rem; flex-wrap: wrap; align-items: center; gap: 0.5rem; padding: 0.55rem 1rem; border-bottom: 1px solid var(--ops-border); background: var(--ops-panel); }
 .ops-filter { display: inline-flex; height: 2rem; align-items: center; gap: 0.4rem; padding: 0 0.25rem 0 0.55rem; border: 1px solid var(--ops-border); border-radius: 0.35rem; background: #0a0d0b; color: var(--ops-text-3); font-size: 0.68rem; }
 .ops-filter strong { color: var(--ops-text-2); font-weight: 500; }
