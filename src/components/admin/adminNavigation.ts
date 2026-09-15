@@ -2,6 +2,7 @@ import {
     Building2,
     Camera,
     ChartNoAxesCombined,
+    Activity,
     Droplet,
     Flag,
     LayoutDashboard,
@@ -166,6 +167,14 @@ export const ADMIN_NAVIGATION: AdminNavigationItem[] = [
         description: 'Anonimizált kerékpáros útvonalforgalom térképi elemzése.',
         section: 'Elemzés',
         icon: ChartNoAxesCombined,
+    },
+    {
+        id: 'ride_diagnostics',
+        label: 'Ride diagnosztika',
+        shortLabel: 'Ride diagnosztika',
+        description: 'Mentett és eldobott ride-próbálkozások közös hibakeresési nézete.',
+        section: 'Elemzés',
+        icon: Activity,
     },
     {
         id: 'audit_log',

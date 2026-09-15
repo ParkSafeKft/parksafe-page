@@ -220,7 +220,14 @@ begin
         raise exception 'Ride id is required' using errcode = '22023';
     end if;
 
-    if char_length(v_purpose) < 10 then
+    if char_length(v_purpose) < 10 and not exists (
+        select 1 from public.admin_audit_log recent
+        where recent.admin_id = v_admin_id
+          and recent.target_type = 'ride'
+          and recent.target_id = p_ride_id::text
+          and recent.action in ('view_ride_location', 'view_exact_ride_route')
+          and recent.created_at >= now() - interval '30 minutes'
+    ) then
         raise exception 'A support purpose of at least 10 characters is required' using errcode = '22023';
     end if;
 

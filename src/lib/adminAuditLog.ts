@@ -20,14 +20,16 @@ export type AuditAction =
     | 'create_city'
     | 'update_city'
     | 'regional_visibility_on'
-    | 'regional_visibility_off';
+    | 'regional_visibility_off'
+    | 'view_ride_diagnostic';
 
 export type AuditTargetType =
     | 'challenge_attempt'
     | 'user'
     | 'daily_challenge'
     | 'city'
-    | 'community_bike_lane';
+    | 'community_bike_lane'
+    | 'ride';
 
 const isDev = process.env.NODE_ENV === 'development';
 

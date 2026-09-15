@@ -66,6 +66,7 @@ import AppConfigTab from '@/components/admin/AppConfigTab';
 import { writeAuditLog } from '@/lib/adminAuditLog';
 import ContentStatsOverview from '@/components/admin/ContentStatsOverview';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import RideDiagnosticsTab from '@/components/admin/RideDiagnosticsTab';
 
 /**
  * Sanitize a search term to prevent PostgREST filter injection.
@@ -111,6 +112,7 @@ const TAB_SLUGS: Record<string, string> = {
     community_routes: 'community-routes',
     leaderboard: 'leaderboard',
     route_heatmap: 'route-heatmap',
+    ride_diagnostics: 'ride-diagnostics',
     audit_log: 'audit-log',
     app_config: 'app-config',
 };
@@ -478,6 +480,10 @@ export default function AdminPage() {
                     return;
                 case 'route_heatmap':
                     // Heatmap tab uses a privacy-preserving RPC and manages its own loading.
+                    setTotalCount(0);
+                    setDataLoading(false);
+                    return;
+                case 'ride_diagnostics':
                     setTotalCount(0);
                     setDataLoading(false);
                     return;
@@ -1855,7 +1861,8 @@ export default function AdminPage() {
                                     {activeTab === 'leaderboard' && (
                                         <LeaderboardTab cities={citiesForFilter} adminId={adminId} />
                                     )}
-                                    {activeTab === 'route_heatmap' && (
+                                        {activeTab === 'ride_diagnostics' && <RideDiagnosticsTab />}
+                                        {activeTab === 'route_heatmap' && (
                                         <RouteHeatmapTab />
                                     )}
                                     {activeTab === 'app_config' && (

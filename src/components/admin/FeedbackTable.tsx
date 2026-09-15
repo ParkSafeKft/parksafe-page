@@ -1,6 +1,7 @@
 'use client';
 
-import { AlertCircle, ChevronRight, HelpCircle, Mail, MessageSquare, SearchX, TrendingUp, UserRound } from 'lucide-react';
+import { AlertCircle, ChevronRight, Copy, HelpCircle, MessageSquare, SearchX, TrendingUp, UserRound } from 'lucide-react';
+import { toast } from 'sonner';
 import BatchStatusActions from './BatchStatusActions';
 import InlineStatusMenu from './InlineStatusMenu';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -67,6 +68,10 @@ function statusTone(status: string) {
     if (status === 'in_progress') return 'info';
     if (status === 'duplicate') return 'danger';
     return 'neutral';
+}
+
+function copyEmail(email: string) {
+    navigator.clipboard?.writeText(email).then(() => toast.success('Emailcím a vágólapra másolva'));
 }
 
 export default function FeedbackTable({
@@ -161,7 +166,7 @@ export default function FeedbackTable({
                                     </div>
 
                                     <div className="ops-inline-actions" onClick={(event) => event.stopPropagation()}>
-                                        {item.contact_email ? <a className="ops-icon-action" href={`mailto:${item.contact_email}?subject=${encodeURIComponent(`ParkSafe: ${item.title}`)}`} title="Email írása" aria-label="Email írása"><Mail aria-hidden="true" /></a> : null}
+                                        {item.contact_email ? <button type="button" className="ops-icon-action" onClick={() => copyEmail(item.contact_email!)} title="Emailcím másolása" aria-label="Emailcím másolása"><Copy aria-hidden="true" /></button> : null}
                                         {item.user_id && onOpenUser ? <button type="button" className="ops-icon-action" onClick={() => onOpenUser(item.user_id!)} title="Beküldő profilja" aria-label="Beküldő profilja"><UserRound aria-hidden="true" /></button> : null}
                                         <button type="button" className="ops-icon-action" onClick={() => onRowClick(item)} title="Részletek" aria-label="Részletek"><ChevronRight aria-hidden="true" /></button>
                                     </div>

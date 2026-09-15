@@ -73,6 +73,8 @@ interface RideDiagnostic {
     battery_saver_on: boolean | null;
     doze_whitelisted: boolean | null;
     precise_location_on: boolean | null;
+    ride_type?: 'normal' | 'diagnostic';
+    diagnostic_reason?: string | null;
 }
 
 interface RevealedRoute {
@@ -83,6 +85,7 @@ interface RevealedRoute {
 const PAGE_SIZE = 25;
 
 const REFINE_LABELS: Record<string, string> = {
+    discarded_diagnostic: 'Eldobott diagnosztikai próbálkozás',
     success: 'Sikeres',
     partial: 'Részleges',
     pending: 'Várakozik',
@@ -199,6 +202,7 @@ export default function UserRideDiagnostics({ userId }: { userId: string }) {
     const [routes, setRoutes] = useState<Record<string, RevealedRoute>>({});
     const [routeMode, setRouteMode] = useState<Record<string, 'recorded' | 'refined'>>({});
     const [routeLoadingId, setRouteLoadingId] = useState<string | null>(null);
+    const routePurposeKey = (rideId: string) => `parksafe-route-purpose:${userId}:${rideId}`;
 
     useEffect(() => {
         setIsOpen(false);
@@ -237,7 +241,42 @@ export default function UserRideDiagnostics({ userId }: { userId: string }) {
             });
             if (rpcError) throw rpcError;
             const nextRows = (Array.isArray(data) ? data : []) as RideDiagnostic[];
-            setRows(current => reset ? nextRows : [...current, ...nextRows]);
+            const { data: discarded, error: discardedError } = await supabase
+                .from('discarded_ride_diagnostics')
+                .select('id,client_ride_id,started_at,created_at,duration_seconds,moving_time_seconds,distance_meters,coordinate_count,first_offset,last_offset,raw_sample_count,rejection_counts,reason,model')
+                .eq('user_id', userId)
+                .order('started_at', { ascending: false })
+                .limit(PAGE_SIZE);
+            if (discardedError) throw discardedError;
+            const diagnosticRows = (discarded || []).map((row) => ({
+                ride_id: row.id,
+                client_ride_id: row.client_ride_id,
+                started_at: row.started_at,
+                created_at: row.created_at,
+                favorite_name: 'Diagnosztikai próbálkozás',
+                kind: 'diagnostic',
+                distance_meters: row.distance_meters,
+                raw_distance_meters: row.distance_meters,
+                duration_seconds: row.duration_seconds,
+                moving_time_seconds: row.moving_time_seconds,
+                refine_status: 'discarded_diagnostic',
+                refine_reason: row.reason,
+                raw_sample_count: row.raw_sample_count,
+                recorded_point_count: row.coordinate_count,
+                snapped_point_count: 0,
+                sample_count_total: row.raw_sample_count,
+                sample_count_accepted: 0,
+                sample_count_rejected: row.rejection_counts,
+                model: row.model,
+                refine_attempts: 0,
+                ride_type: 'diagnostic',
+                diagnostic_reason: row.reason,
+            })) as RideDiagnostic[];
+            nextRows.push(...diagnosticRows);
+            const mergedRows = (reset ? nextRows : [...rows, ...nextRows]).sort((a, b) =>
+                new Date(b.started_at || b.created_at || 0).getTime() - new Date(a.started_at || a.created_at || 0).getTime()
+            );
+            setRows(mergedRows);
             setTotalCount(asNumber(nextRows[0]?.total_count) ?? (reset ? nextRows.length : rows.length + nextRows.length));
         } catch (loadError) {
             const message = loadError instanceof Error ? loadError.message : 'A diagnosztika nem tölthető be.';
@@ -274,8 +313,8 @@ export default function UserRideDiagnostics({ userId }: { userId: string }) {
     };
 
     const revealRoute = async (rideId: string) => {
-        const purpose = (purposeByRide[rideId] || '').trim();
-        if (purpose.length < 10) return;
+        const purpose = (purposeByRide[rideId] || sessionStorage.getItem(routePurposeKey(rideId)) || '').trim();
+        if (purpose.length < 10 && !sessionStorage.getItem(routePurposeKey(rideId))) return;
         setRouteLoadingId(rideId);
         setError(null);
         try {
@@ -290,6 +329,7 @@ export default function UserRideDiagnostics({ userId }: { userId: string }) {
             setRoutes(current => ({ ...current, [rideId]: { recorded, refined } }));
             setRouteMode(current => ({ ...current, [rideId]: refined.length >= 2 ? 'refined' : 'recorded' }));
             setPurposeByRide(current => ({ ...current, [rideId]: '' }));
+            if (purpose.length >= 10) sessionStorage.setItem(routePurposeKey(rideId), purpose);
         } catch (routeError) {
             const message = routeError instanceof Error ? routeError.message : 'Az útvonal nem tölthető be.';
             setError(message);
@@ -383,7 +423,7 @@ export default function UserRideDiagnostics({ userId }: { userId: string }) {
                                 const accepted = asNumber(ride.sample_count_accepted);
                                 const total = asNumber(ride.sample_count_total);
                                 return (
-                                    <article className="ride-diagnostic-card" key={ride.ride_id} data-expanded={expanded}>
+                                    <article className="ride-diagnostic-card" key={ride.ride_id} data-expanded={expanded} data-type={ride.ride_type || 'normal'}>
                                         <button
                                             type="button"
                                             className="ride-diagnostic-summary"
@@ -474,7 +514,7 @@ export default function UserRideDiagnostics({ userId }: { userId: string }) {
                                                                 type="button"
                                                                 size="sm"
                                                                 onClick={() => void revealRoute(ride.ride_id)}
-                                                                disabled={(purposeByRide[ride.ride_id] || '').trim().length < 10 || routeLoadingId === ride.ride_id}
+                                                                disabled={((purposeByRide[ride.ride_id] || '').trim().length < 10 && !sessionStorage.getItem(routePurposeKey(ride.ride_id))) || routeLoadingId === ride.ride_id}
                                                             >
                                                                 {routeLoadingId === ride.ride_id ? <Loader2 className="animate-spin" /> : <Eye />} Útvonal megtekintése
                                                             </Button>

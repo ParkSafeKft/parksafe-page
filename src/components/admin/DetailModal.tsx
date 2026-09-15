@@ -104,6 +104,15 @@ function copyId(id: string) {
     }
 }
 
+function copyEmail(email: string) {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        navigator.clipboard.writeText(email).then(
+            () => toast.success('Emailcím a vágólapra másolva'),
+            () => toast.error('Másolás sikertelen')
+        );
+    }
+}
+
 interface UserActivityProgress {
     xp: number | null;
     current_streak: number | null;
@@ -1140,7 +1149,7 @@ export default function DetailModal({
                                     title={item.contact_email || 'Nincs megadva elérhetőség'}
                                     description={item.contact_email ? 'Közvetlen válasz a levelezőben' : undefined}
                                     icon={item.contact_email ? <Mail /> : <XCircle />}
-                                    href={item.contact_email ? `mailto:${item.contact_email}?subject=${encodeURIComponent(`ParkSafe: ${item.title || 'visszajelzés'}`)}` : undefined}
+                                    onClick={item.contact_email ? () => copyEmail(item.contact_email) : undefined}
                                 />
                                 {item.user_id ? (
                                     <AdminRelationCard
@@ -1243,10 +1252,10 @@ export default function DetailModal({
                                 </div>
                                 <div className="admin-profile-identity-actions">
                                     {item.email ? (
-                                        <a href={`mailto:${item.email}`}>
-                                            <Mail />
-                                            Email írása
-                                        </a>
+                                        <button type="button" onClick={() => copyEmail(item.email)}>
+                                            <Copy />
+                                            Emailcím másolása
+                                        </button>
                                     ) : null}
                                     {item.id ? (
                                         <button type="button" onClick={() => copyId(item.id)}>
