@@ -108,12 +108,13 @@ export default function RouteHeatmapTab() {
             });
             L.control.zoom({ position: 'topright' }).addTo(map);
 
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
-                subdomains: 'abcd',
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                subdomains: ['a', 'b', 'c'],
                 maxZoom: 19,
                 opacity: 0.95,
                 crossOrigin: 'anonymous',
-                attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+                className: 'parksafe-dark-map-tiles',
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>',
             }).addTo(map);
 
             LRef.current = L;

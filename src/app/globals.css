@@ -1,6 +1,12 @@
 @import 'tailwindcss';
 @import "tw-animate-css";
 
+/* Darken the keyless OSM raster basemap while leaving the heatmap canvas and
+   Leaflet controls untouched. OSM tiles remain readable beneath the overlay. */
+.parksafe-dark-map-tiles {
+  filter: invert(88%) hue-rotate(180deg) brightness(68%) contrast(112%) saturate(62%);
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
