@@ -1,10 +1,10 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import {
     Bike,
     Clock3,
-    ExternalLink,
     Map,
     Search,
     UserPlus,
@@ -147,13 +147,6 @@ function formatDate(value: string | null) {
     return value ? dateTimeFormat.format(new Date(value)) : 'Nincs időpont';
 }
 
-function getMapUrl(ride: WeeklyRide) {
-    if (!ride.start_point || !ride.end_point) return null;
-    const [startLng, startLat] = ride.start_point;
-    const [endLng, endLat] = ride.end_point;
-    return `https://www.google.com/maps/dir/?api=1&origin=${startLat},${startLng}&destination=${endLat},${endLng}&travelmode=bicycling`;
-}
-
 function getRideLabel(ride: WeeklyRide) {
     if (ride.favorite_name) return ride.favorite_name;
     if (ride.kind === 'normal') return 'Normál ride';
@@ -279,32 +272,22 @@ export default function WeeklyStatsDetailModal({ metric, stats, onClose }: Weekl
                         ) : (
                             <div className="weekly-detail-table weekly-detail-table--rides">
                                 <div className="weekly-detail-table-head" aria-hidden="true">
-                                    <span>Időpont & user</span><span>Útvonal</span><span>Távolság</span><span>Idő</span><span>Átlag</span><span>Térkép</span>
+                                    <span>Időpont & user</span><span>Ride</span><span>Távolság</span><span>Idő</span><span>Átlag</span>
                                 </div>
                                 {rides.map(ride => {
-                                    const mapUrl = getMapUrl(ride);
                                     return (
-                                        <article className="weekly-detail-row" key={ride.id}>
+                                        <Link className="weekly-detail-row" key={ride.id} href={`/admin/ride-diagnostics?ride=${encodeURIComponent(ride.id)}`}>
                                             <div className="weekly-detail-ride-user">
                                                 <strong>{getPersonName(ride)}</strong>
                                                 <small>{formatDate(ride.started_at)}</small>
                                             </div>
-                                            <span data-label="Útvonal">
+                                            <span data-label="Ride">
                                                 <strong>{getRideLabel(ride)}</strong>
-                                                {ride.start_point && ride.end_point ? <small>GPS útvonal elérhető</small> : null}
                                             </span>
                                             <span data-label="Távolság"><strong>{formatDistance(ride.distance_meters)}</strong></span>
                                             <span data-label="Idő"><strong>{formatDuration(ride.duration_seconds)}</strong></span>
                                             <span data-label="Átlag">{ride.average_speed_kmh > 0 ? `${numberFormat.format(ride.average_speed_kmh)} km/h` : '—'}</span>
-                                            <span data-label="Térkép">
-                                                {mapUrl ? (
-                                                    <a href={mapUrl} target="_blank" rel="noopener noreferrer" aria-label="Útvonal megnyitása a Google Térképen">
-                                                        <ExternalLink aria-hidden="true" />
-                                                        <span>Térkép</span>
-                                                    </a>
-                                                ) : '—'}
-                                            </span>
-                                        </article>
+                                        </Link>
                                     );
                                 })}
                             </div>

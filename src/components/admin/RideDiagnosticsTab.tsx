@@ -2,6 +2,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { ChevronRight, Copy, SearchX } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,6 +19,7 @@ const number = (value: unknown) => value == null ? 0 : Number(value) || 0;
 
 export default function RideDiagnosticsTab() {
   const { user } = useAuth();
+  const rideId = useSearchParams().get('ride');
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -39,7 +41,25 @@ export default function RideDiagnosticsTab() {
   useEffect(() => { const timer = window.setTimeout(() => void load(), 0); return () => window.clearTimeout(timer); }, [load]);
   const filtered = useMemo(() => rows.filter(row => (type === 'all' || row.ride_type === type) && (!query || JSON.stringify(row).toLowerCase().includes(query.toLowerCase()))), [rows, type, query]);
   const pageRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const openDetails = (row: Row) => { setSelected(row); void writeAuditLog({ adminId: user?.id, action: 'view_ride_diagnostic', targetType: 'ride', targetId: String(row.id || row.client_ride_id), notes: 'Diagnosztikai részletek megtekintve.' }); };
+  const openDetails = useCallback((row: Row) => { setSelected(row); void writeAuditLog({ adminId: user?.id, action: 'view_ride_diagnostic', targetType: 'ride', targetId: String(row.id || row.client_ride_id), notes: 'Diagnosztikai részletek megtekintve.' }); }, [user?.id]);
+
+  useEffect(() => {
+    if (!rideId) return;
+    let cancelled = false;
+    const openRide = async () => {
+      try {
+        const { data, error } = await supabase.from('ride_summaries').select(normalSelect).eq('id', rideId).single();
+        if (error || !data) throw new Error('A kiválasztott ride nem tölthető be.');
+        if (cancelled) return;
+        const samples = Array.isArray(data.track_samples) ? data.track_samples.length : 0;
+        openDetails({ ...data, ride_type: 'normal', sample_total: samples, sample_accepted: samples, sample_rejected: 0 });
+      } catch {
+        if (!cancelled) setError('A kiválasztott ride nem található vagy nem érhető el.');
+      }
+    };
+    void openRide();
+    return () => { cancelled = true; };
+  }, [rideId, openDetails]);
 
   return <section className="ops-collection ops-collection-contained" aria-label="Ride diagnosztika">
     <div className="ops-filterbar ride-diagnostics-filters">
