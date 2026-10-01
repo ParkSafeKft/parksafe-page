@@ -286,7 +286,7 @@ export default function WeeklyStatsDetailModal({ metric, stats, onClose }: Weekl
                                             </span>
                                             <span data-label="Távolság"><strong>{formatDistance(ride.distance_meters)}</strong></span>
                                             <span data-label="Idő"><strong>{formatDuration(ride.duration_seconds)}</strong></span>
-                                            <span data-label="Átlag">{ride.average_speed_kmh > 0 ? `${numberFormat.format(ride.average_speed_kmh)} km/h` : '—'}</span>
+                                            <span data-label="Átlag">{ride.average_speed_kmh > 0 ? `${numberFormat.format(ride.average_speed_kmh)} km/h` : '-'}</span>
                                         </Link>
                                     );
                                 })}

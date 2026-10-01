@@ -141,7 +141,7 @@ export default function HomePage() {
                                     <span className="h-2 w-2 rounded-full bg-[#58ce79]" />
                                     {t('home.grid.mainStatLabel')}
                                 </div>
-                                <p className="text-[clamp(5rem,12vw,9.5rem)] font-black leading-none tracking-[-0.075em]">
+                                <p className="whitespace-nowrap text-[clamp(3rem,10vw,9.5rem)] font-black leading-none tracking-[-0.075em]">
                                     {t('home.grid.mainStat')}
                                 </p>
                                 <p className="mt-5 max-w-md text-lg leading-8 text-white/65">

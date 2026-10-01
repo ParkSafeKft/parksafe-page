@@ -34,7 +34,7 @@ export type AuditTargetType =
 const isDev = process.env.NODE_ENV === 'development';
 
 /**
- * Best-effort audit log writer. Failures are logged in dev but do not throw —
+ * Best-effort audit log writer. Failures are logged in dev but do not throw -
  * the audit log must never block the user-facing action.
  */
 export async function writeAuditLog(params: {

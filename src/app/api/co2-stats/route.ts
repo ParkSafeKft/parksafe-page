@@ -29,7 +29,7 @@ export async function GET() {
             return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
         }
 
-        // Anon client — get_public_co2_stats is SECURITY DEFINER and granted to anon.
+        // Anon client - get_public_co2_stats is SECURITY DEFINER and granted to anon.
         const supabase = createClient(supabaseUrl, supabaseAnonKey, {
             auth: { persistSession: false },
         });

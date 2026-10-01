@@ -344,7 +344,7 @@ export default function AppConfigTab() {
 
                         <div className="flex items-center justify-between pt-2 border-t border-border">
                             <span className="text-xs text-muted-foreground">
-                                Utoljára frissítve: {updatedAt.maintenance ? new Date(updatedAt.maintenance).toLocaleString('hu-HU') : '—'}
+                                Utoljára frissítve: {updatedAt.maintenance ? new Date(updatedAt.maintenance).toLocaleString('hu-HU') : '-'}
                             </span>
                             <Button
                                 onClick={() =>
@@ -414,7 +414,7 @@ export default function AppConfigTab() {
                         </div>
 
                         <div className="text-xs text-muted-foreground pt-2 border-t border-border">
-                            Utoljára frissítve: {updatedAt.min_app_version ? new Date(updatedAt.min_app_version).toLocaleString('hu-HU') : '—'}
+                            Utoljára frissítve: {updatedAt.min_app_version ? new Date(updatedAt.min_app_version).toLocaleString('hu-HU') : '-'}
                         </div>
                     </CardContent>
                 </Card>
@@ -530,7 +530,7 @@ export default function AppConfigTab() {
 
                         <div className="flex items-center justify-between pt-2 border-t border-border">
                             <span className="text-xs text-muted-foreground">
-                                Utoljára frissítve: {updatedAt.feature_flags ? new Date(updatedAt.feature_flags).toLocaleString('hu-HU') : '—'}
+                                Utoljára frissítve: {updatedAt.feature_flags ? new Date(updatedAt.feature_flags).toLocaleString('hu-HU') : '-'}
                             </span>
                             <Button
                                 onClick={() =>

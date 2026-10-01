@@ -1,4 +1,4 @@
-/* ParkSafe Control — an operations workspace, intentionally isolated from the public site. */
+/* ParkSafe Control - an operations workspace, intentionally isolated from the public site. */
 body:has(.admin-dark) {
     margin: 0;
     overflow: hidden;

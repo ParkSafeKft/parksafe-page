@@ -40,7 +40,7 @@ export default function InteractiveRouteMap({ points, height = 360, lineColor = 
         return () => {
             markersRef.current.forEach(m => m.remove());
             markersRef.current = [];
-            // Release the GPU context immediately rather than waiting for GC — opening
+            // Release the GPU context immediately rather than waiting for GC - opening
             // and closing route modals otherwise accumulates WebGL contexts past the
             // browser limit, which surfaces as "WebGL context was lost".
             const canvas = map.getCanvas();
@@ -65,7 +65,7 @@ export default function InteractiveRouteMap({ points, height = 360, lineColor = 
             const hasLine = points.length >= 1;
             const pins = pinPoints ?? [];
 
-            // Polyline source/layers — only when we have a routed line
+            // Polyline source/layers - only when we have a routed line
             if (hasLine) {
                 const geojson: GeoJSON.Feature<GeoJSON.LineString> = {
                     type: 'Feature',
@@ -105,7 +105,7 @@ export default function InteractiveRouteMap({ points, height = 360, lineColor = 
                 return el;
             };
 
-            // User-dropped pins — numbered yellow markers, drawn first so A/B sit on top.
+            // User-dropped pins - numbered yellow markers, drawn first so A/B sit on top.
             pins.forEach((p, i) => {
                 const m = new maplibregl.Marker({ element: makeBadge(String(i + 1), '#facc15') }).setLngLat(p).addTo(map);
                 markersRef.current.push(m);

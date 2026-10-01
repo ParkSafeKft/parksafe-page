@@ -113,7 +113,7 @@ function asNumber(value: unknown): number | null {
 }
 
 function formatDate(value: string | null): string {
-    if (!value) return '—';
+    if (!value) return '-';
     return new Date(value).toLocaleString('hu-HU', {
         year: 'numeric',
         month: 'short',
@@ -124,12 +124,12 @@ function formatDate(value: string | null): string {
 }
 
 function formatDistance(value: number | null): string {
-    if (value === null || value === undefined) return '—';
+    if (value === null || value === undefined) return '-';
     return `${(value / 1000).toFixed(2)} km`;
 }
 
 function formatDuration(value: number | null): string {
-    if (!value || value <= 0) return '—';
+    if (!value || value <= 0) return '-';
     const hours = Math.floor(value / 3600);
     const minutes = Math.floor((value % 3600) / 60);
     return hours > 0 ? `${hours}ó ${minutes}p` : `${minutes}p`;
@@ -150,7 +150,7 @@ function gpsAssessment(ride: RideDiagnostic): { label: string; tone: string; det
         return { label: 'Nincs telemetria', tone: 'neutral', detail: 'Lejárt vagy nem érkezett' };
     }
     const rate = total && accepted !== null ? accepted / total : null;
-    const rateText = rate === null ? '—' : `${Math.round(rate * 100)}% elfogadva`;
+    const rateText = rate === null ? '-' : `${Math.round(rate * 100)}% elfogadva`;
     if ((rate === null || rate >= 0.9) && (p95 === null || p95 <= 20)) {
         return { label: 'Jó GPS', tone: 'success', detail: rateText };
     }
@@ -461,8 +461,8 @@ export default function UserRideDiagnostics({ userId }: { userId: string }) {
                                                             <div><dt>Eredmény</dt><dd data-tone={refineTone(ride.refine_status)}>{REFINE_LABELS[statusKey] || statusKey}</dd></div>
                                                             <div><dt>Kísérletek</dt><dd>{ride.refine_attempts ?? 0}{(ride.refine_attempts || 0) > 1 ? ' · újrapróbálva' : ''}</dd></div>
                                                             <div><dt>Következő próba</dt><dd>{formatDate(ride.refine_next_retry_at)}</dd></div>
-                                                            <div><dt>Valhalla illesztés</dt><dd>{matchRatio === null ? '—' : `${Math.round(matchRatio * 100)}%`}</dd></div>
-                                                            <div><dt>Távolság / magasság</dt><dd>{ride.distance_status || '—'} / {ride.elevation_status || '—'}</dd></div>
+                                                            <div><dt>Valhalla illesztés</dt><dd>{matchRatio === null ? '-' : `${Math.round(matchRatio * 100)}%`}</dd></div>
+                                                            <div><dt>Távolság / magasság</dt><dd>{ride.distance_status || '-'} / {ride.elevation_status || '-'}</dd></div>
                                                         </dl>
                                                         {ride.refine_reason ? <p className="ride-diagnostic-reason"><AlertTriangle />{ride.refine_reason}</p> : null}
                                                     </section>
@@ -470,9 +470,9 @@ export default function UserRideDiagnostics({ userId }: { userId: string }) {
                                                     <section>
                                                         <header><Crosshair /><h3>GPS minták</h3></header>
                                                         <dl>
-                                                            <div><dt>Elfogadott</dt><dd>{accepted === null || total === null ? '—' : `${accepted.toLocaleString('hu-HU')} / ${total.toLocaleString('hu-HU')}`}</dd></div>
-                                                            <div><dt>Pontosság átlag / P95</dt><dd>{asNumber(ride.gps_accuracy_avg_m)?.toFixed(1) ?? '—'} m / {asNumber(ride.gps_accuracy_p95_m)?.toFixed(1) ?? '—'} m</dd></div>
-                                                            <div><dt>Legrosszabb pontosság</dt><dd>{asNumber(ride.gps_accuracy_max_m)?.toFixed(1) ?? '—'} m</dd></div>
+                                                            <div><dt>Elfogadott</dt><dd>{accepted === null || total === null ? '-' : `${accepted.toLocaleString('hu-HU')} / ${total.toLocaleString('hu-HU')}`}</dd></div>
+                                                            <div><dt>Pontosság átlag / P95</dt><dd>{asNumber(ride.gps_accuracy_avg_m)?.toFixed(1) ?? '-'} m / {asNumber(ride.gps_accuracy_p95_m)?.toFixed(1) ?? '-'} m</dd></div>
+                                                            <div><dt>Legrosszabb pontosság</dt><dd>{asNumber(ride.gps_accuracy_max_m)?.toFixed(1) ?? '-'} m</dd></div>
                                                             <div><dt>Nyers / rögzített / illesztett</dt><dd>{ride.raw_sample_count ?? 0} / {ride.recorded_point_count ?? 0} / {ride.snapped_point_count ?? 0}</dd></div>
                                                             <div><dt>Nyers / finomított táv</dt><dd>{formatDistance(ride.raw_distance_meters)} / {formatDistance(ride.distance_meters)}</dd></div>
                                                         </dl>
@@ -486,12 +486,12 @@ export default function UserRideDiagnostics({ userId }: { userId: string }) {
                                                     <section>
                                                         <header><Smartphone /><h3>Készülék és háttérfutás</h3></header>
                                                         <dl>
-                                                            <div><dt>Készülék</dt><dd>{[ride.manufacturer, ride.model].filter(Boolean).join(' ') || '—'}</dd></div>
-                                                            <div><dt>Rendszer / app</dt><dd>{[ride.os, ride.os_version].filter(Boolean).join(' ') || '—'} · {ride.app_version || '—'}</dd></div>
-                                                            <div><dt>Pontos hely</dt><dd>{ride.precise_location_on === null ? '—' : ride.precise_location_on ? 'Bekapcsolva' : 'Kikapcsolva'}</dd></div>
-                                                            <div><dt>Háttérengedély</dt><dd>{ride.bg_permission || '—'}</dd></div>
+                                                            <div><dt>Készülék</dt><dd>{[ride.manufacturer, ride.model].filter(Boolean).join(' ') || '-'}</dd></div>
+                                                            <div><dt>Rendszer / app</dt><dd>{[ride.os, ride.os_version].filter(Boolean).join(' ') || '-'} · {ride.app_version || '-'}</dd></div>
+                                                            <div><dt>Pontos hely</dt><dd>{ride.precise_location_on === null ? '-' : ride.precise_location_on ? 'Bekapcsolva' : 'Kikapcsolva'}</dd></div>
+                                                            <div><dt>Háttérengedély</dt><dd>{ride.bg_permission || '-'}</dd></div>
                                                             <div><dt>Háttérleállás / mintaköz</dt><dd>{ride.background_kills ?? 0} / {ride.heartbeat_gap_count ?? 0}</dd></div>
-                                                            <div><dt>Energiatakarékos mód</dt><dd>{ride.battery_saver_on === null ? '—' : ride.battery_saver_on ? 'Bekapcsolva' : 'Kikapcsolva'}</dd></div>
+                                                            <div><dt>Energiatakarékos mód</dt><dd>{ride.battery_saver_on === null ? '-' : ride.battery_saver_on ? 'Bekapcsolva' : 'Kikapcsolva'}</dd></div>
                                                         </dl>
                                                         {ride.battery_saver_on ? <p className="ride-diagnostic-reason"><BatteryWarning />Az energiatakarékos mód ronthatta a háttérben mért GPS-jelet.</p> : null}
                                                     </section>

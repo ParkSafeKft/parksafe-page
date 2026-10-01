@@ -164,7 +164,7 @@ export default function AdminPage() {
     // URL is the source of truth for which tab is active.
     // /admin            → dashboard
     // /admin/<tab-slug> → that tab
-    // Records open as in-page modals only — opening a record does not change
+    // Records open as in-page modals only - opening a record does not change
     // the URL, but switching tabs (or pressing browser back to a previous tab)
     // closes any open modal so the visible state matches the URL.
     const params = useParams<{ slug?: string[] }>();
@@ -455,7 +455,7 @@ export default function AdminPage() {
                     }
                     break;
                 case 'community_routes':
-                    // community_bike_lanes.user_id FK -> auth.users, not profiles — can't use PostgREST join.
+                    // community_bike_lanes.user_id FK -> auth.users, not profiles - can't use PostgREST join.
                     query = supabase.from('community_bike_lanes').select('*');
                     countQuery = supabase.from('community_bike_lanes').select('*', { count: 'exact', head: true });
                     if (routeStatusFilter) {
@@ -550,7 +550,7 @@ export default function AdminPage() {
             }
 
             {
-            // Sorting — make sure the sort column actually exists on this tab's table.
+            // Sorting - make sure the sort column actually exists on this tab's table.
             // Allowlist of valid sortable columns per tab; falls back to the first entry if current key is unknown.
             const validSortKeys: Record<string, string[]> = {
                 users: ['created_at', 'username', 'email', 'full_name', 'role'],
@@ -642,7 +642,7 @@ export default function AdminPage() {
                 setPoiSuggestions(mapped);
             } else if (activeTab === 'parking_images') {
                 const rows = dataRes.data || [];
-                // user_id FK points at auth.users, not profiles — resolve via separate lookup.
+                // user_id FK points at auth.users, not profiles - resolve via separate lookup.
                 const userIds = Array.from(new Set(
                     rows.map((r: { user_id?: string | null }) => r.user_id).filter((v): v is string => !!v)
                 ));

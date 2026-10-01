@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from "framer-motion";
-import { Lock, MapPin, Smartphone, Star } from "lucide-react";
+import { Bike, History, MapPin, Smartphone } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -30,13 +30,13 @@ export default function HowItWorks() {
         },
         {
             number: 3,
-            icon: Star,
+            icon: Bike,
             title: t('howItWorks.step3.title'),
             description: t('howItWorks.step3.desc'),
         },
         {
             number: 4,
-            icon: Lock,
+            icon: History,
             title: t('howItWorks.step4.title'),
             description: t('howItWorks.step4.desc'),
         },

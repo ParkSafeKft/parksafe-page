@@ -46,7 +46,7 @@ const structuredData = {
       name: "ParkSafe",
       url: `${siteUrl}/`,
       description:
-        "Városi kerékpáros navigáció, biztonságos kerékpártárolók és szervizpontok egy közösségi alkalmazásban.",
+        "Bringás útvonaltervezés, kerékpártárolók és szervizpontok egy ingyenes alkalmazásban.",
       inLanguage: ["hu", "en"],
       publisher: { "@id": `${siteUrl}/#organization` },
     },
@@ -56,7 +56,7 @@ const structuredData = {
       name: "ParkSafe",
       url: `${siteUrl}/`,
       description:
-        "A ParkSafe egy ingyenes városi kerékpáros térképalkalmazás biztonságközpontú útvonaltervezéssel, kerékpártárolókkal, szervizpontokkal és közösségi helyadatokkal.",
+        "A ParkSafe egy ingyenes városi kerékpáros térképalkalmazás útvonaltervezéssel, kerékpártárolókkal, szervizpontokkal és közösségi helyadatokkal.",
       applicationCategory: "NavigationApplication",
       applicationSubCategory: "Urban cycling navigation and bicycle parking",
       operatingSystem: ["iOS", "Android"],
@@ -72,7 +72,7 @@ const structuredData = {
       ],
       screenshot: `${siteUrl}/ios_mapview.png`,
       featureList: [
-        "Safety-first urban cycling routes",
+        "Urban cycling route planning",
         "Bicycle parking discovery",
         "Repair shop and public pump discovery",
         "Community ratings, photos, and location reports",
@@ -87,14 +87,14 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   applicationName: "ParkSafe",
   title: "ParkSafe: Kerékpáros Navigáció & Térkép",
-  description: "ParkSafe: Városi kerékpáros navigáció és térkép. Biztonságos útvonalak, tárolók és szervizek egy appban. Töltsd le ingyen és tekerj gondtalanul!",
+  description: "Tervezz bringás útvonalat, keress kerékpártárolót és szervizt a közeledben. A ParkSafe ingyenes, iOS-re és Androidra is letöltheted.",
   keywords: ["kerékpár", "kerékpáros útvonal", "bicikli tárolás", "kerékpár szerviz", "város közlekedés", "kerékpáros navigáció", "bike parking", "ParkSafe"],
   alternates: {
     canonical: "https://parksafe.hu/",
   },
   openGraph: {
     title: "ParkSafe: Kerékpáros Navigáció & Térkép",
-    description: "ParkSafe: Városi kerékpáros navigáció és térkép. Biztonságos útvonalak, tárolók és szervizek egy appban. Töltsd le ingyen és tekerj gondtalanul!",
+    description: "Tervezz bringás útvonalat, keress kerékpártárolót és szervizt a közeledben. A ParkSafe ingyenes, iOS-re és Androidra is letöltheted.",
     url: "https://parksafe.hu/",
     type: "website",
     images: [
@@ -109,7 +109,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "ParkSafe: Kerékpáros Navigáció & Térkép",
-    description: "ParkSafe: Városi kerékpáros navigáció és térkép. Biztonságos útvonalak, tárolók és szervizek egy appban.",
+    description: "Tervezz bringás útvonalat, keress kerékpártárolót és szervizt a közeledben. A ParkSafe ingyenes, iOS-re és Androidra is letöltheted.",
     images: ["https://parksafe.hu/logo.png"],
   },
   icons: {

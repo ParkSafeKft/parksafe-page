@@ -76,7 +76,7 @@ export default function RouteHeatmapTab() {
     const wrapperRef = useRef<HTMLDivElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const mapRef = useRef<Leaflet.Map | null>(null);
-    // Leaflet touches `window` at import time, so it can't be SSR'd — import()-ed
+    // Leaflet touches `window` at import time, so it can't be SSR'd - import()-ed
     // lazily on the client and kept in refs for the layer/export effects.
     const LRef = useRef<typeof Leaflet | null>(null);
     const layerRef = useRef<TrackHeatLayer | null>(null);
@@ -149,7 +149,7 @@ export default function RouteHeatmapTab() {
                         .rpc('admin_get_route_tracks', {
                             p_start_at: startForRange(range),
                             p_end_at: null,
-                            // No ride cap — the RPC trims a 300 m privacy radius off each
+                            // No ride cap - the RPC trims a 300 m privacy radius off each
                             // track's start/end, so every ride can safely go into the heatmap.
                             p_max_points: 300,
                         })
@@ -316,7 +316,7 @@ export default function RouteHeatmapTab() {
             <div ref={wrapperRef} className="relative flex-1 min-h-[560px] overflow-hidden rounded-xl border border-white/10 bg-zinc-950">
                 <div ref={containerRef} className="absolute inset-0 z-0" />
 
-                {/* Controls overlay — kept outside the captured map container, so they
+                {/* Controls overlay - kept outside the captured map container, so they
                     don't appear in the exported PNG, and visible in fullscreen. */}
                 <div className="absolute top-3 left-3 z-[1100] flex items-center gap-2">
                     <button

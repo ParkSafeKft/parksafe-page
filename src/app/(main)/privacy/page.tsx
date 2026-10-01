@@ -178,7 +178,7 @@ export default function PrivacyPage() {
                                     </ul>
                                     <div className="bg-amber-50 border border-amber-100 rounded-lg p-4 mb-4 text-amber-900 text-sm">
                                         {isEn ? (
-                                            <><strong>Background location access:</strong> When using the cycling route tracking (ride tracking) feature — if you explicitly enable it — the application may access the device&apos;s location data in the background, even when the application is not visible on screen. This occurs exclusively during active ride tracking. The collected location data is used solely to calculate distance travelled, speed, and elevation; the detailed GPS track is not stored, only aggregated statistical data.</>
+                                            <><strong>Background location access:</strong> When using the cycling route tracking (ride tracking) feature, if you explicitly enable it, the application may access the device&apos;s location data in the background, even when the application is not visible on screen. This occurs exclusively during active ride tracking. The collected location data is used solely to calculate distance travelled, speed, and elevation; the detailed GPS track is not stored, only aggregated statistical data.</>
                                         ) : (
                                             <><strong>Háttérben futó helymeghatározás (background location):</strong> Az alkalmazás kerékpáros útvonalkövetés (ride tracking) funkciójának használata során – amennyiben Ön ezt kifejezetten engedélyezi – az alkalmazás háttérben is hozzáférhet az eszköz helyadataihoz, akkor is, ha az alkalmazás éppen nem látható a képernyőn. Erre kizárólag az aktív menetkövetés ideje alatt kerül sor. A gyűjtött helyadatok kizárólag a megtett távolság, sebesség és emelkedés kiszámítására szolgálnak; a részletes GPS nyomvonalat nem tároljuk, csak összesített statisztikai adatokat.</>
                                         )}
@@ -260,7 +260,7 @@ export default function PrivacyPage() {
                                     <p className="text-zinc-600">
                                         <strong className="text-zinc-900">{isEn ? "Legal basis:" : "Jogalap:"}</strong>{" "}
                                         {isEn
-                                            ? "legitimate interest (service improvement) or — where required — consent."
+                                            ? "legitimate interest (service improvement) or, where required, consent."
                                             : "jogos érdek (szolgáltatás fejlesztése) vagy – ahol szükséges – hozzájárulás."}
                                     </p>
                                 </div>
@@ -319,7 +319,7 @@ export default function PrivacyPage() {
                                     <ul className="space-y-1 text-zinc-600 list-disc pl-5 marker:text-[#34aa56] mb-4">
                                         {isEn ? (
                                             <>
-                                                <li>GPS coordinates (latitude, longitude, altitude, timestamp) — every 2–4 seconds,</li>
+                                                <li>GPS coordinates (latitude, longitude, altitude, timestamp), every 2–4 seconds,</li>
                                                 <li>current, average and maximum speed (km/h),</li>
                                                 <li>distance travelled (metres),</li>
                                                 <li>ride duration and moving time (seconds),</li>
@@ -432,7 +432,7 @@ export default function PrivacyPage() {
                                     <>
                                         <li>we collect location data <strong className="text-zinc-900">only when you have consented</strong> in the device and application permissions,</li>
                                         <li>precise location data is used <strong className="text-zinc-900">primarily while providing the service</strong>,</li>
-                                        <li>for the cycling ride tracking feature, the route is stored in <strong className="text-zinc-900">simplified form</strong> (Ramer–Douglas–Peucker algorithm) — solely with your consent and linked to your account,</li>
+                                        <li>for the cycling ride tracking feature, the route is stored in <strong className="text-zinc-900">simplified form</strong> (Ramer–Douglas–Peucker algorithm), solely with your consent and linked to your account,</li>
                                         <li>you may <strong className="text-zinc-900">disable</strong> location services at any time.</li>
                                     </>
                                 ) : (

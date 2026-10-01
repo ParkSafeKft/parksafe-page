@@ -162,7 +162,7 @@ export default function UsersTable({
                                             <Star className="w-3 h-3 fill-current" /> Igen
                                         </span>
                                     ) : (
-                                        <span className="text-sm text-zinc-600">—</span>
+                                        <span className="text-sm text-zinc-600">-</span>
                                     )}
                                 </td>
                                 <td className="p-4">

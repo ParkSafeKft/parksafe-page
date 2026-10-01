@@ -685,7 +685,7 @@ function EditSuggestionModal({
                         {suggestedType === 'drinkingFountain' && (
                             <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4 flex items-center gap-3 text-zinc-400">
                                 <Droplet className="w-4 h-4 text-blue-400 shrink-0" />
-                                <span className="text-xs">Az ivókúthoz nincs típus-specifikus mező — a név, város és koordináták elegendőek.</span>
+                                <span className="text-xs">Az ivókúthoz nincs típus-specifikus mező - a név, város és koordináták elegendőek.</span>
                             </div>
                         )}
 
@@ -868,7 +868,7 @@ export default function PoiSuggestionsTable({
                                     <td className="p-4">
                                         <div className="max-w-[220px]">
                                             <span className="text-sm text-white truncate block" title={item.name || ''}>
-                                                {item.name || <span className="text-zinc-600">—</span>}
+                                                {item.name || <span className="text-zinc-600">-</span>}
                                             </span>
                                             {item.comment && (
                                                 <span className="text-xs text-zinc-500 truncate block mt-0.5" title={item.comment}>
@@ -879,7 +879,7 @@ export default function PoiSuggestionsTable({
                                     </td>
                                     <td className="p-4">
                                         <span className="text-sm text-zinc-400 truncate block max-w-[140px]" title={item.city || ''}>
-                                            {item.city || <span className="text-zinc-600">—</span>}
+                                            {item.city || <span className="text-zinc-600">-</span>}
                                         </span>
                                     </td>
                                     <td className="p-4">
@@ -896,7 +896,7 @@ export default function PoiSuggestionsTable({
                                                 ))}
                                             </div>
                                         ) : (
-                                            <span className="text-xs text-zinc-600">—</span>
+                                            <span className="text-xs text-zinc-600">-</span>
                                         )}
                                     </td>
                                     <td className="p-4">

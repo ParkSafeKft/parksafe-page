@@ -82,7 +82,7 @@ interface DetailModalProps {
     onStatusChange?: (id: string, newStatus: string) => void;
     /** POI flags only: open the reported POI in this same detail modal, no tab switch */
     onOpenPoiDetail?: (poiId: string, poiType: string) => void;
-    /** Open another record in this same detail modal — enables cross-navigation between linked entities */
+    /** Open another record in this same detail modal - enables cross-navigation between linked entities */
     onOpenUser?: (userId: string) => void;
     onOpenParkingSpot?: (spotId: string) => void;
     onToggleUserBan?: (id: string, currentlyBanned: boolean) => Promise<boolean>;
@@ -91,7 +91,7 @@ interface DetailModalProps {
     /** Parking-image submissions only: hard delete the submission + image */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onDeleteSubmission?: (submission: any) => void;
-    /** When set, render a back arrow in the header — pops the cross-nav history one step */
+    /** When set, render a back arrow in the header - pops the cross-nav history one step */
     onBack?: () => void;
 }
 
@@ -213,7 +213,7 @@ function formatActivityDuration(totalSec: number): string {
 }
 
 function formatActivityShort(sec: number | null | undefined): string {
-    if (!sec || sec <= 0) return '—';
+    if (!sec || sec <= 0) return '-';
     const m = Math.floor(sec / 60);
     const s = sec % 60;
     return `${m}:${String(s).padStart(2, '0')}`;
@@ -576,7 +576,7 @@ export default function DetailModal({
                             />
 
                             <AdminModalBody className="space-y-6">
-                                    {/* Image — click to enlarge */}
+                                    {/* Image - click to enlarge */}
                                     {item.image_url && (
                                         <div>
                                             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
@@ -631,7 +631,7 @@ export default function DetailModal({
                                         />
                                     </AdminModalRelations>
 
-                                    {/* Map — only when we have coordinates */}
+                                    {/* Map - only when we have coordinates */}
                                     {submissionCoords && (
                                         <div>
                                             <h3 className="flex items-center gap-2 text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
@@ -692,7 +692,7 @@ export default function DetailModal({
                                     )}
                             </AdminModalBody>
 
-                            {/* Footer — full action bar so admin doesn't have to exit and reopen the dropdown */}
+                            {/* Footer - full action bar so admin doesn't have to exit and reopen the dropdown */}
                             <div className="admin-modal-footer justify-between flex-wrap">
                                 <div className="flex gap-2">
                                     {onDeleteSubmission && (
@@ -856,7 +856,7 @@ export default function DetailModal({
                                     </div>
                                 </div>
 
-                                {/* Map — only when we have coordinates */}
+                                {/* Map - only when we have coordinates */}
                                 {poiCoordsLoading ? (
                                     <div className="flex items-center justify-center py-8">
                                         <div className="w-5 h-5 border-2 border-zinc-600 border-t-zinc-300 rounded-full animate-spin" />
@@ -900,7 +900,7 @@ export default function DetailModal({
                                     </div>
                                 ) : null}
 
-                                {/* Reported coordinates — only if user submitted them with the flag */}
+                                {/* Reported coordinates - only if user submitted them with the flag */}
                                 {item.reported_latitude && item.reported_longitude && (
                                     <>
                                         <Separator className="bg-border" />
@@ -944,7 +944,7 @@ export default function DetailModal({
                                 )}
                         </AdminModalBody>
 
-                        {/* Footer — quick status actions, same shape as parking_image accept/reject */}
+                        {/* Footer - quick status actions, same shape as parking_image accept/reject */}
                         <div className="admin-modal-footer flex-wrap">
                             {onStatusChange && currentStatus !== 'dismissed' && (
                                 <Button
@@ -1368,7 +1368,7 @@ export default function DetailModal({
                                     ) : (
                                         <div className="admin-profile-badges" role="list">
                                             {unlockedBadges.map(k => (
-                                                <span key={k} role="listitem" title={`${BADGE_LABELS[k] || k} — szint ${activityProgress?.[k] ?? 0}`}>
+                                                <span key={k} role="listitem" title={`${BADGE_LABELS[k] || k} - szint ${activityProgress?.[k] ?? 0}`}>
                                                     <Award />
                                                     {BADGE_LABELS[k] || k}
                                                     {Number(activityProgress?.[k] ?? 0) > 1 ? <b>×{activityProgress?.[k]}</b> : null}
@@ -1386,7 +1386,7 @@ export default function DetailModal({
                                             const km = ((r.distance_meters ?? 0) / 1000).toFixed(1);
                                             const date = r.started_at
                                                 ? new Date(r.started_at).toLocaleDateString('hu-HU', { year: '2-digit', month: 'short', day: 'numeric' })
-                                                : '—';
+                                                : '-';
                                             const avg = Number(r.average_speed_kmh ?? 0).toFixed(1);
                                             return (
                                                 <article key={r.id} role="listitem">
@@ -1640,7 +1640,7 @@ export default function DetailModal({
                                     </div>
                                 )}
 
-                                {/* OSM information — present on parking, service, repair, drinking_fountain */}
+                                {/* OSM information - present on parking, service, repair, drinking_fountain */}
                                 {(item.osm_id !== undefined && item.osm_id !== null) || item.osm_type || item.osm_version || item.last_synced_at || item.osm_deleted ? (
                                     <div>
                                         <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">

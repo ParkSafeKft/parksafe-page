@@ -48,7 +48,7 @@ function extractLngLatPoints(raw: unknown): Pt[] {
     if (!Array.isArray(raw)) return [];
     const out: Pt[] = [];
     for (const p of raw) {
-        // Nested array — MultiLineString segment, flatten by recursing
+        // Nested array - MultiLineString segment, flatten by recursing
         if (Array.isArray(p) && p.length > 0 && Array.isArray(p[0])) {
             out.push(...extractLngLatPoints(p));
             continue;
@@ -104,7 +104,7 @@ interface CommunityRouteReviewModalProps {
 }
 
 const REJECT_REASONS = [
-    'duplikáció — már létezik a térképen',
+    'duplikáció - már létezik a térképen',
     'nem létező út',
     'pontatlan rajz',
     'OSM-en már szerepel',
@@ -131,7 +131,7 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
         setSelectedStatus((route?.status as Status) ?? 'pending');
     }, [route, isOpen]);
 
-    // The polyline drawn on the map — prefer the routed road geometry, fall back to the raw user pins.
+    // The polyline drawn on the map - prefer the routed road geometry, fall back to the raw user pins.
     const points = useMemo<Pt[]>(() => {
         if (!route) return [];
         const fromGeom = extractLngLatPoints(route.geometry);
@@ -199,7 +199,7 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
                 });
             }
             if (selectedStatus === 'accepted' && route.status !== 'accepted') {
-                toast.success('Elfogadva — ne felejtsd el felvinni OSM-re manuálisan!', { duration: 6000 });
+                toast.success('Elfogadva - ne felejtsd el felvinni OSM-re manuálisan!', { duration: 6000 });
             } else {
                 toast.success('Mentve');
             }
@@ -387,7 +387,7 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
                             </div>
                     </AdminModalBody>
 
-                    {/* Footer — same pattern as EditLocationModal */}
+                    {/* Footer - same pattern as EditLocationModal */}
                     <AdminModalFooter>
                         <Button type="button" variant="outline" onClick={onClose} disabled={saving}>
                             Mégse
