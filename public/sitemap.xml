@@ -25,4 +25,8 @@
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
+  <url><loc>https://parksafe.hu/map</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://parksafe.hu/bikerack</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://parksafe.hu/service</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://parksafe.hu/water</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
 </urlset>

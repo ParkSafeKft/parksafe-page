@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 const base = process.argv[2] || 'http://localhost:3002';
 const site = 'https://parksafe.hu';
-const paths = ['/', '/about', '/contact', '/privacy', '/terms'];
+const paths = ['/', '/about', '/contact', '/privacy', '/terms', '/map', '/bikerack', '/service', '/water'];
 const decode = value => value.replace(/&amp;/g, '&').replace(/&quot;/g, '"');
 
 async function check() {
@@ -12,6 +12,19 @@ async function check() {
         assert.equal(response.status, 200, path);
         assert.ok(!/noindex/i.test(response.headers.get('x-robots-tag') || ''), path);
         const html = await response.text();
+        const nav = html.match(/<nav\b[^>]*>([\s\S]*?)<\/nav>/)?.[1] || '';
+        const activeLinks = [...nav.matchAll(/<a\b[^>]*aria-current="page"[^>]*>/g)];
+        const activeHref = ['/map', '/bikerack', '/service', '/water'].includes(path) ? '/map' : path;
+        const hasNavItem = ['/', '/map', '/about', '/contact'].includes(activeHref);
+        assert.equal(activeLinks.length, hasNavItem ? 1 : 0, `${path} active navbar item count`);
+        if (hasNavItem) assert.equal(activeLinks[0][0].match(/href="([^"]*)"/)?.[1], activeHref, `${path} active navbar href`);
+        if (['/map', '/bikerack', '/service', '/water'].includes(path)) {
+            assert.equal([...html.matchAll(/<h1\b/g)].length, 1, `${path} single SSR H1`);
+            assert.doesNotMatch(html, /Példák az országos snapshotból/, `${path} removed sample list`);
+            assert.match(html, /OpenStreetMap/, `${path} data provenance`);
+            const queryResponse = await fetch(new URL(`${path}?lat=47.5&lng=19.04&z=12`, base));
+            assert.match(await queryResponse.text(), new RegExp(`rel="canonical" href="${site}${path}"`), `${path} query-free canonical`);
+        }
         assert.match(html, /<html[^>]*lang="hu"/, path);
         const tags = [...html.matchAll(/<(?:meta|link)\b[^>]*>/g)].map(([tag]) =>
             Object.fromEntries([...tag.matchAll(/([\w:-]+)="([^"]*)"/g)].map(([, key, value]) => [key, decode(value)])));

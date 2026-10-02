@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
 import { LanguageToggle } from "./LanguageToggle";
@@ -9,6 +10,8 @@ import { LanguageToggle } from "./LanguageToggle";
 function Header() {
     const { user, loading } = useAuth();
     const { t } = useLanguage();
+    const pathname = usePathname();
+    const activeHref = ['/map', '/bikerack', '/service', '/water'].includes(pathname) ? '/map' : pathname;
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
@@ -31,27 +34,27 @@ function Header() {
                 }`}
             >
                 {/* Logo */}
-                <Link href="/" className="group flex items-center gap-3">
+                <Link href="/" aria-label="ParkSafe" className="group flex items-center gap-3">
                     <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-[#34aa56] transition-transform group-hover:-rotate-3">
                         <picture>
                             <source srcSet="/logo_64.webp" type="image/webp" />
                             <img src="/logo_64.png" alt="" className="h-6 w-6 object-contain" />
                         </picture>
                     </div>
-                    <span className="text-lg font-black tracking-[-0.035em] text-[#101512]">ParkSafe</span>
+                    <span className="text-lg font-black tracking-[-0.035em] text-[#101512] max-[359px]:hidden">ParkSafe</span>
                 </Link>
 
                 {/* Desktop Nav */}
                 <nav className="hidden items-center gap-2 rounded-xl border border-[#101512]/10 bg-white/55 p-1 md:flex">
-                    <Link href="/" className="rounded-lg px-4 py-2 text-xs font-bold tracking-[0.01em] text-[#101512] transition-colors hover:bg-white">
-                        {t('nav.home')}
-                    </Link>
-                    <Link href="/about" className="rounded-lg px-4 py-2 text-xs font-bold tracking-[0.01em] text-[#59645d] transition-colors hover:bg-white hover:text-[#101512]">
-                        {t('about.nav')}
-                    </Link>
-                    <Link href="/contact" className="rounded-lg px-4 py-2 text-xs font-bold tracking-[0.01em] text-[#59645d] transition-colors hover:bg-white hover:text-[#101512]">
-                        {t('nav.contact')}
-                    </Link>
+                    {[
+                        ['/map', 'webMap.map'], ['/', 'nav.home'],
+                        ['/about', 'about.nav'], ['/contact', 'nav.contact'],
+                    ].map(([href, label]) => (
+                        <Link key={href} href={href} aria-current={activeHref === href ? 'page' : undefined}
+                            className={`rounded-lg px-4 py-2 text-xs font-bold tracking-[0.01em] transition-colors hover:bg-white hover:text-[#101512] ${activeHref === href ? 'bg-white text-[#101512]' : 'text-[#59645d]'}`}>
+                            {t(label)}
+                        </Link>
+                    ))}
                 </nav>
 
                 {/* Actions */}

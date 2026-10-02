@@ -1,0 +1,5 @@
+POI database: Open Database License 1.0
+https://opendatacommons.org/licenses/odbl/1-0/
+© OpenStreetMap contributors https://www.openstreetmap.org/copyright
+Settlement index: GeoNames CC BY 4.0 https://www.geonames.org/about.html
+HU boundary: geoBoundaries HUN-ADM0-27208725; CC0 1.0; https://www.geoboundaries.org/

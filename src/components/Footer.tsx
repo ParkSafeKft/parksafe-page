@@ -75,6 +75,7 @@ function Footer() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-x-10 gap-y-5 text-sm font-bold sm:grid-cols-3 md:text-right">
+                        <Link href="/map" className="text-white/55 transition-colors hover:text-[#58ce79]">{t('webMap.map')}</Link>
                         <a href="https://apps.apple.com/app/id6752813986" className="text-white/55 transition-colors hover:text-[#58ce79]">
                             {t('footer.appStore')}
                         </a>
