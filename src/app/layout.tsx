@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { GoogleTagManager } from '@next/third-parties/google';
 import { Providers } from "@/components/Providers";
 import { AuthRedirectHandler } from "@/components/AuthRedirectHandler";
+import { publicPageMetadata, siteUrl } from "@/lib/seo";
 import "./globals.css";
 
 const inter = Inter({
@@ -10,8 +11,6 @@ const inter = Inter({
   variable: "--font-inter",
   display: "swap",
 });
-
-const siteUrl = "https://parksafe.hu";
 
 const structuredData = {
   "@context": "https://schema.org",
@@ -57,7 +56,7 @@ const structuredData = {
       url: `${siteUrl}/`,
       description:
         "A ParkSafe egy ingyenes városi kerékpáros térképalkalmazás útvonaltervezéssel, kerékpártárolókkal, szervizpontokkal és közösségi helyadatokkal.",
-      applicationCategory: "NavigationApplication",
+      applicationCategory: "TravelApplication",
       applicationSubCategory: "Urban cycling navigation and bicycle parking",
       operatingSystem: ["iOS", "Android"],
       isAccessibleForFree: true,
@@ -84,34 +83,14 @@ const structuredData = {
 };
 
 export const metadata: Metadata = {
+  ...publicPageMetadata(
+    "/",
+    "ParkSafe: Kerékpáros navigáció és térkép",
+    "Tervezz bringás útvonalat, keress kerékpártárolót és szervizt a közeledben. A ParkSafe ingyenes, iOS-re és Androidra is letöltheted.",
+  ),
   metadataBase: new URL(siteUrl),
   applicationName: "ParkSafe",
-  title: "ParkSafe: Kerékpáros Navigáció & Térkép",
-  description: "Tervezz bringás útvonalat, keress kerékpártárolót és szervizt a közeledben. A ParkSafe ingyenes, iOS-re és Androidra is letöltheted.",
   keywords: ["kerékpár", "kerékpáros útvonal", "bicikli tárolás", "kerékpár szerviz", "város közlekedés", "kerékpáros navigáció", "bike parking", "ParkSafe"],
-  alternates: {
-    canonical: "https://parksafe.hu/",
-  },
-  openGraph: {
-    title: "ParkSafe: Kerékpáros Navigáció & Térkép",
-    description: "Tervezz bringás útvonalat, keress kerékpártárolót és szervizt a közeledben. A ParkSafe ingyenes, iOS-re és Androidra is letöltheted.",
-    url: "https://parksafe.hu/",
-    type: "website",
-    images: [
-      {
-        url: "https://parksafe.hu/logo.png",
-        width: 1200,
-        height: 630,
-        alt: "ParkSafe Logo",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "ParkSafe: Kerékpáros Navigáció & Térkép",
-    description: "Tervezz bringás útvonalat, keress kerékpártárolót és szervizt a közeledben. A ParkSafe ingyenes, iOS-re és Androidra is letöltheted.",
-    images: ["https://parksafe.hu/logo.png"],
-  },
   icons: {
     icon: "/favicon.ico",
   },
