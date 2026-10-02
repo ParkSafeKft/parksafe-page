@@ -70,7 +70,7 @@ export const translations = {
             subtitle: "Tervezd meg, merre mész, és mentsd el, amit tekertél.",
             step1: {
                 title: "Töltsd le az appot",
-                desc: "A ParkSafe ingyenes. iPhone-on és Androidon is használhatod."
+                desc: "A ParkSafe használata és minden jelenlegi funkció ingyenes. iPhone-on és Androidon is használhatod."
             },
             step2: {
                 title: "Tervezd meg az utad",
@@ -95,7 +95,7 @@ export const translations = {
             q3: "Mit tudhatok meg egy kerékpártárolóról?",
             a3: "Megnézheted a tároló helyét és a róla megadott adatokat, például hogy fedett-e. Ahol vannak, fotók és más bringások értékelései is segítenek a választásban. A szabad helyeket érkezéskor tudod ellenőrizni.",
             q4: "Ingyenes a ParkSafe használata?",
-            a4: "Igen, a letöltés és az összes funkció ingyenes. Nincs előfizetés.",
+            a4: "Igen, az app használata és minden jelenlegi funkció teljesen ingyenes. Később havi előfizetéssel elérhető extra funkciókat is tervezünk, például offline térkép- és POI-letöltést. Ezek még nem érhetők el; az indulás időpontja és az ár nincs véglegesítve.",
             q5: "Mennyire megbízhatóak az adatok?",
             a5: "A bringások fotókkal, értékelésekkel és hibajelzésekkel segítenek frissíteni a térképet. Előfordulhat, hogy egy tárolót áthelyeztek vagy egy szerviz bezárt. Ha hibát találsz, jelezd az appban.",
             q6: "Hol érhető el a ParkSafe?",
@@ -112,7 +112,7 @@ export const translations = {
             partnerCta: "Partnerként kapcsolatba lépek",
             benefit1: {
                 title: "Exkluzív Kedvezmények",
-                desc: "Prémium ajánlatok a legnagyobb kerékpáros márkáktól és boltoktól."
+                desc: "Kedvezményes ajánlatok a legnagyobb kerékpáros márkáktól és boltoktól."
             },
             benefit2: {
                 title: "Kiemelt Szervizháttér",
@@ -352,7 +352,7 @@ export const translations = {
             subtitle: "Plan where you're going and save the ride you've done.",
             step1: {
                 title: "Download the app",
-                desc: "ParkSafe is free. You can use it on iPhone and Android."
+                desc: "ParkSafe is free to use, and all current features are free. You can use it on iPhone and Android."
             },
             step2: {
                 title: "Plan your route",
@@ -377,7 +377,7 @@ export const translations = {
             q3: "What can I find out about a bike parking spot?",
             a3: "See the location and its listed details, such as whether it's covered. Where available, photos and ratings from other cyclists can help you choose. You'll need to check for free spaces when you arrive.",
             q4: "Is ParkSafe free to use?",
-            a4: "Yes, the download and all features are free. There's no subscription.",
+            a4: "Yes, the app is completely free to use, and all current features are free. We also plan to offer extra features through a monthly subscription in the future, such as offline map and POI downloads. These are not available yet; the launch date and price have not been finalized.",
             q5: "How reliable is the data?",
             a5: "Cyclists help update the map with photos, ratings and reports. A parking spot may have moved or a repair shop may have closed. If you find an error, report it in the app.",
             q6: "Where is ParkSafe available?",
@@ -394,7 +394,7 @@ export const translations = {
             partnerCta: "Contact Us as a Partner",
             benefit1: {
                 title: "Exclusive Discounts",
-                desc: "Premium offers from top cycling brands and shops."
+                desc: "Discounted offers from top cycling brands and shops."
             },
             benefit2: {
                 title: "Priority Service",

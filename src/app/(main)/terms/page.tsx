@@ -44,7 +44,7 @@ const content = {
                 num: "4.",
                 heading: "Támogatás",
                 paragraphs: [
-                    "A felhasználók önkéntes támogatással járulhatnak hozzá az alkalmazás fejlesztéséhez és működtetéséhez.",
+                    "Az alkalmazás használata és minden jelenlegi funkció ingyenes. A Buy Me a Coffee-n keresztüli támogatás önkéntes, és nem feltétele egyetlen jelenlegi funkció használatának sem.",
                 ],
             },
             {
@@ -151,7 +151,7 @@ const content = {
                 num: "4.",
                 heading: "Support",
                 paragraphs: [
-                    "Users may voluntarily support the development and operation of the application.",
+                    "The application is free to use, and all current features are free. Support through Buy Me a Coffee is voluntary and is not required to use any current feature.",
                 ],
             },
             {
