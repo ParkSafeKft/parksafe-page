@@ -26,11 +26,11 @@ export default function ContactPage() {
                     <div className="lg:col-span-5">
                         <div className="relative aspect-[4/5] overflow-hidden rounded-[1.75rem] bg-[#edf1ed]">
                             <Image
-                                src="/psz.png"
+                                src="/psz-portrait.jpg"
                                 alt="Perjési Szabolcs"
                                 fill
                                 priority
-                                className="object-cover"
+                                className="object-cover object-[center_25%]"
                                 sizes="(max-width: 1024px) 100vw, 42vw"
                             />
                         </div>

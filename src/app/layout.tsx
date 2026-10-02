@@ -69,7 +69,7 @@ const structuredData = {
         "https://apps.apple.com/app/id6752813986",
         "https://play.google.com/store/apps/details?id=com.parksafe.app",
       ],
-      screenshot: `${siteUrl}/ios_mapview.png`,
+      screenshot: `${siteUrl}/parksafe-phone-mockup.png`,
       featureList: [
         "Urban cycling route planning",
         "Bicycle parking discovery",

@@ -1,0 +1,146 @@
+{
+  "source": "T3 browser same-origin HTTP fetch; no-store",
+  "checkedAtUtc": "2026-10-02T10:41:39.097Z",
+  "project": "ParkSafeKft/parksafe-page",
+  "originalAudit": "../ads-market-reserch/research/seo/seo-audit.md",
+  "rows": [
+    {
+      "canonicals": [
+        "https://parksafe.hu/"
+      ],
+      "checkedAt": "2026-10-02T10:41:39.097Z",
+      "description": "Tervezz bringás útvonalat, keress kerékpártárolót és szervizt a közeledben. A ParkSafe ingyenes, iOS-re és Androidra is letöltheted.",
+      "lang": "hu",
+      "ogDescription": "Tervezz bringás útvonalat, keress kerékpártárolót és szervizt a közeledben. A ParkSafe ingyenes, iOS-re és Androidra is letöltheted.",
+      "ogHeight": "630",
+      "ogTitle": "ParkSafe: Kerékpáros Navigáció & Térkép",
+      "ogUrl": "https://parksafe.hu",
+      "ogWidth": "1200",
+      "path": "/",
+      "robots": null,
+      "status": 200,
+      "title": "ParkSafe: Kerékpáros Navigáció & Térkép",
+      "url": "https://parksafe.hu/",
+      "xRobots": null
+    },
+    {
+      "canonicals": [
+        "https://parksafe.hu/"
+      ],
+      "checkedAt": "2026-10-02T10:41:39.095Z",
+      "description": "Tervezz bringás útvonalat, keress kerékpártárolót és szervizt a közeledben. A ParkSafe ingyenes, iOS-re és Androidra is letöltheted.",
+      "lang": "hu",
+      "ogDescription": "Tervezz bringás útvonalat, keress kerékpártárolót és szervizt a közeledben. A ParkSafe ingyenes, iOS-re és Androidra is letöltheted.",
+      "ogHeight": "630",
+      "ogTitle": "ParkSafe: Kerékpáros Navigáció & Térkép",
+      "ogUrl": "https://parksafe.hu",
+      "ogWidth": "1200",
+      "path": "/about",
+      "robots": null,
+      "status": 200,
+      "title": "ParkSafe: Kerékpáros Navigáció & Térkép",
+      "url": "https://parksafe.hu/about",
+      "xRobots": null
+    },
+    {
+      "canonicals": [
+        "https://parksafe.hu/"
+      ],
+      "checkedAt": "2026-10-02T10:41:39.082Z",
+      "description": "Tervezz bringás útvonalat, keress kerékpártárolót és szervizt a közeledben. A ParkSafe ingyenes, iOS-re és Androidra is letöltheted.",
+      "lang": "hu",
+      "ogDescription": "Tervezz bringás útvonalat, keress kerékpártárolót és szervizt a közeledben. A ParkSafe ingyenes, iOS-re és Androidra is letöltheted.",
+      "ogHeight": "630",
+      "ogTitle": "ParkSafe: Kerékpáros Navigáció & Térkép",
+      "ogUrl": "https://parksafe.hu",
+      "ogWidth": "1200",
+      "path": "/contact",
+      "robots": null,
+      "status": 200,
+      "title": "ParkSafe: Kerékpáros Navigáció & Térkép",
+      "url": "https://parksafe.hu/contact",
+      "xRobots": null
+    },
+    {
+      "canonicals": [
+        "https://parksafe.hu/"
+      ],
+      "checkedAt": "2026-10-02T10:41:39.080Z",
+      "description": "Tervezz bringás útvonalat, keress kerékpártárolót és szervizt a közeledben. A ParkSafe ingyenes, iOS-re és Androidra is letöltheted.",
+      "lang": "hu",
+      "ogDescription": "Tervezz bringás útvonalat, keress kerékpártárolót és szervizt a közeledben. A ParkSafe ingyenes, iOS-re és Androidra is letöltheted.",
+      "ogHeight": "630",
+      "ogTitle": "ParkSafe: Kerékpáros Navigáció & Térkép",
+      "ogUrl": "https://parksafe.hu",
+      "ogWidth": "1200",
+      "path": "/privacy",
+      "robots": null,
+      "status": 200,
+      "title": "ParkSafe: Kerékpáros Navigáció & Térkép",
+      "url": "https://parksafe.hu/privacy",
+      "xRobots": null
+    },
+    {
+      "canonicals": [
+        "https://parksafe.hu/"
+      ],
+      "checkedAt": "2026-10-02T10:41:39.085Z",
+      "description": "Tervezz bringás útvonalat, keress kerékpártárolót és szervizt a közeledben. A ParkSafe ingyenes, iOS-re és Androidra is letöltheted.",
+      "lang": "hu",
+      "ogDescription": "Tervezz bringás útvonalat, keress kerékpártárolót és szervizt a közeledben. A ParkSafe ingyenes, iOS-re és Androidra is letöltheted.",
+      "ogHeight": "630",
+      "ogTitle": "ParkSafe: Kerékpáros Navigáció & Térkép",
+      "ogUrl": "https://parksafe.hu",
+      "ogWidth": "1200",
+      "path": "/terms",
+      "robots": null,
+      "status": 200,
+      "title": "ParkSafe: Kerékpáros Navigáció & Térkép",
+      "url": "https://parksafe.hu/terms",
+      "xRobots": null
+    },
+    {
+      "body": "# Primary search crawlers and AI crawlers share the same access policy.\nUser-agent: *\nUser-agent: Googlebot\nUser-agent: Bingbot\nUser-agent: GPTBot\nUser-agent: OAI-SearchBot\nUser-agent: ClaudeBot\nUser-agent: Claude-SearchBot\nUser-agent: PerplexityBot\nAllow: /\nDisallow: /admin\nDisallow: /api/admin\nDisallow: /api/private\nDisallow: /login\nDisallow: /profile\nDisallow: /forgot-password\nDisallow: /reset-password\nDisallow: /cart\nDisallow: /checkout\n\nSitemap: https://parksafe.hu/sitemap.xml\nLLMs-txt: https://parksafe.hu/llms.txt\n",
+      "canonicals": [],
+      "checkedAt": "2026-10-02T10:41:39.150Z",
+      "description": null,
+      "lang": "",
+      "ogDescription": null,
+      "ogHeight": null,
+      "ogTitle": null,
+      "ogUrl": null,
+      "ogWidth": null,
+      "path": "/robots.txt",
+      "robots": null,
+      "status": 200,
+      "title": "",
+      "url": "https://parksafe.hu/robots.txt",
+      "xRobots": null
+    },
+    {
+      "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <url>\n    <loc>https://parksafe.hu/</loc>\n    <lastmod>2026-08-12</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>\n  <url>\n    <loc>https://parksafe.hu/about</loc>\n    <lastmod>2026-08-12</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.8</priority>\n  </url>\n  <url>\n    <loc>https://parksafe.hu/contact</loc>\n    <lastmod>2026-08-12</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n  <url>\n    <loc>https://parksafe.hu/terms</loc>\n    <lastmod>2026-01-29</lastmod>\n    <changefreq>yearly</changefreq>\n    <priority>0.5</priority>\n  </url>\n  <url>\n    <loc>https://parksafe.hu/privacy</loc>\n    <lastmod>2026-01-29</lastmod>\n    <changefreq>yearly</changefreq>\n    <priority>0.5</priority>\n  </url>\n</urlset>\n",
+      "canonicals": [],
+      "checkedAt": "2026-10-02T10:41:39.071Z",
+      "description": null,
+      "lang": "",
+      "ogDescription": null,
+      "ogHeight": null,
+      "ogTitle": null,
+      "ogUrl": null,
+      "ogWidth": null,
+      "path": "/sitemap.xml",
+      "robots": null,
+      "status": 200,
+      "title": "",
+      "url": "https://parksafe.hu/sitemap.xml",
+      "xRobots": null
+    }
+  ],
+  "logo": {
+    "url": "https://parksafe.hu/logo.png",
+    "status": 200,
+    "width": 512,
+    "height": 512
+  }
+}
+

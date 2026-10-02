@@ -368,7 +368,6 @@ export default function DetailModal({
                     { data: profileExtra },
                     { data: progressData },
                     { data: rideRows },
-                    { data: bestAttempt },
                 ] = await Promise.all([
                     supabase
                         .from('profiles')
@@ -385,14 +384,6 @@ export default function DetailModal({
                         .select('id, distance_meters, duration_seconds, average_speed_kmh, max_speed_kmh, elevation_gain_meters, started_at, challenge_completed, favorite_name, is_favorite, kind')
                         .eq('user_id', userId)
                         .order('started_at', { ascending: false, nullsFirst: false }),
-                    supabase
-                        .from('challenge_attempts')
-                        .select('duration_seconds')
-                        .eq('user_id', userId)
-                        .eq('status', 'completed')
-                        .order('duration_seconds', { ascending: true, nullsFirst: false })
-                        .limit(1)
-                        .maybeSingle(),
                 ]);
 
                 if (cancelled) return;
@@ -452,7 +443,7 @@ export default function DetailModal({
                         maxSpeedKmh: maxSpeed,
                         totalElevationM: totalElev,
                         longestRideKm: longestKm,
-                        fastestAttemptSec: bestAttempt?.duration_seconds ?? null,
+                        fastestAttemptSec: null,
                         challengeRides,
                     });
                     setActivityRecent(rides.slice(0, 5));
@@ -465,7 +456,7 @@ export default function DetailModal({
                         maxSpeedKmh: 0,
                         totalElevationM: 0,
                         longestRideKm: 0,
-                        fastestAttemptSec: bestAttempt?.duration_seconds ?? null,
+                        fastestAttemptSec: null,
                         challengeRides: 0,
                     });
                     setActivityRecent([]);

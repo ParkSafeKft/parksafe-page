@@ -54,11 +54,9 @@ import PoiSuggestionsTable, { PoiSuggestion } from '@/components/admin/PoiSugges
 import ParkingImageSubmissionsTable from '@/components/admin/ParkingImageSubmissionsTable';
 import DrinkingFountainTable from '@/components/admin/DrinkingFountainTable';
 import CitiesTable from '@/components/admin/CitiesTable';
-import DailyChallengesTable from '@/components/admin/DailyChallengesTable';
 import CommunityRoutesTable from '@/components/admin/CommunityRoutesTable';
 import CityFormModal from '@/components/admin/CityFormModal';
 import CommunityRouteReviewModal from '@/components/admin/CommunityRouteReviewModal';
-import DailyChallengeDetailModal from '@/components/admin/DailyChallengeDetailModal';
 import LeaderboardTab from '@/components/admin/LeaderboardTab';
 import RouteHeatmapTab from '@/components/admin/RouteHeatmapTab';
 import AuditLogTable from '@/components/admin/AuditLogTable';
@@ -108,7 +106,6 @@ const TAB_SLUGS: Record<string, string> = {
     poi_flags: 'poi-flags',
     poi_suggestions: 'poi-suggestions',
     cities: 'cities',
-    daily_challenges: 'daily-challenges',
     community_routes: 'community-routes',
     leaderboard: 'leaderboard',
     route_heatmap: 'route-heatmap',
@@ -200,8 +197,6 @@ export default function AdminPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [cities, setCities] = useState<any[]>([]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [dailyChallenges, setDailyChallenges] = useState<any[]>([]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [communityRoutes, setCommunityRoutes] = useState<any[]>([]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [citiesForFilter, setCitiesForFilter] = useState<any[]>([]);
@@ -211,10 +206,6 @@ export default function AdminPage() {
     // Filters
     const [userSupporterFilter, setUserSupporterFilter] = useState<'all' | 'supporters' | 'non_supporters'>('all');
     const [userSortMode, setUserSortMode] = useState<'supporters_first' | 'newest' | 'oldest' | 'name_asc'>('supporters_first');
-    const [challengeCityFilter, setChallengeCityFilter] = useState('');
-    const [challengeDateFrom, setChallengeDateFrom] = useState('');
-    const [challengeDateTo, setChallengeDateTo] = useState('');
-    const [challengeActiveFilter, setChallengeActiveFilter] = useState<'all' | 'active' | 'inactive'>('all');
     const [routeStatusFilter, setRouteStatusFilter] = useState('');
     const [routeDateFrom, setRouteDateFrom] = useState('');
     const [routeDateTo, setRouteDateTo] = useState('');
@@ -234,9 +225,6 @@ export default function AdminPage() {
     const [cityFormModal, setCityFormModal] = useState<{ show: boolean; item: any | null }>({ show: false, item: null });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [routeReviewModal, setRouteReviewModal] = useState<{ show: boolean; item: any | null }>({ show: false, item: null });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [challengeDetailModal, setChallengeDetailModal] = useState<{ show: boolean; item: any | null }>({ show: false, item: null });
-
     const [dataLoading, setDataLoading] = useState(false);
     const [toggleLoading, setToggleLoading] = useState<string | null>(null);
     const [batchActionLoading, setBatchActionLoading] = useState(false);
@@ -297,9 +285,8 @@ export default function AdminPage() {
             case 'poi_suggestions': return 'poi_suggestions';
             case 'drinking_fountain': return 'drinkingFountain';
             case 'cities': return 'cities';
-            case 'daily_challenges': return 'daily_challenges';
             case 'community_routes': return 'community_bike_lanes';
-            case 'leaderboard': return 'challenge_attempts';
+            case 'leaderboard': return null;
             case 'audit_log': return 'admin_audit_log';
             default: return null;
         }
@@ -431,29 +418,6 @@ export default function AdminPage() {
                     query = supabase.from('cities').select('*');
                     countQuery = supabase.from('cities').select('*', { count: 'exact', head: true });
                     break;
-                case 'daily_challenges':
-                    query = supabase.from('daily_challenges').select('*, cities!daily_challenges_city_id_fkey(id, name, slug)');
-                    countQuery = supabase.from('daily_challenges').select('*', { count: 'exact', head: true });
-                    if (challengeCityFilter) {
-                        query = query.eq('city_id', challengeCityFilter);
-                        countQuery = countQuery.eq('city_id', challengeCityFilter);
-                    }
-                    if (challengeDateFrom) {
-                        query = query.gte('challenge_date', challengeDateFrom);
-                        countQuery = countQuery.gte('challenge_date', challengeDateFrom);
-                    }
-                    if (challengeDateTo) {
-                        query = query.lte('challenge_date', challengeDateTo);
-                        countQuery = countQuery.lte('challenge_date', challengeDateTo);
-                    }
-                    if (challengeActiveFilter === 'active') {
-                        query = query.eq('is_active', true);
-                        countQuery = countQuery.eq('is_active', true);
-                    } else if (challengeActiveFilter === 'inactive') {
-                        query = query.eq('is_active', false);
-                        countQuery = countQuery.eq('is_active', false);
-                    }
-                    break;
                 case 'community_routes':
                     // community_bike_lanes.user_id FK -> auth.users, not profiles - can't use PostgREST join.
                     query = supabase.from('community_bike_lanes').select('*');
@@ -532,10 +496,6 @@ export default function AdminPage() {
                     } else if (activeTab === 'cities') {
                         query = query.or(`${idQuery}name.ilike.%${safe}%,slug.ilike.%${safe}%,name_en.ilike.%${safe}%`);
                         countQuery = countQuery.or(`${idQuery}name.ilike.%${safe}%,slug.ilike.%${safe}%,name_en.ilike.%${safe}%`);
-                    } else if (activeTab === 'daily_challenges') {
-                        // date-like search
-                        query = query.or(`${idQuery}generation_source.ilike.%${safe}%`);
-                        countQuery = countQuery.or(`${idQuery}generation_source.ilike.%${safe}%`);
                     } else if (activeTab === 'community_routes') {
                         query = query.or(`${idQuery}name.ilike.%${safe}%,description.ilike.%${safe}%,surface_type.ilike.%${safe}%`);
                         countQuery = countQuery.or(`${idQuery}name.ilike.%${safe}%,description.ilike.%${safe}%,surface_type.ilike.%${safe}%`);
@@ -563,7 +523,6 @@ export default function AdminPage() {
                 poi_flags: ['created_at', 'status', 'reason'],
                 poi_suggestions: ['created_at', 'status', 'suggested_type', 'name', 'city'],
                 cities: ['created_at', 'name', 'slug', 'country_code'],
-                daily_challenges: ['challenge_date', 'distance_meters', 'generated_at', 'generation_source'],
                 community_routes: ['created_at', 'status', 'name', 'quality_rating'],
                 audit_log: ['created_at', 'action', 'target_type'],
             };
@@ -675,22 +634,7 @@ export default function AdminPage() {
                 setParkingImageSubmissions(mapped);
             } else if (activeTab === 'cities') {
                 const rows = dataRes.data || [];
-                const cityIds = rows.map((c: { id: string }) => c.id);
-                let countsMap: Record<string, number> = {};
-                if (cityIds.length > 0) {
-                    const { data: ch } = await supabase
-                        .from('daily_challenges')
-                        .select('city_id')
-                        .in('city_id', cityIds);
-                    countsMap = (ch || []).reduce<Record<string, number>>((acc, r: { city_id: string }) => {
-                        acc[r.city_id] = (acc[r.city_id] || 0) + 1;
-                        return acc;
-                    }, {});
-                }
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                setCities(rows.map((c: any) => ({ ...c, challenges_count: countsMap[c.id] || 0 })));
-            } else if (activeTab === 'daily_challenges') {
-                setDailyChallenges(dataRes.data || []);
+                setCities(rows);
             } else if (activeTab === 'community_routes') {
                 const rows = dataRes.data || [];
                 // Resolve submitter usernames via a separate profiles lookup (no FK to profiles).
@@ -754,17 +698,16 @@ export default function AdminPage() {
         setDetailHistory([]);
         setEditLocationModal(prev => (prev.show ? { show: false, item: null } : prev));
         setCityFormModal(prev => (prev.show ? { show: false, item: null } : prev));
-        setChallengeDetailModal(prev => (prev.show ? { show: false, item: null } : prev));
         setRouteReviewModal(prev => (prev.show ? { show: false, item: null } : prev));
         // Reset sort key to a column that exists on this tab's table
-        const defaultSortKey = activeTab === 'daily_challenges' ? 'challenge_date' : 'created_at';
+        const defaultSortKey = 'created_at';
         setSortConfig(prev => (prev.key === defaultSortKey ? prev : { key: defaultSortKey, direction: 'desc' }));
     }, [activeTab, searchTerm]);
 
     useEffect(() => {
         fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeTab, currentPage, sortConfig, searchTerm, profile, pageSize, userSupporterFilter, userSortMode, challengeCityFilter, challengeDateFrom, challengeDateTo, challengeActiveFilter, routeStatusFilter, routeDateFrom, routeDateTo, auditActionFilter, auditTargetTypeFilter, feedbackStatusFilter, feedbackPriorityFilter, feedbackCategoryFilter, poiFlagStatusFilter, poiFlagReasonFilter, poiSuggestionStatusFilter, poiSuggestionTypeFilter, parkingImageStatusFilter]);
+    }, [activeTab, currentPage, sortConfig, searchTerm, profile, pageSize, userSupporterFilter, userSortMode, routeStatusFilter, routeDateFrom, routeDateTo, auditActionFilter, auditTargetTypeFilter, feedbackStatusFilter, feedbackPriorityFilter, feedbackCategoryFilter, poiFlagStatusFilter, poiFlagReasonFilter, poiSuggestionStatusFilter, poiSuggestionTypeFilter, parkingImageStatusFilter]);
 
     useEffect(() => {
         setSelectedRows(new Set());
@@ -773,7 +716,7 @@ export default function AdminPage() {
 
     // Load cities for filter dropdowns when those tabs open
     useEffect(() => {
-        if (activeTab !== 'daily_challenges' && activeTab !== 'leaderboard') return;
+        if (activeTab !== 'leaderboard') return;
         if (citiesForFilter.length > 0) return;
         supabase.from('cities').select('id, name, country_code').order('name').then(({ data }) => {
             if (data) setCitiesForFilter(data);
@@ -1200,22 +1143,6 @@ export default function AdminPage() {
         }
     };
 
-    const handleToggleChallengeActive = async (id: string, currentStatus: boolean) => {
-        setToggleLoading(id);
-        try {
-            const { error } = await supabase.from('daily_challenges').update({ is_active: !currentStatus }).eq('id', id);
-            if (error) throw error;
-            await writeAuditLog({ adminId, action: 'toggle_challenge_active', targetType: 'daily_challenge', targetId: id, notes: !currentStatus ? 'activated' : 'deactivated' });
-            toast.success('Kihívás státusza módosítva');
-            fetchData();
-        } catch (err) {
-            if (isDev) console.error(err);
-            toast.error('Hiba a státusz módosítása során');
-        } finally {
-            setToggleLoading(null);
-        }
-    };
-
     const adminId = (profile as { id?: string } | null)?.id ?? null;
 
     const handleUserToggleBan = async (id: string, currentlyBanned: boolean): Promise<boolean> => {
@@ -1410,7 +1337,6 @@ export default function AdminPage() {
                                                 {activeTab === 'poi_flags' && <MapPin className="h-5 w-5 text-white" />}
                                                 {activeTab === 'poi_suggestions' && <Lightbulb className="h-5 w-5 text-white" />}
                                                 {activeTab === 'cities' && <Building2 className="h-5 w-5 text-white" />}
-                                                {activeTab === 'daily_challenges' && <Trophy className="h-5 w-5 text-white" />}
                                                 {activeTab === 'community_routes' && <Route className="h-5 w-5 text-white" />}
                                                 {activeTab === 'leaderboard' && <Trophy className="h-5 w-5 text-white" />}
                                                 {activeTab === 'route_heatmap' && <ChartNoAxesCombined className="h-5 w-5 text-white" />}
@@ -1430,7 +1356,6 @@ export default function AdminPage() {
                                                     {activeTab === 'poi_flags' && 'POI Bejelentések'}
                                                     {activeTab === 'poi_suggestions' && 'POI Javaslatok'}
                                                     {activeTab === 'cities' && 'Városok'}
-                                                    {activeTab === 'daily_challenges' && 'Napi kihívások'}
                                                     {activeTab === 'community_routes' && 'Közösségi útvonalak'}
                                                     {activeTab === 'leaderboard' && 'Ranglista'}
                                                     {activeTab === 'route_heatmap' && 'Útvonal hőtérkép'}
@@ -1470,7 +1395,6 @@ export default function AdminPage() {
                                                     {activeTab === 'poi_flags' && 'POI-khoz kapcsolódó bejelentések kezelése'}
                                                     {activeTab === 'poi_suggestions' && 'Felhasználói POI javaslatok áttekintése és szerkesztése'}
                                                     {activeTab === 'cities' && 'Városok kezelése (slug, koordináták, bounding box)'}
-                                                    {activeTab === 'daily_challenges' && 'Automatikusan generált napi kihívások áttekintése'}
                                                     {activeTab === 'community_routes' && 'Közösségi beküldésű kerékpárutak moderálása'}
                                                     {activeTab === 'leaderboard' && 'Teljesített kihívások rangsora és láthatóság-kezelés'}
                                                     {activeTab === 'route_heatmap' && 'Anonimizált, aggregált kerékpáros útvonalforgalom városfejlesztési döntésekhez'}
@@ -1505,7 +1429,7 @@ export default function AdminPage() {
                                             </div>
                                         )}
 
-                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'poi_suggestions' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'daily_challenges' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'route_heatmap' && activeTab !== 'audit_log' && activeTab !== 'app_config' && (
+                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'poi_suggestions' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'route_heatmap' && activeTab !== 'audit_log' && activeTab !== 'app_config' && (
                                             <>
                                                 <Separator orientation="vertical" className="h-8 bg-sidebar-border" />
                                                 <Button
@@ -1549,7 +1473,6 @@ export default function AdminPage() {
                                             {activeTab === 'poi_flags' && 'POI Bejelentések'}
                                             {activeTab === 'poi_suggestions' && 'POI Javaslatok'}
                                             {activeTab === 'cities' && 'Városok'}
-                                            {activeTab === 'daily_challenges' && 'Napi kihívások'}
                                             {activeTab === 'community_routes' && 'Közösségi útvonalak'}
                                             {activeTab === 'leaderboard' && 'Ranglista'}
                                             {activeTab === 'route_heatmap' && 'Útvonal hőtérkép'}
@@ -1573,7 +1496,7 @@ export default function AdminPage() {
                                                 {mobileSearchOpen ? <XCircle className="h-4 w-4" /> : <Search className="h-4 w-4" />}
                                             </Button>
                                         )}
-                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'poi_suggestions' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'daily_challenges' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'route_heatmap' && activeTab !== 'audit_log' && activeTab !== 'app_config' && (
+                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'poi_suggestions' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'route_heatmap' && activeTab !== 'audit_log' && activeTab !== 'app_config' && (
                                             <Button
                                                 size="sm"
                                                 className="h-8 w-8 p-0"
@@ -1812,30 +1735,6 @@ export default function AdminPage() {
                                             onPageSizeChange={setPageSize}
                                         />
                                     )}
-                                    {activeTab === 'daily_challenges' && (
-                                        <DailyChallengesTable
-                                            data={dailyChallenges}
-                                            onRowClick={(item) => setChallengeDetailModal({ show: true, item })}
-                                            onDelete={(id) => handleDeleteClick(id)}
-                                            onToggleActive={handleToggleChallengeActive}
-                                            toggleLoading={toggleLoading}
-                                            searchTerm={searchTerm}
-                                            cityFilter={challengeCityFilter}
-                                            onCityFilterChange={setChallengeCityFilter}
-                                            dateFrom={challengeDateFrom}
-                                            onDateFromChange={setChallengeDateFrom}
-                                            dateTo={challengeDateTo}
-                                            onDateToChange={setChallengeDateTo}
-                                            activeFilter={challengeActiveFilter}
-                                            onActiveFilterChange={setChallengeActiveFilter}
-                                            cities={citiesForFilter}
-                                            currentPage={currentPage}
-                                            totalPages={totalPages}
-                                            onPageChange={setCurrentPage}
-                                            pageSize={pageSize}
-                                            onPageSizeChange={setPageSize}
-                                        />
-                                    )}
                                     {activeTab === 'community_routes' && (
                                         <CommunityRoutesTable
                                             data={communityRoutes}
@@ -2024,13 +1923,6 @@ export default function AdminPage() {
                         setCityFormModal({ show: false, item: null });
                         fetchData();
                     }}
-                />
-
-                <DailyChallengeDetailModal
-                    isOpen={challengeDetailModal.show}
-                    onClose={() => setChallengeDetailModal({ show: false, item: null })}
-                    challenge={challengeDetailModal.item}
-                    adminId={adminId}
                 />
 
                 <CommunityRouteReviewModal

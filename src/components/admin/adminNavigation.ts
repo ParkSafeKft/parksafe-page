@@ -144,15 +144,6 @@ export const ADMIN_NAVIGATION: AdminNavigationItem[] = [
         searchable: true,
     },
     {
-        id: 'daily_challenges',
-        label: 'Napi kihívások',
-        shortLabel: 'Kihívások',
-        description: 'Automatikusan generált napi kihívások felügyelete.',
-        section: 'Közösség',
-        icon: Trophy,
-        searchable: true,
-    },
-    {
         id: 'leaderboard',
         label: 'Ranglista',
         shortLabel: 'Ranglista',

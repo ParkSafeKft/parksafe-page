@@ -74,6 +74,23 @@ Validátor: `https://validator.schema.org/`, 2026-10-02, a helyi production főo
 
 Ez Schema.org markup-validálás, nem Google rich-result jogosultsági igazolás. Nincs kitalált értékelés/review. A Google SoftwareApplication rich result rating vagy review mezőt is kér; ilyen igazolt adatot nem adtunk hozzá. A schema ár/funkció egyezés itt a publikus tartalomhoz történt, nem a mobilapp aktuális release-ének külön auditja.
 
+## PARKS-294 — helyi strukturált adat ellenőrzés
+
+2026-10-02: a jóváhagyott változtatás a SoftwareApplication `screenshot` mezőjét `/ios_mapview.png` helyett `/parksafe-phone-mockup.png` értékre állítja. Ez ugyanaz a felhasználó által adott kép, amelyet a főoldal két PhoneMockup példánya használ. A látható tartalom, ár és funkcióállítások nem változtak.
+
+| Adat | Helyi egyezés és bizonyíték |
+| --- | --- |
+| Screenshot | A schema és a PhoneMockup ugyanazt a képet használja; a helyi fájl HTTP 200, `image/png`. |
+| Platform és store URL | iOS/Android, App Store `6752813986`, Play `com.parksafe.app`; schema és főoldali gombok azonosak. |
+| Kategória és funkciók | TravelApplication; a meglévő útvonaltervezés, tárolókeresés, szerviz/pumpa, közösségi fotók/értékelések/jelzések megfeleltetése fent szerepel. |
+| Organization | A meglévő kapcsolatadatok és közösségi linkek megfeleltetése fent szerepel; nem változtak. |
+| FAQ | Friss helyi buildben HU és EN nyelven mind a 7 kinyitott kérdés/válasz egyezik a renderelt FAQPage JSON-LD tartalmával. |
+| Ár | `price=0` és `isAccessibleForFree=true` egyezik a látható HU/EN állítással. Ez nem külön bizonyíték a mobilapp aktuális árazására; hiteles aktuális termékár/truth table igazolás továbbra is szükséges a ticket teljes elfogadásához. |
+
+Friss Schema.org validálás: a helyi production build renderelt JSON-LD kódrészletével **0 hiba, 0 figyelmeztetés**, SoftwareApplication, WebSite és FAQPage felismerve; Organization a kapcsolódó gráf része. A validált kód már az új screenshot URL-t tartalmazta. Ez nem Google rich-result jogosultsági ígéret, a FAQ markup sem ilyen ígéret.
+
+Ellenőrzés: `npm run build` sikeres (16 generált oldal); a módosított layout és script ESLint hibamentes; `node scripts/check-seo.mjs http://localhost:3002` PASS. A meglévő ellenőrzés az új schema screenshot értékét és a képfájl HTTP elérhetőségét is ellenőrzi. Kizárólag a helyi verziót vizsgáltuk; nincs élesítési vagy indexelési igazolás.
+
 ## Search Console – dokumentált hozzáférési blokk
 
 2026-10-02: megnyitottuk a `https://search.google.com/search-console` oldalt, majd a „Start now” belépést. A böngésző a Google-fiók email/telefon bejelentkezési képernyőjére irányított. Ebben a munkamenetben nincs hitelesített GSC session és nincs elérhető Search Console connector.

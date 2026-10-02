@@ -39,11 +39,15 @@ async function check() {
         assert.equal(app.applicationCategory, 'TravelApplication', path);
         assert.equal(Number(app.offers.price), 0, path);
         assert.equal(app.isAccessibleForFree, true, path);
+        assert.equal(app.screenshot, `${site}/parksafe-phone-mockup.png`, path);
         assert.deepEqual(app.operatingSystem, ['iOS', 'Android'], path);
         assert.deepEqual(app.downloadUrl, ['https://apps.apple.com/app/id6752813986', 'https://play.google.com/store/apps/details?id=com.parksafe.app'], path);
         return { path, status: response.status, title, description, canonical: canonical[0].href };
     }));
     assert.equal(new Set(pages.map(page => page.title)).size, paths.length, 'Distinct titles');
+    const screenshotResponse = await fetch(new URL('/parksafe-phone-mockup.png', base));
+    assert.equal(screenshotResponse.status, 200, 'Schema screenshot asset');
+    assert.match(screenshotResponse.headers.get('content-type') || '', /image\/png/, 'Schema screenshot asset');
     assert.equal(new Set(pages.map(page => page.description)).size, paths.length, 'Distinct descriptions');
     const sitemapResponse = await fetch(new URL('/sitemap.xml', base));
     assert.equal(sitemapResponse.status, 200);

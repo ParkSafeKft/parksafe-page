@@ -16,8 +16,8 @@ export function AboutTimeline() {
             desc: t('about.page.timeline.milestone1.desc'),
             icon: Lightbulb,
             imageAlt: t('about.page.timeline.milestone1.imageAlt'),
-            image: '/mgk.jpg',
-            imageOrientation: 'portrait' as const,
+            image: '/parksafe-founders-portrait.png',
+            imageOrientation: 'square' as const,
         },
         {
             year: t('about.page.timeline.milestone2.year'),
@@ -154,13 +154,13 @@ export function AboutTimeline() {
                             {milestone.image && (
                                 <div className="lg:col-span-4">
                                     <div className={`relative w-full overflow-hidden rounded-[1.5rem] bg-[#edf1ed] ${
-                                        milestone.imageOrientation === 'portrait' ? 'aspect-[4/5]' : 'aspect-[16/10]'
+                                        milestone.imageOrientation === 'square' ? 'aspect-square' : 'aspect-[16/10]'
                                     }`}>
                                         <Image
                                             src={milestone.image}
                                             alt={milestone.imageAlt}
                                             fill
-                                            className="object-cover"
+                                            className={milestone.imageOrientation === 'square' ? "object-cover object-[center_35%]" : "object-cover"}
                                             sizes="(max-width: 1024px) 100vw, 34vw"
                                         />
                                     </div>

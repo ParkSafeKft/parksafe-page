@@ -228,7 +228,7 @@ export const translations = {
                         badge: "Alapítás",
                         title: "Egy Probléma, Egy Megoldás",
                         desc: "A ParkSafe projektet azért hoztuk létre, hogy válaszoljunk egy hiányosságra: nem létezett olyan eszköz, amely segítette volna a kerékpárosokat biztonságos és megbízható parkolóhelyek megtalálásában a városi környezetben.",
-                        imageAlt: "ParkSafe alapítási pillanat"
+                        imageAlt: "A ParkSafe két alapítójának portréja"
                     },
                     milestone2: {
                         year: "2025 Vége",
@@ -510,7 +510,7 @@ export const translations = {
                         badge: "Foundation",
                         title: "One Problem, One Solution",
                         desc: "We created the ParkSafe project to address a gap: there was no tool to help cyclists find safe and reliable parking spots in urban environments.",
-                        imageAlt: "ParkSafe founding moment"
+                        imageAlt: "Portrait of the two ParkSafe founders"
                     },
                     milestone2: {
                         year: "End of 2025",

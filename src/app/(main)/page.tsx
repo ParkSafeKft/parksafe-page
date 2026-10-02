@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { ArrowDown, Navigation, Users, Wrench, Zap } from "lucide-react";
 import { motion } from "framer-motion";
+import PhoneMockup from "@/components/PhoneMockup";
 import FAQSection from "@/components/FAQSection";
 import PartnerBenefits from "@/components/PartnerBenefits";
 import HowItWorks from "@/components/HowItWorks";
@@ -95,26 +96,13 @@ export default function HomePage() {
                         initial={{ opacity: 0, x: 30 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.85, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-                        className="relative z-10 flex min-h-[590px] items-center justify-center lg:col-span-5 lg:justify-end"
+                        className="relative z-10 flex items-center justify-center lg:col-span-5 lg:justify-end"
                     >
-                        <picture className="relative z-10 block w-[330px] translate-y-6 sm:w-[400px] lg:w-[460px]">
-                            <source
-                                type="image/webp"
-                                srcSet="/ios_mapview_300.webp 300w, /ios_mapview_480.webp 480w, /ios_mapview_600.webp 600w, /ios_mapview_800.webp 800w"
-                                sizes="(min-width: 1024px) 460px, (min-width: 640px) 400px, 330px"
-                            />
-                            <img
-                                src="/ios_mapview.png"
-                                srcSet="/ios_mapview_300.png 300w, /ios_mapview_480.png 480w, /ios_mapview_600.png 600w, /ios_mapview_800.png 800w"
-                                sizes="(min-width: 1024px) 460px, (min-width: 640px) 400px, 330px"
-                                alt="ParkSafe Mobile Interface - Kerékpáros Térkép"
-                                width="480"
-                                height="480"
-                                className="h-auto w-full drop-shadow-[0_36px_40px_rgba(16,21,18,0.28)]"
-                                fetchPriority="high"
-                                decoding="async"
-                            />
-                        </picture>
+                        <PhoneMockup
+                            className="z-10 w-[310px] sm:w-[380px] lg:w-[400px]"
+                            priority
+                            alt={t('home.grid.mainStatLabel')}
+                        />
                     </motion.div>
                 </div>
             </section>
@@ -148,16 +136,8 @@ export default function HomePage() {
                                     {t('home.grid.mainDesc')}
                                 </p>
                             </div>
-                            <div className="absolute bottom-[-8%] right-[-5%] h-[54%] w-[72%] max-w-[520px] rotate-3 sm:h-[62%]">
-                                <picture>
-                                    <source type="image/webp" srcSet="/ios_mapview_600.webp" />
-                                    <img
-                                        src="/ios_mapview_600.png"
-                                        alt=""
-                                        className="h-full w-full origin-bottom translate-x-[6%] scale-[1.25] object-contain object-bottom sm:scale-[1.12]"
-                                        loading="lazy"
-                                    />
-                                </picture>
+                            <div className="absolute right-6 top-[340px] w-[280px] rotate-6 sm:right-10 sm:top-[370px] sm:w-[360px]">
+                                <PhoneMockup />
                             </div>
                         </div>
 
