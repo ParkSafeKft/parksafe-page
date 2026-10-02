@@ -51,7 +51,7 @@ export default function HomePage() {
                         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
                         className="relative z-20 pt-10 lg:col-span-7 lg:pt-0"
                     >
-                        <h1 className="max-w-[930px] text-[clamp(3.6rem,8.1vw,8.6rem)] font-black leading-[0.92] tracking-[-0.045em] text-[#101512] text-balance">
+                        <h1 className="max-w-[930px] text-[clamp(2.25rem,12vw,3.6rem)] font-black leading-[0.92] tracking-[-0.045em] text-[#101512] text-balance sm:text-[clamp(3.6rem,8.1vw,8.6rem)]">
                             {t('home.hero.title')}
                             <span className="mt-2 block text-[#34aa56]">{t('home.hero.subtitle')}</span>
                         </h1>
@@ -109,7 +109,7 @@ export default function HomePage() {
                                 sizes="(min-width: 1024px) 460px, (min-width: 640px) 400px, 330px"
                                 alt="ParkSafe Mobile Interface - Kerékpáros Térkép"
                                 width="480"
-                                height="900"
+                                height="480"
                                 className="h-auto w-full drop-shadow-[0_36px_40px_rgba(16,21,18,0.28)]"
                                 fetchPriority="high"
                                 decoding="async"
