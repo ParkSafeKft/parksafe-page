@@ -11,10 +11,7 @@ Allow: /
 Disallow: /admin
 Disallow: /api/admin
 Disallow: /api/private
-Disallow: /login
 Disallow: /profile
-Disallow: /forgot-password
-Disallow: /reset-password
 Disallow: /cart
 Disallow: /checkout
 

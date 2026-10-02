@@ -55,7 +55,7 @@ Az első szerveroldali megjelenés magyar, a keresőcímek magyarok. Nyelvvált�
 - A sitemap továbbra is pontosan az öt jóváhagyott, HTTP 200-as, indexelhető, saját canonical URL-t tartalmazza.
 - A statikus `lastmod` dátumokat eltávolítottuk, mert nem mindegyik volt igazolható valódi tartalmi módosításként. A jogi dokumentumok látható dátuma augusztus 12., miközben a sitemap január 29-et adott. Új lastmod csak igazolt változáskövetésből kerüljön vissza.
 - `robots.txt` és `sitemap.xml`: élesen és helyi production szerveren HTTP 200. A robots sitemap-hivatkozása a helyes hostra mutat.
-- `/login`, `/profile`, `/forgot-password`, `/reset-password`, `/admin`: `robots.txt` kizárás és `X-Robots-Tag: noindex, nofollow, noarchive` élesen és helyben is megvan. A HTML oldalak HTTP 200-as kliensoldali belépési felületet adhatnak; ez nem bizonyíték jogosulatlan adatelérésre.
+- A korábbi mérésben `/login`, `/profile`, `/forgot-password`, `/reset-password`, `/admin` esetén robots.txt kizárás és `X-Robots-Tag: noindex, nofollow, noarchive` is szerepelt. A PARKS-288 jóváhagyott helyi korrekciója lent külön szerepel; ez nem élesítés igazolása.
 - `/api/admin-usage-stats`: bejelentkezés nélküli kérésre HTTP 401 és noindex, élesen és helyben is. A teljes auth rendszer nem volt auditálva.
 
 ## Strukturált adatok és látható állítások
@@ -91,3 +91,24 @@ Hozzáférés pótlásának felelőse: a ParkSafe GSC-property tulajdonosa vagy 
 - Élesítés és kereső általi újrafeldolgozás nem történt ebben a munkában. A meglévő, külön adminos módosítások nem részei a PARKS-199 változtatásnak.
 
 Források: [Next.js Metadata](https://nextjs.org/docs/app/api-reference/functions/generate-metadata), [Google sitemap](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap), [Google SoftwareApplication](https://developers.google.com/search/docs/appearance/structured-data/software-app).
+
+## PARKS-288 — jóváhagyott helyi robots korrekció
+
+2026-10-02: a felhasználó jóváhagyta a `/login`, `/forgot-password`, `/reset-password` Disallow sorok eltávolítását. Ezek publikus belépési felületek, de nem keresőbe szánt tartalmak. A bejárás engedett, hogy a kereső elolvashassa a meglévő noindex fejlécet. [Google noindex feltételek](https://developers.google.com/search/docs/crawling-indexing/block-indexing).
+
+| Útvonal | Helyi HTTP | Robots bejárás | Noindex | Sitemap | Canonical / szándék |
+| --- | --- | --- | --- | --- | --- |
+| `/` | 200 | engedett | nincs | igen | saját URL, indexelhető |
+| `/about` | 200 | engedett | nincs | igen | saját URL, indexelhető |
+| `/contact` | 200 | engedett | nincs | igen | saját URL, indexelhető |
+| `/privacy` | 200 | engedett | nincs | igen | saját URL, jóváhagyott jogi indexelés |
+| `/terms` | 200 | engedett | nincs | igen | saját URL, jóváhagyott jogi indexelés |
+| `/login` | 200 | engedett | HTTP fejléc | nem | nem indexelendő belépési felület |
+| `/forgot-password` | 200 | engedett | HTTP fejléc | nem | nem indexelendő jelszókezelési felület |
+| `/reset-password` | 200 | engedett | HTTP fejléc | nem | nem indexelendő jelszókezelési felület |
+| `/profile`, `/admin` | HTTP kérés és noindex ellenőrizve | tiltott | HTTP fejléc; crawl tiltás mellett önmagában nem deindexelési bizonyíték | nem | privát felület, a hozzáférési szabályok nem változtak |
+| `/api/admin-usage-stats` | 401 bejelentkezés nélkül | robots admin-prefix tiltás | HTTP fejléc | nem | API hozzáférés változatlan |
+
+A sitemap pontosan az öt szándékosan indexelhető saját canonicalos URL-t tartalmazza. Nincs kitalált lastmod dátum. A robots sitemap-hivatkozása megfelelő.
+
+Ellenőrzés: `node scripts/check-seo.mjs http://localhost:3002` PASS, a friss robots.txt HTTP válaszával; script ESLint és diff ellenőrzés hibamentes. A három belépési URL HTTP 200 és noindex, bejárási tiltás nélkül. Jogosultságkezelés és Next.js header konfiguráció nem változott. A statikus robots.txt módosításához nem kellett új build; a futó helyi production szerver már az új fájlt adta vissza.

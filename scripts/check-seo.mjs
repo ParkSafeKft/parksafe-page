@@ -53,8 +53,16 @@ async function check() {
     assert.equal(robotsResponse.status, 200);
     const robots = await robotsResponse.text();
     assert.ok(robots.includes(`Sitemap: ${site}/sitemap.xml`));
-    for (const path of ['/login', '/profile', '/forgot-password', '/reset-password', '/admin']) {
+    for (const path of ['/profile', '/admin']) {
         assert.ok(robots.includes(`Disallow: ${path}`), path);
+    }
+    for (const path of ['/login', '/forgot-password', '/reset-password']) {
+        assert.ok(!robots.includes(`Disallow: ${path}`), `${path} must be crawlable to read noindex`);
+        const response = await fetch(new URL(path, base));
+        assert.equal(response.status, 200, path);
+        assert.match(response.headers.get('x-robots-tag') || '', /noindex/, path);
+    }
+    for (const path of ['/profile', '/admin']) {
         const response = await fetch(new URL(path, base));
         assert.match(response.headers.get('x-robots-tag') || '', /noindex/, path);
     }
