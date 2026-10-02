@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect } from "react";
-import { ArrowDown, Navigation, Users, Wrench, Zap } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Navigation, Users, Wrench, Zap } from "lucide-react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import PhoneMockup from "@/components/PhoneMockup";
 import FAQSection from "@/components/FAQSection";
@@ -58,9 +59,15 @@ export default function HomePage() {
                         </h1>
 
                         <div className="mt-10 grid max-w-3xl gap-8 border-t border-[#101512]/20 pt-7 md:grid-cols-[1fr_auto] md:items-end">
-                            <p className="max-w-xl text-lg font-medium leading-8 text-[#425047] text-pretty md:text-xl">
-                                {t('home.hero.description')}
-                            </p>
+                            <div>
+                                <p className="max-w-xl text-lg font-medium leading-8 text-[#425047] text-pretty md:text-xl">
+                                    {t('home.hero.description')}
+                                </p>
+                                <Link href="/map" className="mt-2 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-[#237d40] underline underline-offset-4 hover:text-[#17542a] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#34aa56]">
+                                    {t('home.hero.exploreMap')}
+                                    <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                                </Link>
+                            </div>
                             <a
                                 href="#platform"
                                 aria-label={t('home.grid.osTitle')}
