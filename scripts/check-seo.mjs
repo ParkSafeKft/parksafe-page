@@ -6,9 +6,10 @@ const site = 'https://parksafe.hu';
 const paths = ['/', '/about', '/contact', '/privacy', '/terms', '/map', '/bikerack', '/service', '/water'];
 const decode = value => value.replace(/&amp;/g, '&').replace(/&quot;/g, '"');
 
-async function check() {
+async function check(userAgent) {
+    const request = url => fetch(url, { redirect: 'manual', headers: { 'User-Agent': userAgent } });
     const pages = await Promise.all(paths.map(async path => {
-        const response = await fetch(new URL(path, base));
+        const response = await request(new URL(path, base));
         assert.equal(response.status, 200, path);
         assert.ok(!/noindex/i.test(response.headers.get('x-robots-tag') || ''), path);
         const html = await response.text();
@@ -20,9 +21,12 @@ async function check() {
         if (hasNavItem) assert.equal(activeLinks[0][0].match(/href="([^"]*)"/)?.[1], activeHref, `${path} active navbar href`);
         if (['/map', '/bikerack', '/service', '/water'].includes(path)) {
             assert.equal([...html.matchAll(/<h1\b/g)].length, 1, `${path} single SSR H1`);
+            assert.match(html, /<h1[^>]*>[^<]+<\/h1>/, `${path} SSR heading without JavaScript`);
+            assert.match(html, /<section class="web-map-explanation">[\s\S]*?<h2>/, `${path} SSR explanation`);
             assert.doesNotMatch(html, /Példák az országos snapshotból/, `${path} removed sample list`);
             assert.match(html, /OpenStreetMap/, `${path} data provenance`);
-            const queryResponse = await fetch(new URL(`${path}?lat=47.5&lng=19.04&z=12`, base));
+            const queryResponse = await request(new URL(`${path}?lat=47.5&lng=19.04&z=12`, base));
+            assert.equal(queryResponse.status, 200, `${path} camera query`);
             assert.match(await queryResponse.text(), new RegExp(`rel="canonical" href="${site}${path}"`), `${path} query-free canonical`);
         }
         assert.match(html, /<html[^>]*lang="hu"/, path);
@@ -58,36 +62,54 @@ async function check() {
         return { path, status: response.status, title, description, canonical: canonical[0].href };
     }));
     assert.equal(new Set(pages.map(page => page.title)).size, paths.length, 'Distinct titles');
-    const screenshotResponse = await fetch(new URL('/parksafe-phone-mockup.png', base));
+    const screenshotResponse = await request(new URL('/parksafe-phone-mockup.png', base));
     assert.equal(screenshotResponse.status, 200, 'Schema screenshot asset');
     assert.match(screenshotResponse.headers.get('content-type') || '', /image\/png/, 'Schema screenshot asset');
     assert.equal(new Set(pages.map(page => page.description)).size, paths.length, 'Distinct descriptions');
-    const sitemapResponse = await fetch(new URL('/sitemap.xml', base));
+    const sitemapResponse = await request(new URL('/sitemap.xml', base));
     assert.equal(sitemapResponse.status, 200);
+    assert.match(sitemapResponse.headers.get('content-type') || '', /^(?:application|text)\/xml\b/i, 'Sitemap XML content type');
     const sitemap = await sitemapResponse.text();
+    // Validate the entire deliberately minimal XML format, not just loc substrings in an HTML fallback.
+    assert.match(sitemap, /^\s*<\?xml version="1\.0" encoding="UTF-8"\?>\s*<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">(?:\s*<url>\s*<loc>https:\/\/parksafe\.hu\/[a-z]*<\/loc>\s*<\/url>)+\s*<\/urlset>\s*$/, 'Complete sitemap XML document');
     assert.deepEqual([...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(([, url]) => url).sort(), paths.map(path => `${site}${path}`).sort());
-    const robotsResponse = await fetch(new URL('/robots.txt', base));
+    const robotsResponse = await request(new URL('/robots.txt', base));
     assert.equal(robotsResponse.status, 200);
+    assert.match(robotsResponse.headers.get('content-type') || '', /^text\/plain\b/i, 'Robots plain text content type');
     const robots = await robotsResponse.text();
     assert.ok(robots.includes(`Sitemap: ${site}/sitemap.xml`));
+    assert.deepEqual([...robots.matchAll(/^User-agent:\s*(.+)$/gmi)].map(([, agent]) => agent.trim()), ['*'], 'One shared policy including Googlebot');
+    assert.match(robots, /^Allow:\s*\/$/m, 'Public crawling allowed');
+    const disallowed = [...robots.matchAll(/^Disallow:\s*(.+)$/gmi)].map(([, path]) => path.trim());
+    for (const path of [...paths, '/sitemap.xml', '/robots.txt']) {
+        assert.ok(!disallowed.some(rule => path.startsWith(rule)), `${path} not robots-blocked`);
+    }
     for (const path of ['/profile', '/admin']) {
         assert.ok(robots.includes(`Disallow: ${path}`), path);
     }
     for (const path of ['/login', '/forgot-password', '/reset-password']) {
         assert.ok(!robots.includes(`Disallow: ${path}`), `${path} must be crawlable to read noindex`);
-        const response = await fetch(new URL(path, base));
+        const response = await request(new URL(path, base));
         assert.equal(response.status, 200, path);
         assert.match(response.headers.get('x-robots-tag') || '', /noindex/, path);
     }
     for (const path of ['/profile', '/admin']) {
-        const response = await fetch(new URL(path, base));
+        const response = await request(new URL(path, base));
         assert.match(response.headers.get('x-robots-tag') || '', /noindex/, path);
     }
-    const privateResponse = await fetch(new URL('/api/admin-usage-stats', base));
+    const privateResponse = await request(new URL('/api/admin-usage-stats', base));
     assert.equal(privateResponse.status, 401, 'Unauthenticated private API');
     assert.match(privateResponse.headers.get('x-robots-tag') || '', /noindex/);
-    console.log(JSON.stringify(pages, null, 2));
-    console.log('PASS: public metadata, JSON-LD, sitemap, robots and private noindex/access checks');
+    for (const path of ['/seo-missing-page-check', '/map/seo-missing-page-check']) {
+        const response = await request(new URL(path, base));
+        assert.equal(response.status, 404, `${path} genuine 404, no SPA fallback`);
+    }
+    if (userAgent === 'ParkSafe-SEO-check') console.log(JSON.stringify(pages, null, 2));
+    console.log(`PASS (${userAgent}): public SSR metadata, status codes, JSON-LD, sitemap XML, robots and private noindex/access checks`);
 }
 
-check().catch(error => { console.error(error); process.exitCode = 1; });
+async function main() {
+    for (const agent of ['ParkSafe-SEO-check', 'Googlebot']) await check(agent);
+}
+
+main().catch(error => { console.error(error); process.exitCode = 1; });
