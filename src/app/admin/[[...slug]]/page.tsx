@@ -63,6 +63,7 @@ import AuditLogTable from '@/components/admin/AuditLogTable';
 import AppConfigTab from '@/components/admin/AppConfigTab';
 import { writeAuditLog } from '@/lib/adminAuditLog';
 import ContentStatsOverview from '@/components/admin/ContentStatsOverview';
+import ActivationMetricsOverview from '@/components/admin/ActivationMetricsOverview';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import RideDiagnosticsTab from '@/components/admin/RideDiagnosticsTab';
 
@@ -1552,9 +1553,10 @@ export default function AdminPage() {
                             <Card className="bg-card border-border overflow-hidden h-full flex flex-col">
                                 <CardContent className="p-0 m-0 flex-1 overflow-hidden flex flex-col">
                                     {activeTab === 'dashboard' && (
-                                        <div className="overflow-y-auto h-full p-1">
-                                            <DeviceStatsOverview />
-                                            <ContentStatsOverview />
+                                        <div className="ops-overview-scroll">
+                                            <DeviceStatsOverview activation={<ActivationMetricsOverview />}>
+                                                <ContentStatsOverview />
+                                            </DeviceStatsOverview>
                                         </div>
                                     )}
                                     {activeTab === 'users' && (

@@ -85,13 +85,13 @@ const metricCopy: Record<WeeklyMetricKey, {
 }> = {
     'active-users': {
         eyebrow: 'Elmúlt 7 nap · felhasználók',
-        title: 'Aktív userek',
-        subtitle: 'Minden felhasználó, aki legalább egy ride-ot indított.',
+        title: 'Aktív tekerők',
+        subtitle: 'Legalább egy mentett tekeréssel az elmúlt 7 napban.',
         icon: UsersRound,
     },
     rides: {
         eyebrow: 'Elmúlt 7 nap · aktivitás',
-        title: 'Ride-ok',
+        title: 'Tekerések',
         subtitle: 'Az összes rögzített út, legfrissebb elöl.',
         icon: Bike,
     },
@@ -109,7 +109,7 @@ const metricCopy: Record<WeeklyMetricKey, {
     },
     'new-users': {
         eyebrow: 'Elmúlt 7 nap · regisztrációk',
-        title: 'Új userek',
+        title: 'Új regisztrálók',
         subtitle: 'Az időszakban létrehozott felhasználói profilok.',
         icon: UserPlus,
     },

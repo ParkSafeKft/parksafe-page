@@ -44,11 +44,11 @@ export default function ContentStatsOverview() {
     useEffect(() => { loadStats(); }, [loadStats]);
 
     const metrics = useMemo(() => stats ? [
-        { key: 'active-users' as const, label: 'Aktív userek', value: stats.active_users_7d.toLocaleString('hu-HU'), note: 'ride-ot indított', icon: UsersRound },
-        { key: 'rides' as const, label: 'Ride-ok', value: stats.rides_7d.toLocaleString('hu-HU'), note: 'rögzített út', icon: Bike },
+        { key: 'active-users' as const, label: 'Aktív tekerők', value: stats.active_users_7d.toLocaleString('hu-HU'), note: 'felhasználó', icon: UsersRound },
+        { key: 'rides' as const, label: 'Tekerések', value: stats.rides_7d.toLocaleString('hu-HU'), note: 'mentett út', icon: Bike },
         { key: 'distance' as const, label: 'Távolság', value: `${(stats.distance_meters_7d / 1000).toLocaleString('hu-HU', { maximumFractionDigits: 1 })} km`, note: 'összesen', icon: Map },
         { key: 'duration' as const, label: 'Idő', value: `${Math.round(stats.duration_seconds_7d / 60).toLocaleString('hu-HU')} perc`, note: 'rögzítve', icon: Clock3 },
-        { key: 'new-users' as const, label: 'Új userek', value: stats.new_users_7d.toLocaleString('hu-HU'), note: 'regisztráció', icon: UserPlus },
+        { key: 'new-users' as const, label: 'Új regisztrálók', value: stats.new_users_7d.toLocaleString('hu-HU'), note: 'felhasználó', icon: UserPlus },
     ] : [], [stats]);
 
     if (loading) return <div className="ops-dashboard-loading"><Loader2 aria-label="Betöltés" /></div>;
@@ -59,8 +59,8 @@ export default function ContentStatsOverview() {
         <>
             <section className="ops-weekly-ledger">
                 <header>
-                    <span>Elmúlt 7 nap <small>· Kattints a részletekért</small></span>
-                    <small>Frissítve: {new Intl.DateTimeFormat('hu-HU', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(stats.computed_at))}</small>
+                    <h2>Elmúlt 7 nap</h2>
+                    <small>Frissítve {new Intl.DateTimeFormat('hu-HU', { timeStyle: 'short', timeZone: 'Europe/Budapest' }).format(new Date(stats.computed_at))}</small>
                 </header>
                 <div>
                     {metrics.map(({ key, label, value, note, icon: Icon }) => (

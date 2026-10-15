@@ -43,7 +43,7 @@ export default function AdminPageHeader({
     }, [item.searchable]);
 
     return (
-        <header className="ops-header">
+        <header className={`ops-header${activeTab === 'dashboard' ? ' is-overview' : ''}`}>
             <div className="ops-commandbar">
                 <SidebarTrigger className="ops-mobile-trigger" aria-label="Navigáció megnyitása" />
 
@@ -72,11 +72,11 @@ export default function AdminPageHeader({
                             <kbd><Command aria-hidden="true" />K</kbd>
                         )}
                     </label>
-                ) : (
+                ) : activeTab !== 'dashboard' ? (
                     <div className="ops-command-search is-placeholder" aria-hidden="true">
                         <span>{item.description}</span>
                     </div>
-                )}
+                ) : null}
 
                 <div className="ops-header-actions">
                     {hasRealtime ? (
@@ -94,7 +94,7 @@ export default function AdminPageHeader({
                 </div>
             </div>
 
-            <div className="ops-scopebar">
+            {activeTab !== 'dashboard' ? <div className="ops-scopebar">
                 <div className="ops-scope-tabs" role="navigation" aria-label={`${item.section} nézetek`}>
                     {peers.map((peer) => (
                         <button
@@ -109,7 +109,7 @@ export default function AdminPageHeader({
                     ))}
                 </div>
                 <p>{item.description}</p>
-            </div>
+            </div> : null}
         </header>
     );
 }

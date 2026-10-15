@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { AppWindow, Bike, Loader2, Repeat2, Smartphone, UserPlus, UserRound, type LucideIcon } from 'lucide-react';
+import { AppWindow, Bike, ChartNoAxesCombined, Repeat2, Smartphone, UsersRound } from 'lucide-react';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -24,7 +24,7 @@ interface DeviceStats {
 
 const isDev = process.env.NODE_ENV === 'development';
 
-export default function DeviceStatsOverview() {
+export default function DeviceStatsOverview({ children, activation }: { children?: ReactNode; activation?: ReactNode }) {
     const [stats, setStats] = useState<DeviceStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -58,6 +58,7 @@ export default function DeviceStatsOverview() {
                 throw new Error(message);
             }
             setStats(await response.json());
+            setError(null);
         } catch (reason: unknown) {
             if (isDev) console.error('Error fetching device stats:', reason);
             setError(reason instanceof Error ? reason.message : 'Ismeretlen hiba');
@@ -91,71 +92,53 @@ export default function DeviceStatsOverview() {
         };
     }, [stats]);
 
-    if (loading) return <div className="ops-dashboard-loading"><Loader2 aria-label="Betöltés" /></div>;
-    if (error) return <div className="ops-dashboard-error">{error}</div>;
-    if (!stats || !view) return null;
-
     return (
-        <section className="ops-dashboard" aria-label="Rendszerállapot">
-            <div className="ops-dashboard-hero">
-                <div className="ops-dashboard-total">
-                    <span>Rendszerkép</span>
-                    <h2>{stats.total_users.toLocaleString('hu-HU')}</h2>
-                    <p>összes felhasználó</p>
-                </div>
-
-                <div className="ops-user-split">
-                    <UserSplitRow
-                        icon={UserRound}
-                        label="Regisztrált"
-                        value={stats.registered_users}
-                    />
-                    <UserSplitRow
-                        icon={Smartphone}
-                        label="Vendég"
-                        value={stats.guest_users}
-                    />
-                </div>
-
-                <div className="ops-platform-compact">
-                    <header><AppWindow aria-hidden="true" /><span>Platformok</span><small>{(stats.ios_devices + stats.android_devices + stats.web_devices).toLocaleString('hu-HU')} eszköz</small></header>
-                    <Platform platform="android" label="Android" value={stats.android_devices} share={view.androidShare} />
-                    <Platform platform="apple" label="iOS" value={stats.ios_devices} share={view.iosShare} />
-                    {stats.web_devices > 0 ? <Platform platform="web" label="Web" value={stats.web_devices} share={view.webShare} /> : null}
-                </div>
+        <div className="ops-overview-page">
+            <section className="ops-overview-summary" aria-label="Közösség és aktivitás" aria-busy={loading}>
+                {[
+                    { label: 'Felhasználó', value: stats?.total_users, icon: UsersRound, note: stats ? `${stats.registered_users.toLocaleString('hu-HU')} regisztrált · ${stats.guest_users.toLocaleString('hu-HU')} vendég` : 'Összesen' },
+                    { label: 'Aktív tekerő', value: stats?.user_metrics.active_this_month, icon: Bike, note: 'Ebben a hónapban' },
+                    { label: 'Visszatérő tekerő', value: stats?.user_metrics.returning_this_month, icon: Repeat2, note: 'Ebben és korábbi hónapban is tekert' },
+                ].map(({ icon: Icon, ...item }) => <div key={item.label}><span><Icon aria-hidden="true" />{item.label}</span><strong>{item.value === undefined ? <span className="ops-activation-placeholder" aria-hidden="true" /> : item.value.toLocaleString('hu-HU')}</strong><small>{item.note}</small></div>)}
+            </section>
+            {error ? <div className="ops-dashboard-error" role="alert">{error}</div> : null}
+            {children}
+            <div className="ops-audience-grid">
+                <MonthlyUsersChart data={view?.monthlyUsers ?? []} loading={loading} />
+                <section className="ops-audience-panel" aria-label="Eszközök és platformmegoszlás">
+                    <header><h2><Smartphone aria-hidden="true" />Eszközök</h2><span>Platformmegoszlás</span></header>
+                    {stats && view ? <>
+                        <DeviceRing stats={stats} />
+                        <table className="ops-platform-table">
+                            <caption className="sr-only">Eszközök platformonként</caption>
+                            <thead><tr><th scope="col">Platform</th><th scope="col">Eszköz</th><th scope="col">Arány</th></tr></thead>
+                            <tbody>
+                                <Platform platform="android" label="Android" value={stats.android_devices} share={view.androidShare} />
+                                <Platform platform="apple" label="iOS" value={stats.ios_devices} share={view.iosShare} />
+                                {stats.web_devices > 0 ? <Platform platform="web" label="Web" value={stats.web_devices} share={view.webShare} /> : null}
+                            </tbody>
+                        </table>
+                    </> : <p className="ops-audience-empty" role="status">{loading ? 'Betöltés…' : 'Nincs adat'}</p>}
+                </section>
             </div>
-
-            {view.monthlyUsers.length > 0 ? <MonthlyUsersChart data={view.monthlyUsers} /> : null}
-
-            <div className="ops-user-kpis" aria-label="Havi felhasználói mutatók">
-                <Metric icon={Repeat2} label="Visszatérő felhasználók" value={stats.user_metrics.returning_this_month} note="ebben és egy korábbi hónapban is tekertek" />
-                <Metric icon={Bike} label="Aktív felhasználók" value={stats.user_metrics.active_this_month} note="ebben a hónapban rögzítettek túrát" />
-                <Metric icon={UserPlus} label="Új regisztrációk" value={stats.user_metrics.new_this_month} note="ebben a hónapban" />
-            </div>
-        </section>
+            {activation}
+        </div>
     );
 }
 
-function Metric({ icon: Icon, label, value, note }: { icon: LucideIcon; label: string; value: number; note: string }) {
-    return <div className="ops-metric"><Icon aria-hidden="true" /><span>{label}</span><strong>{value.toLocaleString('hu-HU')}</strong><small>{note}</small></div>;
-}
-
-function UserSplitRow({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: number }) {
-    return <div className="ops-user-row"><Icon aria-hidden="true" /><span>{label}</span><strong>{value.toLocaleString('hu-HU')}</strong></div>;
-}
-
-function MonthlyUsersChart({ data }: { data: Array<{ month: string; users: number; label: string; fullLabel: string }> }) {
+function MonthlyUsersChart({ data, loading }: { data: Array<{ month: string; users: number; label: string; fullLabel: string }>; loading: boolean }) {
     const latest = data.at(-1);
     return (
-        <section className="ops-user-growth" aria-label="Havi új regisztrációk">
+        <section className="ops-user-growth ops-registration-chart" aria-label="Havi új regisztrációk">
             <header>
-                <div><span>Új regisztrációk</span><small>elmúlt 12 hónap</small></div>
+                <div><h2><ChartNoAxesCombined aria-hidden="true" />Új regisztrációk</h2><small>Elmúlt 12 hónap</small></div>
                 {latest ? <strong>{latest.users.toLocaleString('hu-HU')} <small>ebben a hónapban</small></strong> : null}
             </header>
             <ol className="sr-only">
                 {data.map(item => <li key={item.month}>{item.fullLabel}: {item.users.toLocaleString('hu-HU')} új felhasználó</li>)}
             </ol>
             <div className="ops-user-growth-chart">
+                {data.length === 0 ? <p className="ops-audience-empty" role="status">{loading ? 'Betöltés…' : 'Nincs adat'}</p> :
                 <ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 800, height: 176 }}>
                     <LineChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -20 }}>
                         <CartesianGrid vertical={false} stroke="var(--ops-border)" />
@@ -167,9 +150,9 @@ function MonthlyUsersChart({ data }: { data: Array<{ month: string; users: numbe
                             labelFormatter={(_, payload) => payload[0]?.payload.fullLabel ?? ''}
                             formatter={(value) => [`${Number(value).toLocaleString('hu-HU')} felhasználó`, 'Regisztráció']}
                         />
-                        <Line type="monotone" dataKey="users" stroke="var(--ops-green)" strokeWidth={2} dot={{ r: 2.5, fill: 'var(--ops-green)', strokeWidth: 0 }} activeDot={{ r: 4, fill: 'var(--ops-green)', stroke: '#0c0f0d', strokeWidth: 2 }} />
+                        <Line type="monotone" dataKey="users" isAnimationActive={false} stroke="var(--ops-green)" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: 'var(--ops-green)', stroke: '#0c0f0d', strokeWidth: 2 }} />
                     </LineChart>
-                </ResponsiveContainer>
+                </ResponsiveContainer>}
             </div>
         </section>
     );
@@ -177,15 +160,30 @@ function MonthlyUsersChart({ data }: { data: Array<{ month: string; users: numbe
 
 function Platform({ platform, label, value, share }: { platform: 'android' | 'apple' | 'web'; label: string; value: number; share: number }) {
     return (
-        <div className="ops-platform-row">
-            <span className="ops-platform-mark" role="img" aria-label={label}>
+        <tr>
+            <th scope="row"><span className="ops-platform-cell"><span className={`ops-platform-mark is-${platform}`} aria-hidden="true">
                 {platform === 'android' ? <AndroidMark /> : platform === 'apple' ? <AppleMark /> : <AppWindow aria-hidden="true" />}
-            </span>
-            <i><b style={{ width: `${share}%` }} /></i>
-            <strong>{value.toLocaleString('hu-HU')}</strong>
-            <small>{share}%</small>
-        </div>
+            </span>{label}</span></th>
+            <td>{value.toLocaleString('hu-HU')}</td><td>{share}%</td>
+        </tr>
     );
+}
+
+function DeviceRing({ stats }: { stats: DeviceStats }) {
+    const total = stats.android_devices + stats.ios_devices + stats.web_devices;
+    const android = total ? stats.android_devices / total * 100 : 0;
+    const ios = total ? stats.ios_devices / total * 100 : 0;
+    return <svg className="ops-device-ring" viewBox="0 0 140 140" role="img" aria-label={`${stats.total_devices.toLocaleString('hu-HU')} eszköz; Android ${stats.android_devices}, iOS ${stats.ios_devices}${stats.web_devices ? `, Web ${stats.web_devices}` : ''}`}>
+        <g transform="rotate(-90 70 70)" fill="none" strokeWidth="10">
+            <circle cx="70" cy="70" r="55" stroke="var(--ops-border-strong)" />
+            {total > 0 ? <>
+                <circle cx="70" cy="70" r="55" pathLength="100" stroke="var(--ops-green)" strokeDasharray={`${android} ${100 - android}`} />
+                <circle cx="70" cy="70" r="55" pathLength="100" stroke="var(--ops-text-2)" strokeDasharray={`${ios} ${100 - ios}`} strokeDashoffset={-android} />
+            </> : null}
+        </g>
+        <text x="70" y="69" textAnchor="middle" className="ops-device-count">{stats.total_devices.toLocaleString('hu-HU')}</text>
+        <text x="70" y="88" textAnchor="middle" className="ops-device-caption">eszköz</text>
+    </svg>;
 }
 
 function AppleMark() {
