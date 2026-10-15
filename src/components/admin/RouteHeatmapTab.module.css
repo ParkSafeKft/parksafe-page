@@ -1,0 +1,60 @@
+.period {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2rem;
+  padding: 0.3rem 0.5rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: none;
+  color: var(--ops-text-3);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+.period svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+.period.period[aria-pressed="true"] {
+  border-color: var(--ops-green);
+  background: none;
+  color: var(--ops-text);
+}
+.period:hover {
+  color: var(--ops-text);
+}
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 3rem;
+  padding: 0.25rem 0 0.75rem;
+}
+.stat {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+.stat span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ops-text-3);
+  font-size: 0.8125rem;
+}
+.stat svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+.stat strong {
+  color: var(--ops-text);
+  font-size: 1.125rem;
+  font-weight: 550;
+  font-variant-numeric: tabular-nums;
+}
+@media (pointer: coarse) {
+  .period {
+    min-height: 2.75rem;
+  }
+}

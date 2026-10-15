@@ -1,5 +1,7 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import ImagePreview from './ImagePreview';
+import DeleteConfirmModal from './DeleteConfirmModal';
+import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
 import { Image as ImageIcon, Plus, X, AlertTriangle, Info, Loader2, GripVertical } from 'lucide-react';
 import { ImageUploadProps } from '@/types';
@@ -14,6 +16,8 @@ const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(function Ima
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<{ url: string; index: number } | null>(null);
+    const [deleting, setDeleting] = useState(false);
     const [pendingFiles, setPendingFiles] = useState<File[]>([]); // files waiting for location id
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -79,13 +83,13 @@ const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(function Ima
 
                 // Validate file
                 if (!file.type.startsWith('image/')) {
-                    alert(`${file.name} nem kép fájl!`);
+                    toast.error(`${file.name} nem kép fájl!`);
                     continue;
                 }
 
                 // Check file size (max 5MB)
                 if (file.size > 5 * 1024 * 1024) {
-                    alert(`${file.name} túl nagy! Maximum 5MB lehet.`);
+                    toast.error(`${file.name} túl nagy! Maximum 5MB lehet.`);
                     continue;
                 }
 
@@ -104,7 +108,7 @@ const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(function Ima
                     } catch (error) {
                         console.error(`Error uploading ${file.name}:`, error);
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        alert(`Hiba ${file.name} feltöltése során: ${(error as any).message}`);
+                        toast.error(`Hiba ${file.name} feltöltése során: ${(error as any).message}`);
                     } finally {
                         setUploading(false);
                     }
@@ -118,7 +122,7 @@ const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(function Ima
 
         } catch (error) {
             console.error('Upload error:', error);
-            alert('Hiba a képek feltöltése során');
+            toast.error('Hiba a képek feltöltése során');
         } finally {
             setUploadProgress({});
             // Reset file input
@@ -177,10 +181,7 @@ const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(function Ima
 
     // Delete image
     const handleDeleteImage = async (imageUrl: string, index: number) => {
-        if (!confirm('Biztosan törölni szeretnéd ezt a képet?')) {
-            return;
-        }
-
+        setDeleting(true);
         try {
             // Extract file path from URL
             const urlParts = imageUrl.split('/marker-images/');
@@ -205,7 +206,10 @@ const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(function Ima
 
         } catch (error) {
             console.error('Error deleting image:', error);
-            alert('Hiba a kép törlése során');
+            toast.error('Hiba a kép törlése során');
+        } finally {
+            setDeleting(false);
+            setDeleteTarget(null);
         }
     };
 
@@ -264,23 +268,24 @@ const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(function Ima
                             onDragLeave={handleDragLeave}
                             onDrop={(e) => handleDrop(e, index)}
                             onDragEnd={handleDragEnd}
-                            onClick={() => setPreviewUrl(url)}
                         >
                             <div className="absolute top-1.5 left-1.5 z-10 p-1 bg-black/60 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
                                 <GripVertical size={14} className="text-white/80" />
                             </div>
 
+                            <button type="button" className="block w-full h-full" onClick={() => setPreviewUrl(url)} aria-label={`${index + 1}. kép nagyítása`}>
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={url}
                                 alt={`Kép ${index + 1}`}
                                 className="w-full h-full object-cover"
                             />
+                            </button>
 
                             <button
                                 type="button"
-                                className="absolute top-1.5 right-1.5 w-7 h-7 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all transform hover:scale-110 shadow-sm z-10"
-                                onClick={(e) => { e.stopPropagation(); handleDeleteImage(url, index); }}
+                                className="absolute top-1.5 right-1.5 w-11 h-11 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center z-10"
+                                onClick={(e) => { e.stopPropagation(); setDeleteTarget({ url, index }); }}
                                 title="Törlés"
                             >
                                 <X size={14} className="text-white stroke-[2.5]" />
@@ -297,6 +302,10 @@ const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(function Ima
             {previewUrl && (
                 <ImagePreview src={previewUrl} alt="Előnézet" onClose={() => setPreviewUrl(null)} />
             )}
+            <DeleteConfirmModal isOpen={deleteTarget !== null} title="Feltöltött kép törlése"
+                description="A kép eltűnik a helyszínhez tartozó képek közül és a tárhelyről is."
+                loading={deleting} onClose={() => setDeleteTarget(null)}
+                onConfirm={() => { if (deleteTarget) void handleDeleteImage(deleteTarget.url, deleteTarget.index); }} />
 
             {/* Upload Progress */}
             {Object.keys(uploadProgress).length > 0 && (

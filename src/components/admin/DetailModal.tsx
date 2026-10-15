@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import {
-    Dialog,
+    Dialog, DialogContent, DialogDescription, DialogTitle,
 } from '@/components/ui/dialog';
 import {
     DropdownMenu,
@@ -15,6 +15,9 @@ import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ImagePreview from './ImagePreview';
 import UserRideDiagnostics from './UserRideDiagnostics';
+import RideDetailContent from './RideDetailContent';
+import weeklyStyles from './WeeklyStatsDetailModal.module.css';
+import profileStyles from './UserProfileModal.module.css';
 import {
     AdminModalBody,
     AdminModalContent,
@@ -22,7 +25,6 @@ import {
     AdminModalHeader,
     AdminModalRelations,
     AdminRelationCard,
-    AdminModalSection,
 } from './AdminModal';
 import { toast } from 'sonner';
 import {
@@ -30,7 +32,6 @@ import {
     Shield,
     Mail,
     Phone,
-    Calendar,
     CheckCircle,
     XCircle,
     Eye,
@@ -56,19 +57,14 @@ import {
     Languages,
     RefreshCw,
     Hash,
-    Activity,
     Bike,
-    Gauge,
-    Mountain,
-    Timer,
-    Trophy,
-    Flame,
     Award,
-    Zap,
-    Route as RouteIcon,
     Loader2,
     Ban,
     UserCheck,
+    ChevronRight,
+    ArrowLeft,
+    X,
 } from 'lucide-react';
 
 interface DetailModalProps {
@@ -84,6 +80,7 @@ interface DetailModalProps {
     onOpenPoiDetail?: (poiId: string, poiType: string) => void;
     /** Open another record in this same detail modal - enables cross-navigation between linked entities */
     onOpenUser?: (userId: string) => void;
+    onOpenRide?: (rideId: string) => void;
     onOpenParkingSpot?: (spotId: string) => void;
     onToggleUserBan?: (id: string, currentlyBanned: boolean) => Promise<boolean>;
     onToggleUserSupporter?: (id: string, currentlySupporter: boolean) => Promise<boolean>;
@@ -93,6 +90,7 @@ interface DetailModalProps {
     onDeleteSubmission?: (submission: any) => void;
     /** When set, render a back arrow in the header - pops the cross-nav history one step */
     onBack?: () => void;
+    backLabel?: string;
 }
 
 function copyId(id: string) {
@@ -229,13 +227,38 @@ export default function DetailModal({
     onStatusChange,
     onOpenPoiDetail,
     onOpenUser,
+    onOpenRide,
     onOpenParkingSpot,
     onToggleUserBan,
     onToggleUserSupporter,
     userActionLoading,
     onDeleteSubmission,
     onBack,
+    backLabel = 'Vissza az előző rekordhoz',
 }: DetailModalProps) {
+    const viewMemory = useRef<Record<string, { top: number; focus?: string }>>({});
+    const viewKey = type + ':' + item?.id;
+    const navigationProps = {
+        onScrollCapture: (event: React.UIEvent<HTMLDivElement>) => {
+            const target = event.target as HTMLElement;
+            if (target.matches('.admin-modal-body, [data-modal-scroll]')) {
+                viewMemory.current[viewKey] = { ...viewMemory.current[viewKey], top: target.scrollTop };
+            }
+        },
+        onClickCapture: (event: React.MouseEvent<HTMLDivElement>) => {
+            const button = (event.target as HTMLElement).closest('button, a');
+            if (button) viewMemory.current[viewKey] = { top: viewMemory.current[viewKey]?.top ?? 0, focus: button.getAttribute('aria-label') || button.textContent || undefined };
+        },
+        onOpenAutoFocus: (event: Event) => {
+            const memory = viewMemory.current[viewKey];
+            if (!memory) return;
+            const dialog = event.target instanceof HTMLElement ? event.target.closest('[role="dialog"]') : null;
+            const panel = dialog?.querySelector<HTMLElement>('.admin-modal-body, [data-modal-scroll]');
+            if (panel) panel.scrollTop = memory.top;
+            const button = [...dialog?.querySelectorAll<HTMLElement>('button, a') || []].find(element => (element.getAttribute('aria-label') || element.textContent) === memory.focus);
+            if (button) { event.preventDefault(); button.focus({ preventScroll: true }); }
+        },
+    };
     const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
     const [currentStatus, setCurrentStatus] = useState<string | null>(null);
     const [poiCoords, setPoiCoords] = useState<{ lat: number; lon: number; name: string } | null>(null);
@@ -243,11 +266,25 @@ export default function DetailModal({
 
     // User activity data (loaded only when type === 'user')
     const [activityLoading, setActivityLoading] = useState(false);
+    const [activityError, setActivityError] = useState('');
     const [activityProgress, setActivityProgress] = useState<UserActivityProgress | null>(null);
     const [activityStats, setActivityStats] = useState<UserActivityStats | null>(null);
     const [activityRecent, setActivityRecent] = useState<UserActivityRide[]>([]);
     const [activityHomeCity, setActivityHomeCity] = useState<string | null>(null);
     const [activitySupporter, setActivitySupporter] = useState<{ is_supporter: boolean; supporter_since: string | null } | null>(null);
+    useEffect(() => {
+        if (!isOpen || type !== 'user' || activityLoading) return;
+        const memory = viewMemory.current[viewKey];
+        if (!memory) return;
+        const frame = requestAnimationFrame(() => {
+            const dialog = document.querySelector('[data-slot="user-profile-dialog"]');
+            const panel = dialog?.querySelector<HTMLElement>('[data-modal-scroll]');
+            if (panel) panel.scrollTop = memory.top;
+            const control = [...dialog?.querySelectorAll<HTMLElement>('button, a') || []].find(element => (element.getAttribute('aria-label') || element.textContent) === memory.focus);
+            control?.focus({ preventScroll: true });
+        });
+        return () => cancelAnimationFrame(frame);
+    }, [isOpen, type, viewKey, activityLoading]);
     const [userBannedAt, setUserBannedAt] = useState<string | null>(item?.banned_at ?? null);
     const [pendingUserAction, setPendingUserAction] = useState<'ban' | 'supporter' | null>(null);
 
@@ -353,6 +390,7 @@ export default function DetailModal({
     useEffect(() => {
         let cancelled = false;
         const loadActivity = async () => {
+            setActivityError('');
             if (!isOpen || type !== 'user' || !item?.id) {
                 setActivityProgress(null);
                 setActivityStats(null);
@@ -362,12 +400,17 @@ export default function DetailModal({
                 return;
             }
             setActivityLoading(true);
+            setActivityStats(null);
+            setActivityProgress(null);
+            setActivityRecent([]);
+            setActivityHomeCity(null);
+            setActivitySupporter(null);
             try {
                 const userId = item.id as string;
                 const [
-                    { data: profileExtra },
-                    { data: progressData },
-                    { data: rideRows },
+                    { data: profileExtra, error: profileError },
+                    { data: progressData, error: progressError },
+                    { data: rideRows, error: ridesError },
                 ] = await Promise.all([
                     supabase
                         .from('profiles')
@@ -387,6 +430,7 @@ export default function DetailModal({
                 ]);
 
                 if (cancelled) return;
+                if (profileError || progressError || ridesError) throw profileError || progressError || ridesError;
 
                 if (profileExtra) {
                     setActivitySupporter({
@@ -405,6 +449,7 @@ export default function DetailModal({
                     }
                 }
 
+                if (cancelled) return;
                 setActivityProgress(progressData ? (progressData as UserActivityProgress) : null);
 
                 const rides = (rideRows || []) as UserActivityRide[];
@@ -463,6 +508,7 @@ export default function DetailModal({
                 }
             } catch (err) {
                 console.error('Error loading user activity:', err);
+                if (!cancelled) setActivityError('Az aktivitás most nem tölthető be. A profil újranyitásával próbálhatod újra.');
             } finally {
                 if (!cancelled) setActivityLoading(false);
             }
@@ -479,6 +525,12 @@ export default function DetailModal({
     };
 
     if (!item) return null;
+
+    if (type === 'ride') return <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
+        <AdminModalContent key={viewKey} {...navigationProps}><AdminModalFrame>
+            <RideDetailContent key={item.id} ride={item} onBack={onBack} backLabel={backLabel} onOpenUser={onOpenUser} />
+        </AdminModalFrame></AdminModalContent>
+    </Dialog>;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const parseWKBPoint = (wkb: any) => {
@@ -542,7 +594,7 @@ export default function DetailModal({
         return (
             <>
                 <Dialog open={isOpen} onOpenChange={onClose}>
-                    <AdminModalContent variant="inspector">
+                    <AdminModalContent key={viewKey} {...navigationProps} variant="inspector">
                         <AdminModalFrame>
                             <AdminModalHeader
                                 eyebrow="Képmoderáció"
@@ -550,7 +602,7 @@ export default function DetailModal({
                                 subtitle={item.parking_name || 'Felhasználó által beküldött kép'}
                                 icon={Camera}
                                 onBack={onBack}
-                                backLabel="Vissza az előző rekordhoz"
+                                backLabel={backLabel}
                                 meta={(
                                     <>
                                         <code>#{item.id?.substring(0, 8)}</code>
@@ -782,7 +834,7 @@ export default function DetailModal({
 
         return (
             <Dialog open={isOpen} onOpenChange={onClose}>
-                <AdminModalContent variant="inspector">
+                <AdminModalContent key={viewKey} {...navigationProps} variant="inspector">
                     <AdminModalFrame>
                         <AdminModalHeader
                             eyebrow="POI moderáció"
@@ -790,7 +842,7 @@ export default function DetailModal({
                             subtitle={poiName}
                             icon={Flag}
                             onBack={onBack}
-                            backLabel="Vissza az előző rekordhoz"
+                            backLabel={backLabel}
                             meta={(
                                 <>
                                     <code>#{item.id.substring(0, 8)}</code>
@@ -979,7 +1031,7 @@ export default function DetailModal({
     if (type === 'feedback') {
         return (
             <Dialog open={isOpen} onOpenChange={onClose}>
-                <AdminModalContent variant="inspector">
+                <AdminModalContent key={viewKey} {...navigationProps} variant="inspector">
                     <AdminModalFrame>
                         <AdminModalHeader
                             eyebrow="Visszajelzés"
@@ -987,7 +1039,7 @@ export default function DetailModal({
                             subtitle="Bejelentés áttekintése és feldolgozása"
                             icon={MessageSquare}
                             onBack={onBack}
-                            backLabel="Vissza az előző rekordhoz"
+                            backLabel={backLabel}
                             meta={(
                                 <>
                                     <code title={item.id}>#{item.id.substring(0, 8)}</code>
@@ -1194,211 +1246,166 @@ export default function DetailModal({
         const hasAnyActivity = (stats?.totalRides ?? 0) > 0 || challengeCompletions > 0 || xpVal > 0;
 
         return (
-            <Dialog open={isOpen} onOpenChange={onClose}>
-                <AdminModalContent variant="inspector">
-                    <AdminModalFrame>
-                        <AdminModalHeader
-                            eyebrow="Felhasználói profil"
-                            title={profileName}
-                            subtitle={item.full_name && item.full_name !== profileName ? item.full_name : (item.email || 'Profil és aktivitás')}
-                            icon={Users}
-                            onBack={onBack}
-                            backLabel="Vissza az előző rekordhoz"
-                            meta={(
-                                <>
-                                    <span className="admin-modal-state" data-tone={item.role === 'admin' ? 'info' : 'neutral'}>
-                                        <i />
-                                        {item.role === 'admin' ? 'Adminisztrátor' : 'Felhasználó'}
-                                    </span>
-                                    {item.id ? <code>#{String(item.id).substring(0, 8)}</code> : null}
-                                    {item.id ? (
-                                        <button type="button" className="admin-modal-meta-action" onClick={() => copyId(item.id)} aria-label="ID másolása" title="ID másolása">
-                                            <Copy />
-                                        </button>
+            <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
+                <DialogContent key={viewKey} {...navigationProps} className={weeklyStyles.modal} data-slot="user-profile-dialog" showCloseButton={false}>
+                    <header className={weeklyStyles.header}>
+                        <div className={weeklyStyles.topbar}>
+                            {onBack ? (
+                                <button type="button" className={profileStyles.back} onClick={onBack} aria-label={backLabel} title={backLabel}>
+                                    <ArrowLeft aria-hidden="true" /><span>Vissza</span>
+                                </button>
+                            ) : null}
+                            <p className={weeklyStyles.period}>Felhasználói profil</p>
+                            <button type="button" className={weeklyStyles.close} onClick={onClose} aria-label="Felhasználói profil bezárása">
+                                <span aria-hidden="true">Esc</span><X aria-hidden="true" />
+                            </button>
+                        </div>
+                        <div className={profileStyles.identity}>
+                            <Avatar className={profileStyles.avatar} aria-hidden="true">
+                                <AvatarImage src={item.avatar_url || undefined} alt="" />
+                                <AvatarFallback>{profileInitial}</AvatarFallback>
+                            </Avatar>
+                            <div className={profileStyles.identityCopy}>
+                                <DialogTitle className={weeklyStyles.title}>{profileName}</DialogTitle>
+                                <DialogDescription className={weeklyStyles.description}>
+                                    {item.full_name && item.full_name !== profileName ? item.full_name : 'ParkSafe tag'}
+                                </DialogDescription>
+                                <div className={profileStyles.tags}>
+                                    <span>{item.role === 'admin' ? 'Adminisztrátor' : 'Felhasználó'}</span>
+                                    <span className={profileStyles.mobileState}>{userBannedAt ? 'Letiltva' : 'Aktív hozzáférés'}</span>
+                                    {activityHomeCity ? <span><MapPin aria-hidden="true" />{activityHomeCity}</span> : null}
+                                    {activitySupporter?.is_supporter ? (
+                                        <span><Star aria-hidden="true" />Támogató
+                                            {activitySupporter.supporter_since ? ' · ' + new Date(activitySupporter.supporter_since).toLocaleDateString('hu-HU', { year: 'numeric', month: 'short' }) : ''}
+                                        </span>
                                     ) : null}
-                                </>
-                            )}
-                        />
-
-                        <AdminModalBody className="admin-user-profile">
-                            <section className="admin-profile-identity" aria-label="Profil összefoglaló">
-                                <Avatar className="admin-profile-avatar">
-                                    <AvatarImage src={item.avatar_url} alt={profileName} />
-                                    <AvatarFallback>{profileInitial}</AvatarFallback>
-                                </Avatar>
-                                <div className="admin-profile-identity-copy">
-                                    <p className="admin-profile-kicker">ParkSafe tag</p>
-                                    <h2>{profileName}</h2>
-                                    <p>{item.email || 'Nincs email cím megadva'}</p>
-                                    <div className="admin-profile-tags">
-                                        {activityHomeCity ? <span><MapPin />{activityHomeCity}</span> : null}
-                                        {activitySupporter?.is_supporter ? (
-                                            <span data-tone="supporter">
-                                                <Star />Támogató
-                                                {activitySupporter.supporter_since ? ` · ${new Date(activitySupporter.supporter_since).toLocaleDateString('hu-HU', { year: 'numeric', month: 'short' })}` : ''}
-                                            </span>
-                                        ) : null}
-                                        {xpVal > 0 ? <span data-tone="xp"><Zap />{xpVal.toLocaleString('hu-HU')} XP</span> : null}
-                                    </div>
-                                </div>
-                                <div className="admin-profile-identity-actions">
-                                    {item.email ? (
-                                        <button type="button" onClick={() => copyEmail(item.email)}>
-                                            <Copy />
-                                            Emailcím másolása
-                                        </button>
-                                    ) : null}
-                                    {item.id ? (
-                                        <button type="button" onClick={() => copyId(item.id)}>
-                                            <Copy />
-                                            UUID másolása
-                                        </button>
-                                    ) : null}
-                                    {onToggleUserSupporter ? (
-                                        <Button
-                                            type="button"
-                                            size="sm"
-                                            variant={activitySupporter?.is_supporter ? 'outline' : 'default'}
-                                            onClick={handleUserSupporterToggle}
-                                            disabled={userActionLoading === item.id || activityLoading || pendingUserAction !== null}
-                                        >
-                                            {pendingUserAction === 'supporter' ? <Loader2 className="animate-spin" /> : <Star />}
-                                            {activitySupporter?.is_supporter ? 'Jelvény visszavonása' : 'Támogatói jelvény'}
-                                        </Button>
-                                    ) : null}
-                                    {onToggleUserBan ? (
-                                        <Button
-                                            type="button"
-                                            size="sm"
-                                            variant={userBannedAt ? 'outline' : 'destructive'}
-                                            onClick={handleUserBanToggle}
-                                            disabled={userActionLoading === item.id || pendingUserAction !== null}
-                                        >
-                                            {pendingUserAction === 'ban'
-                                                ? <Loader2 className="animate-spin" />
-                                                : userBannedAt ? <UserCheck /> : <Ban />}
-                                            {userBannedAt ? 'Tiltás feloldása' : 'Felhasználó tiltása'}
-                                        </Button>
-                                    ) : null}
-                                </div>
-                            </section>
-
-                            <div className="admin-profile-facts">
-                                <div>
-                                    <Mail />
-                                    <span>Email cím</span>
-                                    {item.email ? <a href={`mailto:${item.email}`}>{item.email}</a> : <strong>Nincs megadva</strong>}
-                                </div>
-                                <div>
-                                    <Phone />
-                                    <span>Telefonszám</span>
-                                    {item.phone ? <a href={`tel:${item.phone}`}>{item.phone}</a> : <strong>Nincs megadva</strong>}
-                                </div>
-                                <div>
-                                    <Calendar />
-                                    <span>Regisztráció</span>
-                                    <strong>{registeredAt}</strong>
                                 </div>
                             </div>
+                            <div className={profileStyles.accountState}>
+                                <span>Hozzáférés</span>
+                                <strong data-banned={Boolean(userBannedAt)}>{userBannedAt ? 'Letiltva' : 'Aktív'}</strong>
+                            </div>
+                        </div>
+                    </header>
 
-                            <AdminModalSection title="Aktivitás" icon={Activity} description={activityHomeCity || undefined}>
-                                {activityLoading ? (
-                                    <div className="admin-profile-empty" role="status">
-                                        <Loader2 className="animate-spin" />
-                                        <span>Aktivitás betöltése…</span>
-                                    </div>
-                                ) : !hasAnyActivity ? (
-                                    <div className="admin-profile-empty">
-                                        <Bike />
-                                        <div>
-                                            <strong>Még nincs rögzített aktivitás</strong>
-                                            <span>A felhasználó első túrája után itt jelennek meg az adatok.</span>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div className="admin-profile-stat-strip">
-                                            <div><Bike /><span>Túrák</span><strong>{(stats?.totalRides ?? 0).toLocaleString('hu-HU')}</strong></div>
-                                            <div><RouteIcon /><span>Össztáv</span><strong>{(stats?.totalDistanceKm ?? 0).toFixed(1)} <small>km</small></strong></div>
-                                            <div><Gauge /><span>Átlagsebesség</span><strong>{(stats?.avgSpeedKmh ?? 0).toFixed(1)} <small>km/h</small></strong></div>
-                                            <div><Zap /><span>XP</span><strong>{xpVal.toLocaleString('hu-HU')}</strong></div>
-                                        </div>
+                    <div data-modal-scroll className={weeklyStyles.content + ' ' + profileStyles.content} tabIndex={0} aria-label="Felhasználó adatai és aktivitása">
+                        <section className={profileStyles.section} aria-labelledby="profile-contact-title">
+                            <h2 id="profile-contact-title">Profiladatok</h2>
+                            <dl className={profileStyles.contacts}>
+                                <div>
+                                    <dt>Email</dt>
+                                    <dd>
+                                        {item.email ? <><a href={'mailto:' + item.email}>{item.email}</a><button type="button" onClick={() => copyEmail(item.email)} aria-label="Emailcím másolása" title="Emailcím másolása"><Copy aria-hidden="true" /></button></> : <span>Nincs megadva</span>}
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt>Telefonszám</dt>
+                                    <dd>{item.phone ? <a href={'tel:' + item.phone}>{item.phone}</a> : <span>Nincs megadva</span>}</dd>
+                                </div>
+                                <div>
+                                    <dt>Csatlakozott</dt>
+                                    <dd><span>{registeredAt}</span></dd>
+                                </div>
+                                <div>
+                                    <dt>Felhasználói azonosító</dt>
+                                    <dd><span className={profileStyles.identifier}>{item.id}</span><button type="button" onClick={() => copyId(item.id)} aria-label="UUID másolása" title="UUID másolása"><Copy aria-hidden="true" /></button></dd>
+                                </div>
+                            </dl>
+                        </section>
 
-                                        <div className="admin-profile-columns">
-                                            <section className="admin-profile-data-section">
-                                                <header><Bike /><h3>Kerékpározás</h3></header>
-                                                <dl>
-                                                    <div><dt><Gauge />Max. sebesség</dt><dd>{(stats?.maxSpeedKmh ?? 0).toFixed(1)} km/h</dd></div>
-                                                    <div><dt><Timer />Összes idő</dt><dd>{formatActivityDuration(stats?.totalDurationSec ?? 0)}</dd></div>
-                                                    <div><dt><RouteIcon />Leghosszabb túra</dt><dd>{(stats?.longestRideKm ?? 0).toFixed(2)} km</dd></div>
-                                                    <div><dt><Mountain />Szintemelkedés</dt><dd>{Math.round(stats?.totalElevationM ?? 0).toLocaleString('hu-HU')} m</dd></div>
-                                                </dl>
-                                            </section>
-                                            <section className="admin-profile-data-section">
-                                                <header><Trophy /><h3>Kihívások &amp; sorozatok</h3></header>
-                                                <dl>
-                                                    <div><dt><Trophy />Teljesítések</dt><dd>{challengeCompletions.toLocaleString('hu-HU')}</dd></div>
-                                                    <div><dt><MapPin />Városok</dt><dd>{challengeCities.toLocaleString('hu-HU')}</dd></div>
-                                                    <div><dt><Timer />Legjobb idő</dt><dd>{formatActivityShort(stats?.fastestAttemptSec)}</dd></div>
-                                                    <div><dt><Flame />Sorozat</dt><dd>{currentStreak} / {longestStreak} nap</dd></div>
-                                                </dl>
-                                            </section>
-                                        </div>
-                                    </>
+                        <section className={profileStyles.section} aria-labelledby="profile-activity-title">
+                            <div className={profileStyles.sectionHeading}><h2 id="profile-activity-title">Aktivitás</h2><span>Összes rögzített adat</span></div>
+                            {activityLoading ? (
+                                <div className={profileStyles.empty} role="status"><Loader2 className={profileStyles.spinner} aria-hidden="true" /><span>Aktivitás betöltése…</span></div>
+                            ) : activityError ? (
+                                <div className={profileStyles.empty} role="alert"><AlertCircle aria-hidden="true" /><span>{activityError}</span></div>
+                            ) : !hasAnyActivity ? (
+                                <div className={profileStyles.empty}><Bike aria-hidden="true" /><strong>Még nincs rögzített aktivitás</strong><span>Az első mentett tekerés után itt jelennek meg az adatok.</span></div>
+                            ) : (
+                                <>
+                                    <dl className={profileStyles.stats}>
+                                        <div><dt>Tekerés</dt><dd>{(stats?.totalRides ?? 0).toLocaleString('hu-HU')}</dd></div>
+                                        <div><dt>Megtett táv</dt><dd className={profileStyles.primaryValue}>{(stats?.totalDistanceKm ?? 0).toLocaleString('hu-HU', { maximumFractionDigits: 1 })}<small>km</small></dd></div>
+                                        <div><dt>Átlagsebesség</dt><dd>{(stats?.avgSpeedKmh ?? 0).toLocaleString('hu-HU', { maximumFractionDigits: 1 })}<small>km/h</small></dd></div>
+                                        <div><dt>Tapasztalat</dt><dd>{xpVal.toLocaleString('hu-HU')}<small>XP</small></dd></div>
+                                    </dl>
+                                    <div className={profileStyles.columns}>
+                                        <section>
+                                            <h3>Kerékpározás</h3>
+                                            <dl className={profileStyles.details}>
+                                                <div><dt>Legnagyobb sebesség</dt><dd>{(stats?.maxSpeedKmh ?? 0).toLocaleString('hu-HU', { maximumFractionDigits: 1 })} km/h</dd></div>
+                                                <div><dt>Rögzített idő</dt><dd>{formatActivityDuration(stats?.totalDurationSec ?? 0)}</dd></div>
+                                                <div><dt>Leghosszabb túra</dt><dd>{(stats?.longestRideKm ?? 0).toLocaleString('hu-HU', { maximumFractionDigits: 2 })} km</dd></div>
+                                                <div><dt>Szintemelkedés</dt><dd>{Math.round(stats?.totalElevationM ?? 0).toLocaleString('hu-HU')} m</dd></div>
+                                            </dl>
+                                        </section>
+                                        <section>
+                                            <h3>Kihívások és sorozatok</h3>
+                                            <dl className={profileStyles.details}>
+                                                <div><dt>Teljesítések</dt><dd>{challengeCompletions.toLocaleString('hu-HU')}</dd></div>
+                                                <div><dt>Városok</dt><dd>{challengeCities.toLocaleString('hu-HU')}</dd></div>
+                                                <div><dt>Legjobb idő</dt><dd>{formatActivityShort(stats?.fastestAttemptSec)}</dd></div>
+                                                <div><dt>Aktuális sorozat</dt><dd>{currentStreak} nap</dd></div>
+                                                <div><dt>Leghosszabb sorozat</dt><dd>{longestStreak} nap</dd></div>
+                                            </dl>
+                                        </section>
+                                    </div>
+                                </>
+                            )}
+                        </section>
+
+                        {!activityLoading && !activityError && hasAnyActivity ? (
+                            <section className={profileStyles.section} aria-labelledby="profile-badges-title">
+                                <div className={profileStyles.sectionHeading}><h2 id="profile-badges-title">Jelvények</h2><span>{unlockedBadges.length} / {ACTIVITY_BADGE_KEYS.length} megszerezve</span></div>
+                                {unlockedBadges.length === 0 ? <p className={profileStyles.muted}>Még nincs megszerzett jelvény.</p> : (
+                                    <ul className={profileStyles.badges}>
+                                        {unlockedBadges.map(k => <li key={k} title={(BADGE_LABELS[k] || k) + ' · szint ' + activityProgress?.[k]}>
+                                            <Award aria-hidden="true" /><span>{BADGE_LABELS[k] || k}</span>
+                                            {Number(activityProgress?.[k] ?? 0) > 1 ? <strong>×{activityProgress?.[k]}</strong> : null}
+                                        </li>)}
+                                    </ul>
                                 )}
-                            </AdminModalSection>
+                            </section>
+                        ) : null}
 
-                            {!activityLoading && hasAnyActivity ? (
-                                <AdminModalSection
-                                    title="Jelvények"
-                                    icon={Award}
-                                    description={`${unlockedBadges.length} / ${ACTIVITY_BADGE_KEYS.length} megszerezve`}
-                                >
-                                    {unlockedBadges.length === 0 ? (
-                                        <p className="admin-profile-muted">Nincs megszerzett jelvény.</p>
-                                    ) : (
-                                        <div className="admin-profile-badges" role="list">
-                                            {unlockedBadges.map(k => (
-                                                <span key={k} role="listitem" title={`${BADGE_LABELS[k] || k} - szint ${activityProgress?.[k] ?? 0}`}>
-                                                    <Award />
-                                                    {BADGE_LABELS[k] || k}
-                                                    {Number(activityProgress?.[k] ?? 0) > 1 ? <b>×{activityProgress?.[k]}</b> : null}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    )}
-                                </AdminModalSection>
-                            ) : null}
+                        {!activityLoading && !activityError && activityRecent.length > 0 ? (
+                            <section className={profileStyles.section} aria-labelledby="profile-recent-title">
+                                <div className={profileStyles.sectionHeading}><h2 id="profile-recent-title">Legutóbbi tekerések</h2><span>{activityRecent.length} rekord</span></div>
+                                <div className={profileStyles.rides} role="list">
+                                    {activityRecent.map(r => (
+                                        <article key={r.id} role="listitem">
+                                            <div>{onOpenRide ? <button type="button" className="admin-record-link" onClick={() => onOpenRide(r.id)}>{r.favorite_name || (r.challenge_completed ? 'Kihívás' : 'Tekerés')}<ChevronRight aria-hidden="true" size={16} /></button> : <strong>{r.favorite_name || (r.challenge_completed ? 'Kihívás' : 'Tekerés')}</strong>}<small>{r.started_at ? new Date(r.started_at).toLocaleDateString('hu-HU', { month: 'short', day: 'numeric' }) : 'Nincs időpont'}</small></div>
+                                            <dl>
+                                                <div><dt>Távolság</dt><dd>{((r.distance_meters ?? 0) / 1000).toLocaleString('hu-HU', { maximumFractionDigits: 1 })} km</dd></div>
+                                                <div><dt>Idő</dt><dd>{formatActivityShort(r.duration_seconds)}</dd></div>
+                                                <div><dt>Átlag</dt><dd>{Number(r.average_speed_kmh ?? 0).toLocaleString('hu-HU', { maximumFractionDigits: 1 })} km/h</dd></div>
+                                            </dl>
+                                        </article>
+                                    ))}
+                                </div>
+                            </section>
+                        ) : null}
 
-                            {activityRecent.length > 0 ? (
-                                <AdminModalSection title="Legutóbbi túrák" icon={Clock} description={`${activityRecent.length} legutóbbi rekord`}>
-                                    <div className="admin-profile-rides" role="list">
-                                        {activityRecent.map(r => {
-                                            const km = ((r.distance_meters ?? 0) / 1000).toFixed(1);
-                                            const date = r.started_at
-                                                ? new Date(r.started_at).toLocaleDateString('hu-HU', { year: '2-digit', month: 'short', day: 'numeric' })
-                                                : '-';
-                                            const avg = Number(r.average_speed_kmh ?? 0).toFixed(1);
-                                            return (
-                                                <article key={r.id} role="listitem">
-                                                    <span className="admin-profile-ride-icon">{r.challenge_completed ? <Trophy /> : <Bike />}</span>
-                                                    <div><strong>{r.favorite_name || date}</strong>{r.favorite_name ? <span>{date}</span> : null}</div>
-                                                    <dl>
-                                                        <div><dt>Táv</dt><dd>{km} km</dd></div>
-                                                        <div><dt>Idő</dt><dd>{formatActivityShort(r.duration_seconds)}</dd></div>
-                                                        <div><dt>Átlag</dt><dd>{avg} km/h</dd></div>
-                                                    </dl>
-                                                </article>
-                                            );
-                                        })}
-                                    </div>
-                                </AdminModalSection>
-                            ) : null}
+                        <div className={profileStyles.diagnostics}><UserRideDiagnostics userId={item.id} onOpenRide={onOpenRide} /></div>
+                    </div>
 
-                            <UserRideDiagnostics userId={item.id} />
-                        </AdminModalBody>
-                    </AdminModalFrame>
-                </AdminModalContent>
+                    {onToggleUserSupporter || onToggleUserBan ? <footer className={profileStyles.footer}>
+                        <span>Adminisztráció</span>
+                        <div className={profileStyles.actions}>
+                            {onToggleUserSupporter ? <button type="button"
+                                onClick={handleUserSupporterToggle}
+                                disabled={userActionLoading === item.id || activityLoading || Boolean(activityError) || pendingUserAction !== null}>
+                                {pendingUserAction === 'supporter' ? <Loader2 className={profileStyles.spinner} aria-hidden="true" /> : <Star aria-hidden="true" />}
+                                {activitySupporter?.is_supporter ? 'Jelvény visszavonása' : 'Támogatói jelvény'}
+                            </button> : null}
+                            {onToggleUserBan ? <button type="button" className={userBannedAt ? undefined : profileStyles.danger}
+                                onClick={handleUserBanToggle} disabled={userActionLoading === item.id || pendingUserAction !== null}>
+                                {pendingUserAction === 'ban' ? <Loader2 className={profileStyles.spinner} aria-hidden="true" /> : userBannedAt ? <UserCheck aria-hidden="true" /> : <Ban aria-hidden="true" />}
+                                {userBannedAt ? 'Tiltás feloldása' : 'Felhasználó tiltása'}
+                            </button> : null}
+                        </div>
+                    </footer> : null}
+                </DialogContent>
             </Dialog>
         );
     }
@@ -1411,7 +1418,7 @@ export default function DetailModal({
     return (
         <>
             <Dialog open={isOpen} onOpenChange={onClose}>
-                <AdminModalContent variant="inspector">
+                <AdminModalContent key={viewKey} {...navigationProps} variant="inspector">
                     <AdminModalFrame>
                         <AdminModalHeader
                             eyebrow={locationTypeLabel}
@@ -1419,7 +1426,7 @@ export default function DetailModal({
                             subtitle={item.city || 'Nincs város megadva'}
                             icon={LocationIcon}
                             onBack={onBack}
-                            backLabel="Vissza az előző rekordhoz"
+                            backLabel={backLabel}
                             meta={(
                                 <>
                                     <span className="admin-modal-state" data-tone={item.available ? 'success' : 'danger'}>
@@ -1445,7 +1452,7 @@ export default function DetailModal({
                                         </h3>
                                         <div className="flex flex-wrap gap-2">
                                             {item.picture_url.map((url: string, index: number) => (
-                                                <div
+                                                <button type="button" aria-label={`${index + 1}. kép nagyítása`}
                                                     key={index}
                                                     className="relative w-28 h-28 rounded-lg overflow-hidden border border-border cursor-pointer hover:border-primary transition-colors group"
                                                     onClick={() => setImagePreviewUrl(url)}
@@ -1460,7 +1467,7 @@ export default function DetailModal({
                                                     <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
                                                         {index + 1}
                                                     </div>
-                                                </div>
+                                                </button>
                                             ))}
                                         </div>
                                     </div>

@@ -14,34 +14,40 @@ interface DeleteConfirmModalProps {
     isOpen: boolean;
     onClose: () => void;
     onConfirm: () => void;
+    title?: string;
+    description?: string;
+    loading?: boolean;
 }
 
 export default function DeleteConfirmModal({
     isOpen,
     onClose,
     onConfirm,
+    title = 'Elem törlése',
+    description = 'Biztosan törölni szeretnéd ezt az elemet?',
+    loading = false,
 }: DeleteConfirmModalProps) {
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+        <Dialog open={isOpen} onOpenChange={(open) => !open && !loading && onClose()}>
             <AdminModalContent variant="confirm">
                 <AdminModalFrame>
                     <AdminModalHeader
                         eyebrow="Visszavonhatatlan művelet"
-                        title="Elem törlése"
+                        title={title}
                         subtitle="A kapcsolódó adatok is véglegesen elveszhetnek."
                         icon={Trash2}
                     />
                     <div className="admin-modal-confirm-copy">
-                        <p>Biztosan törölni szeretnéd ezt az elemet?</p>
+                        <p>{description}</p>
                         <span>A művelet nem vonható vissza.</span>
                     </div>
                     <AdminModalFooter>
-                        <Button variant="outline" onClick={onClose}>
+                        <Button variant="outline" onClick={onClose} disabled={loading}>
                             Mégse
                         </Button>
-                        <Button variant="destructive" onClick={onConfirm}>
+                        <Button variant="destructive" onClick={onConfirm} disabled={loading}>
                             <Trash2 />
-                            Végleges törlés
+                            {loading ? 'Törlés…' : 'Végleges törlés'}
                         </Button>
                     </AdminModalFooter>
                 </AdminModalFrame>

@@ -7,11 +7,12 @@ import { supabase } from '@/lib/supabaseClient';
 import WeeklyStatsDetailModal, {
     type WeeklyMetricKey,
     type WeeklyUsageStats,
+    type WeeklyUserNavigation,
 } from './WeeklyStatsDetailModal';
 
 const isDev = process.env.NODE_ENV === 'development';
 
-export default function ContentStatsOverview() {
+export default function ContentStatsOverview({ onOpenUser, onOpenRide }: { onOpenUser?: WeeklyUserNavigation; onOpenRide?: WeeklyUserNavigation }) {
     const [stats, setStats] = useState<WeeklyUsageStats | null>(null);
     const [selectedMetric, setSelectedMetric] = useState<WeeklyMetricKey | null>(null);
     const [loading, setLoading] = useState(true);
@@ -78,6 +79,8 @@ export default function ContentStatsOverview() {
                 metric={selectedMetric}
                 stats={stats}
                 onClose={() => setSelectedMetric(null)}
+                onOpenUser={onOpenUser}
+                onOpenRide={onOpenRide}
             />
         </>
     );

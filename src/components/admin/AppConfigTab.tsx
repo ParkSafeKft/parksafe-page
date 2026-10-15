@@ -232,12 +232,12 @@ export default function AppConfigTab() {
     }
 
     return (
-        <div className="overflow-y-auto h-full p-4 sm:p-6">
+        <div className="admin-settings">
             <div className="max-w-4xl mx-auto space-y-6">
                 {/* Top toolbar */}
                 <div className="flex items-center justify-between flex-wrap gap-3">
                     <div>
-                        <h2 className="text-lg font-semibold text-foreground">App-konfiguráció</h2>
+                        <h2 className="text-lg font-semibold text-foreground">Mobilalkalmazás beállításai</h2>
                         <p className="text-sm text-muted-foreground">
                             A mobil app indulásakor olvassa ezeket a kapcsolókat. Módosítások azonnal élesednek.
                         </p>
@@ -254,7 +254,7 @@ export default function AppConfigTab() {
                 </div>
 
                 {/* Maintenance mode */}
-                <Card className="border-amber-500/20 bg-amber-500/5">
+                <Card>
                     <CardContent className="p-6 space-y-5">
                         <div className="flex items-start justify-between gap-4 flex-wrap">
                             <div className="flex items-start gap-3">

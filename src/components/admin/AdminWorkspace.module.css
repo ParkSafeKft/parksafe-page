@@ -1,0 +1,583 @@
+.workspace.workspace {
+  --ops-canvas: #000;
+  --ops-panel: #000;
+  --ops-panel-raised: #111;
+  --ops-hover: #111;
+  --ops-selected: #111;
+  --ops-border: #242424;
+  --ops-border-strong: #444;
+  --ops-text: #f3f3f3;
+  --ops-text-2: #bdbdbd;
+  --ops-text-3: #a0a0a0;
+  --ops-green: #52df78;
+  --ops-green-strong: #52df78;
+  --ops-green-wash: #111;
+  --ops-red: #ff8585;
+  --ops-amber: #edc36c;
+  --ops-blue: #82b5ff;
+  --background: var(--ops-canvas);
+  --foreground: var(--ops-text);
+  --card: var(--ops-panel-raised);
+  --card-foreground: var(--ops-text);
+  --muted: var(--ops-hover);
+  --muted-foreground: var(--ops-text-3);
+  --border: var(--ops-border);
+  --input: var(--ops-border);
+  --ring: var(--ops-green);
+  --primary: var(--ops-green);
+  --primary-foreground: #000;
+  --accent: var(--ops-hover);
+  --accent-foreground: var(--ops-text);
+  --secondary: var(--ops-hover);
+  --secondary-foreground: var(--ops-text);
+  --popover: var(--ops-panel-raised);
+  --popover-foreground: var(--ops-text);
+  display: flex;
+  width: 100%;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  background: #000;
+  color: var(--ops-text);
+  color-scheme: dark;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.875rem;
+}
+:global(body:has(.admin-modern)) {
+  margin: 0;
+  overflow: hidden;
+  background: #000;
+  color-scheme: dark;
+}
+.workspace.workspace * {
+  scrollbar-width: thin;
+  scrollbar-color: #444 transparent;
+}
+.workspace.workspace :global([data-slot="sidebar-inset"]) {
+  min-width: 0;
+  background: #000;
+  border-radius: 0;
+  margin: 0;
+  box-shadow: none;
+}
+.workspace.workspace :global(.admin-canvas) {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: #000;
+}
+.workspace.workspace :global(.admin-special-view) {
+  height: 100%;
+  overflow: auto;
+  padding: 1rem 1.25rem;
+}
+.workspace.workspace :global(.admin-overview-view),
+.workspace.workspace :global(.admin-record-view) {
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+}
+.workspace.workspace :global(.ops-rail) {
+  position: relative;
+  inset: auto;
+  translate: 0 0;
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  width: 14.5rem;
+  height: 100dvh;
+  border: 0;
+  border-right: 1px solid var(--ops-border);
+  background: #000;
+  color: var(--ops-text);
+}
+.workspace.workspace :global(.ops-rail[data-expanded="false"]) {
+  width: 3.75rem;
+}
+.workspace.workspace :global(.ops-rail-head) {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.25rem;
+  height: 3.75rem;
+  min-height: 3.75rem;
+  padding: 0.5rem 0.65rem;
+}
+.workspace.workspace :global(.ops-rail-brand) {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.55rem;
+  width: auto;
+  min-width: 0;
+  height: 2rem;
+  padding: 0.25rem;
+  border: 0;
+  border-radius: 0.25rem;
+  color: var(--ops-text);
+  background: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.workspace.workspace :global(.ops-rail[data-expanded="true"] .ops-rail-brand) {
+  width: auto;
+}
+.workspace.workspace :global(.ops-rail-brand) > svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--ops-green);
+  flex: none;
+}
+.workspace.workspace :global(.ops-rail-brand-label),
+.workspace.workspace :global(.ops-rail-label) {
+  display: block;
+  min-width: 0;
+  max-width: none;
+  opacity: 1;
+  translate: 0 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: inherit;
+}
+.workspace.workspace :global(.ops-rail-toggle) {
+  position: static;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  opacity: 1;
+  pointer-events: auto;
+  border: 0;
+  border-radius: 0.25rem;
+  background: none;
+  color: var(--ops-text-3);
+}
+.workspace.workspace :global(.ops-rail-toggle) > svg {
+  width: 1rem;
+  height: 1rem;
+}
+.workspace.workspace :global(.ops-rail-nav) {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.25rem 0.5rem 0.5rem;
+  gap: 0;
+}
+.workspace.workspace :global(.ops-rail-group) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  margin: 0 0 0.65rem;
+  padding: 0;
+  border: 0;
+}
+.workspace.workspace :global(.ops-rail-section-label) {
+  display: block;
+  max-height: none;
+  opacity: 1;
+  translate: 0 0;
+  padding: 0.4rem 0.65rem;
+  color: var(--ops-text-3);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+.workspace.workspace :global(.ops-rail-item) {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+  flex: 0 0 auto;
+  gap: 0.6rem;
+  width: 100%;
+  height: auto;
+  min-height: 2.125rem;
+  padding: 0.35rem 0.65rem;
+  border: 0;
+  border-radius: 0.3rem;
+  color: var(--ops-text-2);
+  background: none;
+  text-align: left;
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+.workspace.workspace :global(.ops-rail-item) > svg {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+  color: inherit;
+}
+.workspace.workspace :global(.ops-rail-item):hover {
+  background: #111;
+  color: var(--ops-text);
+}
+.workspace.workspace :global(.ops-rail-item[data-active="true"]) {
+  background: #111;
+  color: var(--ops-green);
+  box-shadow: none;
+  font-weight: 550;
+}
+.workspace.workspace :global(.ops-rail-item[data-active="true"])::before {
+  display: none;
+}
+.workspace.workspace :global(.ops-rail-footer) {
+  display: grid;
+  flex: none;
+  gap: 0.05rem;
+  padding: 0.4rem 0.5rem;
+  border-top: 1px solid var(--ops-border);
+  background: none;
+}
+.workspace.workspace :global(.ops-avatar) {
+  display: grid;
+  place-items: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  border: 0;
+  border-radius: 50%;
+  background: #111;
+  color: var(--ops-text-2);
+  font-size: 0.7rem;
+}
+.workspace.workspace :global(.ops-external-mark) {
+  margin-left: auto;
+}
+.workspace.workspace
+  :global(.ops-rail[data-expanded="false"])
+  :global(.ops-rail-brand-label),
+.workspace.workspace
+  :global(.ops-rail[data-expanded="false"])
+  :global(.ops-rail-label),
+.workspace.workspace
+  :global(.ops-rail[data-expanded="false"])
+  :global(.ops-rail-section-label),
+.workspace.workspace
+  :global(.ops-rail[data-expanded="false"])
+  :global(.ops-external-mark),
+.workspace.workspace :global(.ops-rail-toggle[data-visible="false"]) {
+  display: none;
+}
+.workspace.workspace
+  :global(.ops-rail[data-expanded="false"])
+  :global(.ops-rail-item) {
+  justify-content: center;
+  padding: 0.4rem;
+}
+.workspace.workspace
+  :global(.ops-rail[data-expanded="false"] .ops-rail-item)::after {
+  background: #111;
+}
+.workspace.workspace :global(.ops-header) {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: #000;
+}
+.workspace.workspace :global(.ops-commandbar),
+.workspace.workspace :global(.ops-header.is-overview .ops-commandbar) {
+  display: flex;
+  min-height: 4rem;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.65rem 1.25rem;
+}
+.workspace.workspace :global(.ops-page-identity) {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: baseline;
+  flex-wrap: nowrap;
+  gap: 0.6rem;
+}
+.workspace.workspace :global(.ops-page-identity) > span {
+  display: none;
+}
+.workspace.workspace :global(.ops-page-identity) > h1 {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+  color: var(--ops-text);
+}
+.workspace.workspace :global(.ops-page-identity) > b {
+  padding: 0;
+  border: 0;
+  color: var(--ops-text-3);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+.workspace.workspace :global(.ops-command-search) {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 0.5rem;
+  width: clamp(12rem, 23vw, 25rem);
+  height: 2.125rem;
+  min-width: 0;
+  padding: 0 0.65rem;
+  border: 1px solid var(--ops-border);
+  border-radius: 0.3rem;
+  background: #000;
+  color: var(--ops-text-3);
+}
+.workspace.workspace :global(.ops-command-search) input {
+  font-size: 0.8125rem;
+  color: var(--ops-text);
+}
+.workspace.workspace :global(.ops-command-search) input::placeholder {
+  color: var(--ops-text-3);
+}
+.workspace.workspace :global(.ops-command-search.is-placeholder) {
+  display: none;
+}
+.workspace.workspace :global(.ops-header-actions) {
+  gap: 0.75rem;
+}
+.workspace.workspace :global(.ops-connection) {
+  color: var(--ops-text-3);
+  font-size: 0.75rem;
+}
+.workspace.workspace :global(.ops-connection i) {
+  box-shadow: none;
+}
+.workspace.workspace :global(.ops-create) {
+  height: 2.125rem;
+  min-height: 2.125rem;
+  padding: 0.35rem 0.7rem;
+  border: 0;
+  border-radius: 0.3rem;
+  background: var(--ops-green);
+  color: #000;
+  font-size: 0.8125rem;
+}
+.workspace.workspace :global(.ops-scopebar) {
+  min-height: 2.25rem;
+  padding: 0 1.25rem;
+  border: 0;
+  border-bottom: 1px solid var(--ops-border);
+}
+.workspace.workspace :global(.ops-scopebar) > p {
+  display: none;
+}
+.workspace.workspace :global(.ops-scope-tabs) {
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
+  width: 100%;
+  height: auto;
+  min-height: 2.25rem;
+  overflow-x: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  scrollbar-width: none;
+}
+.workspace.workspace :global(.ops-scope-tabs) button {
+  position: relative;
+  flex: none;
+  min-height: 2.25rem;
+  padding: 0.35rem 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: none;
+  color: var(--ops-text-3);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+.workspace.workspace :global(.ops-scope-tabs) button[data-active="true"] {
+  background: none;
+  border-color: var(--ops-green);
+  color: var(--ops-text);
+  font-weight: 550;
+}
+.workspace.workspace :global(.ops-scope-tabs) button::after {
+  display: none;
+}
+.workspace.workspace :global(.ops-mobile-trigger) {
+  display: none !important;
+}
+.workspace.workspace button,
+.workspace.workspace a {
+  touch-action: manipulation;
+}
+.workspace.workspace :is(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid var(--ops-green);
+  outline-offset: 2px;
+}
+.workspace.workspace :global(.admin-special-view) :global([data-slot="card"]) {
+  padding: 0;
+  gap: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: none;
+  color: var(--ops-text);
+}
+.workspace.workspace
+  :global(.admin-settings)
+  :global([class*="w-10"][class*="h-10"]) {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+.workspace.workspace
+  :global(.admin-special-view)
+  :global([data-slot="card"])
+  + :global([data-slot="card"]) {
+  padding-top: 1rem;
+  border-top: 1px solid var(--ops-border);
+}
+.workspace.workspace
+  :global(.admin-special-view)
+  :global([data-slot="card-content"]) {
+  padding: 1rem 0;
+}
+.workspace.workspace
+  :global(.admin-special-view)
+  :is(input:not([type="checkbox"]), select, textarea) {
+  min-height: 2rem;
+  background: #111;
+  border: 1px solid var(--ops-border);
+  border-radius: 0.3rem;
+  color: var(--ops-text);
+  font-size: 0.875rem;
+}
+.workspace.workspace
+  :global(.admin-special-view)
+  :is(
+    [class*="bg-zinc-"],
+    [class*="bg-[#"],
+    [class*="bg-white/"],
+    [class*="bg-green-"],
+    [class*="bg-blue-"],
+    [class*="bg-amber-"]
+  ) {
+  background: #111;
+  border-color: var(--ops-border);
+}
+.workspace.workspace
+  :global(.admin-special-view)
+  :is([class*="text-zinc-"], .text-muted-foreground) {
+  color: var(--ops-text-3);
+}
+.workspace.workspace
+  :global(.admin-special-view)
+  :is(.text-white, .text-foreground) {
+  color: var(--ops-text);
+}
+.workspace.workspace
+  :global(.admin-special-view)
+  :global([data-slot="button"]) {
+  min-height: 2rem;
+  border-radius: 0.3rem;
+  box-shadow: none;
+}
+.workspace.workspace
+  :global(.admin-special-view)
+  :global([data-slot="button"][data-variant="default"]) {
+  background: var(--ops-green);
+  color: #000;
+}
+.workspace.workspace :global(.admin-special-view) button[aria-pressed="true"] {
+  color: var(--ops-green);
+  background: #111;
+  border-color: var(--ops-border-strong);
+}
+@media (max-width: 1100px) {
+  .workspace.workspace :global(.ops-connection) {
+    display: none;
+  }
+  .workspace.workspace :global(.ops-commandbar) {
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .workspace.workspace :global(.ops-command-search) {
+    order: 4;
+    width: 100%;
+  }
+}
+@media (max-width: 767px) {
+  .workspace.workspace :global(.ops-rail) {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 60;
+    width: min(18rem, calc(100vw - 3rem));
+    translate: -100% 0;
+  }
+  .workspace.workspace :global(.ops-rail.is-open) {
+    translate: 0 0;
+  }
+  .workspace.workspace :global(.ops-rail-backdrop) {
+    position: fixed;
+    inset: 0;
+    z-index: 59;
+    border: 0;
+    background: #0009;
+  }
+  .workspace.workspace :global(.ops-mobile-trigger) {
+    display: inline-flex !important;
+    flex: none;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    background: none;
+  }
+  .workspace.workspace :global(.ops-commandbar),
+  .workspace.workspace :global(.ops-header.is-overview .ops-commandbar) {
+    padding: 0.4rem 0.75rem;
+  }
+  .workspace.workspace :global(.ops-page-identity) > h1 {
+    font-size: 1.2rem;
+  }
+  .workspace.workspace :global(.ops-scopebar) {
+    padding: 0 0.75rem;
+  }
+  .workspace.workspace :global(.ops-create) {
+    min-height: 2.75rem;
+    width: 2.75rem;
+    padding: 0.5rem;
+    font-size: 0;
+    gap: 0;
+  }
+  .workspace.workspace :global(.ops-command-search) {
+    height: 2.75rem;
+  }
+  .workspace.workspace :global(.ops-command-search) kbd {
+    display: none;
+  }
+  .workspace.workspace :global(.admin-special-view) {
+    padding: 0.75rem;
+  }
+}
+@media (pointer: coarse) {
+  .workspace.workspace :global(.ops-rail-item),
+  .workspace.workspace :global(.ops-rail-toggle),
+  .workspace.workspace :global(.ops-scope-tabs) button,
+  .workspace.workspace
+    :global(.admin-special-view)
+    :is(button:not([role="switch"]), select, input:not([type="checkbox"])) {
+    min-height: 2.75rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workspace.workspace * {
+    transition: none !important;
+    animation-duration: 0.01ms !important;
+  }
+}

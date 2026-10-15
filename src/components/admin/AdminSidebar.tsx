@@ -1,6 +1,7 @@
 'use client';
 
-import { ArrowUpRight, Home, LogOut, PanelLeftClose, PanelLeftOpen, ShieldCheck } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { ArrowUpRight, Home, LogOut, PanelLeftClose, PanelLeftOpen, ShieldCheck, X } from 'lucide-react';
 import { useSidebar } from '@/components/ui/sidebar';
 import { ADMIN_NAVIGATION, ADMIN_SECTIONS } from './adminNavigation';
 
@@ -15,6 +16,7 @@ interface AdminSidebarProps {
         avatar_url?: string;
     } | null;
     onHomeConfig: () => void;
+    onProfile?: () => void;
 }
 
 export default function AdminSidebar({
@@ -23,9 +25,27 @@ export default function AdminSidebar({
     onLogout,
     profile,
     onHomeConfig,
+    onProfile,
 }: AdminSidebarProps) {
     const { openMobile, setOpenMobile, isMobile, state, toggleSidebar } = useSidebar();
     const isExpanded = isMobile || state === 'expanded';
+    const railRef = useRef<HTMLElement>(null);
+    useEffect(() => {
+        if (!isMobile || !openMobile) return;
+        const previous = document.activeElement as HTMLElement | null;
+        const rail = railRef.current;
+        rail?.querySelector<HTMLButtonElement>('button')?.focus();
+        const keydown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') { event.preventDefault(); setOpenMobile(false); }
+            if (event.key !== 'Tab' || !rail) return;
+            const buttons = Array.from(rail.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')).filter(button => button.getClientRects().length);
+            const first = buttons[0], last = buttons.at(-1);
+            if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+            if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+        };
+        document.addEventListener('keydown', keydown);
+        return () => { document.removeEventListener('keydown', keydown); previous?.focus(); };
+    }, [isMobile, openMobile, setOpenMobile]);
 
     const navigate = (id: string) => {
         if (isMobile) setOpenMobile(false);
@@ -44,6 +64,10 @@ export default function AdminSidebar({
             ) : null}
 
             <aside
+                ref={railRef}
+                role={isMobile && openMobile ? 'dialog' : undefined}
+                aria-modal={isMobile && openMobile ? true : undefined}
+                inert={isMobile && !openMobile ? true : undefined}
                 className={`ops-rail ${isMobile ? (openMobile ? 'is-open' : '') : ''}`}
                 id="ops-admin-navigation"
                 data-expanded={isExpanded}
@@ -79,7 +103,7 @@ export default function AdminSidebar({
                         >
                             <PanelLeftClose aria-hidden="true" />
                         </button>
-                    ) : null}
+                    ) : <button type="button" className="ops-rail-toggle" onClick={() => setOpenMobile(false)} aria-label="Navigáció bezárása"><X aria-hidden="true" /></button>}
                 </div>
 
                 <nav className="ops-rail-nav">
@@ -99,6 +123,7 @@ export default function AdminSidebar({
                                         onClick={() => navigate(item.id)}
                                         aria-current={active ? 'page' : undefined}
                                         aria-label={item.label}
+                                        title={!isExpanded ? item.label : undefined}
                                     >
                                         <Icon aria-hidden="true" />
                                         <span className="ops-rail-label">{item.label}</span>
@@ -114,7 +139,7 @@ export default function AdminSidebar({
                         type="button"
                         className="ops-rail-item"
                         data-tooltip={profile?.username || profile?.full_name || profile?.email || 'Profil'}
-                        onClick={() => navigate('users')}
+                        onClick={() => { if (isMobile) setOpenMobile(false); if (onProfile) onProfile(); else navigate('users'); }}
                         aria-label="Saját profil megnyitása"
                     >
                         <span className="ops-avatar" aria-hidden="true">

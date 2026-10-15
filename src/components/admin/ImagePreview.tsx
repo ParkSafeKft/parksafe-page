@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog } from '@/components/ui/dialog';
+import { Dialog, DialogTitle } from '@/components/ui/dialog';
 import { AdminModalContent } from './AdminModal';
 
 interface ImagePreviewProps {
@@ -14,6 +14,7 @@ export default function ImagePreview({ src, alt = 'Kép előnézet', onClose }: 
     return (
         <Dialog open={!!src} onOpenChange={(open) => !open && onClose()}>
             <AdminModalContent variant="media" aria-label={alt}>
+                <DialogTitle className="sr-only">{alt}</DialogTitle>
                 <figure className="admin-modal-media-frame">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={src} alt={alt} width={1600} height={1200} />

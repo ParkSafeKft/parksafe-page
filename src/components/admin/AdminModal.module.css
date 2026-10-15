@@ -1,0 +1,156 @@
+.dialog {
+    --ops-text: var(--weekly-text);
+    --ops-text-2: var(--weekly-text);
+    --ops-text-3: var(--weekly-secondary);
+    --ops-border: var(--weekly-border);
+    --ops-border-strong: var(--weekly-border);
+    --ops-border-focus: var(--weekly-primary);
+    --ops-panel: var(--weekly-surface);
+    --ops-panel-raised: var(--weekly-raised);
+    --ops-hover: var(--weekly-hover);
+    --ops-green: var(--weekly-primary);
+    --ops-green-strong: var(--weekly-primary);
+    --ops-green-wash: var(--weekly-muted-surface);
+    --ops-red: #b42318;
+    --ops-amber: #805800;
+    --ops-blue: var(--weekly-primary);
+    --primary: var(--weekly-primary);
+    --primary-foreground: var(--weekly-surface);
+    --muted-foreground: var(--weekly-secondary);
+    --border: var(--weekly-border);
+    --background: var(--weekly-surface);
+    --foreground: var(--weekly-text);
+}
+.form { width: min(58rem, calc(100vw - 4rem)); }
+.confirm { width: min(29rem, calc(100vw - 2rem)); height: auto; }
+.media { width: auto; height: auto; max-width: calc(100vw - 2rem); max-height: calc(100dvh - 2rem); padding: 3.5rem 1rem 1rem; background: var(--weekly-surface); }
+.header { flex: none; padding: 1.25rem 1.75rem; border-bottom: 1px solid var(--weekly-border); }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 2.75rem; }
+.topbar > p { flex: 1; }
+.topbar > button:first-child + p { text-align: center; }
+.heading { min-width: 0; padding-top: 0.8rem; overflow-wrap: anywhere; }
+.back { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 2.75rem; padding: 0 0.5rem 0 0; color: var(--weekly-primary); background: transparent; border: 0; border-radius: 0.5rem; font-weight: 600; }
+.back svg { width: 1.1rem; height: 1.1rem; }
+.back:hover { text-decoration: underline; text-underline-offset: 0.2rem; }
+.toggle { display: flex; width: 100%; min-height: 3rem; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.35rem 0; border: 0; border-radius: 0.5rem; background: transparent; color: var(--weekly-text); text-align: left; }
+.toggle > span { display: inline-flex; align-items: center; gap: 0.6rem; }
+.toggle svg { width: 1rem; height: 1rem; color: var(--weekly-secondary); }
+.toggle > i { display: flex; width: 2.75rem; height: 1.65rem; flex: none; align-items: center; padding: 0.2rem; border: 1px solid var(--weekly-border); border-radius: 1rem; background: var(--weekly-muted-surface); }
+.toggle b { width: 1.15rem; height: 1.15rem; border-radius: 50%; background: var(--weekly-secondary); }
+.toggle[aria-checked="true"] > i { background: var(--weekly-primary); border-color: var(--weekly-primary); justify-content: flex-end; }
+.toggle[aria-checked="true"] b { background: var(--weekly-surface); }
+.dialog :global(.admin-form-section) { padding-top: 1.5rem; border-top: 1px solid var(--weekly-border); }
+.dialog :global(.admin-form-section-heading) { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; font-size: 0.9375rem; font-weight: 600; color: var(--weekly-text); }
+.dialog :global(.admin-form-section-heading) svg { width: 1rem; height: 1rem; color: var(--weekly-secondary); }
+.mediaClose { position: absolute; right: 1rem; top: 0.5rem; display: grid; place-items: center; width: 2.75rem; height: 2.75rem; color: var(--weekly-secondary); border: 0; border-radius: 0.65rem; background: transparent; }
+.mediaClose svg { width: 1.25rem; height: 1.25rem; }
+.dialog :global(.admin-modal-frame), .dialog :global(.admin-modal-frame) > form { display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; overflow: hidden; }
+.dialog :global(.admin-modal-body) { min-height: 0; flex: 1; overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; background: transparent; }
+.dialog :global(.admin-modal-body-inner) { width: 100%; padding: 1.5rem 1.75rem 2rem; }
+.dialog :global(.admin-modal-body-inner) > :first-child { margin-top: 0; }
+.dialog :global(.admin-modal-footer) { display: flex; flex-direction: row; flex: none; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 0.65rem; padding: 0.85rem 1.75rem; border-top: 1px solid var(--weekly-border); background: var(--weekly-surface); }
+.dialog :global(.admin-modal-footer) > :first-child:not(:last-child) { margin-right: auto; }
+.dialog :global(.admin-modal-meta) { display: flex; align-items: center; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.8rem; color: var(--weekly-secondary); font-size: 0.8125rem; }
+.dialog :global(.admin-modal-meta) code { overflow-wrap: anywhere; }
+.dialog :global(.admin-modal-meta-action) { display: inline-grid; flex: none; place-items: center; width: 2.75rem; height: 2.75rem; border: 0; border-radius: 0.6rem; background: transparent; color: var(--weekly-secondary); }
+.dialog :global(.admin-modal-meta-action) svg { width: 1rem; height: 1rem; }
+.dialog :global(.admin-modal-state) { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--weekly-secondary); }
+.dialog :global(.admin-modal-state) i { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: currentColor; }
+.dialog :global(.admin-modal-state[data-tone="success"]) { color: var(--weekly-primary); }
+.dialog :global(.admin-modal-state[data-tone="danger"]) { color: var(--ops-red); }
+.dialog :global(.admin-modal-section) + :global(.admin-modal-section) { padding-top: 1.5rem; border-top: 1px solid var(--weekly-border); }
+.dialog :global(.admin-modal-section-heading) { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0.4rem 1rem; margin-bottom: 1rem; }
+.dialog :global(.admin-modal-section-heading) h2 { display: flex; align-items: center; gap: 0.45rem; font-size: 1rem; font-weight: 600; letter-spacing: -0.02em; text-transform: none; color: var(--weekly-text); }
+.dialog :global(.admin-modal-section-heading) svg { width: 1rem; height: 1rem; }
+.dialog :global(.admin-modal-section-heading) p { font-size: 0.8125rem; color: var(--weekly-secondary); }
+.dialog :global(.admin-modal-relations-grid) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; }
+.dialog :global(.admin-relation-card) { display: flex; flex-wrap: wrap; min-width: 0; border: 1px solid var(--weekly-border); border-radius: 0.85rem; background: var(--weekly-raised); }
+.dialog :global(.admin-relation-main) { display: flex; min-width: 0; flex: 1; align-items: center; gap: 0.75rem; padding: 0.9rem; border: 0; border-radius: inherit; background: transparent; color: var(--weekly-text); text-align: left; }
+.dialog :global(.admin-relation-icon) { display: grid; place-items: center; flex: none; width: 2.5rem; height: 2.5rem; border: 1px solid var(--weekly-border); border-radius: 50%; color: var(--weekly-primary); background: var(--weekly-muted-surface); }
+.dialog :global(.admin-relation-icon) > svg { width: 1.1rem; height: 1.1rem; }
+.dialog :global(.admin-relation-copy) { display: flex; flex: 1; flex-direction: column; min-width: 0; gap: 0.25rem; overflow-wrap: anywhere; }
+.dialog :global(.admin-relation-label), .dialog :global(.admin-relation-description) { color: var(--weekly-secondary); font-size: 0.8125rem; letter-spacing: normal; text-transform: none; white-space: normal; }
+.dialog :global(.admin-relation-title) { color: var(--weekly-text); font-size: 0.9375rem; font-weight: 600; white-space: normal; }
+.dialog :global(.admin-relation-chevron) { width: 1rem; height: 1rem; flex: none; color: var(--weekly-secondary); }
+.dialog :global(.admin-relation-action) { display: flex; padding: 0.5rem; align-items: center; }
+.dialog :global(.admin-relation-action) > :is(a, button) { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 2.75rem; padding: 0.5rem 0.75rem; border: 1px solid var(--weekly-border); border-radius: 0.6rem; color: var(--weekly-primary); background: var(--weekly-surface); font-size: 0.8125rem; }
+.dialog :global(.admin-relation-action) svg { width: 1rem; height: 1rem; }
+.dialog :global(.admin-modal-confirm-copy) { padding: 1.5rem 1.75rem; color: var(--weekly-text); font-size: 0.9375rem; }
+.dialog :global(.admin-modal-confirm-copy) span { display: block; color: var(--weekly-secondary); margin-top: 0.5rem; font-size: 0.875rem; }
+.dialog :global(.admin-modal-media-frame) { margin: 0; background: var(--weekly-muted-surface); border-radius: 0.75rem; overflow: hidden; }
+.dialog :global(.admin-modal-media-frame) img { display: block; max-width: min(70rem, calc(100vw - 4rem)); max-height: calc(100dvh - 9rem); width: auto; height: auto; object-fit: contain; }
+.dialog :global(.admin-modal-media-frame) figcaption { padding: 0.75rem 1rem; color: var(--weekly-secondary); font-size: 0.875rem; }
+.dialog :global(h3) { font-size: 0.9375rem; line-height: 1.4; font-weight: 600; letter-spacing: normal; text-transform: none; color: var(--weekly-text); }
+.dialog :global(label), .dialog :global(label) > span { font-size: 0.8125rem; font-weight: 500; letter-spacing: normal; text-transform: none; color: var(--weekly-secondary); }
+.dialog :global([class*="text-zinc-"]), .dialog :global(.text-muted-foreground) { color: var(--weekly-secondary); }
+.dialog :global(.text-white), .dialog :global(.text-foreground) { color: var(--weekly-text); }
+.dialog :global([class*="text-green-"]), .dialog :global(.text-primary) { color: var(--weekly-primary); }
+.dialog :global([class*="text-red-"]) { color: var(--ops-red); }
+.dialog :global([class*="text-amber-"]), .dialog :global([class*="text-orange-"]) { color: var(--ops-amber); }
+.dialog :global(.uppercase) { text-transform: none; letter-spacing: normal; }
+.dialog :global([class*="text-[10px]"]), .dialog :global([class*="text-[11px]"]), .dialog :global(.text-xs) { font-size: 0.8125rem; }
+.dialog :global([class*="bg-zinc-"]), .dialog :global([class*="bg-white/"]), .dialog :global([class*="bg-black/"]), .dialog :global([class*="bg-[#"]), .dialog :global([class*="bg-gradient"]), .dialog :global([class*="bg-green-"]), .dialog :global([class*="bg-primary/"]) { background: var(--weekly-muted-surface); background-image: none; border-color: var(--weekly-border); }
+.dialog :global([class*="border-white/"]), .dialog :global([class*="border-zinc-"]) { border-color: var(--weekly-border); }
+.dialog :global(input:not([type="checkbox"]):not([type="radio"])), .dialog :global(select), .dialog :global(textarea) { min-height: 2.875rem; width: 100%; min-width: 0; padding: 0.65rem 0.85rem; border: 1px solid var(--weekly-border); border-radius: 0.75rem; color: var(--weekly-text); background: var(--weekly-raised); font-size: 0.875rem; box-shadow: none; }
+.dialog :global(textarea) { min-height: 6rem; resize: vertical; }
+.dialog :global(input)::placeholder, .dialog :global(textarea)::placeholder { color: var(--weekly-secondary); opacity: 1; }
+.dialog :global(input[type="checkbox"]) { accent-color: var(--weekly-primary); width: 1.15rem; height: 1.15rem; }
+.dialog :global(.ride-diagnostic-modal-grid) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.4rem 2rem; }
+.dialog :global(.ride-diagnostic-modal-grid) > div { min-width: 0; padding: 0; border: 0; background: transparent; }
+.dialog :global(.admin-ride-summary) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.75rem; }
+.dialog :global(.admin-ride-summary) dt { color: var(--weekly-secondary); font-size: 0.8125rem; margin-bottom: 0.65rem; }
+.dialog :global(.admin-ride-summary) dd { margin: 0; color: var(--weekly-text); font-size: clamp(1.35rem, 2vw, 1.75rem); font-weight: 600; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.dialog :global(.admin-ride-summary) > div:first-child dd { color: var(--weekly-primary); }
+.dialog :global(.ride-diagnostic-modal-grid) dt { margin-bottom: 0.4rem; color: var(--weekly-secondary); font-size: 0.8125rem; }
+.dialog :global(.ride-diagnostic-modal-grid) dd { margin: 0; color: var(--weekly-text); font-size: 0.9375rem; overflow-wrap: anywhere; }
+.dialog :global(.admin-record-link) { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 2.75rem; color: var(--weekly-primary); font-weight: 600; text-align: left; }
+.dialog :global(.admin-record-link):hover { text-decoration: underline; text-underline-offset: 0.2rem; }
+@layer base {
+    .dialog.dialog .toggle[role="switch"] { background: transparent !important; border: 0 !important; }
+    .dialog.dialog button { transform: none !important; }
+    .dialog.dialog :global(.admin-modal-footer) button { min-height: 2.75rem; padding: 0.5rem 0.85rem; border: 1px solid var(--weekly-border); border-radius: 0.65rem; font-size: 0.875rem; background: var(--weekly-raised) !important; color: var(--weekly-text) !important; box-shadow: none; }
+    .dialog.dialog :global(.admin-modal-footer) button[class*="bg-green-"] { background: var(--weekly-primary) !important; color: var(--weekly-surface) !important; border-color: transparent; }
+    .dialog.dialog :global(.admin-modal-footer) button[class*="text-red-"] { color: var(--ops-red) !important; }
+    .dialog.dialog [data-slot="button"] { min-height: 2.75rem; border-radius: 0.65rem; padding: 0.5rem 0.85rem; font-size: 0.875rem; box-shadow: none; }
+    .dialog.dialog [data-slot="button"][data-variant="default"], .dialog.dialog button[class*="bg-primary"] { background: var(--weekly-primary) !important; color: var(--weekly-surface) !important; border-color: transparent !important; }
+    .dialog.dialog [data-slot="button"][data-variant="outline"], .dialog.dialog [data-slot="button"][data-variant="secondary"] { border: 1px solid var(--weekly-border); background: var(--weekly-raised) !important; color: var(--weekly-text) !important; }
+    .dialog.dialog [data-slot="button"][data-variant="destructive"] { border: 1px solid var(--weekly-border); background: var(--weekly-raised) !important; color: var(--ops-red) !important; }
+    .dialog.dialog button:hover:not(:disabled), .dialog.dialog a:hover { background-color: var(--weekly-hover) !important; }
+    .dialog.dialog button:focus-visible, .dialog.dialog a:focus-visible, .dialog.dialog input:focus-visible, .dialog.dialog textarea:focus-visible, .dialog.dialog select:focus-visible { outline: 2px solid var(--weekly-primary) !important; outline-offset: 3px !important; }
+}
+@media (prefers-color-scheme: dark) { .dialog { --ops-red: #ffa6a1; --ops-amber: #ebc36b; } }
+@media (max-width: 800px) { .form { width: calc(100vw - 2rem); } .dialog :global(.admin-modal-relations-grid) { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) {
+    .form { width: calc(100vw - 1rem); }
+    .header { padding: 0.75rem 1rem 1rem; }
+    .topbar { gap: 0.5rem; }
+    .topbar > p { font-size: 0.75rem; }
+    .dialog :global(.admin-modal-body-inner) { padding: 1.25rem 1rem 1.5rem; }
+    .dialog :global(.admin-modal-footer) { padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom)); }
+    .dialog :global(.grid-cols-2), .dialog :global(.ride-diagnostic-modal-grid) { grid-template-columns: minmax(0, 1fr); }
+    .dialog :global(.admin-ride-summary) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+    .dialog :global([class*="min-w-[200px]"]) { min-width: 0; flex-basis: 100%; }
+    .dialog :global(.admin-modal-footer) > button { flex: 1; }
+    .dialog :global(.admin-modal-confirm-copy) { padding: 1.25rem 1rem; }
+}
+@media (prefers-reduced-transparency: reduce) { .dialog { box-shadow: none; } }
+
+.dialog { --ops-blue:#82b5ff;--ops-amber:#edc36c;--ops-red:#ff8585; }
+.dialog :global(.admin-modal-state[data-tone="warning"]) { color:var(--ops-amber); }
+.dialog :global(.admin-modal-state[data-tone="info"]) { color:var(--ops-blue); }
+.dialog :global(.admin-relation-card) { border:0;border-radius:0;background:none; }
+.dialog :global(div[class*="bg-"]) { background:transparent;border:0;border-radius:0; }
+.dialog :global(div[class*="bg-"][class*="p-"]) { padding:0; }
+.dialog :global(.admin-relation-main) { padding:.5rem 0; }
+.dialog :global(.admin-relation-icon) { width:1.5rem;height:1.5rem;border:0;border-radius:0;background:none; }
+.dialog :global(.admin-relation-action)>:is(a,button) { padding:.25rem .5rem;border:0;border-radius:.25rem;background:none; }
+@media(min-width:768px) and (pointer:fine) {
+ .header { padding:.75rem 1.25rem; }.topbar { min-height:2rem; }.heading { padding-top:.4rem; }.back { min-height:2rem; }
+ .dialog :global(.admin-modal-body-inner) { padding:1rem 1.25rem 1.25rem; }
+ .dialog :global(.admin-modal-footer) { padding:.5rem 1.25rem; }
+ .dialog :global(.admin-modal-meta) { margin-top:.4rem; }
+ .dialog :global(.admin-modal-meta-action) { width:2rem;height:2rem; }
+ .dialog :is(input:not([type="checkbox"]):not([type="file"]),select) { min-height:2rem;padding:.35rem .55rem;border-radius:.3rem; }
+ .dialog.dialog [data-slot="button"],.dialog.dialog :global(.admin-modal-footer) button { min-height:2rem;padding:.3rem .65rem;border-radius:.3rem;font-size:.8125rem; }
+ .toggle { min-height:2.25rem; }
+}

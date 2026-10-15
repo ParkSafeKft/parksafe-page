@@ -187,7 +187,7 @@ function copyId(id: string, label: string) {
     );
 }
 
-export default function UserRideDiagnostics({ userId }: { userId: string }) {
+export default function UserRideDiagnostics({ userId, onOpenRide }: { userId: string; onOpenRide?: (rideId: string) => void }) {
     const [isOpen, setIsOpen] = useState(false);
     const [rows, setRows] = useState<RideDiagnostic[]>([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -440,6 +440,7 @@ export default function UserRideDiagnostics({ userId }: { userId: string }) {
                                         {expanded ? (
                                             <div className="ride-diagnostic-detail">
                                                 <div className="ride-diagnostic-idline">
+                                                    {onOpenRide ? <button type="button" className="admin-record-link" onClick={() => onOpenRide(ride.ride_id)}>Tekerés részletei</button> : null}
                                                     <span>
                                                         <code>Ride: {ride.ride_id}</code>
                                                         <button type="button" className="admin-modal-meta-action" onClick={() => copyId(ride.ride_id, 'Ride ID')} aria-label="Ride ID másolása" title="Ride ID másolása"><Copy /></button>

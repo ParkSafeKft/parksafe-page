@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useModalNavigation, type ModalNavigation } from './useModalNavigation';
 import {
     Building,
     Camera,
@@ -89,7 +90,7 @@ interface PoiSuggestionsTableProps {
     onSave: (id: string, updates: Partial<PoiSuggestion>) => void;
     onStatusChange: (id: string, newStatus: string) => void;
     onDelete?: (id: string) => void;
-    onOpenUser?: (userId: string) => void;
+    onOpenUser?: ModalNavigation;
     searchTerm?: string;
     statusFilter: string;
     onStatusFilterChange: (value: string) => void;
@@ -346,7 +347,7 @@ function buildDetailsForType(
     return {};
 }
 
-function EditSuggestionModal({
+export function EditSuggestionModal({
     item,
     isOpen,
     onClose,
@@ -359,11 +360,12 @@ function EditSuggestionModal({
     onClose: () => void;
     onSave: (id: string, updates: Partial<PoiSuggestion>) => void;
     onStatusChange: (id: string, newStatus: string) => void;
-    onOpenUser?: (userId: string) => void;
+    onOpenUser?: ModalNavigation;
 }) {
     const initialDetails = (item?.details ?? {}) as PoiSuggestionDetails;
 
     const [suggestedType, setSuggestedType] = useState(item?.suggested_type || '');
+    const navigation = useModalNavigation(isOpen, onOpenUser);
     const [status, setStatus] = useState(item?.status || 'pending');
     const [name, setName] = useState(item?.name || '');
     const [city, setCity] = useState(item?.city || '');
@@ -441,7 +443,7 @@ function EditSuggestionModal({
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <Dialog open={isOpen && !navigation.suspended} onOpenChange={open => !open && onClose()}>
             <AdminModalContent variant="inspector">
                 <AdminModalFrame>
                     <AdminModalHeader
@@ -464,13 +466,15 @@ function EditSuggestionModal({
                     />
 
                     <AdminModalBody className="space-y-6">
+                        {navigation.pending ? <p role="status">Profil betöltése…</p> : null}
+                        {navigation.error ? <p role="alert">{navigation.error}</p> : null}
                         <AdminModalRelations>
                             <AdminRelationCard
                                 label="Beküldő"
                                 title={reporterName}
                                 description={item.user_id || 'Nincs kapcsolt profil'}
                                 icon={<User />}
-                                onClick={onOpenUser && item.user_id ? () => onOpenUser(item.user_id!) : undefined}
+                                onClick={onOpenUser && item.user_id && !navigation.pending ? () => void navigation.open(item.user_id!) : undefined}
                             />
                             <AdminRelationCard
                                 label="Javasolt hely"

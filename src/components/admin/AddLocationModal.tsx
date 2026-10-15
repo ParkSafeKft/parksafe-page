@@ -21,10 +21,9 @@ import {
     Plus,
     Droplet
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { AdminModalBody, AdminModalContent, AdminModalFooter, AdminModalFrame, AdminModalHeader } from './AdminModal';
+import { AdminToggle, AdminModalBody, AdminModalContent, AdminModalFooter, AdminModalFrame, AdminModalHeader } from './AdminModal';
 
 interface AddLocationModalProps {
     isOpen: boolean;
@@ -286,11 +285,8 @@ export default function AddLocationModal({ isOpen, onClose, locationType, onSucc
                             </div>
 
                             {/* Coordinates Group */}
-                            <div className="p-6 rounded-2xl bg-zinc-900/30 border border-white/5 space-y-4">
-                                <div className="flex items-center gap-2 text-zinc-400 mb-2">
-                                    <MapPin className="w-4 h-4 text-green-500" />
-                                    <span className="text-xs font-bold uppercase tracking-widest">Koordináták</span>
-                                </div>
+                            <div className="admin-form-section space-y-4">
+                                <h3 className="admin-form-section-heading"><MapPin aria-hidden="true" />Koordináták</h3>
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-1.5">
                                         <label htmlFor="lat" className="text-[10px] text-zinc-500 uppercase tracking-widest">Szélesség (Latitude) *</label>
@@ -333,11 +329,8 @@ export default function AddLocationModal({ isOpen, onClose, locationType, onSucc
 
                             {/* Type Specific Settings */}
                             {locationType === 'parking' && (
-                                <div className="p-6 rounded-2xl bg-zinc-900/30 border border-white/5 space-y-6">
-                                    <div className="flex items-center gap-2 text-zinc-400 mb-2">
-                                        <ShieldCheck className="w-4 h-4 text-green-500" />
-                                        <span className="text-xs font-bold uppercase tracking-widest">Parkoló információk</span>
-                                    </div>
+                                <div className="admin-form-section space-y-4">
+                                    <h3 className="admin-form-section-heading"><ShieldCheck aria-hidden="true" />Parkoló információk</h3>
 
                                     <ToggleItem label="Fedett parkoló" icon={Info} active={formData.covered} onClick={() => toggleBoolean('covered')} isLoading={isLoading} />
                                     <ToggleItem label="24 órás nyitvatartás" icon={Clock} active={formData.is_open_24h} onClick={() => toggleBoolean('is_open_24h')} isLoading={isLoading} />
@@ -363,7 +356,7 @@ export default function AddLocationModal({ isOpen, onClose, locationType, onSucc
                             )}
 
                             {locationType === 'services' && (
-                                <div className="p-6 rounded-2xl bg-zinc-900/30 border border-white/5 space-y-6">
+                                <div className="admin-form-section space-y-4">
                                     <div className="flex items-center gap-2 text-zinc-400 mb-2">
                                         <Building2 className="w-4 h-4 text-green-500" />
                                         <span className="text-xs font-bold uppercase tracking-widest">Üzlet információk</span>
@@ -462,11 +455,8 @@ export default function AddLocationModal({ isOpen, onClose, locationType, onSucc
                             )}
 
                             {locationType === 'repair' && (
-                                <div className="p-6 rounded-2xl bg-zinc-900/30 border border-white/5 space-y-6">
-                                    <div className="flex items-center gap-2 text-zinc-400 mb-2">
-                                        <Wrench className="w-4 h-4 text-green-500" />
-                                        <span className="text-xs font-bold uppercase tracking-widest">Szerviz információk</span>
-                                    </div>
+                                <div className="admin-form-section space-y-4">
+                                    <h3 className="admin-form-section-heading"><Wrench aria-hidden="true" />Szerviz információk</h3>
 
                                     <ToggleItem label="Fedett állomás" icon={Info} active={formData.covered} onClick={() => toggleBoolean('covered')} isLoading={isLoading} />
                                     <ToggleItem label="Ingyenes használat" icon={DollarSign} active={formData.free} onClick={() => toggleBoolean('free')} isLoading={isLoading} />
@@ -474,7 +464,7 @@ export default function AddLocationModal({ isOpen, onClose, locationType, onSucc
                             )}
 
                             {/* Image Upload */}
-                            <div className="p-6 rounded-2xl bg-zinc-900/30 border border-white/5 space-y-4">
+                            <div className="admin-form-section space-y-4">
                                 <h3 className="text-sm font-semibold flex items-center gap-2 text-foreground">
                                     Képek
                                 </h3>
@@ -537,19 +527,4 @@ export default function AddLocationModal({ isOpen, onClose, locationType, onSucc
     );
 }
 
-const ToggleItem = ({ label, icon: Icon, active, onClick, isLoading }: { label: string, icon: LucideIcon, active: boolean, onClick?: () => void, isLoading: boolean }) => (
-    <div className="flex items-center justify-between group">
-        <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg transition-colors ${active ? 'bg-green-500/10 text-green-500' : 'bg-white/5 text-zinc-500 group-hover:text-green-500'}`}>
-                <Icon className="w-4 h-4" />
-            </div>
-            <span className={`text-sm font-medium transition-colors ${active ? 'text-white' : 'text-zinc-300'}`}>{label}</span>
-        </div>
-        <div
-            onClick={isLoading ? undefined : onClick}
-            className={`w-12 h-6 rounded-full p-1 transition-colors cursor-pointer ${active ? 'bg-green-600' : 'bg-zinc-800'} ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-        >
-            <div className={`w-4 h-4 bg-white rounded-full transition-transform shadow-sm ${active ? 'translate-x-6' : 'translate-x-0'}`} />
-        </div>
-    </div>
-);
+const ToggleItem = AdminToggle;

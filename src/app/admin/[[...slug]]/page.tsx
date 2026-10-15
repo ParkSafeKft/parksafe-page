@@ -1,71 +1,47 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabaseClient';
-import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
-import {
-    SidebarProvider,
-    SidebarTrigger,
-    SidebarInset,
-} from '@/components/ui/sidebar';
-import { Separator } from '@/components/ui/separator';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card,CardContent } from '@/components/ui/card';
 import {
-    Search,
-    XCircle,
-    Plus,
-    Loader2,
-    Users,
-    MapPin,
-    Building,
-    Wrench,
-    ArrowLeft,
-    Camera,
-    Droplet,
-    Building2,
-    Trophy,
-    Route,
-    ScrollText,
-    Settings,
-    Lightbulb,
-    ChartNoAxesCombined,
+SidebarInset,
+SidebarProvider
+} from '@/components/ui/sidebar';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
+import { supabase } from '@/lib/supabaseClient';
+import {
+ArrowLeft,
+Loader2,
+XCircle
 } from 'lucide-react';
+import { useParams,useRouter } from 'next/navigation';
+import { useCallback,useEffect,useRef,useState } from 'react';
 import { toast } from 'sonner';
 
-import AdminSidebar from '@/components/admin/AdminSidebar';
-import ImagePreview from '@/components/admin/ImagePreview';
-import UsersTable from '@/components/admin/UsersTable';
-import ParkingTable from '@/components/admin/ParkingTable';
-import ServicesTable from '@/components/admin/ServicesTable';
-import RepairTable from '@/components/admin/RepairTable';
+import ActivationMetricsOverview from '@/components/admin/ActivationMetricsOverview';
 import AddLocationModal from '@/components/admin/AddLocationModal';
-import EditLocationModal from '@/components/admin/EditLocationModal';
-import DetailModal from '@/components/admin/DetailModal';
-import DeleteConfirmModal from '@/components/admin/DeleteConfirmModal';
-import DeviceStatsOverview from '@/components/admin/DeviceStatsOverview';
-import FeedbackTable from '@/components/admin/FeedbackTable';
-import PoiFlagsTable from '@/components/admin/PoiFlagsTable';
-import PoiSuggestionsTable, { PoiSuggestion } from '@/components/admin/PoiSuggestionsTable';
-import ParkingImageSubmissionsTable from '@/components/admin/ParkingImageSubmissionsTable';
-import DrinkingFountainTable from '@/components/admin/DrinkingFountainTable';
-import CitiesTable from '@/components/admin/CitiesTable';
-import CommunityRoutesTable from '@/components/admin/CommunityRoutesTable';
+import { getAdminNavigationItem } from '@/components/admin/adminNavigation';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import AdminRecordBrowser,{ type RecordFilter } from '@/components/admin/AdminRecordBrowser';
+import { RECORD_COLLECTIONS,RECORD_STATUSES,type AdminRecord } from '@/components/admin/adminRecordModel';
+import { applyRecordAction } from '@/components/admin/adminRecordMutations';
+import AdminSidebar from '@/components/admin/AdminSidebar';
+import workspaceStyles from '@/components/admin/AdminWorkspace.module.css';
+import AppConfigTab from '@/components/admin/AppConfigTab';
 import CityFormModal from '@/components/admin/CityFormModal';
 import CommunityRouteReviewModal from '@/components/admin/CommunityRouteReviewModal';
-import LeaderboardTab from '@/components/admin/LeaderboardTab';
-import RouteHeatmapTab from '@/components/admin/RouteHeatmapTab';
-import AuditLogTable from '@/components/admin/AuditLogTable';
-import AppConfigTab from '@/components/admin/AppConfigTab';
-import { writeAuditLog } from '@/lib/adminAuditLog';
 import ContentStatsOverview from '@/components/admin/ContentStatsOverview';
-import ActivationMetricsOverview from '@/components/admin/ActivationMetricsOverview';
-import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import DeleteConfirmModal from '@/components/admin/DeleteConfirmModal';
+import DetailModal from '@/components/admin/DetailModal';
+import DeviceStatsOverview from '@/components/admin/DeviceStatsOverview';
+import EditLocationModal from '@/components/admin/EditLocationModal';
+import ImagePreview from '@/components/admin/ImagePreview';
+import LeaderboardTab from '@/components/admin/LeaderboardTab';
+import { EditSuggestionModal,PoiSuggestion } from '@/components/admin/PoiSuggestionsTable';
+import type { AdminRideRecord } from '@/components/admin/RideDetailContent';
 import RideDiagnosticsTab from '@/components/admin/RideDiagnosticsTab';
+import RouteHeatmapTab from '@/components/admin/RouteHeatmapTab';
+import { writeAuditLog } from '@/lib/adminAuditLog';
 
 /**
  * Sanitize a search term to prevent PostgREST filter injection.
@@ -174,7 +150,6 @@ export default function AdminPage() {
     }, [router]);
 
     const [searchTerm, setSearchTerm] = useState('');
-    const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
     // Data states
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -219,6 +194,7 @@ export default function AdminPage() {
     const [poiFlagReasonFilter, setPoiFlagReasonFilter] = useState('');
     const [poiSuggestionStatusFilter, setPoiSuggestionStatusFilter] = useState('');
     const [poiSuggestionTypeFilter, setPoiSuggestionTypeFilter] = useState('');
+    const [directoryStatusFilter,setDirectoryStatusFilter] = useState('');
     const [parkingImageStatusFilter, setParkingImageStatusFilter] = useState('');
 
     // New modals
@@ -226,6 +202,10 @@ export default function AdminPage() {
     const [cityFormModal, setCityFormModal] = useState<{ show: boolean; item: any | null }>({ show: false, item: null });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [routeReviewModal, setRouteReviewModal] = useState<{ show: boolean; item: any | null }>({ show: false, item: null });
+    const [suggestionEditor, setSuggestionEditor] = useState<PoiSuggestion | null>(null);
+    const actionLock = useRef(false);
+    const recordScope = useRef('');
+
     const [dataLoading, setDataLoading] = useState(false);
     const [toggleLoading, setToggleLoading] = useState<string | null>(null);
     const [batchActionLoading, setBatchActionLoading] = useState(false);
@@ -237,10 +217,11 @@ export default function AdminPage() {
 
     // Selection
     const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
-    const [selectAll, setSelectAll] = useState(false);
 
     // Sorting
     const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
+    recordScope.current = JSON.stringify([activeTab,searchTerm,currentPage,pageSize,sortConfig,userSupporterFilter,userSortMode,routeStatusFilter,routeDateFrom,routeDateTo,auditActionFilter,auditTargetTypeFilter,feedbackStatusFilter,feedbackPriorityFilter,feedbackCategoryFilter,poiFlagStatusFilter,poiFlagReasonFilter,poiSuggestionStatusFilter,poiSuggestionTypeFilter,parkingImageStatusFilter,directoryStatusFilter]);
+    const fetchSequence = useRef(0);
 
     // Modals
     const [addLocationModal, setAddLocationModal] = useState(false);
@@ -266,6 +247,12 @@ export default function AdminPage() {
     const detailModalRef = useRef<{ show: boolean; item: any; type: string }>({ show: false, item: null, type: 'user' });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const detailHistoryRef = useRef<Array<{ item: any; type: string }>>([]);
+    const weeklyDetailReturnRef = useRef<(() => void) | null>(null);
+    const [hasWeeklyReturn, setHasWeeklyReturn] = useState(false);
+    const [detailReturnLabel, setDetailReturnLabel] = useState('Vissza az előző nézethez');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [imageSubmissionToDelete, setImageSubmissionToDelete] = useState<any | null>(null);
+    const [deletingRecord, setDeletingRecord] = useState(false);
     const [deleteModal, setDeleteModal] = useState<{ show: boolean; table: string | null; id: string | null }>({
         show: false,
         table: null,
@@ -328,6 +315,7 @@ export default function AdminPage() {
     // Fetch data (silent = true skips the loading spinner, used for realtime updates)
     const fetchData = async (silent = false) => {
         if (!profile) return;
+        const request = ++fetchSequence.current, requestScope = recordScope.current;
         if (!silent) setDataLoading(true);
         try {
             let query;
@@ -472,6 +460,16 @@ export default function AdminPage() {
                     return;
             }
 
+            if (directoryStatusFilter && ['users','cities','parking','services','repair','drinking_fountain'].includes(activeTab)) {
+                if(activeTab === 'users') {
+                    query = directoryStatusFilter === 'active' ? query.is('banned_at',null) : query.not('banned_at','is',null);
+                    countQuery = directoryStatusFilter === 'active' ? countQuery.is('banned_at',null) : countQuery.not('banned_at','is',null);
+                } else {
+                    const column = activeTab === 'cities' ? 'is_active' : 'available';
+                    const enabled = ['active','available'].includes(directoryStatusFilter);
+                    query = query.eq(column,enabled); countQuery = countQuery.eq(column,enabled);
+                }
+            }
             // Search (sanitized to prevent PostgREST filter injection)
             if (searchTerm) {
                 const safe = sanitizeSearchTerm(searchTerm);
@@ -553,17 +551,27 @@ export default function AdminPage() {
 
             const [dataRes, countRes] = await Promise.all([query, countQuery]);
 
+            if (request !== fetchSequence.current || requestScope !== recordScope.current) return;
             if (dataRes.error) throw dataRes.error;
             if (countRes.error) throw countRes.error;
 
             setTotalCount(countRes.count || 0);
+            const lastPage = Math.max(1, Math.ceil((countRes.count || 0) / pageSize));
+            if (currentPage > lastPage) { setCurrentPage(lastPage); return; }
 
             if (activeTab === 'users') setUsers(dataRes.data || []);
             else if (activeTab === 'parking') setParkingSpots(dataRes.data || []);
             else if (activeTab === 'services') setBicycleServices(dataRes.data || []);
             else if (activeTab === 'repair') setRepairStations(dataRes.data || []);
             else if (activeTab === 'drinking_fountain') setDrinkingFountains(dataRes.data || []);
-            else if (activeTab === 'feedback') setFeedback(dataRes.data || []);
+            else if (activeTab === 'feedback') {
+                const rows = dataRes.data || [];
+                const userIds = Array.from(new Set(rows.map((row: {user_id?: string}) => row.user_id).filter((id): id is string => Boolean(id))));
+                const { data: people } = userIds.length ? await supabase.from('profiles').select('id,username,full_name').in('id',userIds) : {data:[]};
+                if (request !== fetchSequence.current || requestScope !== recordScope.current) return;
+                const names = new Map((people || []).map(person => [person.id,person]));
+                setFeedback(rows.map((row: {user_id?: string}) => ({...row, profiles: names.get(row.user_id)})));
+            }
             else if (activeTab === 'poi_flags') {
                 // Flatten the joined profiles data
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -573,6 +581,7 @@ export default function AdminPage() {
                     reporter_full_name: row.profiles?.full_name || null,
                     reporter_avatar_url: row.profiles?.avatar_url || null,
                 }));
+                if (request !== fetchSequence.current || requestScope !== recordScope.current) return;
                 setPoiFlags(mapped);
             } else if (activeTab === 'poi_suggestions') {
                 const rows = dataRes.data || [];
@@ -599,6 +608,7 @@ export default function AdminPage() {
                         reporter_avatar_url: prof?.avatar_url || null,
                     };
                 });
+                if (request !== fetchSequence.current || requestScope !== recordScope.current) return;
                 setPoiSuggestions(mapped);
             } else if (activeTab === 'parking_images') {
                 const rows = dataRes.data || [];
@@ -632,6 +642,7 @@ export default function AdminPage() {
                         reporter_email: prof?.email || null,
                     };
                 });
+                if (request !== fetchSequence.current || requestScope !== recordScope.current) return;
                 setParkingImageSubmissions(mapped);
             } else if (activeTab === 'cities') {
                 const rows = dataRes.data || [];
@@ -657,6 +668,7 @@ export default function AdminPage() {
                     ...r,
                     profiles: r.user_id ? profilesMap[r.user_id] || null : null,
                 }));
+                if (request !== fetchSequence.current || requestScope !== recordScope.current) return;
                 setCommunityRoutes(mapped);
             } else if (activeTab === 'audit_log') {
                 const rows = dataRes.data || [];
@@ -670,6 +682,7 @@ export default function AdminPage() {
                 }
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const mapped = rows.map((r: any) => ({ ...r, profiles: r.admin_id ? profilesMap[r.admin_id] || null : null }));
+                if (request !== fetchSequence.current || requestScope !== recordScope.current) return;
                 setAuditLog(mapped);
             }
 
@@ -677,7 +690,7 @@ export default function AdminPage() {
             if (isDev) console.error('Error fetching data:', error);
             if (!silent) toast.error('Hiba történt az adatok betöltésekor');
         } finally {
-            if (!silent) setDataLoading(false);
+            if (request === fetchSequence.current) setDataLoading(false);
         }
     };
 
@@ -686,20 +699,24 @@ export default function AdminPage() {
 
     useEffect(() => {
         // Reset page and selection on tab/search change
+        setDirectoryStatusFilter('');
         setCurrentPage(1);
         setSelectedRows(new Set());
-        setSelectAll(false);
-        setMobileSearchOpen(false);
         // Close any open modal when the user switches tabs (or pops back
         // through the URL history). Without this, an opened detail/edit
         // modal would linger on the wrong tab.
         setDetailModal(prev => (prev.show ? { ...prev, show: false } : prev));
         detailHistoryRef.current = [];
         detailModalRef.current = { ...detailModalRef.current, show: false };
+        weeklyDetailReturnRef.current = null;
+        setHasWeeklyReturn(false);
         setDetailHistory([]);
         setEditLocationModal(prev => (prev.show ? { show: false, item: null } : prev));
         setCityFormModal(prev => (prev.show ? { show: false, item: null } : prev));
         setRouteReviewModal(prev => (prev.show ? { show: false, item: null } : prev));
+        setSuggestionEditor(null);
+        setImageSubmissionToDelete(null);
+        setDeleteModal({ show: false, table: null, id: null });
         // Reset sort key to a column that exists on this tab's table
         const defaultSortKey = 'created_at';
         setSortConfig(prev => (prev.key === defaultSortKey ? prev : { key: defaultSortKey, direction: 'desc' }));
@@ -708,12 +725,11 @@ export default function AdminPage() {
     useEffect(() => {
         fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeTab, currentPage, sortConfig, searchTerm, profile, pageSize, userSupporterFilter, userSortMode, routeStatusFilter, routeDateFrom, routeDateTo, auditActionFilter, auditTargetTypeFilter, feedbackStatusFilter, feedbackPriorityFilter, feedbackCategoryFilter, poiFlagStatusFilter, poiFlagReasonFilter, poiSuggestionStatusFilter, poiSuggestionTypeFilter, parkingImageStatusFilter]);
+    }, [activeTab, currentPage, sortConfig, searchTerm, profile, pageSize, userSupporterFilter, userSortMode, routeStatusFilter, routeDateFrom, routeDateTo, auditActionFilter, auditTargetTypeFilter, feedbackStatusFilter, feedbackPriorityFilter, feedbackCategoryFilter, poiFlagStatusFilter, poiFlagReasonFilter, poiSuggestionStatusFilter, poiSuggestionTypeFilter, parkingImageStatusFilter, directoryStatusFilter]);
 
     useEffect(() => {
         setSelectedRows(new Set());
-        setSelectAll(false);
-    }, [currentPage, pageSize, userSupporterFilter, userSortMode, feedbackStatusFilter, feedbackPriorityFilter, feedbackCategoryFilter, poiFlagStatusFilter, poiFlagReasonFilter]);
+    }, [activeTab, searchTerm, sortConfig, currentPage, pageSize, userSupporterFilter, userSortMode, feedbackStatusFilter, feedbackPriorityFilter, feedbackCategoryFilter, poiFlagStatusFilter, poiFlagReasonFilter, poiSuggestionStatusFilter, poiSuggestionTypeFilter, parkingImageStatusFilter, routeStatusFilter, routeDateFrom, routeDateTo, auditActionFilter, auditTargetTypeFilter, directoryStatusFilter]);
 
     // Load cities for filter dropdowns when those tabs open
     useEffect(() => {
@@ -731,57 +747,11 @@ export default function AdminPage() {
         }));
     };
 
-    const handleSelectAll = (checked: boolean) => {
-        setSelectAll(checked);
-        if (checked) {
-            const currentData = activeTab === 'users' ? users :
-                activeTab === 'parking' ? parkingSpots :
-                    activeTab === 'parking_images' ? parkingImageSubmissions :
-                        activeTab === 'drinking_fountain' ? drinkingFountains :
-                            activeTab === 'services' ? bicycleServices :
-                                activeTab === 'repair' ? repairStations :
-                                    activeTab === 'poi_flags' ? poiFlags :
-                                        activeTab === 'poi_suggestions' ? poiSuggestions : feedback;
-            setSelectedRows(new Set(currentData.map(item => item.id)));
-        } else {
-            setSelectedRows(new Set());
-        }
-    };
 
-    const handleSelectRow = (id: string, checked: boolean) => {
-        const newSelected = new Set(selectedRows);
-        if (checked) {
-            newSelected.add(id);
-        } else {
-            newSelected.delete(id);
-            setSelectAll(false);
-        }
-        setSelectedRows(newSelected);
-    };
 
-    const handleToggleAvailability = async (id: string, currentStatus: boolean) => {
-        setToggleLoading(id);
-        const table = activeTab === 'parking' ? 'parkingSpots' :
-            activeTab === 'services' ? 'bicycleService' :
-                activeTab === 'drinking_fountain' ? 'drinkingFountain' : 'repairStation';
 
-        try {
-            const { error } = await supabase
-                .from(table)
-                .update({ available: !currentStatus })
-                .eq('id', id);
 
-            if (error) throw error;
 
-            toast.success('Státusz sikeresen módosítva');
-            fetchData();
-        } catch (error) {
-            if (isDev) console.error('Error toggling status:', error);
-            toast.error('Hiba történt a státusz módosítása során');
-        } finally {
-            setToggleLoading(null);
-        }
-    };
 
     const handleFeedbackStatusChange = async (id: string, newStatus: string) => {
         setToggleLoading(id);
@@ -803,35 +773,14 @@ export default function AdminPage() {
         }
     };
 
-    const handleFeedbackBatchStatusChange = async (ids: string[], newStatus: string) => {
-        const allowedStatuses = new Set(['open', 'in_progress', 'resolved', 'closed', 'duplicate']);
-        const uniqueIds = Array.from(new Set(ids));
-        if (uniqueIds.length === 0 || !allowedStatuses.has(newStatus)) return;
 
-        setBatchActionLoading(true);
-        try {
-            const { error } = await supabase
-                .from('feedback')
-                .update({ status: newStatus })
-                .in('id', uniqueIds);
-
-            if (error) throw error;
-
-            toast.success(`${uniqueIds.length} visszajelzés státusza frissítve`);
-            handleSelectAll(false);
-            await fetchData();
-        } catch (error) {
-            if (isDev) console.error('Error updating feedback statuses:', error);
-            toast.error('Hiba történt a kijelölt visszajelzések frissítésekor');
-        } finally {
-            setBatchActionLoading(false);
-        }
-    };
 
     // Open a record in the detail modal as a *fresh* navigation (used by table row clicks).
     // Resets the back-stack so the user can't go back to whatever was open in a previous tab.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const openFreshDetail = useCallback((item: any, type: string) => {
+        weeklyDetailReturnRef.current = null;
+        setHasWeeklyReturn(false);
         detailModalRef.current = { show: true, item, type };
         detailHistoryRef.current = [];
         setDetailHistory([]);
@@ -851,75 +800,87 @@ export default function AdminPage() {
         setDetailModal({ show: true, item, type });
     }, []);
 
+    const closeDetail = useCallback(() => {
+        const returnToWeekly = weeklyDetailReturnRef.current;
+        weeklyDetailReturnRef.current = null;
+        setHasWeeklyReturn(false);
+        detailModalRef.current = { ...detailModalRef.current, show: false };
+        detailHistoryRef.current = [];
+        setDetailModal(prev => ({ ...prev, show: false }));
+        setDetailHistory([]);
+        returnToWeekly?.();
+    }, []);
+
     const goBackDetail = useCallback(() => {
         const stack = detailHistoryRef.current;
-        if (stack.length === 0) return;
+        if (stack.length === 0) {
+            if (weeklyDetailReturnRef.current) closeDetail();
+            return;
+        }
         const last = stack[stack.length - 1];
         detailHistoryRef.current = stack.slice(0, -1);
         detailModalRef.current = { show: true, item: last.item, type: last.type };
         setDetailHistory(detailHistoryRef.current);
         setDetailModal({ show: true, item: last.item, type: last.type });
-    }, []);
+    }, [closeDetail]);
 
-    const closeDetail = useCallback(() => {
-        detailModalRef.current = { ...detailModalRef.current, show: false };
-        detailHistoryRef.current = [];
-        setDetailModal(prev => ({ ...prev, show: false }));
-        setDetailHistory([]);
-    }, []);
 
-    const handleOpenPoiEdit = useCallback(async (poiId: string, poiType: string) => {
-        const tableMap: Record<string, string> = {
-            parking: 'parkingSpots',
-            bicycleService: 'bicycleService',
-            repairStation: 'repairStation',
-            drinkingFountain: 'drinkingFountain',
-        };
-        const tabMap: Record<string, string> = {
-            parking: 'parking',
-            bicycleService: 'services',
-            repairStation: 'repair',
-            drinkingFountain: 'drinking_fountain',
-        };
-        const table = tableMap[poiType];
-        const tab = tabMap[poiType];
-        if (!table || !tab) {
-            toast.error('Ismeretlen POI típus');
-            return;
-        }
-        setDetailModal(prev => ({ ...prev, show: false }));
-        try {
-            const { data, error } = await supabase.from(table).select('*').eq('id', poiId).single();
-            if (error) throw error;
-            if (!data) {
-                toast.error('POI nem található');
-                return;
-            }
-            setActiveTab(tab);
-            setEditLocationModal({ show: true, item: data });
-            toast.success('POI szerkesztés megnyitva');
-        } catch (err) {
-            if (process.env.NODE_ENV === 'development') console.error(err);
-            toast.error('POI betöltése sikertelen');
-        }
-    }, [setActiveTab]);
 
-    const handleOpenUserProfile = useCallback(async (userId: string) => {
+    const handleOpenUserProfile = useCallback(async (userId: string, onReturn?: () => void, signal?: AbortSignal, returnLabel = 'Vissza az előző nézethez') => {
+        const origin = detailModalRef.current;
         try {
             const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
+            if (signal?.aborted || detailModalRef.current !== origin) return false;
             if (error) throw error;
             if (!data) {
                 toast.error('Felhasználó nem található');
-                return;
+                return false;
             }
-            openLinkedDetail(data, 'user');
+            if (onReturn) {
+                openFreshDetail(data, 'user');
+                weeklyDetailReturnRef.current = onReturn;
+                setHasWeeklyReturn(true);
+                setDetailReturnLabel(returnLabel);
+            } else {
+                openLinkedDetail(data, 'user');
+            }
+            return true;
         } catch (err) {
+            if (signal?.aborted || detailModalRef.current !== origin) return false;
             if (isDev) console.error(err);
             toast.error('Felhasználó betöltése sikertelen');
+            return false;
         }
-    }, [openLinkedDetail]);
+    }, [openFreshDetail, openLinkedDetail]);
+
+    const openRideRecord = useCallback((ride: AdminRideRecord) => openFreshDetail(ride, 'ride'), [openFreshDetail]);
+    const handleOpenRide = useCallback(async (rideId: string, onReturn?: () => void, signal?: AbortSignal) => {
+        const origin = detailModalRef.current;
+        try {
+            const { data, error } = await supabase.from('ride_summaries')
+                .select('id,user_id,client_ride_id,started_at,created_at,duration_seconds,moving_time_seconds,distance_meters,average_speed_kmh,max_speed_kmh,elevation_gain_meters,favorite_name,track_samples')
+                .eq('id', rideId).single();
+            if (signal?.aborted || detailModalRef.current !== origin) return false;
+            if (error || !data) throw error || new Error('Ride unavailable');
+            const { track_samples, ...metadata } = data;
+            const samples = Array.isArray(track_samples) ? track_samples.length : 0;
+            const ride = { ...metadata, ride_type: 'normal', sample_total: samples, sample_accepted: samples, sample_rejected: 0 };
+            if (onReturn) {
+                openFreshDetail(ride, 'ride');
+                weeklyDetailReturnRef.current = onReturn;
+                setHasWeeklyReturn(true);
+                setDetailReturnLabel('Vissza a heti statisztikához');
+            } else openLinkedDetail(ride, 'ride');
+            void writeAuditLog({ adminId: profile?.id, action: 'view_ride_diagnostic', targetType: 'ride', targetId: rideId, notes: 'Tekerés részletei megtekintve.' });
+            return true;
+        } catch {
+            if (!signal?.aborted && detailModalRef.current === origin) toast.error('A tekerés nem tölthető be.');
+            return false;
+        }
+    }, [openFreshDetail, openLinkedDetail, profile?.id]);
 
     const handleOpenPoiDetail = useCallback(async (poiId: string, poiType: string) => {
+        const origin = detailModalRef.current;
         const tableMap: Record<string, string> = {
             parking: 'parkingSpots',
             bicycleService: 'bicycleService',
@@ -940,6 +901,7 @@ export default function AdminPage() {
         }
         try {
             const { data, error } = await supabase.from(table).select('*').eq('id', poiId).single();
+            if (detailModalRef.current !== origin) return;
             if (error) throw error;
             if (!data) {
                 toast.error('POI nem található');
@@ -953,8 +915,10 @@ export default function AdminPage() {
     }, [openLinkedDetail]);
 
     const handleOpenParkingSpotDetail = useCallback(async (spotId: string) => {
+        const origin = detailModalRef.current;
         try {
             const { data, error } = await supabase.from('parkingSpots').select('*').eq('id', spotId).single();
+            if (detailModalRef.current !== origin) return;
             if (error) throw error;
             if (!data) {
                 toast.error('Parkoló nem található');
@@ -987,30 +951,7 @@ export default function AdminPage() {
         }
     };
 
-    const handlePoiFlagBatchStatusChange = async (ids: string[], newStatus: string) => {
-        const allowedStatuses = new Set(['pending', 'reviewed', 'resolved', 'dismissed']);
-        const uniqueIds = Array.from(new Set(ids));
-        if (uniqueIds.length === 0 || !allowedStatuses.has(newStatus)) return;
 
-        setBatchActionLoading(true);
-        try {
-            const { error } = await supabase
-                .from('poi_flags')
-                .update({ status: newStatus, reviewed_at: new Date().toISOString() })
-                .in('id', uniqueIds);
-
-            if (error) throw error;
-
-            toast.success(`${uniqueIds.length} POI bejelentés státusza frissítve`);
-            handleSelectAll(false);
-            await fetchData();
-        } catch (error) {
-            if (isDev) console.error('Error updating POI flag statuses:', error);
-            toast.error('Hiba történt a kijelölt POI bejelentések frissítésekor');
-        } finally {
-            setBatchActionLoading(false);
-        }
-    };
 
     const handlePoiSuggestionSave = async (id: string, updates: Partial<PoiSuggestion>) => {
         setToggleLoading(id);
@@ -1088,10 +1029,8 @@ export default function AdminPage() {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleDeleteParkingImageSubmission = async (submission: any) => {
+    const deleteParkingImageSubmission = async (submission: any) => {
         if (!submission) return;
-        const confirmed = window.confirm('Biztosan törlöd ezt a kérelmet, a hozzá tartozó képet és a markerhez csatolt képet is?');
-        if (!confirmed) return;
 
         setToggleLoading(submission.id);
 
@@ -1120,29 +1059,19 @@ export default function AdminPage() {
             toast.error('Hiba történt a törlés közben');
         } finally {
             setToggleLoading(null);
+            setImageSubmissionToDelete(null);
         }
     };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleDeleteParkingImageSubmission = (submission: any) => setImageSubmissionToDelete(submission);
 
     const handleDeleteClick = (id: string) => {
         const table = getTableForTab(activeTab) || 'feedback';
         setDeleteModal({ show: true, table, id });
     };
 
-    const handleToggleCityActive = async (id: string, currentStatus: boolean) => {
-        setToggleLoading(id);
-        try {
-            const { error } = await supabase.from('cities').update({ is_active: !currentStatus }).eq('id', id);
-            if (error) throw error;
-            await writeAuditLog({ adminId, action: 'toggle_city_active', targetType: 'city', targetId: id, notes: !currentStatus ? 'activated' : 'deactivated' });
-            toast.success('Státusz módosítva');
-            fetchData();
-        } catch (err) {
-            if (isDev) console.error(err);
-            toast.error('Hiba a státusz módosítása során');
-        } finally {
-            setToggleLoading(null);
-        }
-    };
+
 
     const adminId = (profile as { id?: string } | null)?.id ?? null;
 
@@ -1197,35 +1126,15 @@ export default function AdminPage() {
         }
     };
 
-    const handleCommunityRouteStatusChange = async (id: string, newStatus: string) => {
-        setToggleLoading(id);
-        try {
-            const { error } = await supabase
-                .from('community_bike_lanes')
-                .update({ status: newStatus })
-                .eq('id', id);
-            if (error) throw error;
-            // The action+target already convey what changed. Keep the status in a structured
-            // action name (e.g. `community_route_${newStatus}`) so the Megjegyzés column stays
-            // free for actual admin remarks set via the review modal.
-            await writeAuditLog({ adminId, action: `community_route_${newStatus}` as 'community_route_pending' | 'community_route_in_review' | 'community_route_accepted' | 'community_route_rejected', targetType: 'community_bike_lane', targetId: id });
-            toast.success('Útvonal státusza frissítve');
-            fetchData();
-        } catch (err) {
-            if (isDev) console.error(err);
-            toast.error('Hiba a státusz frissítésekor');
-        } finally {
-            setToggleLoading(null);
-        }
-    };
+
 
     const confirmDelete = async () => {
         if (!deleteModal.id) return;
 
-        // Recalculate table name from activeTab instead of trusting state
-        const table = getTableForTab(activeTab);
-        if (!table) return;
+        const table = deleteModal.table;
+        if (!table || !['profiles', 'parkingSpots', 'parking_image_submissions', 'bicycleService', 'repairStation', 'feedback', 'poi_flags', 'poi_suggestions', 'drinkingFountain', 'cities', 'community_bike_lanes', 'admin_audit_log'].includes(table) || deletingRecord) return;
 
+        setDeletingRecord(true);
         try {
             const { error } = await supabase
                 .from(table)
@@ -1236,10 +1145,14 @@ export default function AdminPage() {
 
             toast.success('Elem sikeresen törölve');
             setDeleteModal({ show: false, table: null, id: null });
+            setEditLocationModal({ show: false, item: null });
+            if (detailModal.item?.id === deleteModal.id) closeDetail();
             fetchData();
         } catch (error) {
             if (isDev) console.error('Error deleting item:', error);
             toast.error('Hiba történt a törlés során');
+        } finally {
+            setDeletingRecord(false);
         }
     };
 
@@ -1251,6 +1164,60 @@ export default function AdminPage() {
             if (isDev) console.error('Logout error:', error);
         }
     };
+
+    const recordRows: AdminRecord[] = ({ users, parking: parkingSpots, services: bicycleServices, repair: repairStations,
+        drinking_fountain: drinkingFountains, cities, feedback, poi_flags: poiFlags, poi_suggestions: poiSuggestions,
+        parking_images: parkingImageSubmissions, community_routes: communityRoutes, audit_log: auditLog } as Record<string, AdminRecord[]>)[activeTab] || [];
+    const openRecord = (row: AdminRecord) => {
+        if (activeTab === 'cities') { setCityFormModal({show:true,item:row}); return; }
+        if (activeTab === 'community_routes') { setRouteReviewModal({show:true,item:row}); return; }
+        if (activeTab === 'poi_suggestions') { setSuggestionEditor(row as PoiSuggestion); return; }
+        openFreshDetail(row, ({users:'user',services:'service',parking_images:'parking_image'} as Record<string,string>)[activeTab] || activeTab);
+    };
+    const editRecord = (row: AdminRecord) => {
+        if (activeTab === 'cities' || activeTab === 'poi_suggestions') { openRecord(row); return; }
+        setEditLocationModal({show:true,item:row,locationType:activeTab});
+    };
+    const handleRecordAction = async (ids: string[], value: string) => {
+        if (actionLock.current || dataLoading) return;
+        const kind = activeTab, scope = recordScope.current;
+        if (!ids.length || ids.some(id => !recordRows.some(row => row.id === id))) return;
+        actionLock.current = true;
+        setBatchActionLoading(true);
+        try {
+            const result = await applyRecordAction(supabase, writeAuditLog, kind, ids, value, adminId || '');
+            if (result.succeeded.length) toast.success(`${result.succeeded.length} rekord frissítve`);
+            if (result.failed.length) toast.error(`${result.failed.length} rekord módosítása nem sikerült. Ezek kijelölve maradtak.`);
+            if (recordScope.current === scope) { setSelectedRows(new Set(result.failed)); await fetchData(true); }
+        } catch (error) { toast.error(error instanceof Error ? error.message : 'A módosítás nem sikerült.'); }
+        finally { actionLock.current = false; setBatchActionLoading(false); }
+    };
+    const recordFilters: RecordFilter[] = [];
+    const addFilter = (label: string, value: string, setter: (value: string) => void, values: {value:string;label:string}[]) => {
+        recordFilters.push({ label, value, options:[{value:'',label:'Mind'},...values], onChange:next => {setter(next);setCurrentPage(1);} });
+    };
+    const statusFilter = ({ feedback:[feedbackStatusFilter,setFeedbackStatusFilter],poi_flags:[poiFlagStatusFilter,setPoiFlagStatusFilter],poi_suggestions:[poiSuggestionStatusFilter,setPoiSuggestionStatusFilter],parking_images:[parkingImageStatusFilter,setParkingImageStatusFilter],community_routes:[routeStatusFilter,setRouteStatusFilter] } as Record<string,[string,(value:string)=>void]>)[activeTab];
+    if (['users','cities','parking','services','repair','drinking_fountain'].includes(activeTab)) addFilter('Állapot',directoryStatusFilter,setDirectoryStatusFilter,RECORD_STATUSES[activeTab]);
+    if (statusFilter) addFilter('Állapot',statusFilter[0],statusFilter[1],RECORD_STATUSES[activeTab]);
+    const opts = (values: Record<string,string>) => Object.entries(values).map(([value,label])=>({value,label}));
+    if (activeTab === 'users') {
+        recordFilters.push({label:'Támogatói státusz',value:userSupporterFilter,onChange:next=>{setUserSupporterFilter(next as typeof userSupporterFilter);setCurrentPage(1);},options:opts({all:'Minden felhasználó',supporters:'Támogatók',non_supporters:'Nem támogatók'})});
+        recordFilters.push({label:'Rendezés',value:userSortMode,onChange:next=>{setUserSortMode(next as typeof userSortMode);setCurrentPage(1);},options:opts({supporters_first:'Támogatók elöl',newest:'Legújabb elöl',oldest:'Legrégebbi elöl',name_asc:'Név szerint'})});
+    }
+    if(activeTab === 'feedback') {
+        addFilter('Prioritás',feedbackPriorityFilter,setFeedbackPriorityFilter,opts({high:'Magas',medium:'Közepes',low:'Alacsony'}));
+        addFilter('Kategória',feedbackCategoryFilter,setFeedbackCategoryFilter,opts({bug:'Hiba',feature:'Funkció',ui_ux:'UI / UX',content:'Tartalom',other:'Egyéb'}));
+    }
+    if(activeTab === 'poi_flags') addFilter('Ok',poiFlagReasonFilter,setPoiFlagReasonFilter,opts({wrong_location:'Rossz helyen',doesnt_exist:'Nem létezik',incorrect_info:'Hibás információ',duplicate:'Duplikált',other:'Egyéb'}));
+    if(activeTab === 'poi_suggestions') addFilter('Helyszín típusa',poiSuggestionTypeFilter,setPoiSuggestionTypeFilter,opts({parking:'Parkoló',bicycleService:'Szerviz / bolt',repairStation:'Javítóállomás',drinkingFountain:'Ivókút'}));
+    if(activeTab === 'community_routes') {
+        recordFilters.push({label:'Ettől',value:routeDateFrom,type:'date',onChange:next=>{setRouteDateFrom(next);setCurrentPage(1);}});
+        recordFilters.push({label:'Eddig',value:routeDateTo,type:'date',onChange:next=>{setRouteDateTo(next);setCurrentPage(1);}});
+    }
+    if(activeTab === 'audit_log') {
+        addFilter('Művelet',auditActionFilter,setAuditActionFilter,['hide_from_leaderboard','show_on_leaderboard','ban_user','unban_user','grant_supporter','revoke_supporter','toggle_city_active','create_city','update_city','delete_city','community_route_status','community_route_pending','community_route_in_review','community_route_accepted','community_route_rejected','delete_community_route','regional_visibility_on','regional_visibility_off','view_ride_diagnostic','view_user_ride_metrics','view_exact_ride_route','view_user_ride_diagnostics','view_ride_location'].map(value=>({value,label:value})));
+        addFilter('Cél típusa',auditTargetTypeFilter,setAuditTargetTypeFilter,opts({user:'Felhasználó',ride:'Tekerés',city:'Város',community_bike_lane:'Közösségi útvonal',challenge_attempt:'Kihívásteljesítés',daily_challenge:'Napi kihívás'}));
+    }
 
     const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -1291,13 +1258,14 @@ export default function AdminPage() {
 
     return (
         <SidebarProvider defaultOpen={true}>
-            <div className="admin-dark min-h-screen bg-background text-foreground flex w-full">
+            <div className={`admin-modern ${workspaceStyles.workspace}`}>
                 <AdminSidebar
                     activeTab={activeTab}
                     setActiveTab={setActiveTab}
                     profile={profile}
                     onLogout={handleLogout}
                     onHomeConfig={() => router.push('/')}
+                    onProfile={() => { if (adminId) void handleOpenUserProfile(adminId); }}
                 />
 
                 <SidebarInset className="flex flex-col flex-1 h-screen overflow-hidden bg-background">
@@ -1318,527 +1286,35 @@ export default function AdminPage() {
                                 setAddLocationModal(true);
                             }}
                         />
-                        <Card className="hidden">
-                            <CardContent className="p-3 xl:p-4">
-                                <div className="hidden xl:flex items-center justify-between">
-                                    {/* Left Section */}
-                                    <div className="flex items-center gap-4">
-                                        <SidebarTrigger />
-                                        <Separator orientation="vertical" className="h-8 bg-sidebar-border" />
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
-                                                {activeTab === 'dashboard' && <Loader2 className="h-5 w-5 text-white" />}
-                                                {activeTab === 'users' && <Users className="h-5 w-5 text-white" />}
-                                                {activeTab === 'parking' && <MapPin className="h-5 w-5 text-white" />}
-                                                {activeTab === 'parking_images' && <Camera className="h-5 w-5 text-white" />}
-                                                {activeTab === 'services' && <Building className="h-5 w-5 text-white" />}
-                                                {activeTab === 'repair' && <Wrench className="h-5 w-5 text-white" />}
-                                                {activeTab === 'drinking_fountain' && <Droplet className="h-5 w-5 text-white" />}
-                                                {activeTab === 'feedback' && <Users className="h-5 w-5 text-white" />}
-                                                {activeTab === 'poi_flags' && <MapPin className="h-5 w-5 text-white" />}
-                                                {activeTab === 'poi_suggestions' && <Lightbulb className="h-5 w-5 text-white" />}
-                                                {activeTab === 'cities' && <Building2 className="h-5 w-5 text-white" />}
-                                                {activeTab === 'community_routes' && <Route className="h-5 w-5 text-white" />}
-                                                {activeTab === 'leaderboard' && <Trophy className="h-5 w-5 text-white" />}
-                                                {activeTab === 'route_heatmap' && <ChartNoAxesCombined className="h-5 w-5 text-white" />}
-                                                {activeTab === 'audit_log' && <ScrollText className="h-5 w-5 text-white" />}
-                                                {activeTab === 'app_config' && <Settings className="h-5 w-5 text-white" />}
-                                            </div>
-                                            <div>
-                                                <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                                                    {activeTab === 'dashboard' && 'Vezérlőpult'}
-                                                    {activeTab === 'users' && 'Felhasználók'}
-                                                    {activeTab === 'parking' && 'Bicikli Parkolók'}
-                                                    {activeTab === 'parking_images' && 'Parkoló képek'}
-                                                    {activeTab === 'services' && 'Szervizek & Boltok'}
-                                                    {activeTab === 'repair' && 'Javító Állomások'}
-                                                    {activeTab === 'drinking_fountain' && 'Ivókutak'}
-                                                    {activeTab === 'feedback' && 'Visszajelzések'}
-                                                    {activeTab === 'poi_flags' && 'POI Bejelentések'}
-                                                    {activeTab === 'poi_suggestions' && 'POI Javaslatok'}
-                                                    {activeTab === 'cities' && 'Városok'}
-                                                    {activeTab === 'community_routes' && 'Közösségi útvonalak'}
-                                                    {activeTab === 'leaderboard' && 'Ranglista'}
-                                                    {activeTab === 'route_heatmap' && 'Útvonal hőtérkép'}
-                                                    {activeTab === 'audit_log' && 'Audit napló'}
-                                                    {activeTab === 'app_config' && 'App-konfiguráció'}
-                                                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                                                        {activeTab === 'dashboard' || activeTab === 'app_config' || activeTab === 'route_heatmap' ? 'Beállítások' : `${totalCount} elem`}
-                                                    </Badge>
-                                                    {activeTab !== 'dashboard' && activeTab !== 'app_config' && activeTab !== 'route_heatmap' && (
-                                                        <Badge
-                                                            variant="outline"
-                                                            className={`gap-1.5 text-xs ${isRealtimeConnected
-                                                                ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                                                                : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
-                                                                }`}
-                                                        >
-                                                            <span className="relative flex h-2 w-2">
-                                                                {isRealtimeConnected && (
-                                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                                                                )}
-                                                                <span className={`relative inline-flex rounded-full h-2 w-2 ${isRealtimeConnected ? 'bg-emerald-500' : 'bg-yellow-500'
-                                                                    }`} />
-                                                            </span>
-                                                            {isRealtimeConnected ? 'Élő' : 'Kapcsolódás...'}
-                                                        </Badge>
-                                                    )}
-                                                </h1>
-                                                <p className="text-muted-foreground text-sm mt-1">
-                                                    {activeTab === 'dashboard' && 'Rendszerstatisztikák és áttekintés'}
-                                                    {activeTab === 'users' && 'Összes regisztrált felhasználó kezelése'}
-                                                    {activeTab === 'parking' && 'Bicikli parkolók létrehozása és kezelése'}
-                                                    {activeTab === 'parking_images' && 'Felhasználók által beküldött parkoló képek jóváhagyása'}
-                                                    {activeTab === 'services' && 'Kerékpár szervizek és boltok kezelése'}
-                                                    {activeTab === 'repair' && 'Önkiszolgáló javító állomások kezelése'}
-                                                    {activeTab === 'drinking_fountain' && 'Ivókutak nyilvántartása és kezelése'}
-                                                    {activeTab === 'feedback' && 'Felhasználói visszajelzések kezelése'}
-                                                    {activeTab === 'poi_flags' && 'POI-khoz kapcsolódó bejelentések kezelése'}
-                                                    {activeTab === 'poi_suggestions' && 'Felhasználói POI javaslatok áttekintése és szerkesztése'}
-                                                    {activeTab === 'cities' && 'Városok kezelése (slug, koordináták, bounding box)'}
-                                                    {activeTab === 'community_routes' && 'Közösségi beküldésű kerékpárutak moderálása'}
-                                                    {activeTab === 'leaderboard' && 'Teljesített kihívások rangsora és láthatóság-kezelés'}
-                                                    {activeTab === 'route_heatmap' && 'Anonimizált, aggregált kerékpáros útvonalforgalom városfejlesztési döntésekhez'}
-                                                    {activeTab === 'audit_log' && 'Admin műveletek időrendi naplója'}
-                                                    {activeTab === 'app_config' && 'Karbantartás, minimum app verzió és feature flags kezelése'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Right Section */}
-                                    <div className="flex items-center gap-4">
-                                        {activeTab !== 'app_config' && (
-                                            <div className="relative">
-                                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                <Input
-                                                    placeholder="Keresés..."
-                                                    value={searchTerm}
-                                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                                    className="pl-10 w-80"
-                                                />
-                                                {searchTerm && (
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-                                                        onClick={() => setSearchTerm('')}
-                                                    >
-                                                        <XCircle className="h-4 w-4" />
-                                                    </Button>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'poi_suggestions' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'route_heatmap' && activeTab !== 'audit_log' && activeTab !== 'app_config' && (
-                                            <>
-                                                <Separator orientation="vertical" className="h-8 bg-sidebar-border" />
-                                                <Button
-                                                    onClick={() => setAddLocationModal(true)}
-                                                    className="gap-2"
-                                                >
-                                                    <Plus className="h-4 w-4" />
-                                                    Új hozzáadása
-                                                </Button>
-                                            </>
-                                        )}
-                                        {activeTab === 'cities' && (
-                                            <>
-                                                <Separator orientation="vertical" className="h-8 bg-sidebar-border" />
-                                                <Button
-                                                    onClick={() => setCityFormModal({ show: true, item: null })}
-                                                    className="gap-2"
-                                                >
-                                                    <Plus className="h-4 w-4" />
-                                                    Új város
-                                                </Button>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Mobile Header */}
-                                <div className="xl:hidden flex items-center gap-2 min-h-[40px]">
-                                    <SidebarTrigger />
-                                    <Separator orientation="vertical" className="h-6 bg-sidebar-border" />
-                                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                                        <h1 className="text-base font-bold text-foreground truncate">
-                                            {activeTab === 'dashboard' && 'Vezérlőpult'}
-                                            {activeTab === 'users' && 'Felhasználók'}
-                                            {activeTab === 'parking' && 'Bicikli Parkolók'}
-                                            {activeTab === 'parking_images' && 'Parkoló képek'}
-                                            {activeTab === 'services' && 'Szervizek & Boltok'}
-                                            {activeTab === 'repair' && 'Javító Állomások'}
-                                            {activeTab === 'drinking_fountain' && 'Ivókutak'}
-                                            {activeTab === 'feedback' && 'Visszajelzések'}
-                                            {activeTab === 'poi_flags' && 'POI Bejelentések'}
-                                            {activeTab === 'poi_suggestions' && 'POI Javaslatok'}
-                                            {activeTab === 'cities' && 'Városok'}
-                                            {activeTab === 'community_routes' && 'Közösségi útvonalak'}
-                                            {activeTab === 'leaderboard' && 'Ranglista'}
-                                            {activeTab === 'route_heatmap' && 'Útvonal hőtérkép'}
-                                            {activeTab === 'audit_log' && 'Audit napló'}
-                                            {activeTab === 'app_config' && 'App-konfiguráció'}
-                                        </h1>
-                                        {activeTab !== 'dashboard' && activeTab !== 'app_config' && activeTab !== 'route_heatmap' && (
-                                            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 shrink-0 text-xs">
-                                                {totalCount}
-                                            </Badge>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center gap-1 shrink-0">
-                                        {activeTab !== 'dashboard' && activeTab !== 'app_config' && activeTab !== 'route_heatmap' && (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="h-8 w-8 p-0"
-                                                onClick={() => setMobileSearchOpen(v => !v)}
-                                            >
-                                                {mobileSearchOpen ? <XCircle className="h-4 w-4" /> : <Search className="h-4 w-4" />}
-                                            </Button>
-                                        )}
-                                        {activeTab !== 'users' && activeTab !== 'dashboard' && activeTab !== 'feedback' && activeTab !== 'poi_flags' && activeTab !== 'poi_suggestions' && activeTab !== 'parking_images' && activeTab !== 'cities' && activeTab !== 'community_routes' && activeTab !== 'leaderboard' && activeTab !== 'route_heatmap' && activeTab !== 'audit_log' && activeTab !== 'app_config' && (
-                                            <Button
-                                                size="sm"
-                                                className="h-8 w-8 p-0"
-                                                onClick={() => setAddLocationModal(true)}
-                                            >
-                                                <Plus className="h-4 w-4" />
-                                            </Button>
-                                        )}
-                                        {activeTab === 'cities' && (
-                                            <Button
-                                                size="sm"
-                                                className="h-8 w-8 p-0"
-                                                onClick={() => setCityFormModal({ show: true, item: null })}
-                                            >
-                                                <Plus className="h-4 w-4" />
-                                            </Button>
-                                        )}
-                                    </div>
-                                </div>
-                                {/* Mobile Search Bar */}
-                                {mobileSearchOpen && activeTab !== 'dashboard' && activeTab !== 'app_config' && activeTab !== 'route_heatmap' && (
-                                    <div className="xl:hidden mt-3 relative">
-                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            placeholder="Keresés..."
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                            className="pl-10 w-full"
-                                            autoFocus
-                                        />
-                                        {searchTerm && (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-                                                onClick={() => setSearchTerm('')}
-                                            >
-                                                <XCircle className="h-4 w-4" />
-                                            </Button>
-                                        )}
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
                     </header>
 
-                    <main className="admin-workspace">
-                        {dataLoading ? (
-                            <Card className="bg-card border-border shadow-lg h-full flex items-center justify-center">
-                                <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                            </Card>
-                        ) : (
-                            <Card className="bg-card border-border overflow-hidden h-full flex flex-col">
-                                <CardContent className="p-0 m-0 flex-1 overflow-hidden flex flex-col">
-                                    {activeTab === 'dashboard' && (
-                                        <div className="ops-overview-scroll">
-                                            <DeviceStatsOverview activation={<ActivationMetricsOverview />}>
-                                                <ContentStatsOverview />
-                                            </DeviceStatsOverview>
-                                        </div>
-                                    )}
-                                    {activeTab === 'users' && (
-                                        <UsersTable
-                                            users={users}
-                                            isLoading={dataLoading}
-                                            selectedRows={selectedRows}
-                                            onSelectAll={handleSelectAll}
-                                            onSelectRow={handleSelectRow}
-                                            onRowClick={(item) => openFreshDetail(item, 'user')}
-                                            onToggleBan={handleUserToggleBan}
-                                            onToggleSupporter={handleUserToggleSupporter}
-                                            toggleLoading={toggleLoading}
-                                            searchTerm={searchTerm}
-                                            supporterFilter={userSupporterFilter}
-                                            onSupporterFilterChange={(value) => {
-                                                setUserSupporterFilter(value);
-                                                setCurrentPage(1);
-                                            }}
-                                            sortMode={userSortMode}
-                                            onSortModeChange={(value) => {
-                                                setUserSortMode(value);
-                                                setCurrentPage(1);
-                                            }}
-                                            currentPage={currentPage}
-                                            totalPages={totalPages}
-                                            onPageChange={setCurrentPage}
-                                            pageSize={pageSize}
-                                            onPageSizeChange={setPageSize}
-                                        />
-                                    )}
-                                    {activeTab === 'parking' && (
-                                        <ParkingTable
-                                            data={parkingSpots}
-                                            selectedRows={selectedRows}
-                                            onSelectAll={handleSelectAll}
-                                            onSelectRow={handleSelectRow}
-                                            onSort={handleSort}
-                                            sortConfig={sortConfig}
-                                            onRowClick={(item) => openFreshDetail(item, 'parking')}
-                                            onEdit={(item) => setEditLocationModal({ show: true, item })}
-                                            onDelete={(id) => handleDeleteClick(id)}
-                                            onToggleAvailability={handleToggleAvailability}
-                                            toggleLoading={toggleLoading}
-                                            searchTerm={searchTerm}
-                                            currentPage={currentPage}
-                                            totalPages={totalPages}
-                                            onPageChange={setCurrentPage}
-                                            pageSize={pageSize}
-                                            onPageSizeChange={setPageSize}
-                                        />
-                                    )}
-                                    {activeTab === 'parking_images' && (
-                                        <ParkingImageSubmissionsTable
-                                            data={parkingImageSubmissions}
-                                            isLoading={dataLoading}
-                                            onStatusChange={handleParkingImageStatusChange}
-                                            onOpenParkingEdit={(parkingSpotId) => handleOpenPoiEdit(parkingSpotId, 'parking')}
-                                            onDelete={handleDeleteParkingImageSubmission}
-                                            onRowClick={(item) => openFreshDetail(item, 'parking_image')}
-                                            onPreviewImage={(url) => setImagePreviewUrl(url)}
-                                            searchTerm={searchTerm}
-                                            statusFilter={parkingImageStatusFilter}
-                                            onStatusFilterChange={setParkingImageStatusFilter}
-                                            currentPage={currentPage}
-                                            totalPages={totalPages}
-                                            onPageChange={setCurrentPage}
-                                            pageSize={pageSize}
-                                            onPageSizeChange={setPageSize}
-                                        />
-                                    )}
-                                    {activeTab === 'services' && (
-                                        <ServicesTable
-                                            data={bicycleServices}
-                                            selectedRows={selectedRows}
-                                            onSelectAll={handleSelectAll}
-                                            onSelectRow={handleSelectRow}
-                                            onSort={handleSort}
-                                            sortConfig={sortConfig}
-                                            onRowClick={(item) => openFreshDetail(item, 'service')}
-                                            onEdit={(item) => setEditLocationModal({ show: true, item })}
-                                            onDelete={(id) => handleDeleteClick(id)}
-                                            onToggleAvailability={handleToggleAvailability}
-                                            toggleLoading={toggleLoading}
-                                            searchTerm={searchTerm}
-                                            selectAll={selectAll}
-                                            currentPage={currentPage}
-                                            totalPages={totalPages}
-                                            onPageChange={setCurrentPage}
-                                            pageSize={pageSize}
-                                            onPageSizeChange={setPageSize}
-                                        />
-                                    )}
-                                    {activeTab === 'repair' && (
-                                        <RepairTable
-                                            data={repairStations}
-                                            selectedRows={selectedRows}
-                                            onSelectAll={handleSelectAll}
-                                            onSelectRow={handleSelectRow}
-                                            onSort={handleSort}
-                                            sortConfig={sortConfig}
-                                            onRowClick={(item) => openFreshDetail(item, 'repair')}
-                                            onEdit={(item) => setEditLocationModal({ show: true, item })}
-                                            onDelete={(id) => handleDeleteClick(id)}
-                                            onToggleAvailability={handleToggleAvailability}
-                                            toggleLoading={toggleLoading}
-                                            searchTerm={searchTerm}
-                                            selectAll={selectAll}
-                                            currentPage={currentPage}
-                                            totalPages={totalPages}
-                                            onPageChange={setCurrentPage}
-                                            pageSize={pageSize}
-                                            onPageSizeChange={setPageSize}
-                                        />
-                                    )}
-                                    {activeTab === 'drinking_fountain' && (
-                                        <DrinkingFountainTable
-                                            data={drinkingFountains}
-                                            selectedRows={selectedRows}
-                                            onSelectAll={handleSelectAll}
-                                            onSelectRow={handleSelectRow}
-                                            onSort={handleSort}
-                                            sortConfig={sortConfig}
-                                            onRowClick={(item) => openFreshDetail(item, 'drinking_fountain')}
-                                            onEdit={(item) => setEditLocationModal({ show: true, item })}
-                                            onDelete={(id) => handleDeleteClick(id)}
-                                            onToggleAvailability={handleToggleAvailability}
-                                            toggleLoading={toggleLoading}
-                                            searchTerm={searchTerm}
-                                            currentPage={currentPage}
-                                            totalPages={totalPages}
-                                            onPageChange={setCurrentPage}
-                                            pageSize={pageSize}
-                                            onPageSizeChange={setPageSize}
-                                        />
-                                    )}
-                                    {activeTab === 'feedback' && (
-                                        <FeedbackTable
-                                            data={feedback}
-                                            isLoading={dataLoading}
-                                            selectedRows={selectedRows}
-                                            onSelectAll={handleSelectAll}
-                                            onSelectRow={handleSelectRow}
-                                            onSort={handleSort}
-                                            sortConfig={sortConfig}
-                                            onRowClick={(item) => openFreshDetail(item, 'feedback')}
-                                            onOpenUser={handleOpenUserProfile}
-                                            onStatusChange={handleFeedbackStatusChange}
-                                            onBatchStatusChange={handleFeedbackBatchStatusChange}
-                                            batchActionLoading={batchActionLoading}
-                                            searchTerm={searchTerm}
-                                            statusFilter={feedbackStatusFilter}
-                                            onStatusFilterChange={setFeedbackStatusFilter}
-                                            priorityFilter={feedbackPriorityFilter}
-                                            onPriorityFilterChange={setFeedbackPriorityFilter}
-                                            categoryFilter={feedbackCategoryFilter}
-                                            onCategoryFilterChange={setFeedbackCategoryFilter}
-                                            currentPage={currentPage}
-                                            totalPages={totalPages}
-                                            onPageChange={setCurrentPage}
-                                            pageSize={pageSize}
-                                            onPageSizeChange={setPageSize}
-                                        />
-                                    )}
-                                    {activeTab === 'cities' && (
-                                        <CitiesTable
-                                            data={cities}
-                                            onRowClick={(item) => setCityFormModal({ show: true, item })}
-                                            onEdit={(item) => setCityFormModal({ show: true, item })}
-                                            onDelete={(id) => handleDeleteClick(id)}
-                                            onToggleActive={handleToggleCityActive}
-                                            toggleLoading={toggleLoading}
-                                            searchTerm={searchTerm}
-                                            currentPage={currentPage}
-                                            totalPages={totalPages}
-                                            onPageChange={setCurrentPage}
-                                            pageSize={pageSize}
-                                            onPageSizeChange={setPageSize}
-                                        />
-                                    )}
-                                    {activeTab === 'community_routes' && (
-                                        <CommunityRoutesTable
-                                            data={communityRoutes}
-                                            onRowClick={(item) => setRouteReviewModal({ show: true, item })}
-                                            onOpenUser={handleOpenUserProfile}
-                                            onDelete={(id) => handleDeleteClick(id)}
-                                            onStatusChange={handleCommunityRouteStatusChange}
-                                            toggleLoading={toggleLoading}
-                                            statusFilter={routeStatusFilter}
-                                            onStatusFilterChange={setRouteStatusFilter}
-                                            dateFrom={routeDateFrom}
-                                            onDateFromChange={setRouteDateFrom}
-                                            dateTo={routeDateTo}
-                                            onDateToChange={setRouteDateTo}
-                                            searchTerm={searchTerm}
-                                            currentPage={currentPage}
-                                            totalPages={totalPages}
-                                            onPageChange={setCurrentPage}
-                                            pageSize={pageSize}
-                                            onPageSizeChange={setPageSize}
-                                        />
-                                    )}
-                                    {activeTab === 'leaderboard' && (
-                                        <LeaderboardTab cities={citiesForFilter} adminId={adminId} />
-                                    )}
-                                        {activeTab === 'ride_diagnostics' && <RideDiagnosticsTab />}
-                                        {activeTab === 'route_heatmap' && (
-                                        <RouteHeatmapTab />
-                                    )}
-                                    {activeTab === 'app_config' && (
-                                        <AppConfigTab />
-                                    )}
-                                    {activeTab === 'audit_log' && (
-                                        <AuditLogTable
-                                            data={auditLog}
-                                            actionFilter={auditActionFilter}
-                                            onActionFilterChange={setAuditActionFilter}
-                                            targetTypeFilter={auditTargetTypeFilter}
-                                            onTargetTypeFilterChange={setAuditTargetTypeFilter}
-                                            searchTerm={searchTerm}
-                                            currentPage={currentPage}
-                                            totalPages={totalPages}
-                                            onPageChange={setCurrentPage}
-                                            pageSize={pageSize}
-                                            onPageSizeChange={setPageSize}
-                                        />
-                                    )}
-                                    {activeTab === 'poi_flags' && (
-                                        <PoiFlagsTable
-                                            data={poiFlags}
-                                            isLoading={dataLoading}
-                                            selectedRows={selectedRows}
-                                            onSelectAll={handleSelectAll}
-                                            onSelectRow={handleSelectRow}
-                                            onSort={handleSort}
-                                            sortConfig={sortConfig}
-                                            onRowClick={(item) => openFreshDetail(item, 'poi_flags')}
-                                            onOpenPoi={handleOpenPoiDetail}
-                                            onOpenUser={handleOpenUserProfile}
-                                            onStatusChange={handlePoiFlagStatusChange}
-                                            onBatchStatusChange={handlePoiFlagBatchStatusChange}
-                                            batchActionLoading={batchActionLoading}
-                                            onDelete={(id) => handleDeleteClick(id)}
-                                            searchTerm={searchTerm}
-                                            statusFilter={poiFlagStatusFilter}
-                                            onStatusFilterChange={setPoiFlagStatusFilter}
-                                            reasonFilter={poiFlagReasonFilter}
-                                            onReasonFilterChange={setPoiFlagReasonFilter}
-                                            currentPage={currentPage}
-                                            totalPages={totalPages}
-                                            onPageChange={setCurrentPage}
-                                            pageSize={pageSize}
-                                            onPageSizeChange={setPageSize}
-                                        />
-                                    )}
-                                    {activeTab === 'poi_suggestions' && (
-                                        <PoiSuggestionsTable
-                                            data={poiSuggestions}
-                                            onSort={handleSort}
-                                            sortConfig={sortConfig}
-                                            onSave={handlePoiSuggestionSave}
-                                            onStatusChange={handlePoiSuggestionStatusChange}
-                                            onDelete={(id) => handleDeleteClick(id)}
-                                            onOpenUser={handleOpenUserProfile}
-                                            searchTerm={searchTerm}
-                                            statusFilter={poiSuggestionStatusFilter}
-                                            onStatusFilterChange={setPoiSuggestionStatusFilter}
-                                            typeFilter={poiSuggestionTypeFilter}
-                                            onTypeFilterChange={setPoiSuggestionTypeFilter}
-                                            currentPage={currentPage}
-                                            totalPages={totalPages}
-                                            onPageChange={setCurrentPage}
-                                            pageSize={pageSize}
-                                            onPageSizeChange={setPageSize}
-                                        />
-                                    )}
-                                </CardContent>
-                            </Card>
-                        )}
-                    </main>
+                    <div className="admin-canvas" role="region" aria-label="Admin tartalom">
+                        {RECORD_COLLECTIONS.includes(activeTab) ? <AdminRecordBrowser
+                            key={activeTab} kind={activeTab} title={getAdminNavigationItem(activeTab).label}
+                            rows={recordRows} total={totalCount} loading={dataLoading} busy={batchActionLoading}
+                            selected={selectedRows} onSelect={setSelectedRows} filters={recordFilters}
+                            page={currentPage} pages={totalPages} pageSize={pageSize}
+                            onPage={setCurrentPage} onPageSize={size => { setPageSize(size); setCurrentPage(1); }}
+                            sort={sortConfig} onSort={['parking','services','repair','drinking_fountain','cities','feedback','poi_suggestions'].includes(activeTab) ? handleSort : undefined}
+                            onOpen={activeTab === 'audit_log' ? undefined : openRecord}
+                            onEdit={['parking','services','repair','drinking_fountain','cities','poi_suggestions'].includes(activeTab) ? editRecord : undefined}
+                            onDelete={['users','audit_log'].includes(activeTab) ? undefined : row => activeTab === 'parking_images' ? handleDeleteParkingImageSubmission(row) : handleDeleteClick(row.id)}
+                            onUser={id => { void handleOpenUserProfile(id); }}
+                            onPoi={handleOpenPoiDetail} onRide={id => { void handleOpenRide(id); }}
+                            onAction={activeTab === 'audit_log' ? undefined : handleRecordAction}
+                        /> : <div className={['leaderboard','ride_diagnostics'].includes(activeTab) ? 'admin-record-view' : activeTab === 'dashboard' ? 'admin-overview-view' : 'admin-special-view'}>
+                            {activeTab === 'dashboard' && <DeviceStatsOverview activation={<ActivationMetricsOverview />}>
+                                <ContentStatsOverview onOpenUser={(id, back, signal) => handleOpenUserProfile(id, back, signal, 'Vissza a heti statisztikához')} onOpenRide={handleOpenRide} />
+                            </DeviceStatsOverview>}
+                            {activeTab === 'leaderboard' && <LeaderboardTab cities={citiesForFilter} adminId={adminId} onOpenUser={handleOpenUserProfile} />}
+                            {activeTab === 'ride_diagnostics' && <RideDiagnosticsTab onOpenRide={openRideRecord} onOpenUser={handleOpenUserProfile} />}
+                            {activeTab === 'route_heatmap' && <RouteHeatmapTab />}
+                            {activeTab === 'app_config' && <AppConfigTab />}
+                        </div>}
+                    </div>
                 </SidebarInset>
 
+                <EditSuggestionModal key={suggestionEditor?.id || 'closed'} item={suggestionEditor} isOpen={Boolean(suggestionEditor)} onClose={() => setSuggestionEditor(null)} onSave={handlePoiSuggestionSave} onStatusChange={handlePoiSuggestionStatusChange} onOpenUser={handleOpenUserProfile} />
                 {/* Modals */}
                 <AddLocationModal
                     isOpen={addLocationModal}
@@ -1853,27 +1329,34 @@ export default function AdminPage() {
                 <EditLocationModal
                     isOpen={editLocationModal.show}
                     onClose={() => setEditLocationModal({ show: false, item: null })}
+                    onBack={detailModal.show ? () => setEditLocationModal({ show: false, item: null }) : undefined}
                     locationType={editLocationModal.locationType ?? activeTab}
                     item={editLocationModal.item}
-                    onSuccess={() => {
+                    onSuccess={async () => {
                         setEditLocationModal({ show: false, item: null });
+                        const table = getTableForTab(editLocationModal.locationType ?? activeTab);
+                        if (detailModal.show && table && editLocationModal.item?.id) {
+                            const { data } = await supabase.from(table).select('*').eq('id', editLocationModal.item.id).single();
+                            if (data && detailModalRef.current.item?.id === editLocationModal.item.id) {
+                                detailModalRef.current = { ...detailModalRef.current, item: data };
+                                setDetailModal(previous => ({ ...previous, item: data }));
+                            }
+                        }
                         fetchData();
                     }}
                     onDelete={(id) => {
-                        // Close the edit modal first, then surface the existing
-                        // delete-confirm modal. Confirming runs confirmDelete()
-                        // which deletes from the table for the current activeTab.
-                        setEditLocationModal({ show: false, item: null });
-                        handleDeleteClick(id);
+                        const table = getTableForTab(editLocationModal.locationType ?? activeTab);
+                        if (table) setDeleteModal({ show: true, table, id });
                     }}
                 />
 
                 <DetailModal
-                    isOpen={detailModal.show}
+                    isOpen={detailModal.show && !editLocationModal.show}
                     onClose={closeDetail}
                     item={detailModal.item}
                     type={detailModal.type}
-                    onBack={detailHistory.length > 0 ? goBackDetail : undefined}
+                    onBack={detailHistory.length > 0 || hasWeeklyReturn ? goBackDetail : undefined}
+                    backLabel={detailHistory.length === 0 && hasWeeklyReturn ? detailReturnLabel : undefined}
                     onEdit={(item, type) => {
                         // Map DetailModal's `type` (parking/service/repair/drinking_fountain)
                         // to EditLocationModal's `locationType` (parking/services/repair/drinking_fountain).
@@ -1886,7 +1369,6 @@ export default function AdminPage() {
                             drinking_fountain: 'drinking_fountain',
                         };
                         const locationType = detailToEditType[type];
-                        closeDetail();
                         setEditLocationModal({ show: true, item, locationType });
                     }}
                     onStatusChange={
@@ -1896,6 +1378,7 @@ export default function AdminPage() {
                     }
                     onOpenPoiDetail={detailModal.type === 'poi_flags' ? handleOpenPoiDetail : undefined}
                     onOpenUser={handleOpenUserProfile}
+                    onOpenRide={handleOpenRide}
                     onOpenParkingSpot={handleOpenParkingSpotDetail}
                     onToggleUserBan={detailModal.type === 'user' ? handleUserToggleBan : undefined}
                     onToggleUserSupporter={detailModal.type === 'user' ? handleUserToggleSupporter : undefined}
@@ -1913,9 +1396,15 @@ export default function AdminPage() {
 
                 <DeleteConfirmModal
                     isOpen={deleteModal.show}
+                    loading={deletingRecord}
                     onClose={() => setDeleteModal({ show: false, table: null, id: null })}
                     onConfirm={confirmDelete}
                 />
+                <DeleteConfirmModal isOpen={imageSubmissionToDelete !== null} title="Képkérelem törlése"
+                    description="A kérelem, a hozzá tartozó kép és a helyszínhez csatolt kép is véglegesen törlődik."
+                    loading={Boolean(imageSubmissionToDelete && toggleLoading === imageSubmissionToDelete.id)}
+                    onClose={() => setImageSubmissionToDelete(null)}
+                    onConfirm={() => void deleteParkingImageSubmission(imageSubmissionToDelete)} />
 
                 <CityFormModal
                     isOpen={cityFormModal.show}
@@ -1932,10 +1421,7 @@ export default function AdminPage() {
                     onClose={() => setRouteReviewModal({ show: false, item: null })}
                     route={routeReviewModal.item}
                     adminId={adminId}
-                    onOpenUser={(userId) => {
-                        setRouteReviewModal({ show: false, item: null });
-                        handleOpenUserProfile(userId);
-                    }}
+                    onOpenUser={(userId, onReturn, signal) => handleOpenUserProfile(userId, onReturn, signal, 'Vissza az útvonal ellenőrzéséhez')}
                     onSuccess={() => {
                         setRouteReviewModal({ show: false, item: null });
                         fetchData();

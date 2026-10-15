@@ -49,7 +49,7 @@ export default function AdminPageHeader({
 
                 <div className="ops-page-identity">
                     <span>{item.section}</span>
-                    <strong>{item.label}</strong>
+                    <h1>{item.label}</h1>
                     {showCount ? <b>{totalCount.toLocaleString('hu-HU')}</b> : null}
                 </div>
 
@@ -59,6 +59,7 @@ export default function AdminPageHeader({
                         <input
                             ref={searchRef}
                             type="search"
+                            aria-label={`Keresés: ${item.label}`}
                             value={searchTerm}
                             onChange={(event) => onSearchChange(event.target.value)}
                             placeholder={`Keresés: ${item.shortLabel.toLocaleLowerCase('hu-HU')}…`}
@@ -86,7 +87,7 @@ export default function AdminPageHeader({
                         </span>
                     ) : null}
                     {item.createLabel && onCreate ? (
-                        <button type="button" className="ops-create" onClick={onCreate}>
+                        <button type="button" className="ops-create" aria-label={item.createLabel} onClick={onCreate}>
                             <Plus aria-hidden="true" />
                             <span>{item.createLabel}</span>
                         </button>

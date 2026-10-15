@@ -422,7 +422,7 @@
   /* Target all floating elements that might be portaled */
   body:has(.admin-dark) [role="menu"],
   body:has(.admin-dark) [role="listbox"],
-  body:has(.admin-dark) [role="dialog"]:not([data-sidebar]),
+  body:has(.admin-dark) [role="dialog"]:not([data-sidebar]):not([data-slot="weekly-stats-dialog"]):not([data-slot="user-profile-dialog"]):not([data-slot="admin-dialog"]),
   body:has(.admin-dark) [data-side],
   body:has(.admin-dark) [data-align] {
     background: oklch(0.205 0 0) !important;
@@ -458,8 +458,8 @@
   /* Nuclear option - any white background in admin context */
   .admin-dark .bg-white,
   .admin-dark .bg-background,
-  body:has(.admin-dark) .bg-white:not([data-sidebar]),
-  body:has(.admin-dark) .bg-background:not([data-sidebar]) {
+  body:has(.admin-dark) .bg-white:not([data-sidebar]):not(:is([data-slot="admin-dialog"], [data-slot="user-profile-dialog"], [data-slot="weekly-stats-dialog"]) *),
+  body:has(.admin-dark) .bg-background:not([data-sidebar]):not([data-slot="weekly-stats-dialog"]):not([data-slot="user-profile-dialog"]):not([data-slot="admin-dialog"]):not(:is([data-slot="admin-dialog"], [data-slot="user-profile-dialog"], [data-slot="weekly-stats-dialog"]) *) {
     background: oklch(0.205 0 0) !important;
     background-color: oklch(0.205 0 0) !important;
     color: oklch(0.985 0 0) !important;

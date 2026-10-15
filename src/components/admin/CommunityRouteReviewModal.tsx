@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useModalNavigation, type ModalNavigation } from './useModalNavigation';
 import { supabase } from '@/lib/supabaseClient';
 import {
     Route,
@@ -100,7 +101,7 @@ interface CommunityRouteReviewModalProps {
     route: any | null;
     onSuccess: () => void;
     adminId?: string | null;
-    onOpenUser?: (userId: string) => void;
+    onOpenUser?: ModalNavigation;
 }
 
 const REJECT_REASONS = [
@@ -122,6 +123,7 @@ const statusMeta: Record<string, { label: string; className: string; icon: typeo
 type Status = 'pending' | 'in_review' | 'accepted' | 'rejected';
 
 export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSuccess, adminId, onOpenUser }: CommunityRouteReviewModalProps) {
+    const navigation = useModalNavigation(isOpen, onOpenUser);
     const [adminNotes, setAdminNotes] = useState('');
     const [selectedStatus, setSelectedStatus] = useState<Status>('pending');
     const [saving, setSaving] = useState(false);
@@ -129,7 +131,7 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
     useEffect(() => {
         setAdminNotes(route?.admin_notes ?? '');
         setSelectedStatus((route?.status as Status) ?? 'pending');
-    }, [route, isOpen]);
+    }, [route]);
 
     // The polyline drawn on the map - prefer the routed road geometry, fall back to the raw user pins.
     const points = useMemo<Pt[]>(() => {
@@ -216,7 +218,7 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
     const submittedAt = route.created_at ? new Date(route.created_at).toLocaleString('hu-HU') : '-';
 
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => !open && !saving && onClose()}>
+        <Dialog open={isOpen && !navigation.suspended} onOpenChange={(open) => !open && !saving && onClose()}>
             <AdminModalContent variant="inspector">
                 <AdminModalFrame>
                     <AdminModalHeader
@@ -236,6 +238,8 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
 
                     {/* Scrollable body */}
                     <AdminModalBody className="space-y-6">
+                        {navigation.pending ? <p role="status">Profil betöltése…</p> : null}
+                        {navigation.error ? <p role="alert">{navigation.error}</p> : null}
                             {/* Status badge + length summary */}
                             <div className="flex items-center justify-between flex-wrap gap-3">
                                 <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${currentMeta.className}`}>
@@ -256,7 +260,7 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
                                     title={submitterName}
                                     description={route.profiles?.email || route.user_id || 'Nincs kapcsolt profil'}
                                     icon={<User />}
-                                    onClick={route.user_id && onOpenUser ? () => onOpenUser(route.user_id) : undefined}
+                                    onClick={route.user_id && onOpenUser && !navigation.pending ? () => void navigation.open(route.user_id) : undefined}
                                 />
                                 <AdminRelationCard
                                     label="Beküldés ideje"
@@ -340,9 +344,10 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
 
                             {/* Status selector */}
                             <div className="space-y-1.5">
-                                <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Új státusz</label>
+                                <label htmlFor="route-review-status" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">Új státusz</label>
                                 <div className="relative">
                                     <select
+                                        id="route-review-status"
                                         value={selectedStatus}
                                         onChange={(e) => setSelectedStatus(e.target.value as Status)}
                                         disabled={saving}
@@ -359,10 +364,11 @@ export default function CommunityRouteReviewModal({ isOpen, onClose, route, onSu
 
                             {/* Admin notes */}
                             <div className="space-y-1.5">
-                                <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">
+                                <label htmlFor="route-review-notes" className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest px-1">
                                     Admin jegyzet <span className="text-zinc-600 normal-case">(opcionális)</span>
                                 </label>
                                 <textarea
+                                    id="route-review-notes"
                                     value={adminNotes}
                                     onChange={e => setAdminNotes(e.target.value)}
                                     rows={3}

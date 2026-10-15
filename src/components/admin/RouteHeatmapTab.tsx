@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { createTrackHeatLayer, type Track, type TrackHeatLayer } from './trackHeatLayer';
 import RegionExportPanel from './RegionExportPanel';
+import styles from './RouteHeatmapTab.module.css';
 import { fetchOsmStreets, topStreets, toCsv, type StreetCount } from './regionExport';
 
 type RangeKey = '30d' | '90d' | '365d' | 'all';
@@ -295,11 +296,9 @@ export default function RouteHeatmapTab() {
                 {(Object.keys(rangeLabels) as RangeKey[]).map((key) => (
                     <button
                         key={key}
+                        aria-pressed={range === key}
                         onClick={() => setRange(key)}
-                        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-colors ${range === key
-                            ? 'bg-green-500/15 text-green-400 border-green-500/30'
-                            : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white hover:bg-zinc-800'
-                            }`}
+                        className={styles.period}
                     >
                         <CalendarDays className="w-3.5 h-3.5" />
                         {rangeLabels[key]}
@@ -307,13 +306,13 @@ export default function RouteHeatmapTab() {
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className={styles.stats}>
                 <Stat label="Ride-ok" value={stats.rides.toLocaleString('hu-HU')} icon={MapPinned} />
                 <Stat label="Nyomvonal pontok" value={stats.totalPoints.toLocaleString('hu-HU')} icon={Activity} />
                 <Stat label="Időszak" value={rangeLabels[range]} icon={CalendarDays} />
             </div>
 
-            <div ref={wrapperRef} className="relative flex-1 min-h-[560px] overflow-hidden rounded-xl border border-white/10 bg-zinc-950">
+            <div ref={wrapperRef} className="relative isolate flex-1 min-h-[560px] overflow-hidden rounded-xl border border-white/10 bg-zinc-950">
                 <div ref={containerRef} className="absolute inset-0 z-0" />
 
                 {/* Controls overlay - kept outside the captured map container, so they
@@ -371,16 +370,9 @@ export default function RouteHeatmapTab() {
 
 function Stat({ label, value, icon: Icon }: { label: string; value: string; icon: typeof Activity }) {
     return (
-        <div className="rounded-xl border border-white/10 bg-[#111111] p-4">
-            <div className="flex items-center justify-between gap-3">
-                <div>
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{label}</p>
-                    <p className="mt-1 text-xl font-bold text-white">{value}</p>
-                </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-green-500/20 bg-green-500/10">
-                    <Icon className="h-5 w-5 text-green-400" />
-                </div>
-            </div>
+        <div className={styles.stat}>
+            <span><Icon aria-hidden="true" />{label}</span>
+            <strong>{value}</strong>
         </div>
     );
 }

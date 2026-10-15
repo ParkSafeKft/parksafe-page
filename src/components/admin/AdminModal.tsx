@@ -1,7 +1,14 @@
 import type { ComponentProps, ReactNode } from 'react';
-import { ArrowLeft, ChevronRight, ExternalLink, type LucideIcon } from 'lucide-react';
-import { DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { createContext, useContext, useLayoutEffect, useRef } from 'react';
+import { ArrowLeft, ChevronRight, ExternalLink, X, type LucideIcon } from 'lucide-react';
+import { DialogClose, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import weeklyStyles from './WeeklyStatsDetailModal.module.css';
+import styles from './AdminModal.module.css';
+
+const ScrollPosition = createContext({ current: 0 });
+const ReturnFocus = createContext<(() => boolean) | null>(null);
+const controlName = (element: Element) => element.getAttribute('aria-label') || element.getAttribute('title') || element.textContent;
 
 type AdminModalVariant = 'inspector' | 'form' | 'confirm' | 'media';
 
@@ -15,14 +22,48 @@ export function AdminModalContent({
     children,
     ...props
 }: AdminModalContentProps) {
+    const scrollPosition = useRef(0);
+    const focusLabel = useRef<string | null>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
+    const restoreParentFocus = useContext(ReturnFocus);
+    function restoreFocus() {
+        if (!contentRef.current?.isConnected || !focusLabel.current) return false;
+        const control = [...contentRef.current.querySelectorAll<HTMLElement>('button, a')].find(element => controlName(element) === focusLabel.current);
+        if (!control) return false;
+        control.focus({ preventScroll: true });
+        return true;
+    }
     return (
+        <ScrollPosition.Provider value={scrollPosition}>
+        <ReturnFocus.Provider value={restoreFocus}>
         <DialogContent
-            className={cn('admin-dark admin-modal', `admin-modal--${variant}`, className)}
+            ref={contentRef}
+            className={cn(weeklyStyles.modal, styles.dialog, styles[variant], className)}
+            data-slot="admin-dialog"
             {...props}
+            showCloseButton={false}
             aria-describedby={props['aria-describedby']}
+            onClickCapture={event => {
+                props.onClickCapture?.(event);
+                const control = (event.target as HTMLElement).closest('button, a');
+                if (control) focusLabel.current = controlName(control);
+            }}
+            onOpenAutoFocus={event => {
+                props.onOpenAutoFocus?.(event);
+                if (event.defaultPrevented || !focusLabel.current || !(event.target instanceof HTMLElement)) return;
+                const control = [...event.target.querySelectorAll<HTMLElement>('button, a')].find(element => controlName(element) === focusLabel.current);
+                if (control) { event.preventDefault(); control.focus({ preventScroll: true }); }
+            }}
+            onCloseAutoFocus={event => {
+                props.onCloseAutoFocus?.(event);
+                if (!event.defaultPrevented && restoreParentFocus?.()) event.preventDefault();
+            }}
         >
             {children}
+            {variant === 'media' ? <DialogClose className={styles.mediaClose} aria-label="Képnézet bezárása"><X aria-hidden="true" /></DialogClose> : null}
         </DialogContent>
+        </ReturnFocus.Provider>
+        </ScrollPosition.Provider>
     );
 }
 
@@ -46,33 +87,30 @@ export function AdminModalHeader({
     eyebrow,
     subtitle,
     meta,
-    icon: Icon,
     onBack,
     backLabel = 'Vissza',
     className,
 }: AdminModalHeaderProps) {
     return (
-        <header className={cn('admin-modal-header', className)}>
+        <header className={cn(styles.header, className)}>
+            <div className={styles.topbar}>
             {onBack ? (
                 <button
                     type="button"
-                    className="admin-modal-back"
+                    className={styles.back}
                     onClick={onBack}
                     aria-label={backLabel}
                     title={backLabel}
                 >
-                    <ArrowLeft />
+                    <ArrowLeft aria-hidden="true" /><span>Vissza</span>
                 </button>
             ) : null}
-            {Icon ? (
-                <div className="admin-modal-mark" aria-hidden="true">
-                    <Icon />
-                </div>
-            ) : null}
-            <div className="admin-modal-heading">
-                {eyebrow ? <p className="admin-modal-eyebrow">{eyebrow}</p> : null}
-                <DialogTitle className="admin-modal-title">{title}</DialogTitle>
-                {subtitle ? <p className="admin-modal-subtitle">{subtitle}</p> : null}
+            {eyebrow ? <p className={weeklyStyles.period}>{eyebrow}</p> : <span />}
+            <DialogClose className={weeklyStyles.close} aria-label="Ablak bezárása"><span aria-hidden="true">Esc</span><X aria-hidden="true" /></DialogClose>
+            </div>
+            <div className={styles.heading}>
+                <DialogTitle className={weeklyStyles.title}>{title}</DialogTitle>
+                {subtitle ? <p className={weeklyStyles.description}>{subtitle}</p> : null}
                 {meta ? <div className="admin-modal-meta">{meta}</div> : null}
             </div>
         </header>
@@ -84,27 +122,31 @@ interface AdminModalBodyProps extends ComponentProps<'div'> {
 }
 
 export function AdminModalBody({ className, scrollClassName, children, ...props }: AdminModalBodyProps) {
+    const positionRef = useContext(ScrollPosition);
+    const ref = useRef<HTMLDivElement>(null);
+    useLayoutEffect(() => {
+        if (ref.current) ref.current.scrollTop = positionRef.current;
+    }, [positionRef]);
     return (
         <div
+            ref={ref}
+            tabIndex={0}
             className={cn('admin-modal-body', scrollClassName)}
-            onWheel={(event) => {
-                const container = event.currentTarget;
-                const maxScroll = container.scrollHeight - container.clientHeight;
-                if (maxScroll <= 0) return;
-
-                const nextScroll = Math.max(0, Math.min(maxScroll, container.scrollTop + event.deltaY));
-                if (nextScroll === container.scrollTop) return;
-
-                container.scrollTop = nextScroll;
-                event.preventDefault();
-                event.stopPropagation();
-            }}
+            onScroll={event => { positionRef.current = event.currentTarget.scrollTop; }}
         >
             <div className={cn('admin-modal-body-inner', className)} {...props}>
                 {children}
             </div>
         </div>
     );
+}
+
+export function AdminToggle({ label, icon: Icon, active, onClick, isLoading }: {
+    label: string; icon: LucideIcon; active: boolean; onClick?: () => void; isLoading: boolean;
+}) {
+    return <button type="button" className={styles.toggle} role="switch" aria-checked={active} disabled={isLoading} onClick={onClick}>
+        <span><Icon aria-hidden="true" />{label}</span><i aria-hidden="true"><b /></i>
+    </button>;
 }
 
 export function AdminModalFooter({ className, ...props }: ComponentProps<'footer'>) {

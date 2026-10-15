@@ -128,20 +128,20 @@ export default function CityFormModal({ isOpen, onClose, city, onSuccess }: City
                     <AdminModalBody className="space-y-5">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className={labelCls}>Név (magyar) *</label>
-                                <input className={inputCls} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Budapest" />
+                                <label htmlFor="city-name" className={labelCls}>Név (magyar) *</label>
+                                <input id="city-name" className={inputCls} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Budapest" />
                             </div>
                             <div>
-                                <label className={labelCls}>Név (angol)</label>
-                                <input className={inputCls} value={form.name_en} onChange={e => setForm(f => ({ ...f, name_en: e.target.value }))} placeholder="Budapest" />
+                                <label htmlFor="city-name_en" className={labelCls}>Név (angol)</label>
+                                <input id="city-name_en" className={inputCls} value={form.name_en} onChange={e => setForm(f => ({ ...f, name_en: e.target.value }))} placeholder="Budapest" />
                             </div>
                             <div>
-                                <label className={labelCls}>Slug *</label>
-                                <input className={inputCls} value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} placeholder="budapest" />
+                                <label htmlFor="city-slug" className={labelCls}>Slug *</label>
+                                <input id="city-slug" className={inputCls} value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} placeholder="budapest" />
                             </div>
                             <div>
-                                <label className={labelCls}>Ország kód</label>
-                                <input className={inputCls} value={form.country_code} onChange={e => setForm(f => ({ ...f, country_code: e.target.value }))} placeholder="HU" maxLength={2} />
+                                <label htmlFor="city-country_code" className={labelCls}>Ország kód</label>
+                                <input id="city-country_code" className={inputCls} value={form.country_code} onChange={e => setForm(f => ({ ...f, country_code: e.target.value }))} placeholder="HU" maxLength={2} />
                             </div>
                         </div>
 
@@ -149,12 +149,12 @@ export default function CityFormModal({ isOpen, onClose, city, onSuccess }: City
                             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Központ koordináta</h3>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className={labelCls}>Lat *</label>
-                                    <input type="number" step="any" className={inputCls} value={form.center_lat} onChange={e => setForm(f => ({ ...f, center_lat: e.target.value }))} placeholder="47.4979" />
+                                    <label htmlFor="city-center_lat" className={labelCls}>Lat *</label>
+                                    <input id="city-center_lat" type="number" step="any" className={inputCls} value={form.center_lat} onChange={e => setForm(f => ({ ...f, center_lat: e.target.value }))} placeholder="47.4979" />
                                 </div>
                                 <div>
-                                    <label className={labelCls}>Lng *</label>
-                                    <input type="number" step="any" className={inputCls} value={form.center_lng} onChange={e => setForm(f => ({ ...f, center_lng: e.target.value }))} placeholder="19.0402" />
+                                    <label htmlFor="city-center_lng" className={labelCls}>Lng *</label>
+                                    <input id="city-center_lng" type="number" step="any" className={inputCls} value={form.center_lng} onChange={e => setForm(f => ({ ...f, center_lng: e.target.value }))} placeholder="19.0402" />
                                 </div>
                             </div>
                         </div>
@@ -163,28 +163,28 @@ export default function CityFormModal({ isOpen, onClose, city, onSuccess }: City
                             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Bounding box</h3>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className={labelCls}>SW Lat *</label>
-                                    <input type="number" step="any" className={inputCls} value={form.bbox_sw_lat} onChange={e => setForm(f => ({ ...f, bbox_sw_lat: e.target.value }))} />
+                                    <label htmlFor="city-bbox_sw_lat" className={labelCls}>SW Lat *</label>
+                                    <input id="city-bbox_sw_lat" type="number" step="any" className={inputCls} value={form.bbox_sw_lat} onChange={e => setForm(f => ({ ...f, bbox_sw_lat: e.target.value }))} />
                                 </div>
                                 <div>
-                                    <label className={labelCls}>SW Lng *</label>
-                                    <input type="number" step="any" className={inputCls} value={form.bbox_sw_lng} onChange={e => setForm(f => ({ ...f, bbox_sw_lng: e.target.value }))} />
+                                    <label htmlFor="city-bbox_sw_lng" className={labelCls}>SW Lng *</label>
+                                    <input id="city-bbox_sw_lng" type="number" step="any" className={inputCls} value={form.bbox_sw_lng} onChange={e => setForm(f => ({ ...f, bbox_sw_lng: e.target.value }))} />
                                 </div>
                                 <div>
-                                    <label className={labelCls}>NE Lat *</label>
-                                    <input type="number" step="any" className={inputCls} value={form.bbox_ne_lat} onChange={e => setForm(f => ({ ...f, bbox_ne_lat: e.target.value }))} />
+                                    <label htmlFor="city-bbox_ne_lat" className={labelCls}>NE Lat *</label>
+                                    <input id="city-bbox_ne_lat" type="number" step="any" className={inputCls} value={form.bbox_ne_lat} onChange={e => setForm(f => ({ ...f, bbox_ne_lat: e.target.value }))} />
                                 </div>
                                 <div>
-                                    <label className={labelCls}>NE Lng *</label>
-                                    <input type="number" step="any" className={inputCls} value={form.bbox_ne_lng} onChange={e => setForm(f => ({ ...f, bbox_ne_lng: e.target.value }))} />
+                                    <label htmlFor="city-bbox_ne_lng" className={labelCls}>NE Lng *</label>
+                                    <input id="city-bbox_ne_lng" type="number" step="any" className={inputCls} value={form.bbox_ne_lng} onChange={e => setForm(f => ({ ...f, bbox_ne_lng: e.target.value }))} />
                                 </div>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className={labelCls}>Időzóna</label>
-                                <input className={inputCls} value={form.timezone} onChange={e => setForm(f => ({ ...f, timezone: e.target.value }))} placeholder="Europe/Budapest" />
+                                <label htmlFor="city-timezone" className={labelCls}>Időzóna</label>
+                                <input id="city-timezone" className={inputCls} value={form.timezone} onChange={e => setForm(f => ({ ...f, timezone: e.target.value }))} placeholder="Europe/Budapest" />
                             </div>
                             <div className="flex items-end">
                                 <label className="flex items-center gap-3 text-sm text-zinc-300 cursor-pointer select-none">
