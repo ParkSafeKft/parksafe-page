@@ -398,6 +398,13 @@ body:has(.admin-dark) [data-slot="dialog-content"] a:focus-visible {
 .ops-overview-page .ops-weekly-ledger button:last-child { border-right: 0; }
 .ops-overview-page .ops-activation { background: var(--ops-panel); }
 .ops-audience-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.42fr); gap: 1.25rem; }
+.ops-audience-side { display: grid; min-width: 0; grid-template-rows: minmax(min-content, 1fr) minmax(min-content, 1fr); gap: 1rem; }
+.ops-audience-side .ops-devices-compact { display: flex; flex-direction: column; padding: 1rem; border: 1px solid var(--ops-border); border-radius: .85rem; background: var(--ops-panel); }
+.ops-device-breakdown { display: flex; flex: 1; align-items: center; gap: .85rem; }
+.ops-devices-compact .ops-device-ring { flex: 0 0 80px; width: 80px; height: 80px; margin: 0; }
+.ops-devices-compact .ops-platform-table { min-width: 0; }
+.ops-devices-compact .ops-platform-table :is(th, td) { padding: .45rem .15rem; border: 0; }
+.ops-devices-compact .ops-platform-cell { gap: .35rem; font-size: .7rem; }
 .ops-audience-grid .ops-registration-chart { min-width: 0; padding: 1.25rem 1.35rem; }
 .ops-audience-grid .ops-registration-chart > header { align-items: flex-start; }
 .ops-audience-grid .ops-registration-chart > header > div { flex-direction: column; align-items: flex-start; gap: 0.3rem; }

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { AppWindow, Bike, ChartNoAxesCombined, Repeat2, Smartphone, UsersRound } from 'lucide-react';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { supabase } from '@/lib/supabaseClient';
+import CommunityMonthlyGoal from './CommunityMonthlyGoal';
 
 interface DeviceStats {
     total_users: number;
@@ -105,21 +106,26 @@ export default function DeviceStatsOverview({ children, activation }: { children
             {children}
             <div className="ops-audience-grid">
                 <MonthlyUsersChart data={view?.monthlyUsers ?? []} loading={loading} />
-                <section className="ops-audience-panel" aria-label="Eszközök és platformmegoszlás">
-                    <header><h2><Smartphone aria-hidden="true" />Eszközök</h2><span>Platformmegoszlás</span></header>
+                <div className="ops-audience-side">
+                <CommunityMonthlyGoal />
+                <section className="ops-audience-panel ops-devices-compact" aria-label="Eszközök és platformmegoszlás">
+                    <header><h2><Smartphone aria-hidden="true" />Eszközök</h2></header>
                     {stats && view ? <>
+                        <div className="ops-device-breakdown">
                         <DeviceRing stats={stats} />
                         <table className="ops-platform-table">
                             <caption className="sr-only">Eszközök platformonként</caption>
-                            <thead><tr><th scope="col">Platform</th><th scope="col">Eszköz</th><th scope="col">Arány</th></tr></thead>
+                            <thead className="sr-only"><tr><th scope="col">Platform</th><th scope="col">Eszköz</th><th scope="col">Arány</th></tr></thead>
                             <tbody>
                                 <Platform platform="android" label="Android" value={stats.android_devices} share={view.androidShare} />
                                 <Platform platform="apple" label="iOS" value={stats.ios_devices} share={view.iosShare} />
                                 {stats.web_devices > 0 ? <Platform platform="web" label="Web" value={stats.web_devices} share={view.webShare} /> : null}
                             </tbody>
                         </table>
+                        </div>
                     </> : <p className="ops-audience-empty" role="status">{loading ? 'Betöltés…' : 'Nincs adat'}</p>}
                 </section>
+                </div>
             </div>
             {activation}
         </div>
