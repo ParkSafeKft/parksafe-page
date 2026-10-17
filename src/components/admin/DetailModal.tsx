@@ -1234,6 +1234,21 @@ export default function DetailModal({
                 minute: '2-digit',
             })
             : 'Ismeretlen';
+        const lastActiveTimestamp = (() => {
+            const t1 = item.updated_at ? new Date(item.updated_at).getTime() : 0;
+            const t2 = item.last_sign_in_at ? new Date(item.last_sign_in_at).getTime() : 0;
+            const maxTime = Math.max(isNaN(t1) ? 0 : t1, isNaN(t2) ? 0 : t2);
+            return maxTime > 0 ? new Date(maxTime).toISOString() : null;
+        })();
+        const lastActiveAt = lastActiveTimestamp
+            ? new Date(lastActiveTimestamp).toLocaleDateString('hu-HU', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            })
+            : 'Ismeretlen';
         const xpVal = activityProgress?.xp ?? 0;
         const currentStreak = activityProgress?.current_streak ?? 0;
         const longestStreak = activityProgress?.longest_streak ?? 0;
@@ -1307,6 +1322,10 @@ export default function DetailModal({
                                     <dd><span>{registeredAt}</span></dd>
                                 </div>
                                 <div>
+                                    <dt title="Profil utolsó frissítése / aktivitása">Utoljára aktív</dt>
+                                    <dd><span>{lastActiveAt}</span></dd>
+                                </div>
+                                <div className={profileStyles.identifierRow}>
                                     <dt>Felhasználói azonosító</dt>
                                     <dd><span className={profileStyles.identifier}>{item.id}</span><button type="button" onClick={() => copyId(item.id)} aria-label="UUID másolása" title="UUID másolása"><Copy aria-hidden="true" /></button></dd>
                                 </div>
