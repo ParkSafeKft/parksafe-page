@@ -256,6 +256,61 @@
   color: var(--ops-text-3);
   font-size: 0.75rem;
 }
+.browser[data-kind="audit_log"] .identity small {
+  margin-top: 0.4rem;
+  overflow: visible;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--ops-text-2, var(--ops-text));
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.browser[data-kind="audit_log"] .identity strong {
+  white-space: normal;
+  line-height: 1.45;
+}
+.browser[data-kind="audit_log"] .table td {
+  vertical-align: top;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+.auditDetails {
+  margin-top: 0.65rem;
+  font-size: 0.8125rem;
+}
+.auditDetails summary {
+  width: fit-content;
+  padding: 0.35rem 0;
+  color: var(--ops-green);
+  cursor: pointer;
+}
+.auditDetails summary:focus-visible {
+  outline: 2px solid var(--ops-green);
+  outline-offset: 2px;
+}
+.auditDetails dl {
+  margin: 0.5rem 0 0;
+  padding: 0.75rem;
+  border: 1px solid var(--ops-border);
+  border-radius: 0.25rem;
+  background: var(--ops-panel-raised);
+  line-height: 1.6;
+}
+.auditDetails dt {
+  color: var(--ops-text-3);
+  font-size: 0.75rem;
+}
+.auditDetails dd {
+  margin: 0 0 0.65rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.auditDetails dd:last-child {
+  margin-bottom: 0;
+}
+.auditTargetId {
+  overflow-wrap: anywhere;
+}
 .supporter {
   color: var(--ops-green);
   font-size: 0.75rem;
@@ -492,6 +547,20 @@
   }
   .table td[colspan] {
     grid-column: 1/-1;
+  }
+  .browser[data-kind="audit_log"] .table td {
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
+  }
+  .browser[data-kind="audit_log"] .table td:nth-child(2),
+  .browser[data-kind="audit_log"] .table td:nth-child(3) {
+    grid-column: 2/4;
+    grid-row: auto;
+  }
+  .browser[data-kind="audit_log"] .table td:nth-child(3)::before {
+    content: "Végrehajtó admin";
+    color: var(--ops-text-3);
+    font-size: 0.75rem;
   }
   .related {
     flex-flow: row wrap;

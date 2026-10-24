@@ -1,6 +1,48 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- Adapts the existing admin API's heterogeneous records. */
 export type AdminRecord = { id: string; [key: string]: any };
 export type RecordOption = { value: string; label: string };
+export const AUDIT_ACTION_LABELS: Record<string, string> = {
+  hide_from_leaderboard: "Elrejtés a ranglistáról",
+  show_on_leaderboard: "Megjelenítés a ranglistán",
+  ban_user: "Felhasználó letiltása",
+  unban_user: "Felhasználó tiltásának feloldása",
+  grant_supporter: "Támogatói jelvény megadása",
+  revoke_supporter: "Támogatói jelvény visszavonása",
+  toggle_city_active: "Város aktivitásának módosítása",
+  toggle_challenge_active: "Kihívás aktivitásának módosítása",
+  delete_challenge: "Kihívás törlése",
+  create_city: "Város létrehozása",
+  update_city: "Város módosítása",
+  delete_city: "Város törlése",
+  community_route_status: "Közösségi útvonal állapotának módosítása",
+  community_route_pending: "Közösségi útvonal függőbe helyezése",
+  community_route_in_review: "Közösségi útvonal vizsgálata",
+  community_route_accepted: "Közösségi útvonal elfogadása",
+  community_route_rejected: "Közösségi útvonal elutasítása",
+  delete_community_route: "Közösségi útvonal törlése",
+  regional_visibility_on: "Megjelenítés a regionális ranglistán",
+  regional_visibility_off: "Elrejtés a regionális ranglistáról",
+  view_ride_diagnostic: "Tekerés részleteinek megtekintése",
+  view_user_ride_metrics: "Felhasználó tekerési metrikáinak megtekintése",
+  view_user_ride_diagnostics: "Felhasználó tekerési metrikáinak megtekintése",
+  view_exact_ride_route: "Pontos GPS-útvonal megtekintése",
+  view_ride_location: "Pontos GPS-útvonal megtekintése",
+};
+export const auditActionLabel = (action: string) => AUDIT_ACTION_LABELS[action] || action;
+export const auditTargetLabel = (target: string) => ({
+  user: "Felhasználó", ride: "Tekerés", city: "Város",
+  community_bike_lane: "Közösségi útvonal", challenge_attempt: "Kihívásteljesítés",
+  daily_challenge: "Napi kihívás",
+}[target] || target || "Nincs megadva");
+export const auditActor = (row: AdminRecord) =>
+  row.profiles?.username || row.profiles?.full_name || row.admin_id || "Ismeretlen admin";
+export const auditDate = (value: unknown) =>
+  value && Number.isFinite(new Date(String(value)).getTime())
+    ? new Date(String(value)).toLocaleString("hu-HU", {
+        year: "numeric", month: "short", day: "numeric",
+        hour: "2-digit", minute: "2-digit", second: "2-digit",
+      })
+    : "Nincs dátum";
 export const RECORD_COLLECTIONS = [
   "users",
   "parking",
@@ -86,7 +128,7 @@ export function recordTitle(kind: string, row: AdminRecord): string {
     return row.parking_name || "Beküldött parkolókép";
   if (kind === "poi_flags")
     return row.poi_name || row.name || "Helyszínbejelentés";
-  if (kind === "audit_log") return row.action || "Naplóbejegyzés";
+  if (kind === "audit_log") return auditActionLabel(row.action || "Naplóbejegyzés");
   if (kind === "ride_diagnostics")
     return (
       row.favorite_name ||
@@ -162,11 +204,14 @@ export function recordMetadata(kind: string, row: AdminRecord): string {
   if (kind === "feedback")
     return row.description || row.contact_email || row.id;
   if (kind === "audit_log") {
-    if (row.action === "view_user_ride_diagnostics")
+    if (row.notes) return row.action === "view_ride_location"
+      ? `Pontos rögzített és finomított GPS-útvonal megtekintve. Admin indoklása: ${row.notes}`
+      : row.notes;
+    if (["view_user_ride_diagnostics", "view_user_ride_metrics"].includes(row.action))
       return "Ride-előzmények és GPS/refinement metrikák megtekintve. Pontos útvonal nem lett lekérve.";
-    if (row.action === "view_ride_location")
+    if (["view_ride_location", "view_exact_ride_route"].includes(row.action))
       return `Pontos rögzített és finomított GPS-útvonal megtekintve. Admin indoklása: ${row.notes || "nincs megadva"}`;
-    return row.notes || row.target_id || row.id;
+    return "Nincs megjegyzés.";
   }
   return (
     row.city || row.parking_city || row.comment || row.description || row.id

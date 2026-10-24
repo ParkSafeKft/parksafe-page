@@ -20,6 +20,9 @@ import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   RECORD_STATUSES,
+  auditActor,
+  auditDate,
+  auditTargetLabel,
   recordCoordinates,
   recordMetadata,
   recordActions,
@@ -152,6 +155,7 @@ export default function AdminRecordBrowser({
   return (
     <section
       className={styles.browser}
+      data-kind={kind}
       aria-label={title}
       aria-busy={loading || busy}
     >
@@ -308,7 +312,7 @@ export default function AdminRecordBrowser({
                     onSort?.(kind === "feedback" ? "title" : "name")
                   }
                 >
-                  Megnevezés
+                  {kind === "audit_log" ? "Művelet és megjegyzés" : "Megnevezés"}
                   {onSort && (sort?.key === "name" || sort?.key === "title") ? (
                     sort?.direction === "asc" ? (
                       <ArrowUp />
@@ -319,9 +323,9 @@ export default function AdminRecordBrowser({
                 </button>
               </th>
               <th scope="col">
-                {choices.length ? "Állapot" : "Típus / információ"}
+                {kind === "audit_log" ? "Végrehajtó admin" : choices.length ? "Állapot" : "Típus / információ"}
               </th>
-              <th scope="col">Kapcsolódó adatok</th>
+              <th scope="col">{kind === "audit_log" ? "Érintett rekord" : "Kapcsolódó adatok"}</th>
               <th
                 scope="col"
                 aria-sort={
@@ -396,7 +400,7 @@ export default function AdminRecordBrowser({
                         onChange={(e) => toggle(row.id, e.target.checked)}
                       />
                     </td>
-                    <td data-label="Megnevezés">
+                    <td data-label={kind === "audit_log" ? "Művelet és megjegyzés" : "Megnevezés"}>
                       <div className={styles.identity}>
                         {kind === 'users' || kind === 'leaderboard' ? (
                           <button type="button" className={styles.avatarButton} disabled={!onOpen} onClick={() => onOpen?.(row)} aria-label={`${name} profiljának megnyitása`}>
@@ -429,14 +433,37 @@ export default function AdminRecordBrowser({
                           <small title={metadata || row.id}>
                             {metadata || row.id}
                           </small>
+                          {kind === "audit_log" ? (
+                            <details className={styles.auditDetails}>
+                              <summary>Bejegyzés részletei</summary>
+                              <dl>
+                                <dt>Naplóazonosító</dt><dd>{row.id}</dd>
+                                <dt>Végrehajtó admin</dt><dd>{auditActor(row)}</dd>
+                                <dt>Admin azonosítója</dt><dd>{row.admin_id || "Nincs megadva"}</dd>
+                                <dt>Időpont</dt><dd>{auditDate(row.created_at)}</dd>
+                                <dt>Műveletkód</dt><dd>{row.action}</dd>
+                                <dt>Érintett rekord típusa</dt><dd>{auditTargetLabel(row.target_type)}</dd>
+                                <dt>Érintett rekord azonosítója</dt><dd>{row.target_id || "Nincs megadva"}</dd>
+                                <dt>Teljes megjegyzés / indoklás</dt><dd>{metadata}</dd>
+                              </dl>
+                            </details>
+                          ) : null}
                           {kind === "users" && row.is_supporter ? (
                             <span className={styles.supporter}>Támogató</span>
                           ) : null}
                         </div>
                       </div>
                     </td>
-                    <td data-label="Állapot">
-                      {choices.length ? (
+                    <td data-label={kind === "audit_log" ? "Végrehajtó admin" : "Állapot"}>
+                      {kind === "audit_log" ? (
+                        <div className={styles.related}>
+                          {row.admin_id && onUser ? (
+                            <button type="button" onClick={() => onUser(row.admin_id)}>
+                              <UserRound />{auditActor(row)}
+                            </button>
+                          ) : <span>{auditActor(row)}</span>}
+                        </div>
+                      ) : choices.length ? (
                         onAction ? (
                           <select
                             className={styles.status}
@@ -485,7 +512,12 @@ export default function AdminRecordBrowser({
                     </td>
                     <td data-label="Kapcsolódó adatok">
                       <div className={styles.related}>
-                        {personId && onUser ? (
+                        {kind === "audit_log" ? (
+                          <>
+                            <span>{auditTargetLabel(row.target_type)}</span>
+                            <span className={styles.auditTargetId}>{row.target_id || "Nincs azonosító"}</span>
+                          </>
+                        ) : personId && onUser ? (
                           <button
                             type="button"
                             onClick={() => onUser(personId)}
@@ -588,7 +620,7 @@ export default function AdminRecordBrowser({
                       </div>
                     </td>
                     <td data-label="Dátum" className={styles.date}>
-                      {recordDate(row.started_at || row.created_at)}
+                      {kind === "audit_log" ? auditDate(row.created_at) : recordDate(row.started_at || row.created_at)}
                     </td>
                     <td data-label="Műveletek">
                       <div className={styles.actions}>

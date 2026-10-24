@@ -27,6 +27,18 @@ test('bulk controls are absent until a visible record is selected, including rea
     assert.match(render(['visible']),/>CSV</);
     const readOnly=render(['visible'],{kind:'audit_log',onAction:undefined});
     assert.match(readOnly,/>CSV</);assert.doesNotMatch(readOnly,/Tömeges művelet|Alkalmazás/);
+    const audit=render([],{kind:'audit_log',onAction:undefined,rows:[{
+        id:'audit-123',action:'view_exact_ride_route',admin_id:'admin-456',
+        profiles:{username:'Teszt Admin'},target_type:'ride',target_id:'ride-789',
+        created_at:'2026-10-24T10:23:45Z',
+        notes:'Pontos rögzített és finomított GPS-útvonal megtekintve. Admin indoklása: gyenge gps',
+    }]});
+    assert.match(audit,/Pontos GPS-útvonal megtekintése/);
+    assert.match(audit,/<summary>Bejegyzés részletei<\/summary>/);
+    assert.match(audit,/<dt>Végrehajtó admin<\/dt><dd>Teszt Admin<\/dd>/);
+    assert.match(audit,/<dt>Érintett rekord azonosítója<\/dt><dd>ride-789<\/dd>/);
+    assert.match(audit,/Admin indoklása: gyenge gps/);
+    assert.match(audit,/23:45/);
 });
 function backend(failedIds=[],rpcError=false){
     const writes=[],audits=[];let active=0,maxActive=0;
@@ -70,6 +82,15 @@ test('large batches cap parallel writes and map boolean fields correctly',async(
 test('CSV escapes spreadsheet formulas, delimiters and quotes',()=>{
     const csv=model.recordCsv('users',[{id:'a',username:'=HYPERLINK("bad")',created_at:null},{id:'b',username:'+CMD;quoted'}]);
     assert.ok(csv.startsWith('\uFEFF'));assert.ok(csv.includes('"\'=HYPERLINK(""bad"")"'));assert.ok(csv.includes('"\'+CMD;quoted"'));
+});
+test('audit notes preserve stored reasons and support legacy GPS actions and unknown action codes',()=>{
+    const notes='Többsoros indoklás\nGPS pontosság ellenőrzése';
+    for(const action of ['view_exact_ride_route','view_user_ride_metrics','future_action']){
+        assert.equal(model.recordMetadata('audit_log',{id:'a',action,notes}),notes);
+    }
+    assert.match(model.recordMetadata('audit_log',{id:'a',action:'view_ride_location',notes:'gyenge gps'}),/Admin indoklása: gyenge gps/);
+    assert.equal(model.recordTitle('audit_log',{id:'a',action:'future_action'}),'future_action');
+    assert.equal(model.auditActor({id:'a',admin_id:'full-admin-id'}),'full-admin-id');
 });
 test('coordinates reject missing, blank and out-of-range values while accepting GeoJSON and PostGIS EWKB',()=>{
     for(const row of [{lat:null,lon:null},{lat:'',lon:''},{lat:91,lon:19},{coordinate:'broken'}])assert.equal(model.recordCoordinates(row),null);

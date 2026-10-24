@@ -23,7 +23,7 @@ import AddLocationModal from '@/components/admin/AddLocationModal';
 import { getAdminNavigationItem } from '@/components/admin/adminNavigation';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import AdminRecordBrowser,{ type RecordFilter } from '@/components/admin/AdminRecordBrowser';
-import { RECORD_COLLECTIONS,RECORD_STATUSES,type AdminRecord } from '@/components/admin/adminRecordModel';
+import { AUDIT_ACTION_LABELS,RECORD_COLLECTIONS,RECORD_STATUSES,type AdminRecord } from '@/components/admin/adminRecordModel';
 import { applyRecordAction } from '@/components/admin/adminRecordMutations';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import workspaceStyles from '@/components/admin/AdminWorkspace.module.css';
@@ -1215,7 +1215,7 @@ export default function AdminPage() {
         recordFilters.push({label:'Eddig',value:routeDateTo,type:'date',onChange:next=>{setRouteDateTo(next);setCurrentPage(1);}});
     }
     if(activeTab === 'audit_log') {
-        addFilter('Művelet',auditActionFilter,setAuditActionFilter,['hide_from_leaderboard','show_on_leaderboard','ban_user','unban_user','grant_supporter','revoke_supporter','toggle_city_active','create_city','update_city','delete_city','community_route_status','community_route_pending','community_route_in_review','community_route_accepted','community_route_rejected','delete_community_route','regional_visibility_on','regional_visibility_off','view_ride_diagnostic','view_user_ride_metrics','view_exact_ride_route','view_user_ride_diagnostics','view_ride_location'].map(value=>({value,label:value})));
+        addFilter('Művelet',auditActionFilter,setAuditActionFilter,opts(AUDIT_ACTION_LABELS));
         addFilter('Cél típusa',auditTargetTypeFilter,setAuditTargetTypeFilter,opts({user:'Felhasználó',ride:'Tekerés',city:'Város',community_bike_lane:'Közösségi útvonal',challenge_attempt:'Kihívásteljesítés',daily_challenge:'Napi kihívás'}));
     }
 
