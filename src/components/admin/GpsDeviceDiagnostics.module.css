@@ -1,0 +1,32 @@
+.panel { min-width: 0; }
+.notice { padding: .6rem 1.25rem; color: var(--ops-text-3); font-size: .75rem; border-bottom: 1px solid var(--ops-border); }
+.scroll { flex: 1; min-height: 0; }
+.scroll th, .scroll td { min-width: 125px; vertical-align: top; }
+.scroll td { line-height: 1.5; padding-block: 20px; }
+.panel .scroll table { display: table; min-width: 850px; table-layout: auto; }
+.panel .scroll th:first-child { width: 36%; }
+.panel .scroll th:nth-child(2) { width: 10%; }
+.panel .scroll th:nth-child(3), .panel .scroll th:nth-child(4) { width: 21%; }
+.device { display: block; color: var(--ops-text); font-size: .875rem; font-weight: 600; }
+.secondary { display: block; color: var(--ops-text-3); font-size: .75rem; margin-top: 5px; }
+.metric { display: block; color: var(--ops-text); font-size: 1.25rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.3; }
+.unknown { display: block; color: var(--ops-text-3); font-size: .8125rem; }
+.caution { display: inline-block; margin-top: 6px; color: var(--ops-text-3); font-size: .6875rem; border: 1px solid var(--ops-border); border-radius: 4px; padding: 1px 5px; }
+.meter { display: block; width: 96px; height: 5px; margin-top: 8px; accent-color: var(--ops-green); }
+.meter::-webkit-meter-bar { background: var(--ops-border); border: 0; }
+.meter::-webkit-meter-optimum-value { background: var(--ops-green); }
+.meter::-moz-meter-bar { background: var(--ops-green); }
+.detailGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 40px; margin: 0; padding: 4px 16px 8px; }
+.detailGrid div { min-width: 0; }
+.detailGrid dt { color: var(--ops-text-3); font-size: .75rem; margin-bottom: 6px; }
+.detailGrid dd { color: var(--ops-text); font-size: 1rem; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.panel .scroll .detailRow[hidden] { display: none; }
+.panel .scroll .detailRow td { background: var(--ops-panel-raised); padding: 20px; }
+.panel .scroll thead { display: table-header-group; position: sticky; clip-path: none; width: auto; height: auto; }
+.panel .scroll tbody { display: table-row-group; }
+.panel .scroll tr { display: table-row; }
+.panel .scroll td { display: table-cell; }
+.notes { flex: none; padding: .6rem 1.25rem; color: var(--ops-text-3); font-size: .75rem; border-top: 1px solid var(--ops-border); }
+.notes summary { cursor: pointer; }
+.notes p { max-width: 110ch; margin-top: .5rem; line-height: 1.6; }
+.notes summary:focus-visible { outline: 2px solid var(--ops-green); outline-offset: 2px; }

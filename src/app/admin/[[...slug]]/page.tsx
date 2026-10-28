@@ -40,6 +40,7 @@ import LeaderboardTab from '@/components/admin/LeaderboardTab';
 import { EditSuggestionModal,PoiSuggestion } from '@/components/admin/PoiSuggestionsTable';
 import type { AdminRideRecord } from '@/components/admin/RideDetailContent';
 import RideDiagnosticsTab from '@/components/admin/RideDiagnosticsTab';
+import GpsDeviceDiagnostics from '@/components/admin/GpsDeviceDiagnostics';
 import RouteHeatmapTab from '@/components/admin/RouteHeatmapTab';
 import { writeAuditLog } from '@/lib/adminAuditLog';
 
@@ -87,6 +88,7 @@ const TAB_SLUGS: Record<string, string> = {
     leaderboard: 'leaderboard',
     route_heatmap: 'route-heatmap',
     ride_diagnostics: 'ride-diagnostics',
+    gps_diagnostics: 'gps-diagnostics',
     audit_log: 'audit-log',
     app_config: 'app-config',
 };
@@ -437,6 +439,7 @@ export default function AdminPage() {
                     setDataLoading(false);
                     return;
                 case 'ride_diagnostics':
+                case 'gps_diagnostics':
                     setTotalCount(0);
                     setDataLoading(false);
                     return;
@@ -1302,12 +1305,13 @@ export default function AdminPage() {
                             onUser={id => { void handleOpenUserProfile(id); }}
                             onPoi={handleOpenPoiDetail} onRide={id => { void handleOpenRide(id); }}
                             onAction={activeTab === 'audit_log' ? undefined : handleRecordAction}
-                        /> : <div className={['leaderboard','ride_diagnostics'].includes(activeTab) ? 'admin-record-view' : activeTab === 'dashboard' ? 'admin-overview-view' : 'admin-special-view'}>
+                        /> : <div className={['leaderboard','ride_diagnostics','gps_diagnostics'].includes(activeTab) ? 'admin-record-view' : activeTab === 'dashboard' ? 'admin-overview-view' : 'admin-special-view'}>
                             {activeTab === 'dashboard' && <DeviceStatsOverview activation={<ActivationMetricsOverview />}>
                                 <ContentStatsOverview onOpenUser={(id, back, signal) => handleOpenUserProfile(id, back, signal, 'Vissza a heti statisztikához')} onOpenRide={handleOpenRide} />
                             </DeviceStatsOverview>}
                             {activeTab === 'leaderboard' && <LeaderboardTab cities={citiesForFilter} adminId={adminId} onOpenUser={handleOpenUserProfile} />}
                             {activeTab === 'ride_diagnostics' && <RideDiagnosticsTab onOpenRide={openRideRecord} onOpenUser={handleOpenUserProfile} />}
+                            {activeTab === 'gps_diagnostics' && <GpsDeviceDiagnostics />}
                             {activeTab === 'route_heatmap' && <RouteHeatmapTab />}
                             {activeTab === 'app_config' && <AppConfigTab />}
                         </div>}

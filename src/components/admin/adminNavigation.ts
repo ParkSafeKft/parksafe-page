@@ -168,6 +168,14 @@ export const ADMIN_NAVIGATION: AdminNavigationItem[] = [
         icon: Activity,
     },
     {
+        id: 'gps_diagnostics',
+        label: 'Eszközök GPS-minősége',
+        shortLabel: 'Eszközök GPS-minősége',
+        description: 'Túrák GPS-minősége készülék, rendszer és appverzió szerint.',
+        section: 'Elemzés',
+        icon: Activity,
+    },
+    {
         id: 'audit_log',
         label: 'Auditnapló',
         shortLabel: 'Audit',
