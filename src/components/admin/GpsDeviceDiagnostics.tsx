@@ -10,6 +10,7 @@ export interface GpsGroup {
     manufacturer: string; model: string; os: string; os_version: string; app_version: string;
     battery_saver_on: boolean | null; doze_whitelisted: boolean | null;
     rides: number; measured_rides: number; partial_rides: number; gap_rides: number; legacy_gap_rides: number;
+    users?: number; measured_users?: number; gap_users?: number;
     count_rides: number; raw_samples: number | null; accepted_samples: number | null;
     gap_percent: number | null; accepted_percent: number | null;
     storage_measured_rides: number; storage_mismatch_rides: number; rejection_measured_rides: number;
@@ -30,7 +31,7 @@ export function GpsGroupTable({ groups }: { groups: GpsGroup[] }) {
             const open = expanded.has(key);
             return <Fragment key={key}><tr>
             <td><strong className={styles.device}>{g.manufacturer} {g.model}</strong><span className={styles.secondary}>{g.os} {g.os_version} · App {g.app_version}</span><span className={styles.secondary}>Akkukímélő: {setting(g.battery_saver_on)} · Doze-kivétel: {setting(g.doze_whitelisted)}</span></td>
-            <td><strong className={styles.metric}>{amount(g.rides)}</strong>{g.rides < 5 && <span className={styles.caution}>Kevés adat</span>}</td>
+            <td><strong className={styles.metric}>{amount(g.rides)}</strong><span className={styles.secondary}>{g.users == null ? 'Felhasználószám még nem elérhető' : `${amount(g.users)} felhasználótól`}</span>{g.rides < 5 && <span className={styles.caution}>Kevés adat</span>}</td>
             <td>{g.gap_percent == null ? <><span className={styles.unknown}>Nincs mért arány</span><span className={styles.secondary}>Még nincs kimaradásmérés</span></> : <><strong className={styles.metric}>{g.gap_percent.toLocaleString('hu-HU')}%</strong><span className={styles.secondary}>{g.gap_rides} / {g.measured_rides} mért túra</span>{g.measured_rides < 5 && <span className={styles.caution}>Kevés adat</span>}</>}</td>
             <td>{g.accepted_percent == null ? <span className={styles.unknown}>Nincs adat</span> : <><strong className={styles.metric}>{g.accepted_percent.toLocaleString('hu-HU')}%</strong><meter className={styles.meter} min={0} max={100} value={g.accepted_percent} aria-label="Elfogadott GPS-pontok aránya" /><span className={styles.secondary}>{g.count_rides} túra alapján</span></>}</td>
             <td><button aria-expanded={open} aria-controls={`${tableId}-${i}`} onClick={() => setExpanded(previous => {
@@ -45,6 +46,8 @@ export function GpsGroupTable({ groups }: { groups: GpsGroup[] }) {
                 <div><dt>Irreális ugrás miatt elutasítva</dt><dd>{amount(g.teleport)}</dd></div>
                 <div><dt>Elutasítási adatok lefedettsége</dt><dd>{g.rejection_measured_rides} túra</dd></div>
                 <div><dt>Kimaradásméréssel rendelkező túra</dt><dd>{g.measured_rides} / {g.rides}</dd></div>
+                <div><dt>Kimaradásméréssel rendelkező felhasználó</dt><dd>{amount(g.measured_users ?? null)}</dd></div>
+                <div><dt>Kimaradással érintett felhasználó</dt><dd>{amount(g.gap_users ?? null)}</dd></div>
                 <div><dt>Ebből részleges mérés</dt><dd>{g.partial_rides}</dd></div>
                 <div><dt>Régi pozitív kimaradási jel</dt><dd>{g.legacy_gap_rides}</dd></div>
                 <div><dt>Eltérő elfogadott és tárolt pontszám</dt><dd>{g.storage_measured_rides ? `${g.storage_mismatch_rides} / ${g.storage_measured_rides} túra` : 'Nincs adat'}</dd></div>
