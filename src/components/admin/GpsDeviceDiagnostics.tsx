@@ -59,7 +59,7 @@ export function GpsGroupTable({ groups }: { groups: GpsGroup[] }) {
 export default function GpsDeviceDiagnostics() {
     const [days, setDays] = useState(30);
     const [query, setQuery] = useState('');
-    const [sort, setSort] = useState('gap');
+    const [sort, setSort] = useState('rides');
     const [request, setRequest] = useState(0);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(25);
@@ -79,7 +79,8 @@ export default function GpsDeviceDiagnostics() {
     }, [days, request]);
     const groups = useMemo(() => (state?.result?.groups || []).filter(g =>
         [g.manufacturer, g.model, g.os, g.os_version, g.app_version].join(' ').toLocaleLowerCase('hu-HU').includes(query.toLocaleLowerCase('hu-HU')))
-        .sort((a, b) => sort === 'device' ? `${a.manufacturer} ${a.model}`.localeCompare(`${b.manufacturer} ${b.model}`)
+        .sort((a, b) => sort === 'rides' ? b.rides - a.rides || `${a.manufacturer} ${a.model}`.localeCompare(`${b.manufacturer} ${b.model}`)
+            : sort === 'device' ? `${a.manufacturer} ${a.model}`.localeCompare(`${b.manufacturer} ${b.model}`)
             : (b.gap_percent ?? -1) - (a.gap_percent ?? -1) || b.measured_rides - a.measured_rides), [state, query, sort]);
     const current = state?.days === days && state?.request === request;
     const pages = Math.max(1, Math.ceil(groups.length / pageSize));
@@ -88,7 +89,7 @@ export default function GpsDeviceDiagnostics() {
         <div className={records.toolbar}><div className={records.filters}>
             <label>Időszak<select value={days} onChange={e => { setDays(Number(e.target.value)); setPage(1); }}>{[7, 30, 90].map(n => <option key={n} value={n}>Utolsó {n} nap</option>)}</select></label>
             <label>Eszköz / OS / appverzió<input value={query} onChange={e => { setQuery(e.target.value); setPage(1); }} type="search" /></label>
-            <label>Rendezés<select value={sort} onChange={e => { setSort(e.target.value); setPage(1); }}><option value="gap">Kimaradási arány szerint</option><option value="device">Eszköz szerint</option></select></label>
+            <label>Rendezés<select value={sort} onChange={e => { setSort(e.target.value); setPage(1); }}><option value="rides">Legtöbb túra elöl</option><option value="gap">Kimaradási arány szerint</option><option value="device">Eszköz szerint</option></select></label>
         </div>
             <button onClick={() => setRequest(n => n + 1)}>Frissítés</button>
             <span className={records.total}>{current && !state?.error ? `${groups.length} rekord` : '…'}</span>
