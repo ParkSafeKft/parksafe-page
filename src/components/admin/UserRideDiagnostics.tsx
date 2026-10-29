@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AdminModalSection } from './AdminModal';
 import InteractiveRouteMap from './InteractiveRouteMap';
+import RideTrackingDiagnostics from './RideTrackingDiagnostics';
 
 type RoutePoint = [number, number];
 
@@ -491,12 +492,14 @@ export default function UserRideDiagnostics({ userId, onOpenRide }: { userId: st
                                                             <div><dt>Rendszer / app</dt><dd>{[ride.os, ride.os_version].filter(Boolean).join(' ') || '-'} · {ride.app_version || '-'}</dd></div>
                                                             <div><dt>Pontos hely</dt><dd>{ride.precise_location_on === null ? '-' : ride.precise_location_on ? 'Bekapcsolva' : 'Kikapcsolva'}</dd></div>
                                                             <div><dt>Háttérengedély</dt><dd>{ride.bg_permission || '-'}</dd></div>
-                                                            <div><dt>Háttérleállás / mintaköz</dt><dd>{ride.background_kills ?? 0} / {ride.heartbeat_gap_count ?? 0}</dd></div>
+                                                            <div><dt>Háttérleállás</dt><dd>{ride.background_kills ?? 'Nem ismert'}</dd></div>
                                                             <div><dt>Energiatakarékos mód</dt><dd>{ride.battery_saver_on === null ? '-' : ride.battery_saver_on ? 'Bekapcsolva' : 'Kikapcsolva'}</dd></div>
                                                         </dl>
                                                         {ride.battery_saver_on ? <p className="ride-diagnostic-reason"><BatteryWarning />Az energiatakarékos mód ronthatta a háttérben mért GPS-jelet.</p> : null}
                                                     </section>
                                                 </div>
+
+                                                {ride.ride_type !== 'diagnostic' && <div className="ride-diagnostic-panels"><RideTrackingDiagnostics rideId={ride.ride_id} /></div>}
 
                                                 <section className="ride-route-disclosure">
                                                     <header><MapPinned /><div><h3>Pontos útvonal</h3><p>Külön hozzáférési eseményként naplózzuk. Csak a hibakereséshez szükséges ideig tartsd nyitva.</p></div></header>
