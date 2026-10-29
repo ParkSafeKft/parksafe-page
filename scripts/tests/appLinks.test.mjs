@@ -46,3 +46,14 @@ test('app-absent content redirect uses fixed store URLs without query or referre
         assert.equal(response.headers.get('referrer-policy'), 'no-referrer');
     }
 });
+
+test('named screen fallbacks and Apple associations include profile, settings, challenges and leaderboard', async () => {
+    const apple = await campaignLinkResponse(new Request('https://parksafe.hu/.well-known/apple-app-site-association')).json();
+    for (const name of ['profile', 'settings', 'challenges', 'leaderboard']) {
+        assert.ok(apple.applinks.details[0].paths.includes('/app/' + name));
+        const response = campaignLinkResponse(new Request('https://parksafe.hu/app/' + name + '?next=private', { headers: { 'user-agent': 'Android' } }));
+        assert.equal(response.status, 302);
+        assert.equal(response.headers.get('location'), 'https://play.google.com/store/apps/details?id=com.parksafe.app');
+    }
+    assert.equal(campaignLinkResponse(new Request('https://parksafe.hu/app/settings/arbitrary')).status, 404);
+});

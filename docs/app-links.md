@@ -1,5 +1,7 @@
 # App Links and mobile Auth callbacks (PARKS-361)
 
+Named screen links also support `/app/profile` (own profile), `/app/settings`, `/app/challenges` (hub) and `/app/leaderboard`. The native equivalents use `parksafe://profile`, `parksafe://settings`, `parksafe://challenges` and `parksafe://leaderboard`. Profile/challenge UUID targets remain distinct. Update native builds/domain associations for HTTPS capture; custom-scheme mappings run in JavaScript.
+
 `/app/[...segments]` is an HTTP route handler, bypassing the marketing layout and GTM. It provides app-absent content redirects to fixed stores and an Auth helper with same-origin JavaScript, no-store/no-referrer, noindex and restrictive CSP. The script strips the credential-bearing browser address and offers an explicit custom-scheme action. It never calls Supabase or automatically verifies email links. New templates keep token hashes in fragments so proxies do not receive them. Legacy credential queries still require proxy/CDN log redaction.
 
 The `.well-known` handlers publish Apple and Android association responses. Set server-side `ANDROID_APP_SIGNING_SHA256` to comma-separated Play App Signing certificate fingerprints, uppercase colon-delimited SHA-256. Missing valid fingerprints returns 503. Do not substitute debug/upload keys. Both apex and www endpoints must respond without cross-host redirects. iOS identity: `32G9VBK79P.com.parksafe.ios`; Android: `com.parksafe.app`.

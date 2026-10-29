@@ -7,7 +7,7 @@ export function campaignLinkResponse(request, { androidFingerprints = [] } = {})
   const url = new URL(request.url);
   const json = body => new Response(JSON.stringify(body), { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=3600' } });
   if (url.pathname === '/.well-known/apple-app-site-association') {
-    return json({ applinks: { apps: [], details: [{ appID: '32G9VBK79P.com.parksafe.ios', paths: ['/app/ride/*', '/app/route/*', '/app/poi/*', '/app/profile/*', '/app/user/*', '/app/challenge/*', '/app/expedition/*', '/app/auth/callback', '/app/reset-password'] }] } });
+    return json({ applinks: { apps: [], details: [{ appID: '32G9VBK79P.com.parksafe.ios', paths: ['/app/ride/*', '/app/route/*', '/app/poi/*', '/app/profile/*', '/app/user/*', '/app/challenge/*', '/app/expedition/*', '/app/auth/callback', '/app/reset-password', '/app/profile', '/app/settings', '/app/challenges', '/app/leaderboard'] }] } });
   }
   if (url.pathname === '/.well-known/assetlinks.json') {
     const fingerprints = androidFingerprints.filter(value => typeof value === 'string' && /^(?:[A-F0-9]{2}:){31}[A-F0-9]{2}$/.test(value));
@@ -22,7 +22,8 @@ export function campaignLinkResponse(request, { androidFingerprints = [] } = {})
       'x-robots-tag': 'noindex, nofollow',
     } });
   }
-  if (!/^\/app\/(?:ride|route|poi|profile|user|challenge|expedition)\/[^/]+$/.test(url.pathname)) return new Response('Not found', { status: 404 });
+  if (!/^\/app\/(?:ride|route|poi|profile|user|challenge|expedition)\/[^/]+$/.test(url.pathname)
+    && !/^\/app\/(?:profile|settings|challenges|leaderboard)\/?$/.test(url.pathname)) return new Response('Not found', { status: 404 });
   // Installed apps intercept verified links before HTTP. Otherwise offer the store.
   const agent = request.headers.get('user-agent') ?? '';
   const target = /android/i.test(agent) ? 'https://play.google.com/store/apps/details?id=com.parksafe.app'
