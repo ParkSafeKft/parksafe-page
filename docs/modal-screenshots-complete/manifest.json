@@ -1,0 +1,445 @@
+{
+  "scope": "parksafe-page webalkalmazás",
+  "primaryViews": 38,
+  "additionalStates": 5,
+  "notIncludedAsReactModal": [
+    "Két natív böngészős confirm",
+    "Nyilvános térkép részletező oldalpanele",
+    "Mobil navigációs panel"
+  ],
+  "limitation": "Helyi komponens-előnézetek mintaadatokkal; nem az összes lehetséges adat-, státusz- és betöltésiállapot-kombináció.",
+  "screenshots": [
+    {
+      "key": "create-parking",
+      "label": "Új parkoló",
+      "group": "Létrehozás",
+      "component": "AddLocationModal",
+      "type": "parking",
+      "source": "src/components/admin/AddLocationModal.tsx",
+      "screenshot": "create-parking.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "edit-parking",
+      "label": "Parkoló szerkesztése",
+      "group": "Szerkesztés",
+      "component": "EditLocationModal",
+      "type": "parking",
+      "source": "src/components/admin/EditLocationModal.tsx",
+      "screenshot": "edit-parking.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "create-services",
+      "label": "Új szerviz / bolt",
+      "group": "Létrehozás",
+      "component": "AddLocationModal",
+      "type": "services",
+      "source": "src/components/admin/AddLocationModal.tsx",
+      "screenshot": "create-services.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "edit-services",
+      "label": "Szerviz / bolt szerkesztése",
+      "group": "Szerkesztés",
+      "component": "EditLocationModal",
+      "type": "services",
+      "source": "src/components/admin/EditLocationModal.tsx",
+      "screenshot": "edit-services.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "create-repair",
+      "label": "Új javítóállomás",
+      "group": "Létrehozás",
+      "component": "AddLocationModal",
+      "type": "repair",
+      "source": "src/components/admin/AddLocationModal.tsx",
+      "screenshot": "create-repair.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "edit-repair",
+      "label": "Javítóállomás szerkesztése",
+      "group": "Szerkesztés",
+      "component": "EditLocationModal",
+      "type": "repair",
+      "source": "src/components/admin/EditLocationModal.tsx",
+      "screenshot": "edit-repair.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "create-drinking_fountain",
+      "label": "Új ivókút",
+      "group": "Létrehozás",
+      "component": "AddLocationModal",
+      "type": "drinking_fountain",
+      "source": "src/components/admin/AddLocationModal.tsx",
+      "screenshot": "create-drinking_fountain.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "edit-drinking_fountain",
+      "label": "Ivókút szerkesztése",
+      "group": "Szerkesztés",
+      "component": "EditLocationModal",
+      "type": "drinking_fountain",
+      "source": "src/components/admin/EditLocationModal.tsx",
+      "screenshot": "edit-drinking_fountain.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "city-create",
+      "label": "Új város",
+      "group": "Létrehozás",
+      "component": "CityFormModal",
+      "source": "src/components/admin/CityFormModal.tsx",
+      "screenshot": "city-create.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "city-edit",
+      "label": "Város szerkesztése",
+      "group": "Szerkesztés",
+      "component": "CityFormModal",
+      "source": "src/components/admin/CityFormModal.tsx",
+      "screenshot": "city-edit.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "detail-parking",
+      "label": "Parkoló részletei",
+      "group": "Részletezők",
+      "component": "DetailModal",
+      "type": "parking",
+      "source": "src/components/admin/DetailModal.tsx",
+      "screenshot": "detail-parking.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "detail-service",
+      "label": "Szerviz / bolt részletei",
+      "group": "Részletezők",
+      "component": "DetailModal",
+      "type": "service",
+      "source": "src/components/admin/DetailModal.tsx",
+      "screenshot": "detail-service.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "detail-repair",
+      "label": "Javítóállomás részletei",
+      "group": "Részletezők",
+      "component": "DetailModal",
+      "type": "repair",
+      "source": "src/components/admin/DetailModal.tsx",
+      "screenshot": "detail-repair.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "detail-drinking_fountain",
+      "label": "Ivókút részletei",
+      "group": "Részletezők",
+      "component": "DetailModal",
+      "type": "drinking_fountain",
+      "source": "src/components/admin/DetailModal.tsx",
+      "screenshot": "detail-drinking_fountain.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "detail-user",
+      "label": "Felhasználói profil",
+      "group": "Részletezők",
+      "component": "DetailModal",
+      "type": "user",
+      "source": "src/components/admin/DetailModal.tsx",
+      "screenshot": "detail-user.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "detail-feedback",
+      "label": "Visszajelzés",
+      "group": "Moderáció",
+      "component": "DetailModal",
+      "type": "feedback",
+      "source": "src/components/admin/DetailModal.tsx",
+      "screenshot": "detail-feedback.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "detail-parking_image",
+      "label": "Parkolókép ellenőrzése",
+      "group": "Moderáció",
+      "component": "DetailModal",
+      "type": "parking_image",
+      "source": "src/components/admin/DetailModal.tsx",
+      "screenshot": "detail-parking_image.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "flag-parking",
+      "label": "POI-bejelentés: parkoló",
+      "group": "Moderáció",
+      "component": "DetailModal",
+      "type": "poi_flags",
+      "poiType": "parking",
+      "source": "src/components/admin/DetailModal.tsx",
+      "screenshot": "flag-parking.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "flag-bicycleService",
+      "label": "POI-bejelentés: szerviz / bolt",
+      "group": "Moderáció",
+      "component": "DetailModal",
+      "type": "poi_flags",
+      "poiType": "bicycleService",
+      "source": "src/components/admin/DetailModal.tsx",
+      "screenshot": "flag-bicycleService.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "flag-repairStation",
+      "label": "POI-bejelentés: javítóállomás",
+      "group": "Moderáció",
+      "component": "DetailModal",
+      "type": "poi_flags",
+      "poiType": "repairStation",
+      "source": "src/components/admin/DetailModal.tsx",
+      "screenshot": "flag-repairStation.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "flag-drinkingFountain",
+      "label": "POI-bejelentés: ivókút",
+      "group": "Moderáció",
+      "component": "DetailModal",
+      "type": "poi_flags",
+      "poiType": "drinkingFountain",
+      "source": "src/components/admin/DetailModal.tsx",
+      "screenshot": "flag-drinkingFountain.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "suggestion-parking",
+      "label": "POI-javaslat: parkoló",
+      "group": "Moderáció",
+      "component": "EditSuggestionModal",
+      "type": "parking",
+      "source": "src/components/admin/PoiSuggestionsTable.tsx",
+      "screenshot": "suggestion-parking.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "suggestion-bicycleService",
+      "label": "POI-javaslat: szerviz / bolt",
+      "group": "Moderáció",
+      "component": "EditSuggestionModal",
+      "type": "bicycleService",
+      "source": "src/components/admin/PoiSuggestionsTable.tsx",
+      "screenshot": "suggestion-bicycleService.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "suggestion-repairStation",
+      "label": "POI-javaslat: javítóállomás",
+      "group": "Moderáció",
+      "component": "EditSuggestionModal",
+      "type": "repairStation",
+      "source": "src/components/admin/PoiSuggestionsTable.tsx",
+      "screenshot": "suggestion-repairStation.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "suggestion-drinkingFountain",
+      "label": "POI-javaslat: ivókút",
+      "group": "Moderáció",
+      "component": "EditSuggestionModal",
+      "type": "drinkingFountain",
+      "source": "src/components/admin/PoiSuggestionsTable.tsx",
+      "screenshot": "suggestion-drinkingFountain.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "suggestion-unset",
+      "label": "POI-javaslat: nincs típus",
+      "group": "Moderáció",
+      "component": "EditSuggestionModal",
+      "type": "",
+      "source": "src/components/admin/PoiSuggestionsTable.tsx",
+      "screenshot": "suggestion-unset.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "route",
+      "label": "Közösségi útvonal",
+      "group": "Moderáció",
+      "component": "CommunityRouteReviewModal",
+      "source": "src/components/admin/CommunityRouteReviewModal.tsx",
+      "screenshot": "route.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "weekly-active-users",
+      "label": "Aktív tekerők",
+      "group": "Heti statisztikák",
+      "component": "WeeklyStatsDetailModal",
+      "type": "active-users",
+      "source": "src/components/admin/WeeklyStatsDetailModal.tsx",
+      "screenshot": "weekly-active-users.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "weekly-rides",
+      "label": "Tekerések",
+      "group": "Heti statisztikák",
+      "component": "WeeklyStatsDetailModal",
+      "type": "rides",
+      "source": "src/components/admin/WeeklyStatsDetailModal.tsx",
+      "screenshot": "weekly-rides.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "weekly-distance",
+      "label": "Megtett távolság",
+      "group": "Heti statisztikák",
+      "component": "WeeklyStatsDetailModal",
+      "type": "distance",
+      "source": "src/components/admin/WeeklyStatsDetailModal.tsx",
+      "screenshot": "weekly-distance.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "weekly-duration",
+      "label": "Rögzített idő",
+      "group": "Heti statisztikák",
+      "component": "WeeklyStatsDetailModal",
+      "type": "duration",
+      "source": "src/components/admin/WeeklyStatsDetailModal.tsx",
+      "screenshot": "weekly-duration.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "weekly-new-users",
+      "label": "Új regisztrálók",
+      "group": "Heti statisztikák",
+      "component": "WeeklyStatsDetailModal",
+      "type": "new-users",
+      "source": "src/components/admin/WeeklyStatsDetailModal.tsx",
+      "screenshot": "weekly-new-users.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "ride-normal",
+      "label": "Mentett ride",
+      "group": "Diagnosztika",
+      "component": "RideDiagnosticsTab",
+      "type": "normal",
+      "source": "src/components/admin/RideDiagnosticsTab.tsx",
+      "screenshot": "ride-normal.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "ride-diagnostic",
+      "label": "Diagnosztikai próbálkozás",
+      "group": "Diagnosztika",
+      "component": "RideDiagnosticsTab",
+      "type": "diagnostic",
+      "source": "src/components/admin/RideDiagnosticsTab.tsx",
+      "screenshot": "ride-diagnostic.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "image",
+      "label": "Kép nagyítása",
+      "group": "Média és törlés",
+      "component": "ImagePreview",
+      "source": "src/components/admin/ImagePreview.tsx",
+      "screenshot": "image.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "delete",
+      "label": "Adminrekord törlése",
+      "group": "Média és törlés",
+      "component": "DeleteConfirmModal",
+      "source": "src/components/admin/DeleteConfirmModal.tsx",
+      "screenshot": "delete.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "profile-delete",
+      "label": "Fiók törlése",
+      "group": "Fiókkezelés",
+      "component": "ProfileDelete",
+      "source": "src/app/(main)/profile/page.tsx",
+      "screenshot": "profile-delete.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "profile-reset",
+      "label": "Jelszó-visszaállítás",
+      "group": "Fiókkezelés",
+      "component": "ProfileReset",
+      "source": "src/app/(main)/profile/page.tsx",
+      "screenshot": "profile-reset.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "route-rejected",
+      "label": "Útvonal: elutasítás indokai",
+      "group": "További állapotok",
+      "component": "CommunityRouteReviewModal",
+      "type": "rejected",
+      "state": true,
+      "source": "src/components/admin/CommunityRouteReviewModal.tsx",
+      "screenshot": "route-rejected.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "profile-reset-success",
+      "label": "Jelszó-visszaállítás: siker",
+      "group": "További állapotok",
+      "component": "ProfileReset",
+      "type": "success",
+      "state": true,
+      "source": "src/app/(main)/profile/page.tsx",
+      "screenshot": "profile-reset-success.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "profile-reset-error",
+      "label": "Jelszó-visszaállítás: hiba",
+      "group": "További állapotok",
+      "component": "ProfileReset",
+      "type": "error",
+      "state": true,
+      "source": "src/app/(main)/profile/page.tsx",
+      "screenshot": "profile-reset-error.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "profile-delete-error",
+      "label": "Fióktörlés: hiba",
+      "group": "További állapotok",
+      "component": "ProfileDelete",
+      "type": "error",
+      "state": true,
+      "source": "src/app/(main)/profile/page.tsx",
+      "screenshot": "profile-delete-error.png",
+      "verifiedDialogCount": 1
+    },
+    {
+      "key": "weekly-empty",
+      "label": "Heti statisztika: nincs találat",
+      "group": "További állapotok",
+      "component": "WeeklyStatsDetailModal",
+      "type": "rides",
+      "state": true,
+      "source": "src/components/admin/WeeklyStatsDetailModal.tsx",
+      "screenshot": "weekly-empty.png",
+      "verifiedDialogCount": 1
+    }
+  ]
+}

@@ -1,0 +1,593 @@
+{
+  "fixture": true,
+  "variants": 36,
+  "screenshots": 72,
+  "desktop": {
+    "width": 1440,
+    "height": 900,
+    "appearance": "light"
+  },
+  "mobile": {
+    "width": 390,
+    "height": 844,
+    "appearance": "dark"
+  },
+  "cases": [
+    {
+      "kind": "parking",
+      "label": "Parkoló · részletek",
+      "desktop": "01-parking-desktop-light.png",
+      "mobile": "01-parking-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "service",
+      "label": "Szerviz / bolt · részletek",
+      "desktop": "02-service-desktop-light.png",
+      "mobile": "02-service-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "repair",
+      "label": "Javítóállomás · részletek",
+      "desktop": "03-repair-desktop-light.png",
+      "mobile": "03-repair-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "drinking_fountain",
+      "label": "Ivókút · részletek",
+      "desktop": "04-drinking-fountain-desktop-light.png",
+      "mobile": "04-drinking-fountain-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "feedback",
+      "label": "Visszajelzés",
+      "desktop": "05-feedback-desktop-light.png",
+      "mobile": "05-feedback-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "poi_flags",
+      "label": "Bejelentés · parkoló",
+      "desktop": "06-poi-flags-desktop-light.png",
+      "mobile": "06-poi-flags-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "parking_image",
+      "label": "Beküldött parkolókép",
+      "desktop": "07-parking-image-desktop-light.png",
+      "mobile": "07-parking-image-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "ride",
+      "label": "Tekerés · DetailModal",
+      "desktop": "08-ride-desktop-light.png",
+      "mobile": "08-ride-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "ride&diagnostic",
+      "label": "Diagnosztikai próbálkozás · DetailModal",
+      "desktop": "09-ride-diagnostic-desktop-light.png",
+      "mobile": "09-ride-diagnostic-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "add&type=parking",
+      "label": "Új hely · parkoló",
+      "desktop": "10-add-type-parking-desktop-light.png",
+      "mobile": "10-add-type-parking-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "add&type=services",
+      "label": "Új hely · szerviz / bolt",
+      "desktop": "11-add-type-services-desktop-light.png",
+      "mobile": "11-add-type-services-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "add&type=repair",
+      "label": "Új hely · javítóállomás",
+      "desktop": "12-add-type-repair-desktop-light.png",
+      "mobile": "12-add-type-repair-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "add&type=drinking_fountain",
+      "label": "Új hely · ivókút",
+      "desktop": "13-add-type-drinking-fountain-desktop-light.png",
+      "mobile": "13-add-type-drinking-fountain-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "edit&type=parking",
+      "label": "Hely szerkesztése · parkoló",
+      "desktop": "14-edit-type-parking-desktop-light.png",
+      "mobile": "14-edit-type-parking-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "edit&type=services",
+      "label": "Hely szerkesztése · szerviz / bolt",
+      "desktop": "15-edit-type-services-desktop-light.png",
+      "mobile": "15-edit-type-services-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "edit&type=repair",
+      "label": "Hely szerkesztése · javítóállomás",
+      "desktop": "16-edit-type-repair-desktop-light.png",
+      "mobile": "16-edit-type-repair-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "edit&type=drinking_fountain",
+      "label": "Hely szerkesztése · ivókút",
+      "desktop": "17-edit-type-drinking-fountain-desktop-light.png",
+      "mobile": "17-edit-type-drinking-fountain-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "city",
+      "label": "Város szerkesztése",
+      "desktop": "18-city-desktop-light.png",
+      "mobile": "18-city-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "city&new",
+      "label": "Új város",
+      "desktop": "19-city-new-desktop-light.png",
+      "mobile": "19-city-new-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "suggestion&type=parking",
+      "label": "POI-javaslat · parkoló",
+      "desktop": "20-suggestion-type-parking-desktop-light.png",
+      "mobile": "20-suggestion-type-parking-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "suggestion&type=bicycleService",
+      "label": "POI-javaslat · szerviz / bolt",
+      "desktop": "21-suggestion-type-bicycle-ervice-desktop-light.png",
+      "mobile": "21-suggestion-type-bicycle-ervice-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "suggestion&type=repairStation",
+      "label": "POI-javaslat · javítóállomás",
+      "desktop": "22-suggestion-type-repair-tation-desktop-light.png",
+      "mobile": "22-suggestion-type-repair-tation-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "suggestion&type=drinkingFountain",
+      "label": "POI-javaslat · ivókút",
+      "desktop": "23-suggestion-type-drinking-ountain-desktop-light.png",
+      "mobile": "23-suggestion-type-drinking-ountain-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "suggestion&type=",
+      "label": "POI-javaslat · típus nélkül",
+      "desktop": "24-suggestion-type--desktop-light.png",
+      "mobile": "24-suggestion-type--mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "route",
+      "label": "Közösségi útvonal ellenőrzése",
+      "desktop": "25-route-desktop-light.png",
+      "mobile": "25-route-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "delete",
+      "label": "Törlési megerősítés",
+      "desktop": "26-delete-desktop-light.png",
+      "mobile": "26-delete-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "image",
+      "label": "Képnézegető",
+      "desktop": "27-image-desktop-light.png",
+      "mobile": "27-image-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "poi_flags&type=bicycleService",
+      "label": "Bejelentés · szerviz / bolt",
+      "desktop": "28-poi-flags-type-bicycle-ervice-desktop-light.png",
+      "mobile": "28-poi-flags-type-bicycle-ervice-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "poi_flags&type=repairStation",
+      "label": "Bejelentés · javítóállomás",
+      "desktop": "29-poi-flags-type-repair-tation-desktop-light.png",
+      "mobile": "29-poi-flags-type-repair-tation-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "poi_flags&type=drinkingFountain",
+      "label": "Bejelentés · ivókút",
+      "desktop": "30-poi-flags-type-drinking-ountain-desktop-light.png",
+      "mobile": "30-poi-flags-type-drinking-ountain-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "user",
+      "label": "Felhasználói profil · üres aktivitás",
+      "desktop": "31-user-desktop-light.png",
+      "mobile": "31-user-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "weekly&metric=active-users",
+      "label": "Heti statisztika · Aktív tekerők",
+      "desktop": "32-weekly-metric-active-users-desktop-light.png",
+      "mobile": "32-weekly-metric-active-users-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "weekly&metric=rides",
+      "label": "Heti statisztika · Tekerések",
+      "desktop": "33-weekly-metric-rides-desktop-light.png",
+      "mobile": "33-weekly-metric-rides-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "weekly&metric=distance",
+      "label": "Heti statisztika · Megtett távolság",
+      "desktop": "34-weekly-metric-distance-desktop-light.png",
+      "mobile": "34-weekly-metric-distance-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "weekly&metric=duration",
+      "label": "Heti statisztika · Rögzített idő",
+      "desktop": "35-weekly-metric-duration-desktop-light.png",
+      "mobile": "35-weekly-metric-duration-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    },
+    {
+      "kind": "weekly&metric=new-users",
+      "label": "Heti statisztika · Új regisztrálók",
+      "desktop": "36-weekly-metric-new-users-desktop-light.png",
+      "mobile": "36-weekly-metric-new-users-mobile-dark.png",
+      "checks": {
+        "desktop": {
+          "fits": true,
+          "overflow": false
+        },
+        "mobile": {
+          "fits": true,
+          "overflow": false
+        }
+      }
+    }
+  ]
+}
