@@ -1,0 +1,11 @@
+<!doctype html><html lang="hu"><meta charset="utf-8"><title>ParkSafe jelszó-visszaállítás</title>
+<h1>Új jelszó beállítása</h1>
+{{ if eq .RedirectTo "https://parksafe.hu/app/reset-password" }}
+<p><a href="https://parksafe.hu/app/reset-password#token_hash={{ .TokenHash }}&amp;type=recovery">Új jelszó beállítása a ParkSafe alkalmazásban</a></p>
+<p>Ha a hivatkozás böngészőben nyílik meg: <a href="parksafe://reset-password#token_hash={{ .TokenHash }}&amp;type=recovery">ParkSafe közvetlen megnyitása</a>.</p>
+{{ else if or (eq .RedirectTo "https://parksafe.hu/reset-password") (eq .RedirectTo "https://www.parksafe.hu/reset-password") }}
+<p><a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&amp;type=recovery">?j jelsz? be?ll?t?sa a weboldalon</a></p>
+{{ else }}
+<p><a href="{{ .ConfirmationURL }}">?j jelsz? be?ll?t?sa</a></p>
+{{ end }}
+<p>Ha nem te kérted, figyelmen kívül hagyhatod ezt az emailt.</p></html>
